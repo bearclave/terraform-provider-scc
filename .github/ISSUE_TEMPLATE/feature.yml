@@ -1,0 +1,35 @@
+# Managed by bearclave/governance (tools/sync.py) - do not edit here.
+name: Feature
+description: New behaviour, resource, setting or page.
+type: Feature
+assignees:
+  - matej-hrabalek
+body:
+  - type: textarea
+    id: why
+    attributes:
+      label: Why
+      description: The problem or goal. What is missing today.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposal
+      description: What should change, at the level of resources, settings or behaviour.
+    validations:
+      required: true
+  - type: textarea
+    id: done-when
+    attributes:
+      label: Done when
+      description: Checklist that decides when the issue can be closed.
+      value: |
+        - [ ]
+    validations:
+      required: true
+  - type: textarea
+    id: risks
+    attributes:
+      label: Risks and impact
+      description: What it affects in production, what could break, licences or cost.

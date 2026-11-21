@@ -7,6 +7,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/terraprovider/go-exoscc/purview"
 	"github.com/terraprovider/go-msadmin/consistency"
@@ -41,8 +42,8 @@ func (d *informationBarrierPolicyDataSource) Schema(_ context.Context, _ datasou
 			"moderation_allowed":     schema.BoolAttribute{Computed: true, Description: "Maps to the -ModerationAllowed parameter."},
 			"name":                   schema.StringAttribute{Computed: true, Optional: true, Description: "Maps to the -Name parameter."},
 			"segment_allowed_filter": schema.StringAttribute{Computed: true, Description: "Maps to the -SegmentAllowedFilter parameter."},
-			"segments_allowed":       schema.StringAttribute{Computed: true, Description: "Maps to the -SegmentsAllowed parameter."},
-			"segments_blocked":       schema.StringAttribute{Computed: true, Description: "Maps to the -SegmentsBlocked parameter."},
+			"segments_allowed":       schema.SetAttribute{ElementType: types.StringType, Computed: true, Description: "Maps to the -SegmentsAllowed parameter."},
+			"segments_blocked":       schema.SetAttribute{ElementType: types.StringType, Computed: true, Description: "Maps to the -SegmentsBlocked parameter."},
 			"state":                  schema.StringAttribute{Computed: true, Description: "Maps to the -State parameter."},
 		},
 	}

@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
@@ -36,17 +37,19 @@ func NewSupervisoryReviewPolicyV2Resource() resource.Resource {
 }
 
 type supervisoryReviewPolicyV2Model struct {
-	ID                     types.String `tfsdk:"id"`
-	Identity               types.String `tfsdk:"identity"`
-	AddReviewers           types.Set    `tfsdk:"add_reviewers"`
-	Comment                types.String `tfsdk:"comment"`
-	Enabled                types.Bool   `tfsdk:"enabled"`
-	Name                   types.String `tfsdk:"name"`
-	PolicyRBACScopes       types.String `tfsdk:"policy_rbac_scopes"`
-	PolicyTemplate         types.String `tfsdk:"policy_template"`
-	RemoveReviewers        types.Set    `tfsdk:"remove_reviewers"`
-	Reviewers              types.Set    `tfsdk:"reviewers"`
-	UserReportingWorkloads types.Set    `tfsdk:"user_reporting_workloads"`
+	ID                       types.String `tfsdk:"id"`
+	Identity                 types.String `tfsdk:"identity"`
+	AddReviewers             types.Set    `tfsdk:"add_reviewers"`
+	Comment                  types.String `tfsdk:"comment"`
+	Enabled                  types.Bool   `tfsdk:"enabled"`
+	Name                     types.String `tfsdk:"name"`
+	PolicyRBACScopes         types.Set    `tfsdk:"policy_rbac_scopes"`
+	PolicyTemplate           types.String `tfsdk:"policy_template"`
+	PreservationPeriodInDays types.Int64  `tfsdk:"preservation_period_in_days"`
+	RemoveReviewers          types.Set    `tfsdk:"remove_reviewers"`
+	RetentionPeriodInDays    types.Int64  `tfsdk:"retention_period_in_days"`
+	Reviewers                types.Set    `tfsdk:"reviewers"`
+	UserReportingWorkloads   types.Set    `tfsdk:"user_reporting_workloads"`
 }
 
 func (r *supervisoryReviewPolicyV2Resource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -57,17 +60,19 @@ func (r *supervisoryReviewPolicyV2Resource) Schema(_ context.Context, _ resource
 	resp.Schema = schema.Schema{
 		Description: "Manages the SupervisoryReviewPolicyV2 object via New-SupervisoryReviewPolicyV2 / Get-SupervisoryReviewPolicyV2 / Set-SupervisoryReviewPolicyV2 / Remove-SupervisoryReviewPolicyV2.",
 		Attributes: map[string]schema.Attribute{
-			"id":                       schema.StringAttribute{Computed: true, Description: "Object identifier (GUID).", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"identity":                 schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets."},
-			"add_reviewers":            schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -AddReviewers parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
-			"comment":                  schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -Comment parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"enabled":                  schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -Enabled parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
-			"name":                     schema.StringAttribute{Required: true, Description: "Maps to the -Name parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
-			"policy_rbac_scopes":       schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -PolicyRBACScopes parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"policy_template":          schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -PolicyTemplate parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"remove_reviewers":         schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -RemoveReviewers parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
-			"reviewers":                schema.SetAttribute{ElementType: types.StringType, Required: true, Description: "Maps to the -Reviewers parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.RequiresReplace()}},
-			"user_reporting_workloads": schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -UserReportingWorkloads parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"id":                          schema.StringAttribute{Computed: true, Description: "Object identifier (GUID).", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"identity":                    schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"add_reviewers":               schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -AddReviewers parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"comment":                     schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -Comment parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"enabled":                     schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -Enabled parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
+			"name":                        schema.StringAttribute{Required: true, Description: "Maps to the -Name parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
+			"policy_rbac_scopes":          schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -PolicyRBACScopes parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"policy_template":             schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -PolicyTemplate parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"preservation_period_in_days": schema.Int64Attribute{Optional: true, Computed: true, Description: "Maps to the -PreservationPeriodInDays parameter.", PlanModifiers: []planmodifier.Int64{int64planmodifier.UseStateForUnknown()}},
+			"remove_reviewers":            schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -RemoveReviewers parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"retention_period_in_days":    schema.Int64Attribute{Optional: true, Computed: true, Description: "Maps to the -RetentionPeriodInDays parameter.", PlanModifiers: []planmodifier.Int64{int64planmodifier.UseStateForUnknown()}},
+			"reviewers":                   schema.SetAttribute{ElementType: types.StringType, Required: true, Description: "Maps to the -Reviewers parameter."},
+			"user_reporting_workloads":    schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -UserReportingWorkloads parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
 		},
 	}
 }
@@ -86,20 +91,48 @@ func (r *supervisoryReviewPolicyV2Resource) Create(ctx context.Context, req reso
 		return
 	}
 
-	p := purview.NewSupervisoryReviewPolicyV2Params{
-		Comment:                plan.Comment.ValueString(),
-		Enabled:                plan.Enabled.ValueBool(),
-		Name:                   plan.Name.ValueString(),
-		Reviewers:              toStringSlice(ctx, plan.Reviewers, &resp.Diagnostics),
-		UserReportingWorkloads: toStringSlice(ctx, plan.UserReportingWorkloads, &resp.Diagnostics),
+	var config supervisoryReviewPolicyV2Model
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
+	if resp.Diagnostics.HasError() {
+		return
 	}
-	if v := plan.PolicyRBACScopes.ValueString(); v != "" {
-		p.PolicyRBACScopes = v
+
+	p := purview.NewSupervisoryReviewPolicyV2Params{}
+	if !config.Comment.IsNull() {
+		p.Comment = plan.Comment.ValueString()
+	}
+	if !config.Enabled.IsNull() {
+		if !plan.Enabled.IsUnknown() {
+			p.Enabled = plan.Enabled.ValueBoolPointer()
+		}
+	}
+	if !config.Name.IsNull() {
+		p.Name = plan.Name.ValueString()
+	}
+	if !config.PolicyRBACScopes.IsNull() {
+		if v := toStringSlice(ctx, plan.PolicyRBACScopes, &resp.Diagnostics); len(v) > 0 {
+			p.PolicyRBACScopes = v
+		}
+	}
+	if !config.PreservationPeriodInDays.IsNull() {
+		if !plan.PreservationPeriodInDays.IsUnknown() {
+			p.PreservationPeriodInDays = plan.PreservationPeriodInDays.ValueInt64Pointer()
+		}
+	}
+	if !config.Reviewers.IsNull() {
+		if v := toStringSlice(ctx, plan.Reviewers, &resp.Diagnostics); len(v) > 0 {
+			p.Reviewers = v
+		}
+	}
+	if !config.UserReportingWorkloads.IsNull() {
+		if v := toStringSlice(ctx, plan.UserReportingWorkloads, &resp.Diagnostics); len(v) > 0 {
+			p.UserReportingWorkloads = v
+		}
 	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	res, err := r.client.SCC.NewSupervisoryReviewPolicyV2(ctx, p)
+	res, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.NewSupervisoryReviewPolicyV2, p, isNotFound)
 	if err != nil {
 		resp.Diagnostics.AddError("New-SupervisoryReviewPolicyV2 failed", err.Error())
 		return
@@ -146,29 +179,108 @@ func (r *supervisoryReviewPolicyV2Resource) Update(ctx context.Context, req reso
 	id := r.identityOf(state)
 	sp := purview.SetSupervisoryReviewPolicyV2Params{}
 	sp.Identity = id
-	sp.AddReviewers = toStringSlice(ctx, plan.AddReviewers, &resp.Diagnostics)
-	sp.Comment = plan.Comment.ValueString()
-	sp.Enabled = plan.Enabled.ValueBool()
-	if v := plan.PolicyRBACScopes.ValueString(); v != "" {
-		sp.PolicyRBACScopes = v
+	var cur *supervisoryReviewPolicyV2Model
+	curRead := false
+	current := func() *supervisoryReviewPolicyV2Model {
+		if !curRead {
+			curRead = true
+			var m supervisoryReviewPolicyV2Model
+			if r.refresh(ctx, id, &m, &resp.Diagnostics, nil) {
+				cur = &m
+			} else if !resp.Diagnostics.HasError() {
+				resp.Diagnostics.AddError("Get-SupervisoryReviewPolicyV2 failed", "the object could not be read to determine the list values to remove; nothing was changed")
+			}
+		}
+		return cur
 	}
-	sp.PolicyTemplate = plan.PolicyTemplate.ValueString()
-	sp.RemoveReviewers = toStringSlice(ctx, plan.RemoveReviewers, &resp.Diagnostics)
-	sp.UserReportingWorkloads = toStringSlice(ctx, plan.UserReportingWorkloads, &resp.Diagnostics)
+	if !plan.AddReviewers.Equal(state.AddReviewers) {
+		if !plan.AddReviewers.IsNull() && !plan.AddReviewers.IsUnknown() {
+			sp.AddReviewers = append([]string{}, toStringSlice(ctx, plan.AddReviewers, &resp.Diagnostics)...)
+		}
+	}
+	if !plan.Comment.Equal(state.Comment) {
+		sp.Comment = plan.Comment.ValueString()
+	}
+	if !plan.Enabled.Equal(state.Enabled) {
+		if !plan.Enabled.IsUnknown() {
+			sp.Enabled = plan.Enabled.ValueBoolPointer()
+		}
+	}
+	if !plan.PolicyRBACScopes.Equal(state.PolicyRBACScopes) {
+		if !plan.PolicyRBACScopes.IsNull() && !plan.PolicyRBACScopes.IsUnknown() {
+			if v := toStringSlice(ctx, plan.PolicyRBACScopes, &resp.Diagnostics); len(v) > 0 {
+				sp.PolicyRBACScopes = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.PolicyRBACScopes, &resp.Diagnostics); len(rm) > 0 {
+						sp.PolicyRBACScopesDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
+	}
+	if !plan.PolicyTemplate.Equal(state.PolicyTemplate) {
+		sp.PolicyTemplate = plan.PolicyTemplate.ValueString()
+	}
+	if !plan.PreservationPeriodInDays.Equal(state.PreservationPeriodInDays) {
+		if !plan.PreservationPeriodInDays.IsUnknown() {
+			sp.PreservationPeriodInDays = plan.PreservationPeriodInDays.ValueInt64Pointer()
+		}
+	}
+	if !plan.RemoveReviewers.Equal(state.RemoveReviewers) {
+		if !plan.RemoveReviewers.IsNull() && !plan.RemoveReviewers.IsUnknown() {
+			sp.RemoveReviewers = append([]string{}, toStringSlice(ctx, plan.RemoveReviewers, &resp.Diagnostics)...)
+		}
+	}
+	if !plan.RetentionPeriodInDays.Equal(state.RetentionPeriodInDays) {
+		if !plan.RetentionPeriodInDays.IsUnknown() {
+			sp.RetentionPeriodInDays = plan.RetentionPeriodInDays.ValueInt64Pointer()
+		}
+	}
+	if !plan.Reviewers.Equal(state.Reviewers) {
+		if !plan.Reviewers.IsNull() && !plan.Reviewers.IsUnknown() {
+			sp.Reviewers = append([]string{}, toStringSlice(ctx, plan.Reviewers, &resp.Diagnostics)...)
+		}
+	}
+	if !plan.UserReportingWorkloads.Equal(state.UserReportingWorkloads) {
+		if !plan.UserReportingWorkloads.IsNull() && !plan.UserReportingWorkloads.IsUnknown() {
+			sp.UserReportingWorkloads = append([]string{}, toStringSlice(ctx, plan.UserReportingWorkloads, &resp.Diagnostics)...)
+		}
+	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	if _, err := r.client.SCC.SetSupervisoryReviewPolicyV2(ctx, sp); err != nil {
+	if _, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.SetSupervisoryReviewPolicyV2, sp, isNotFound); err != nil {
 		resp.Diagnostics.AddError("Set-SupervisoryReviewPolicyV2 failed", err.Error())
 		return
 	}
 	cfg := plan
 	reflected := reconcile.ReflectsFields(map[string]types.String{
-		"Comment":          cfg.Comment,
-		"PolicyRBACScopes": cfg.PolicyRBACScopes,
-		"PolicyTemplate":   cfg.PolicyTemplate,
+		"Comment":        cfg.Comment,
+		"PolicyTemplate": cfg.PolicyTemplate,
 	}, getString)
+	if !cfg.Enabled.IsUnknown() && !cfg.Enabled.IsNull() && !cfg.Enabled.Equal(state.Enabled) {
+		prev, want := reflected, cfg.Enabled.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["Enabled"] == nil || getBool(obj, "Enabled") == want)
+		}
+	}
+	if !cfg.PreservationPeriodInDays.IsUnknown() && !cfg.PreservationPeriodInDays.IsNull() && !cfg.PreservationPeriodInDays.Equal(state.PreservationPeriodInDays) {
+		prev, want := reflected, cfg.PreservationPeriodInDays.ValueInt64()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["PreservationPeriodInDays"] == nil || getInt(obj, "PreservationPeriodInDays") == want)
+		}
+	}
+	if !cfg.RetentionPeriodInDays.IsUnknown() && !cfg.RetentionPeriodInDays.IsNull() && !cfg.RetentionPeriodInDays.Equal(state.RetentionPeriodInDays) {
+		prev, want := reflected, cfg.RetentionPeriodInDays.ValueInt64()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["RetentionPeriodInDays"] == nil || getInt(obj, "RetentionPeriodInDays") == want)
+		}
+	}
 	r.refresh(ctx, id, &plan, &resp.Diagnostics, reflected)
+	if !cfg.ID.IsUnknown() && !cfg.ID.IsNull() {
+		plan.ID = cfg.ID
+	}
 	r.reconcileState(&cfg, &plan)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
@@ -232,9 +344,11 @@ func readSupervisoryReviewPolicyV2(ctx context.Context, obj map[string]any, m *s
 	m.Comment = types.StringValue(getString(obj, "Comment"))
 	m.Enabled = types.BoolValue(getBool(obj, "Enabled"))
 	m.Name = types.StringValue(getString(obj, "Name"))
-	m.PolicyRBACScopes = types.StringValue(getString(obj, "PolicyRBACScopes"))
+	m.PolicyRBACScopes = stringSetValue(ctx, getStringSlice(obj, "PolicyRBACScopes"))
 	m.PolicyTemplate = types.StringValue(getString(obj, "PolicyTemplate"))
+	m.PreservationPeriodInDays = types.Int64Value(getInt(obj, "PreservationPeriodInDays"))
 	m.RemoveReviewers = stringSetValue(ctx, getStringSlice(obj, "RemoveReviewers"))
+	m.RetentionPeriodInDays = types.Int64Value(getInt(obj, "RetentionPeriodInDays"))
 	m.Reviewers = stringSetValue(ctx, getStringSlice(obj, "Reviewers"))
 	m.UserReportingWorkloads = stringSetValue(ctx, getStringSlice(obj, "UserReportingWorkloads"))
 	_ = ctx
@@ -245,9 +359,11 @@ func (r *supervisoryReviewPolicyV2Resource) reconcileState(cfg, read *supervisor
 	read.Comment = reconcile.KeepStr(cfg.Comment, read.Comment)
 	read.Enabled = reconcile.KeepBool(cfg.Enabled, read.Enabled)
 	read.Name = reconcile.KeepStr(cfg.Name, read.Name)
-	read.PolicyRBACScopes = reconcile.KeepStr(cfg.PolicyRBACScopes, read.PolicyRBACScopes)
+	read.PolicyRBACScopes = reconcile.KeepSet(cfg.PolicyRBACScopes, read.PolicyRBACScopes)
 	read.PolicyTemplate = reconcile.KeepStr(cfg.PolicyTemplate, read.PolicyTemplate)
+	read.PreservationPeriodInDays = reconcile.KeepInt64(cfg.PreservationPeriodInDays, read.PreservationPeriodInDays)
 	read.RemoveReviewers = reconcile.KeepSet(cfg.RemoveReviewers, read.RemoveReviewers)
+	read.RetentionPeriodInDays = reconcile.KeepInt64(cfg.RetentionPeriodInDays, read.RetentionPeriodInDays)
 	read.Reviewers = reconcile.KeepSet(cfg.Reviewers, read.Reviewers)
 	read.UserReportingWorkloads = reconcile.KeepSet(cfg.UserReportingWorkloads, read.UserReportingWorkloads)
 }

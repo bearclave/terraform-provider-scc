@@ -1,0 +1,5 @@
+# Managed by bearclave/governance (tools/sync.py), written only when missing.
+# Rules: https://github.com/bearclave/governance/blob/main/standards/access.md
+# The owners review every change. A repository may add narrower lines below
+# for paths that another team owns; the last matching line wins.
+* @bearclave/owners

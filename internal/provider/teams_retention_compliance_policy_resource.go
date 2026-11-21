@@ -65,7 +65,7 @@ func (r *teamsRetentionCompliancePolicyResource) Schema(_ context.Context, _ res
 		Description: "Manages the TeamsRetentionCompliancePolicy object via New-TeamsRetentionCompliancePolicy / Get-TeamsRetentionCompliancePolicy / Set-TeamsRetentionCompliancePolicy / Remove-TeamsRetentionCompliancePolicy.",
 		Attributes: map[string]schema.Attribute{
 			"id":                                   schema.StringAttribute{Computed: true, Description: "Object identifier (GUID).", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"identity":                             schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets."},
+			"identity":                             schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"add_teams_channel_location":           schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AddTeamsChannelLocation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"add_teams_channel_location_exception": schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AddTeamsChannelLocationException parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"add_teams_chat_location":              schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AddTeamsChatLocation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
@@ -101,28 +101,45 @@ func (r *teamsRetentionCompliancePolicyResource) Create(ctx context.Context, req
 		return
 	}
 
-	p := purview.NewTeamsRetentionCompliancePolicyParams{
-		Comment:              plan.Comment.ValueString(),
-		Enabled:              plan.Enabled.ValueBool(),
-		Name:                 plan.Name.ValueString(),
-		RestrictiveRetention: plan.RestrictiveRetention.ValueBool(),
+	var config teamsRetentionCompliancePolicyModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
+	if resp.Diagnostics.HasError() {
+		return
 	}
-	if v := plan.TeamsChannelLocation.ValueString(); v != "" {
-		p.TeamsChannelLocation = v
+
+	p := purview.NewTeamsRetentionCompliancePolicyParams{}
+	if !config.Comment.IsNull() {
+		p.Comment = plan.Comment.ValueString()
 	}
-	if v := plan.TeamsChannelLocationException.ValueString(); v != "" {
-		p.TeamsChannelLocationException = v
+	if !config.Enabled.IsNull() {
+		if !plan.Enabled.IsUnknown() {
+			p.Enabled = plan.Enabled.ValueBoolPointer()
+		}
 	}
-	if v := plan.TeamsChatLocation.ValueString(); v != "" {
-		p.TeamsChatLocation = v
+	if !config.Name.IsNull() {
+		p.Name = plan.Name.ValueString()
 	}
-	if v := plan.TeamsChatLocationException.ValueString(); v != "" {
-		p.TeamsChatLocationException = v
+	if !config.RestrictiveRetention.IsNull() {
+		if !plan.RestrictiveRetention.IsUnknown() {
+			p.RestrictiveRetention = plan.RestrictiveRetention.ValueBoolPointer()
+		}
+	}
+	if v := config.TeamsChannelLocation.ValueString(); v != "" {
+		p.TeamsChannelLocation = objectParam(v)
+	}
+	if v := config.TeamsChannelLocationException.ValueString(); v != "" {
+		p.TeamsChannelLocationException = objectParam(v)
+	}
+	if v := config.TeamsChatLocation.ValueString(); v != "" {
+		p.TeamsChatLocation = objectParam(v)
+	}
+	if v := config.TeamsChatLocationException.ValueString(); v != "" {
+		p.TeamsChatLocationException = objectParam(v)
 	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	res, err := r.client.SCC.NewTeamsRetentionCompliancePolicy(ctx, p)
+	res, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.NewTeamsRetentionCompliancePolicy, p, isNotFound)
 	if err != nil {
 		resp.Diagnostics.AddError("New-TeamsRetentionCompliancePolicy failed", err.Error())
 		return
@@ -169,54 +186,97 @@ func (r *teamsRetentionCompliancePolicyResource) Update(ctx context.Context, req
 	id := r.identityOf(state)
 	sp := purview.SetTeamsRetentionCompliancePolicyParams{}
 	sp.Identity = id
-	if v := plan.AddTeamsChannelLocation.ValueString(); v != "" {
-		sp.AddTeamsChannelLocation = v
+	if !plan.AddTeamsChannelLocation.Equal(state.AddTeamsChannelLocation) {
+		if v := plan.AddTeamsChannelLocation.ValueString(); v != "" {
+			sp.AddTeamsChannelLocation = objectParam(v)
+		}
 	}
-	if v := plan.AddTeamsChannelLocationException.ValueString(); v != "" {
-		sp.AddTeamsChannelLocationException = v
+	if !plan.AddTeamsChannelLocationException.Equal(state.AddTeamsChannelLocationException) {
+		if v := plan.AddTeamsChannelLocationException.ValueString(); v != "" {
+			sp.AddTeamsChannelLocationException = objectParam(v)
+		}
 	}
-	if v := plan.AddTeamsChatLocation.ValueString(); v != "" {
-		sp.AddTeamsChatLocation = v
+	if !plan.AddTeamsChatLocation.Equal(state.AddTeamsChatLocation) {
+		if v := plan.AddTeamsChatLocation.ValueString(); v != "" {
+			sp.AddTeamsChatLocation = objectParam(v)
+		}
 	}
-	if v := plan.AddTeamsChatLocationException.ValueString(); v != "" {
-		sp.AddTeamsChatLocationException = v
+	if !plan.AddTeamsChatLocationException.Equal(state.AddTeamsChatLocationException) {
+		if v := plan.AddTeamsChatLocationException.ValueString(); v != "" {
+			sp.AddTeamsChatLocationException = objectParam(v)
+		}
 	}
-	sp.Comment = plan.Comment.ValueString()
-	sp.Enabled = plan.Enabled.ValueBool()
-	if v := plan.RemoveTeamsChannelLocation.ValueString(); v != "" {
-		sp.RemoveTeamsChannelLocation = v
+	if !plan.Comment.Equal(state.Comment) {
+		sp.Comment = plan.Comment.ValueString()
 	}
-	if v := plan.RemoveTeamsChannelLocationException.ValueString(); v != "" {
-		sp.RemoveTeamsChannelLocationException = v
+	if !plan.Enabled.Equal(state.Enabled) {
+		if !plan.Enabled.IsUnknown() {
+			sp.Enabled = plan.Enabled.ValueBoolPointer()
+		}
 	}
-	if v := plan.RemoveTeamsChatLocation.ValueString(); v != "" {
-		sp.RemoveTeamsChatLocation = v
+	if !plan.RemoveTeamsChannelLocation.Equal(state.RemoveTeamsChannelLocation) {
+		if v := plan.RemoveTeamsChannelLocation.ValueString(); v != "" {
+			sp.RemoveTeamsChannelLocation = objectParam(v)
+		}
 	}
-	if v := plan.RemoveTeamsChatLocationException.ValueString(); v != "" {
-		sp.RemoveTeamsChatLocationException = v
+	if !plan.RemoveTeamsChannelLocationException.Equal(state.RemoveTeamsChannelLocationException) {
+		if v := plan.RemoveTeamsChannelLocationException.ValueString(); v != "" {
+			sp.RemoveTeamsChannelLocationException = objectParam(v)
+		}
 	}
-	sp.RestrictiveRetention = plan.RestrictiveRetention.ValueBool()
-	sp.RetryDistribution = plan.RetryDistribution.ValueBool()
+	if !plan.RemoveTeamsChatLocation.Equal(state.RemoveTeamsChatLocation) {
+		if v := plan.RemoveTeamsChatLocation.ValueString(); v != "" {
+			sp.RemoveTeamsChatLocation = objectParam(v)
+		}
+	}
+	if !plan.RemoveTeamsChatLocationException.Equal(state.RemoveTeamsChatLocationException) {
+		if v := plan.RemoveTeamsChatLocationException.ValueString(); v != "" {
+			sp.RemoveTeamsChatLocationException = objectParam(v)
+		}
+	}
+	if !plan.RestrictiveRetention.Equal(state.RestrictiveRetention) {
+		if !plan.RestrictiveRetention.IsUnknown() {
+			sp.RestrictiveRetention = plan.RestrictiveRetention.ValueBoolPointer()
+		}
+	}
+	if !plan.RetryDistribution.Equal(state.RetryDistribution) {
+		if !plan.RetryDistribution.IsUnknown() {
+			sp.RetryDistribution = plan.RetryDistribution.ValueBoolPointer()
+		}
+	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	if _, err := r.client.SCC.SetTeamsRetentionCompliancePolicy(ctx, sp); err != nil {
+	if _, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.SetTeamsRetentionCompliancePolicy, sp, isNotFound); err != nil {
 		resp.Diagnostics.AddError("Set-TeamsRetentionCompliancePolicy failed", err.Error())
 		return
 	}
 	cfg := plan
 	reflected := reconcile.ReflectsFields(map[string]types.String{
-		"AddTeamsChannelLocation":             cfg.AddTeamsChannelLocation,
-		"AddTeamsChannelLocationException":    cfg.AddTeamsChannelLocationException,
-		"AddTeamsChatLocation":                cfg.AddTeamsChatLocation,
-		"AddTeamsChatLocationException":       cfg.AddTeamsChatLocationException,
-		"Comment":                             cfg.Comment,
-		"RemoveTeamsChannelLocation":          cfg.RemoveTeamsChannelLocation,
-		"RemoveTeamsChannelLocationException": cfg.RemoveTeamsChannelLocationException,
-		"RemoveTeamsChatLocation":             cfg.RemoveTeamsChatLocation,
-		"RemoveTeamsChatLocationException":    cfg.RemoveTeamsChatLocationException,
+		"Comment": cfg.Comment,
 	}, getString)
+	if !cfg.Enabled.IsUnknown() && !cfg.Enabled.IsNull() && !cfg.Enabled.Equal(state.Enabled) {
+		prev, want := reflected, cfg.Enabled.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["Enabled"] == nil || getBool(obj, "Enabled") == want)
+		}
+	}
+	if !cfg.RestrictiveRetention.IsUnknown() && !cfg.RestrictiveRetention.IsNull() && !cfg.RestrictiveRetention.Equal(state.RestrictiveRetention) {
+		prev, want := reflected, cfg.RestrictiveRetention.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["RestrictiveRetention"] == nil || getBool(obj, "RestrictiveRetention") == want)
+		}
+	}
+	if !cfg.RetryDistribution.IsUnknown() && !cfg.RetryDistribution.IsNull() && !cfg.RetryDistribution.Equal(state.RetryDistribution) {
+		prev, want := reflected, cfg.RetryDistribution.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["RetryDistribution"] == nil || getBool(obj, "RetryDistribution") == want)
+		}
+	}
 	r.refresh(ctx, id, &plan, &resp.Diagnostics, reflected)
+	if !cfg.ID.IsUnknown() && !cfg.ID.IsNull() {
+		plan.ID = cfg.ID
+	}
 	r.reconcileState(&cfg, &plan)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
@@ -276,23 +336,23 @@ func (r *teamsRetentionCompliancePolicyResource) refresh(ctx context.Context, id
 func readTeamsRetentionCompliancePolicy(ctx context.Context, obj map[string]any, m *teamsRetentionCompliancePolicyModel) {
 	m.ID = types.StringValue(firstNonEmptyStr(getString(obj, "Guid"), getString(obj, "Id"), getString(obj, "Identity")))
 	m.Identity = types.StringValue(firstNonEmptyStr(getString(obj, "Identity"), getString(obj, "Guid"), getString(obj, "Name")))
-	m.AddTeamsChannelLocation = types.StringValue(getString(obj, "AddTeamsChannelLocation"))
-	m.AddTeamsChannelLocationException = types.StringValue(getString(obj, "AddTeamsChannelLocationException"))
-	m.AddTeamsChatLocation = types.StringValue(getString(obj, "AddTeamsChatLocation"))
-	m.AddTeamsChatLocationException = types.StringValue(getString(obj, "AddTeamsChatLocationException"))
+	m.AddTeamsChannelLocation = types.StringValue(getObjectJSON(obj, "AddTeamsChannelLocation"))
+	m.AddTeamsChannelLocationException = types.StringValue(getObjectJSON(obj, "AddTeamsChannelLocationException"))
+	m.AddTeamsChatLocation = types.StringValue(getObjectJSON(obj, "AddTeamsChatLocation"))
+	m.AddTeamsChatLocationException = types.StringValue(getObjectJSON(obj, "AddTeamsChatLocationException"))
 	m.Comment = types.StringValue(getString(obj, "Comment"))
 	m.Enabled = types.BoolValue(getBool(obj, "Enabled"))
 	m.Name = types.StringValue(getString(obj, "Name"))
-	m.RemoveTeamsChannelLocation = types.StringValue(getString(obj, "RemoveTeamsChannelLocation"))
-	m.RemoveTeamsChannelLocationException = types.StringValue(getString(obj, "RemoveTeamsChannelLocationException"))
-	m.RemoveTeamsChatLocation = types.StringValue(getString(obj, "RemoveTeamsChatLocation"))
-	m.RemoveTeamsChatLocationException = types.StringValue(getString(obj, "RemoveTeamsChatLocationException"))
+	m.RemoveTeamsChannelLocation = types.StringValue(getObjectJSON(obj, "RemoveTeamsChannelLocation"))
+	m.RemoveTeamsChannelLocationException = types.StringValue(getObjectJSON(obj, "RemoveTeamsChannelLocationException"))
+	m.RemoveTeamsChatLocation = types.StringValue(getObjectJSON(obj, "RemoveTeamsChatLocation"))
+	m.RemoveTeamsChatLocationException = types.StringValue(getObjectJSON(obj, "RemoveTeamsChatLocationException"))
 	m.RestrictiveRetention = types.BoolValue(getBool(obj, "RestrictiveRetention"))
 	m.RetryDistribution = types.BoolValue(getBool(obj, "RetryDistribution"))
-	m.TeamsChannelLocation = types.StringValue(getString(obj, "TeamsChannelLocation"))
-	m.TeamsChannelLocationException = types.StringValue(getString(obj, "TeamsChannelLocationException"))
-	m.TeamsChatLocation = types.StringValue(getString(obj, "TeamsChatLocation"))
-	m.TeamsChatLocationException = types.StringValue(getString(obj, "TeamsChatLocationException"))
+	m.TeamsChannelLocation = types.StringValue(getObjectJSON(obj, "TeamsChannelLocation"))
+	m.TeamsChannelLocationException = types.StringValue(getObjectJSON(obj, "TeamsChannelLocationException"))
+	m.TeamsChatLocation = types.StringValue(getObjectJSON(obj, "TeamsChatLocation"))
+	m.TeamsChatLocationException = types.StringValue(getObjectJSON(obj, "TeamsChatLocationException"))
 	_ = ctx
 }
 

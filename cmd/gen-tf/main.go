@@ -82,6 +82,9 @@ func main() {
 	}
 	fmt.Printf("(%d json data sources)\n", jsonDSCount)
 
+	metas, err := applyOverrides(resources, byNoun, only != "")
+	check(err)
+
 	files, err := genframework.Generate(cfg, resources)
 	check(err)
 
@@ -89,12 +92,28 @@ func main() {
 	for _, f := range files {
 		check(os.WriteFile(filepath.Join(out, f.Name), f.Content, 0o644))
 	}
+	if only == "" { // a single-noun run would drop the other nouns' entries
+		src, err := renderOverrides(metas)
+		check(err)
+		check(os.WriteFile(filepath.Join(out, "zz_generated_overrides.go"), src, 0o644))
+	}
 	fmt.Printf("generated %d resource(s), %d file(s) -> %s\n", len(resources), len(files), out)
 	if len(skipped) > 0 {
 		sort.Strings(skipped)
 		fmt.Printf("skipped %d noun(s):\n  %s\n", len(skipped), strings.Join(skipped, "\n  "))
 	}
 }
+
+// sparseWrite: every generated resource sends only what the operator set
+// (create) or changed (update), like the cmdlets themselves. Typed *bool/*int64
+// fields make false/0 sendable, so a full re-send would also write values that
+// were only read back — e.g. 0 for a deprecated property Get no longer returns
+// (EndUserSpamNotificationFrequency), which Set rejects as out of range.
+
+// namingParam lists New-mandatory params that name the object. Set accepts
+// them as a rename, which can change the identity the provider reads back, so
+// they force replacement instead.
+var namingParam = map[string]bool{"Name": true, "ScheduleName": true}
 
 // buildResource maps a noun's CRUD cmdlets into a genframework.Resource.
 func buildResource(noun string, verbs map[string]spec.Cmdlet, byNoun map[string]map[string]spec.Cmdlet) (genframework.Resource, bool, string) {
@@ -137,31 +156,51 @@ func buildResource(noun string, verbs map[string]spec.Cmdlet, byNoun map[string]
 			continue
 		}
 		p := firstParam(name, newCmd, setCmd)
-		at, ok := attrType(p)
-		if !ok {
-			continue // unmappable (any/int/complex)
-		}
+		at := attrType(p)
 		field := exportName(name)
 		_, inC := inNew[name]
 		_, inU := inSet[name]
 		required := inC && newCmd.Parameters != nil && mandatoryIn(newCmd, name)
-		replace := required || (inC && !inU)
+		// New and Set bind the parameter differently (e.g. a -SkipReports switch on
+		// New but a Boolean on Set): one attribute cannot write both fields, so
+		// it follows New and becomes create-time only.
+		kindConflict := inC && inU && firstParam(name, newCmd).Kind() != firstParam(name, setCmd).Kind()
+		// A parameter mandatory on New but also accepted by Set (e.g. DKIM
+		// -Enabled) is updated in place. Naming params stay replace-only: Set
+		// renames the object, and the name often is its identity. So do
+		// mandatory switches: they select a parameter set (e.g. Set-Mailbox
+		// -PublicFolder) rather than change a setting. And a Set without its own
+		// identity key may locate the object through a mandatory param (e.g.
+		// the rule-pack ID inside Set-ClassificationRuleCollection -FileData).
+		selector := required && firstParam(name, newCmd).Kind() == spec.KindSwitch
+		inPlace := inU && setKey != "" && !namingParam[name] && !selector
+		// A bool that only New takes may still be switched in place by
+		// Enable-/Disable-<Noun> (e.g. a rule's -Enabled).
+		var toggle *genframework.Toggle
+		if inC && !inU && !required && attrType(p) == genframework.TypeBool {
+			toggle = toggleFor(name, noun, verbs)
+		}
+		replace := (required && !inPlace) || (inC && !inU && toggle == nil) || kindConflict
 		if replace {
 			inU = false // replace-only attributes are never updated in place
 		}
 		attrs = append(attrs, genframework.Attribute{
-			TFName:      tfName(field),
-			Field:       field,
-			APIName:     field,
-			Type:        at,
-			Required:    required,
-			Computed:    !required,
-			Sensitive:   sensitive(name),
-			Replace:     replace,
-			Description: describe(name, p),
-			InCreate:    inC,
-			InUpdate:    inU,
-			Object:      goType(p) == "any",
+			TFName:       tfName(field),
+			Field:        field,
+			APIName:      field,
+			Type:         at,
+			Required:     required,
+			Computed:     !required,
+			Sensitive:    sensitive(name),
+			Replace:      replace,
+			Description:  describe(name, p),
+			InCreate:     inC,
+			InUpdate:     inU,
+			Object:       p.Kind() == spec.KindAny,
+			PointerParam: isPointer(p),
+			Delta:        at == genframework.TypeStringSet && inU && firstParam(name, setCmd).DeltaCapable(), // clear via Remove delta
+			Toggle:       toggle,
+			StateField:   stateField(toggle),
 		})
 	}
 	if !hasCreateAttr(attrs) {
@@ -184,7 +223,55 @@ func buildResource(noun string, verbs map[string]spec.Cmdlet, byNoun map[string]
 		Delete:            op(removeCmd, exportName(removeKey)),
 		Members:           members,
 		Plural:            true, // also expose a list-all data source
+		SparseWrite:       true, // see sparseWrite
 	}, true, ""
+}
+
+// toggleFor returns the Enable-/Disable-<Noun> pair that switches the bool
+// param name in place, or nil. Only -Enabled qualifies, and only when both
+// cmdlets target the object by -Identity and need nothing else (e.g.
+// Enable-SafeLinksRule; Enable-TransportRule's optional -Mode is ignored).
+func toggleFor(name, noun string, verbs map[string]spec.Cmdlet) *genframework.Toggle {
+	if name != "Enabled" {
+		return nil
+	}
+	en, okE := verbs["Enable"]
+	dis, okD := verbs["Disable"]
+	if !okE || !okD || !identityOnly(en) || !identityOnly(dis) {
+		return nil
+	}
+	e, d := goName(en.Cmdlet), goName(dis.Cmdlet)
+	return &genframework.Toggle{
+		EnableMethod: e, EnableParams: e + "Params",
+		DisableMethod: d, DisableParams: d + "Params",
+		IdentityField: "Identity",
+	}
+}
+
+// identityOnly reports whether c takes -Identity and has no other mandatory
+// (non-plumbing) parameter.
+func identityOnly(c spec.Cmdlet) bool {
+	hasID := false
+	for _, p := range c.Parameters {
+		switch {
+		case p.Name == "Identity":
+			hasID = true
+		case p.Mandatory() && !skipParam(p.Name):
+			return false
+		}
+	}
+	return hasID
+}
+
+// stateField is the read-back property for a toggled attribute: Exchange rule
+// objects report State ("Enabled"/"Disabled") rather than a bool Enabled. The
+// generated read falls back to Enabled for objects without State (e.g. journal
+// rules).
+func stateField(t *genframework.Toggle) string {
+	if t == nil {
+		return ""
+	}
+	return "State"
 }
 
 // memberCollection detects a <Noun>Member companion family with a Get (to read)
@@ -316,22 +403,21 @@ func buildConfigResource(noun string, verbs map[string]spec.Cmdlet) (genframewor
 			continue
 		}
 		p := firstParam(name, setc)
-		at, ok := attrType(p)
-		if !ok {
-			continue
-		}
+		at := attrType(p)
 		field := exportName(name)
 		attrs = append(attrs, genframework.Attribute{
-			TFName:      tfName(field),
-			Field:       field,
-			APIName:     field,
-			Type:        at,
-			Computed:    true, // settings: Optional + Computed
-			Sensitive:   sensitive(name),
-			Description: describe(name, p),
-			InCreate:    true,
-			InUpdate:    true,
-			Object:      goType(p) == "any",
+			TFName:       tfName(field),
+			Field:        field,
+			APIName:      field,
+			Type:         at,
+			Computed:     true, // settings: Optional + Computed
+			Sensitive:    sensitive(name),
+			Description:  describe(name, p),
+			InCreate:     true,
+			InUpdate:     true,
+			Object:       p.Kind() == spec.KindAny,
+			PointerParam: isPointer(p),
+			Delta:        at == genframework.TypeStringSet && p.DeltaCapable(), // clear via Remove delta
 		})
 	}
 	if len(attrs) == 0 {
@@ -356,6 +442,7 @@ func buildConfigResource(noun string, verbs map[string]spec.Cmdlet) (genframewor
 		Config:      true,
 		Singleton:   singleton,
 		Plural:      !singleton, // list-all makes sense only for per-object configs
+		SparseWrite: true,       // see sparseWrite
 	}, true, ""
 }
 
@@ -390,20 +477,34 @@ func identityFieldFor(c spec.Cmdlet, noun string) string {
 	return ""
 }
 
-func attrType(p spec.Param) (genframework.AttrType, bool) {
-	switch goType(p) {
-	case "bool":
-		return genframework.TypeBool, true
-	case "[]string":
-		return genframework.TypeStringSet, true
-	case "string", "any":
-		// "any" is a PowerShell System.Object — most are identity/string-valued
-		// (an account, a role name, a GUID). Expose them as strings (best-effort);
-		// complex objects simply read back empty and can be left unset.
-		return genframework.TypeString, true
-	default: // int
-		return 0, false
+// attrType maps a parameter's binding kind (spec.Param.Kind, the same mapping
+// go-exoscc's gen-go uses for the bindings) to a Terraform attribute type.
+// System.Object parameters are refined from their docs-declared .NET type;
+// whatever stays untyped (KindAny: Unlimited, ByteQuantifiedSize, enums,
+// *IdParameter, ...) is exposed as a string.
+func attrType(p spec.Param) genframework.AttrType {
+	switch p.Kind() {
+	case spec.KindSwitch, spec.KindBool:
+		return genframework.TypeBool
+	case spec.KindInt64:
+		return genframework.TypeInt
+	case spec.KindList:
+		return genframework.TypeStringSet
+	default: // KindString, KindAny
+		return genframework.TypeString
 	}
+}
+
+// isPointer reports whether the binding field is a pointer (*bool / *int64),
+// so an explicit false / 0 is sendable and unset stays nil. Switches are *bool
+// too: a configured false must go out as -Switch:$false, or a state switch such
+// as -AllowBasicAuthSmtp could never be turned off again.
+func isPointer(p spec.Param) bool {
+	switch p.Kind() {
+	case spec.KindSwitch, spec.KindBool, spec.KindInt64:
+		return true
+	}
+	return false
 }
 
 func hasCreateAttr(attrs []genframework.Attribute) bool {
@@ -461,11 +562,40 @@ func firstParam(name string, cmds ...spec.Cmdlet) spec.Param {
 	return spec.Param{Name: name}
 }
 
+// mandatoryIn reports whether c needs the parameter however it is called. The
+// psm1 proxies split some New-* cmdlets into alternative parameter sets, and a
+// parameter mandatory only in one of them is optional for the others: e.g.
+// New-RetentionComplianceRule -ApplyComplianceTag (set ComplianceTag) versus
+// -RetentionDuration (set Default), or New-RetentionCompliancePolicy
+// -AdaptiveScopeLocation (set AdaptiveScopeLocation). A parameter is required
+// when it is mandatory in all sets, in the default set, or in a set named
+// Default (the proxies' default when DefaultParameterSet is unset).
 func mandatoryIn(c spec.Cmdlet, name string) bool {
 	for _, p := range c.Parameters {
-		if p.Name == name {
-			return p.Mandatory()
+		if p.Name != name {
+			continue
 		}
+		if !p.Mandatory() {
+			return false
+		}
+		in := map[string]bool{}
+		for _, s := range p.ParameterSets {
+			if !s.Mandatory {
+				continue
+			}
+			if s.Name == "__AllParameterSets" || s.Name == "Default" || s.Name == c.DefaultParameterSet {
+				return true
+			}
+			in[s.Name] = true
+		}
+		for _, q := range c.Parameters {
+			for _, s := range q.ParameterSets {
+				if s.Name != "__AllParameterSets" && !in[s.Name] {
+					return false
+				}
+			}
+		}
+		return true
 	}
 	return false
 }
@@ -490,27 +620,6 @@ func unionKeys(a, b map[string]bool) []string {
 }
 
 // ---- name/type mapping (mirrors go-exoscc/cmd/gen-go) ----
-
-func goType(p spec.Param) string {
-	if p.IsSwitch {
-		return "bool"
-	}
-	t := strings.ToLower(p.Type)
-	switch {
-	case strings.HasSuffix(t, "[]"):
-		return "[]string"
-	case t == "string" || strings.HasSuffix(t, ".string"):
-		return "string"
-	case t == "bool" || strings.HasSuffix(t, ".boolean"):
-		return "bool"
-	case t == "int" || strings.HasSuffix(t, ".int32") || strings.HasSuffix(t, ".int64"):
-		return "int"
-	case strings.HasSuffix(t, ".guid"):
-		return "string"
-	default:
-		return "any"
-	}
-}
 
 func goName(cmdlet string) string {
 	parts := strings.FieldsFunc(cmdlet, func(r rune) bool { return r == '-' || r == '_' })

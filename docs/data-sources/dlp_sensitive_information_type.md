@@ -23,10 +23,10 @@ Look up an existing DlpSensitiveInformationType object. Set identity or name to 
 ### Read-Only
 
 - `description` (String) Maps to the -Description parameter.
-- `file_data` (Set of String) Maps to the -FileData parameter.
-- `fingerprints` (String) Maps to the -Fingerprints parameter.
+- `file_data` (String) Maps to the -FileData parameter.
+- `fingerprints` (Set of String) Maps to the -Fingerprints parameter.
 - `id` (String) Object identifier (GUID).
 - `is_exact` (Boolean) Maps to the -IsExact parameter.
 - `locale` (String) Maps to the -Locale parameter.
-- `threshold` (String) Maps to the -Threshold parameter.
+- `threshold` (Number) Maps to the -Threshold parameter.
 - `threshold_config` (String) Maps to the -ThresholdConfig parameter.

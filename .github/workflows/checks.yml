@@ -1,0 +1,124 @@
+# Copy of bearclave/ci .github/workflows/checks.yml at v2.9.1, unchanged below
+# this header: a public repository cannot call a reusable workflow of the
+# private bearclave/ci. Update it from a newer release of ci by hand.
+# The pipeline of a repository that builds and deploys nothing (governance,
+# handbook, ops-tools, app-office-templates, vs-code-extensions, .github):
+# ESLint where the repository has JavaScript, an optional command of the
+# repository's own, then the gate the ruleset requires.
+#
+#   jobs:
+#     pipeline:
+#       uses: bearclave/ci/.github/workflows/checks.yml@v2
+#       permissions:
+#         contents: read
+#       with:
+#         command: python3 tools/check.py    # optional
+#
+# The required check is "pipeline / gate".
+name: checks
+
+on:
+  workflow_call:
+    inputs:
+      command:
+        description: Commands run in the checkout of the repository; empty runs nothing
+        type: string
+        default: ""
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  # One job: ESLint where there is JavaScript, then the repository's own
+  # command. A job of its own for ESLint cost a minute even without any.
+  checks:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # ESLint over the JavaScript git tracks, with the repository's
+      # eslint.config.mjs (managed by governance tools/sync.py: the recommended
+      # rules, the repository's own section below its marker). A repository with a
+      # package.json that pins eslint in devDependencies runs that version from its
+      # lock file; any other runs the versions below through npx. Errors fail,
+      # warnings are annotations only.
+      - name: JavaScript in the repository
+        id: js
+        run: |
+          count=$(git ls-files '*.js' '*.mjs' '*.cjs' | wc -l)
+          if [ "$count" -eq 0 ]; then
+            echo "No JavaScript."
+            echo "lint=false" >>"$GITHUB_OUTPUT"
+          elif [ ! -f eslint.config.mjs ]; then
+            echo "::warning title=eslint::$count JavaScript files without eslint.config.mjs - run tools/sync.py of governance for this repository"
+            echo "lint=false" >>"$GITHUB_OUTPUT"
+          else
+            echo "lint=true" >>"$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        if: steps.js.outputs.lint == 'true'
+        with:
+          node-version: "24"
+
+      - name: ESLint
+        if: steps.js.outputs.lint == 'true'
+        env:
+          ESLINT_VERSION: "10.14.0"
+          ESLINT_JS_VERSION: "10.0.1"
+          GLOBALS_VERSION: "17.14.0"
+        run: |
+          set -euo pipefail
+          mapfile -t files < <(git ls-files '*.js' '*.mjs' '*.cjs')
+          if [ -f package.json ] && jq -e '.devDependencies.eslint' package.json >/dev/null; then
+            npm ci --ignore-scripts --no-audit --no-fund
+            eslint=(npx --no-install eslint)
+          else
+            eslint=(npx -y -p "eslint@$ESLINT_VERSION" -p "@eslint/js@$ESLINT_JS_VERSION" -p "globals@$GLOBALS_VERSION" eslint)
+          fi
+          "${eslint[@]}" --version
+          report="$RUNNER_TEMP/eslint.json"
+          rc=0
+          "${eslint[@]}" --config eslint.config.mjs --no-warn-ignored --format json --output-file "$report" "${files[@]}" || rc=$?
+          if [ ! -s "$report" ]; then
+            echo "::error title=eslint::eslint ended with $rc and wrote no report"
+            exit 1
+          fi
+          jq -r --arg root "$PWD/" '.[] | (.filePath | ltrimstr($root)) as $f | .messages[]
+            | "::\(if .severity == 2 then "error" else "warning" end) file=\($f),line=\(.line // 1),col=\(.column // 1),title=\(.ruleId // "eslint")::\(.message | gsub("\n"; " "))"' "$report"
+          jq -r '"ESLint: \(length) files, \(map(.errorCount) | add) errors, \(map(.warningCount) | add) warnings"' "$report" |
+            tee -a "$GITHUB_STEP_SUMMARY"
+          exit "$rc"
+
+      - name: Repository checks
+        if: ${{ !cancelled() && inputs.command != '' }}
+        env:
+          COMMAND: ${{ inputs.command }}
+        run: bash -euo pipefail -c "$COMMAND"
+
+  gate:
+    needs: [checks]
+    if: always()
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      # needs of the gate job, as JSON: anything but success or skipped fails it.
+      # A skipped job counts as passed in a required check, so the gate - which
+      # always runs - is the one the ruleset requires.
+      - name: Everything needed passed
+        env:
+          RESULTS: ${{ toJSON(needs) }}
+        run: |
+          failed=$(jq -r 'to_entries[] | select(.value.result != "success" and .value.result != "skipped") | "\(.key): \(.value.result)"' <<<"$RESULTS")
+          if [ -n "$failed" ]; then
+            echo "::error::not passed: $(tr '\n' ' ' <<<"$failed")"
+            exit 1
+          fi
+          jq -r 'to_entries[] | "\(.key): \(.value.result)"' <<<"$RESULTS"

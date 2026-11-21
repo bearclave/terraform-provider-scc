@@ -17,7 +17,7 @@ Manages the DlpSensitiveInformationTypeRulePackage object via New-DlpSensitiveIn
 
 ### Required
 
-- `file_data` (Set of String) Maps to the -FileData parameter.
+- `file_data` (String) Maps to the -FileData parameter.
 
 ### Optional
 

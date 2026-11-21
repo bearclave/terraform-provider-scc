@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
@@ -42,6 +43,8 @@ type complianceSearchActionModel struct {
 	FileTypeExclusionsForUnindexedItems types.Set    `tfsdk:"file_type_exclusions_for_unindexed_items"`
 	IncludeCredential                   types.Bool   `tfsdk:"include_credential"`
 	IncludeSharePointDocumentVersions   types.Bool   `tfsdk:"include_share_point_document_versions"`
+	JobOptions                          types.Int64  `tfsdk:"job_options"`
+	MaxUnindexedSize                    types.Int64  `tfsdk:"max_unindexed_size"`
 	ReferenceActionName                 types.String `tfsdk:"reference_action_name"`
 	Region                              types.String `tfsdk:"region"`
 	Report                              types.Bool   `tfsdk:"report"`
@@ -63,13 +66,15 @@ func (r *complianceSearchActionResource) Schema(_ context.Context, _ resource.Sc
 		Description: "Manages the ComplianceSearchAction object via New-ComplianceSearchAction / Get-ComplianceSearchAction / Set-ComplianceSearchAction / Remove-ComplianceSearchAction.",
 		Attributes: map[string]schema.Attribute{
 			"id":                schema.StringAttribute{Computed: true, Description: "Object identifier (GUID).", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"identity":          schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets."},
+			"identity":          schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"action_name":       schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ActionName parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace(), stringplanmodifier.UseStateForUnknown()}},
 			"change_export_key": schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -ChangeExportKey parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
 			"enable_dedupe":     schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -EnableDedupe parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.RequiresReplace(), boolplanmodifier.UseStateForUnknown()}},
 			"file_type_exclusions_for_unindexed_items": schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -FileTypeExclusionsForUnindexedItems parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.RequiresReplace(), setplanmodifier.UseStateForUnknown()}},
 			"include_credential":                       schema.BoolAttribute{Optional: true, Computed: true, Sensitive: true, Description: "Maps to the -IncludeCredential parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.RequiresReplace(), boolplanmodifier.UseStateForUnknown()}},
 			"include_share_point_document_versions":    schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -IncludeSharePointDocumentVersions parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.RequiresReplace(), boolplanmodifier.UseStateForUnknown()}},
+			"job_options":                              schema.Int64Attribute{Optional: true, Computed: true, Description: "Maps to the -JobOptions parameter.", PlanModifiers: []planmodifier.Int64{int64planmodifier.RequiresReplace(), int64planmodifier.UseStateForUnknown()}},
+			"max_unindexed_size":                       schema.Int64Attribute{Optional: true, Computed: true, Description: "Maps to the -MaxUnindexedSize parameter.", PlanModifiers: []planmodifier.Int64{int64planmodifier.RequiresReplace(), int64planmodifier.UseStateForUnknown()}},
 			"reference_action_name":                    schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ReferenceActionName parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace(), stringplanmodifier.UseStateForUnknown()}},
 			"region":                                   schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -Region parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace(), stringplanmodifier.UseStateForUnknown()}},
 			"report":                                   schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -Report parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.RequiresReplace(), boolplanmodifier.UseStateForUnknown()}},
@@ -98,29 +103,92 @@ func (r *complianceSearchActionResource) Create(ctx context.Context, req resourc
 		return
 	}
 
-	p := purview.NewComplianceSearchActionParams{
-		ActionName:                          plan.ActionName.ValueString(),
-		EnableDedupe:                        plan.EnableDedupe.ValueBool(),
-		FileTypeExclusionsForUnindexedItems: toStringSlice(ctx, plan.FileTypeExclusionsForUnindexedItems, &resp.Diagnostics),
-		IncludeCredential:                   plan.IncludeCredential.ValueBool(),
-		IncludeSharePointDocumentVersions:   plan.IncludeSharePointDocumentVersions.ValueBool(),
-		ReferenceActionName:                 plan.ReferenceActionName.ValueString(),
-		Region:                              plan.Region.ValueString(),
-		Report:                              plan.Report.ValueBool(),
-		RetentionReport:                     plan.RetentionReport.ValueBool(),
-		RetryOnError:                        plan.RetryOnError.ValueBool(),
-		ScopeDetails:                        toStringSlice(ctx, plan.ScopeDetails, &resp.Diagnostics),
-		SearchName:                          toStringSlice(ctx, plan.SearchName, &resp.Diagnostics),
-		SearchNames:                         toStringSlice(ctx, plan.SearchNames, &resp.Diagnostics),
-		Version:                             plan.Version.ValueString(),
+	var config complianceSearchActionModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
+	if resp.Diagnostics.HasError() {
+		return
 	}
-	if v := plan.Scope.ValueString(); v != "" {
-		p.Scope = v
+
+	p := purview.NewComplianceSearchActionParams{}
+	if !config.ActionName.IsNull() {
+		p.ActionName = plan.ActionName.ValueString()
+	}
+	if !config.EnableDedupe.IsNull() {
+		if !plan.EnableDedupe.IsUnknown() {
+			p.EnableDedupe = plan.EnableDedupe.ValueBoolPointer()
+		}
+	}
+	if !config.FileTypeExclusionsForUnindexedItems.IsNull() {
+		if v := toStringSlice(ctx, plan.FileTypeExclusionsForUnindexedItems, &resp.Diagnostics); len(v) > 0 {
+			p.FileTypeExclusionsForUnindexedItems = v
+		}
+	}
+	if !config.IncludeCredential.IsNull() {
+		if !plan.IncludeCredential.IsUnknown() {
+			p.IncludeCredential = plan.IncludeCredential.ValueBoolPointer()
+		}
+	}
+	if !config.IncludeSharePointDocumentVersions.IsNull() {
+		if !plan.IncludeSharePointDocumentVersions.IsUnknown() {
+			p.IncludeSharePointDocumentVersions = plan.IncludeSharePointDocumentVersions.ValueBoolPointer()
+		}
+	}
+	if !config.JobOptions.IsNull() {
+		if !plan.JobOptions.IsUnknown() {
+			p.JobOptions = plan.JobOptions.ValueInt64Pointer()
+		}
+	}
+	if !config.MaxUnindexedSize.IsNull() {
+		if !plan.MaxUnindexedSize.IsUnknown() {
+			p.MaxUnindexedSize = plan.MaxUnindexedSize.ValueInt64Pointer()
+		}
+	}
+	if !config.ReferenceActionName.IsNull() {
+		p.ReferenceActionName = plan.ReferenceActionName.ValueString()
+	}
+	if !config.Region.IsNull() {
+		p.Region = plan.Region.ValueString()
+	}
+	if !config.Report.IsNull() {
+		if !plan.Report.IsUnknown() {
+			p.Report = plan.Report.ValueBoolPointer()
+		}
+	}
+	if !config.RetentionReport.IsNull() {
+		if !plan.RetentionReport.IsUnknown() {
+			p.RetentionReport = plan.RetentionReport.ValueBoolPointer()
+		}
+	}
+	if !config.RetryOnError.IsNull() {
+		if !plan.RetryOnError.IsUnknown() {
+			p.RetryOnError = plan.RetryOnError.ValueBoolPointer()
+		}
+	}
+	if v := config.Scope.ValueString(); v != "" {
+		p.Scope = objectParam(v)
+	}
+	if !config.ScopeDetails.IsNull() {
+		if v := toStringSlice(ctx, plan.ScopeDetails, &resp.Diagnostics); len(v) > 0 {
+			p.ScopeDetails = v
+		}
+	}
+	if !config.SearchName.IsNull() {
+		if v := toStringSlice(ctx, plan.SearchName, &resp.Diagnostics); len(v) > 0 {
+			p.SearchName = v
+		}
+	}
+	if !config.SearchNames.IsNull() {
+		if v := toStringSlice(ctx, plan.SearchNames, &resp.Diagnostics); len(v) > 0 {
+			p.SearchNames = v
+		}
+	}
+	if !config.Version.IsNull() {
+		p.Version = plan.Version.ValueString()
 	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	res, err := r.client.SCC.NewComplianceSearchAction(ctx, p)
+	res, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.NewComplianceSearchAction, p, isNotFound)
 	if err != nil {
 		resp.Diagnostics.AddError("New-ComplianceSearchAction failed", err.Error())
 		return
@@ -167,17 +235,30 @@ func (r *complianceSearchActionResource) Update(ctx context.Context, req resourc
 	id := r.identityOf(state)
 	sp := purview.SetComplianceSearchActionParams{}
 	sp.Identity = id
-	sp.ChangeExportKey = plan.ChangeExportKey.ValueBool()
+	if !plan.ChangeExportKey.Equal(state.ChangeExportKey) {
+		if !plan.ChangeExportKey.IsUnknown() {
+			sp.ChangeExportKey = plan.ChangeExportKey.ValueBoolPointer()
+		}
+	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	if _, err := r.client.SCC.SetComplianceSearchAction(ctx, sp); err != nil {
+	if _, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.SetComplianceSearchAction, sp, isNotFound); err != nil {
 		resp.Diagnostics.AddError("Set-ComplianceSearchAction failed", err.Error())
 		return
 	}
 	cfg := plan
 	reflected := reconcile.ReflectsFields(map[string]types.String{}, getString)
+	if !cfg.ChangeExportKey.IsUnknown() && !cfg.ChangeExportKey.IsNull() && !cfg.ChangeExportKey.Equal(state.ChangeExportKey) {
+		prev, want := reflected, cfg.ChangeExportKey.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["ChangeExportKey"] == nil || getBool(obj, "ChangeExportKey") == want)
+		}
+	}
 	r.refresh(ctx, id, &plan, &resp.Diagnostics, reflected)
+	if !cfg.ID.IsUnknown() && !cfg.ID.IsNull() {
+		plan.ID = cfg.ID
+	}
 	r.reconcileState(&cfg, &plan)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
@@ -243,12 +324,14 @@ func readComplianceSearchAction(ctx context.Context, obj map[string]any, m *comp
 	m.FileTypeExclusionsForUnindexedItems = stringSetValue(ctx, getStringSlice(obj, "FileTypeExclusionsForUnindexedItems"))
 	m.IncludeCredential = types.BoolValue(getBool(obj, "IncludeCredential"))
 	m.IncludeSharePointDocumentVersions = types.BoolValue(getBool(obj, "IncludeSharePointDocumentVersions"))
+	m.JobOptions = types.Int64Value(getInt(obj, "JobOptions"))
+	m.MaxUnindexedSize = types.Int64Value(getInt(obj, "MaxUnindexedSize"))
 	m.ReferenceActionName = types.StringValue(getString(obj, "ReferenceActionName"))
 	m.Region = types.StringValue(getString(obj, "Region"))
 	m.Report = types.BoolValue(getBool(obj, "Report"))
 	m.RetentionReport = types.BoolValue(getBool(obj, "RetentionReport"))
 	m.RetryOnError = types.BoolValue(getBool(obj, "RetryOnError"))
-	m.Scope = types.StringValue(getString(obj, "Scope"))
+	m.Scope = types.StringValue(getObjectJSON(obj, "Scope"))
 	m.ScopeDetails = stringSetValue(ctx, getStringSlice(obj, "ScopeDetails"))
 	m.SearchName = stringSetValue(ctx, getStringSlice(obj, "SearchName"))
 	m.SearchNames = stringSetValue(ctx, getStringSlice(obj, "SearchNames"))
@@ -263,6 +346,8 @@ func (r *complianceSearchActionResource) reconcileState(cfg, read *complianceSea
 	read.FileTypeExclusionsForUnindexedItems = reconcile.KeepSet(cfg.FileTypeExclusionsForUnindexedItems, read.FileTypeExclusionsForUnindexedItems)
 	read.IncludeCredential = reconcile.KeepBool(cfg.IncludeCredential, read.IncludeCredential)
 	read.IncludeSharePointDocumentVersions = reconcile.KeepBool(cfg.IncludeSharePointDocumentVersions, read.IncludeSharePointDocumentVersions)
+	read.JobOptions = reconcile.KeepInt64(cfg.JobOptions, read.JobOptions)
+	read.MaxUnindexedSize = reconcile.KeepInt64(cfg.MaxUnindexedSize, read.MaxUnindexedSize)
 	read.ReferenceActionName = reconcile.KeepStr(cfg.ReferenceActionName, read.ReferenceActionName)
 	read.Region = reconcile.KeepStr(cfg.Region, read.Region)
 	read.Report = reconcile.KeepBool(cfg.Report, read.Report)

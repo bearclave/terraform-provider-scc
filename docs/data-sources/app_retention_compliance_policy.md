@@ -22,27 +22,27 @@ Look up an existing AppRetentionCompliancePolicy object. Set identity or name to
 
 ### Read-Only
 
-- `adaptive_scope_location` (String) Maps to the -AdaptiveScopeLocation parameter.
-- `add_adaptive_scope_location` (String) Maps to the -AddAdaptiveScopeLocation parameter.
-- `add_exchange_location` (String) Maps to the -AddExchangeLocation parameter.
-- `add_exchange_location_exception` (String) Maps to the -AddExchangeLocationException parameter.
-- `add_modern_group_location` (String) Maps to the -AddModernGroupLocation parameter.
-- `add_modern_group_location_exception` (String) Maps to the -AddModernGroupLocationException parameter.
+- `adaptive_scope_location` (Set of String) Maps to the -AdaptiveScopeLocation parameter.
+- `add_adaptive_scope_location` (Set of String) Maps to the -AddAdaptiveScopeLocation parameter.
+- `add_exchange_location` (Set of String) Maps to the -AddExchangeLocation parameter.
+- `add_exchange_location_exception` (Set of String) Maps to the -AddExchangeLocationException parameter.
+- `add_modern_group_location` (Set of String) Maps to the -AddModernGroupLocation parameter.
+- `add_modern_group_location_exception` (Set of String) Maps to the -AddModernGroupLocationException parameter.
 - `applications` (Set of String) Maps to the -Applications parameter.
 - `comment` (String) Maps to the -Comment parameter.
 - `deleted_resources` (String) Maps to the -DeletedResources parameter.
 - `enabled` (Boolean) Maps to the -Enabled parameter.
-- `exchange_location` (String) Maps to the -ExchangeLocation parameter.
-- `exchange_location_exception` (String) Maps to the -ExchangeLocationException parameter.
+- `exchange_location` (Set of String) Maps to the -ExchangeLocation parameter.
+- `exchange_location_exception` (Set of String) Maps to the -ExchangeLocationException parameter.
 - `id` (String) Object identifier (GUID).
 - `locations` (String) Maps to the -Locations parameter.
-- `modern_group_location` (String) Maps to the -ModernGroupLocation parameter.
-- `modern_group_location_exception` (String) Maps to the -ModernGroupLocationException parameter.
-- `policy_rbac_scopes` (String) Maps to the -PolicyRBACScopes parameter.
-- `remove_adaptive_scope_location` (String) Maps to the -RemoveAdaptiveScopeLocation parameter.
-- `remove_exchange_location` (String) Maps to the -RemoveExchangeLocation parameter.
-- `remove_exchange_location_exception` (String) Maps to the -RemoveExchangeLocationException parameter.
-- `remove_modern_group_location` (String) Maps to the -RemoveModernGroupLocation parameter.
-- `remove_modern_group_location_exception` (String) Maps to the -RemoveModernGroupLocationException parameter.
+- `modern_group_location` (Set of String) Maps to the -ModernGroupLocation parameter.
+- `modern_group_location_exception` (Set of String) Maps to the -ModernGroupLocationException parameter.
+- `policy_rbac_scopes` (Set of String) Maps to the -PolicyRBACScopes parameter.
+- `remove_adaptive_scope_location` (Set of String) Maps to the -RemoveAdaptiveScopeLocation parameter.
+- `remove_exchange_location` (Set of String) Maps to the -RemoveExchangeLocation parameter.
+- `remove_exchange_location_exception` (Set of String) Maps to the -RemoveExchangeLocationException parameter.
+- `remove_modern_group_location` (Set of String) Maps to the -RemoveModernGroupLocation parameter.
+- `remove_modern_group_location_exception` (Set of String) Maps to the -RemoveModernGroupLocationException parameter.
 - `restrictive_retention` (Boolean) Maps to the -RestrictiveRetention parameter.
 - `retry_distribution` (Boolean) Maps to the -RetryDistribution parameter.

@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
@@ -41,7 +42,7 @@ type complianceRetentionEventModel struct {
 	AssetId                types.String `tfsdk:"asset_id"`
 	Comment                types.String `tfsdk:"comment"`
 	EventDateTime          types.String `tfsdk:"event_date_time"`
-	EventTags              types.String `tfsdk:"event_tags"`
+	EventTags              types.Set    `tfsdk:"event_tags"`
 	EventType              types.String `tfsdk:"event_type"`
 	ExchangeAssetIdQuery   types.String `tfsdk:"exchange_asset_id_query"`
 	Name                   types.String `tfsdk:"name"`
@@ -58,12 +59,12 @@ func (r *complianceRetentionEventResource) Schema(_ context.Context, _ resource.
 		Description: "Manages the ComplianceRetentionEvent object via New-ComplianceRetentionEvent / Get-ComplianceRetentionEvent / Set-ComplianceRetentionEvent / Remove-ComplianceRetentionEvent.",
 		Attributes: map[string]schema.Attribute{
 			"id":                         schema.StringAttribute{Computed: true, Description: "Object identifier (GUID).", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"identity":                   schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets."},
+			"identity":                   schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"action":                     schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -Action parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"asset_id":                   schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AssetId parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"comment":                    schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -Comment parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"event_date_time":            schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -EventDateTime parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace(), stringplanmodifier.UseStateForUnknown()}},
-			"event_tags":                 schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -EventTags parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"event_tags":                 schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -EventTags parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
 			"event_type":                 schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -EventType parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"exchange_asset_id_query":    schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ExchangeAssetIdQuery parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"name":                       schema.StringAttribute{Required: true, Description: "Maps to the -Name parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
@@ -87,27 +88,48 @@ func (r *complianceRetentionEventResource) Create(ctx context.Context, req resou
 		return
 	}
 
-	p := purview.NewComplianceRetentionEventParams{
-		AssetId:                plan.AssetId.ValueString(),
-		Comment:                plan.Comment.ValueString(),
-		ExchangeAssetIdQuery:   plan.ExchangeAssetIdQuery.ValueString(),
-		Name:                   plan.Name.ValueString(),
-		PreviewOnly:            plan.PreviewOnly.ValueBool(),
-		SharePointAssetIdQuery: plan.SharePointAssetIdQuery.ValueString(),
+	var config complianceRetentionEventModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
+	if resp.Diagnostics.HasError() {
+		return
 	}
-	if v := plan.EventDateTime.ValueString(); v != "" {
-		p.EventDateTime = v
+
+	p := purview.NewComplianceRetentionEventParams{}
+	if !config.AssetId.IsNull() {
+		p.AssetId = plan.AssetId.ValueString()
 	}
-	if v := plan.EventTags.ValueString(); v != "" {
-		p.EventTags = v
+	if !config.Comment.IsNull() {
+		p.Comment = plan.Comment.ValueString()
 	}
-	if v := plan.EventType.ValueString(); v != "" {
-		p.EventType = v
+	if v := config.EventDateTime.ValueString(); v != "" {
+		p.EventDateTime = objectParam(v)
+	}
+	if !config.EventTags.IsNull() {
+		if v := toStringSlice(ctx, plan.EventTags, &resp.Diagnostics); len(v) > 0 {
+			p.EventTags = v
+		}
+	}
+	if v := config.EventType.ValueString(); v != "" {
+		p.EventType = objectParam(v)
+	}
+	if !config.ExchangeAssetIdQuery.IsNull() {
+		p.ExchangeAssetIdQuery = plan.ExchangeAssetIdQuery.ValueString()
+	}
+	if !config.Name.IsNull() {
+		p.Name = plan.Name.ValueString()
+	}
+	if !config.PreviewOnly.IsNull() {
+		if !plan.PreviewOnly.IsUnknown() {
+			p.PreviewOnly = plan.PreviewOnly.ValueBoolPointer()
+		}
+	}
+	if !config.SharePointAssetIdQuery.IsNull() {
+		p.SharePointAssetIdQuery = plan.SharePointAssetIdQuery.ValueString()
 	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	res, err := r.client.SCC.NewComplianceRetentionEvent(ctx, p)
+	res, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.NewComplianceRetentionEvent, p, isNotFound)
 	if err != nil {
 		resp.Diagnostics.AddError("New-ComplianceRetentionEvent failed", err.Error())
 		return
@@ -154,37 +176,73 @@ func (r *complianceRetentionEventResource) Update(ctx context.Context, req resou
 	id := r.identityOf(state)
 	sp := purview.SetComplianceRetentionEventParams{}
 	sp.Identity = id
-	if v := plan.Action.ValueString(); v != "" {
-		sp.Action = v
+	var cur *complianceRetentionEventModel
+	curRead := false
+	current := func() *complianceRetentionEventModel {
+		if !curRead {
+			curRead = true
+			var m complianceRetentionEventModel
+			if r.refresh(ctx, id, &m, &resp.Diagnostics, nil) {
+				cur = &m
+			} else if !resp.Diagnostics.HasError() {
+				resp.Diagnostics.AddError("Get-ComplianceRetentionEvent failed", "the object could not be read to determine the list values to remove; nothing was changed")
+			}
+		}
+		return cur
 	}
-	sp.AssetId = plan.AssetId.ValueString()
-	sp.Comment = plan.Comment.ValueString()
-	if v := plan.EventTags.ValueString(); v != "" {
-		sp.EventTags = v
+	if !plan.Action.Equal(state.Action) {
+		if v := plan.Action.ValueString(); v != "" {
+			sp.Action = objectParam(v)
+		}
 	}
-	if v := plan.EventType.ValueString(); v != "" {
-		sp.EventType = v
+	if !plan.AssetId.Equal(state.AssetId) {
+		sp.AssetId = plan.AssetId.ValueString()
 	}
-	sp.ExchangeAssetIdQuery = plan.ExchangeAssetIdQuery.ValueString()
-	sp.SharePointAssetIdQuery = plan.SharePointAssetIdQuery.ValueString()
+	if !plan.Comment.Equal(state.Comment) {
+		sp.Comment = plan.Comment.ValueString()
+	}
+	if !plan.EventTags.Equal(state.EventTags) {
+		if !plan.EventTags.IsNull() && !plan.EventTags.IsUnknown() {
+			if v := toStringSlice(ctx, plan.EventTags, &resp.Diagnostics); len(v) > 0 {
+				sp.EventTags = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.EventTags, &resp.Diagnostics); len(rm) > 0 {
+						sp.EventTagsDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
+	}
+	if !plan.EventType.Equal(state.EventType) {
+		if v := plan.EventType.ValueString(); v != "" {
+			sp.EventType = objectParam(v)
+		}
+	}
+	if !plan.ExchangeAssetIdQuery.Equal(state.ExchangeAssetIdQuery) {
+		sp.ExchangeAssetIdQuery = plan.ExchangeAssetIdQuery.ValueString()
+	}
+	if !plan.SharePointAssetIdQuery.Equal(state.SharePointAssetIdQuery) {
+		sp.SharePointAssetIdQuery = plan.SharePointAssetIdQuery.ValueString()
+	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	if _, err := r.client.SCC.SetComplianceRetentionEvent(ctx, sp); err != nil {
+	if _, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.SetComplianceRetentionEvent, sp, isNotFound); err != nil {
 		resp.Diagnostics.AddError("Set-ComplianceRetentionEvent failed", err.Error())
 		return
 	}
 	cfg := plan
 	reflected := reconcile.ReflectsFields(map[string]types.String{
-		"Action":                 cfg.Action,
 		"AssetId":                cfg.AssetId,
 		"Comment":                cfg.Comment,
-		"EventTags":              cfg.EventTags,
-		"EventType":              cfg.EventType,
 		"ExchangeAssetIdQuery":   cfg.ExchangeAssetIdQuery,
 		"SharePointAssetIdQuery": cfg.SharePointAssetIdQuery,
 	}, getString)
 	r.refresh(ctx, id, &plan, &resp.Diagnostics, reflected)
+	if !cfg.ID.IsUnknown() && !cfg.ID.IsNull() {
+		plan.ID = cfg.ID
+	}
 	r.reconcileState(&cfg, &plan)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
@@ -244,12 +302,12 @@ func (r *complianceRetentionEventResource) refresh(ctx context.Context, identity
 func readComplianceRetentionEvent(ctx context.Context, obj map[string]any, m *complianceRetentionEventModel) {
 	m.ID = types.StringValue(firstNonEmptyStr(getString(obj, "Guid"), getString(obj, "Id"), getString(obj, "Identity")))
 	m.Identity = types.StringValue(firstNonEmptyStr(getString(obj, "Identity"), getString(obj, "Guid"), getString(obj, "Name")))
-	m.Action = types.StringValue(getString(obj, "Action"))
+	m.Action = types.StringValue(getObjectJSON(obj, "Action"))
 	m.AssetId = types.StringValue(getString(obj, "AssetId"))
 	m.Comment = types.StringValue(getString(obj, "Comment"))
-	m.EventDateTime = types.StringValue(getString(obj, "EventDateTime"))
-	m.EventTags = types.StringValue(getString(obj, "EventTags"))
-	m.EventType = types.StringValue(getString(obj, "EventType"))
+	m.EventDateTime = types.StringValue(getObjectJSON(obj, "EventDateTime"))
+	m.EventTags = stringSetValue(ctx, getStringSlice(obj, "EventTags"))
+	m.EventType = types.StringValue(getObjectJSON(obj, "EventType"))
 	m.ExchangeAssetIdQuery = types.StringValue(getString(obj, "ExchangeAssetIdQuery"))
 	m.Name = types.StringValue(getString(obj, "Name"))
 	m.PreviewOnly = types.BoolValue(getBool(obj, "PreviewOnly"))
@@ -262,7 +320,7 @@ func (r *complianceRetentionEventResource) reconcileState(cfg, read *complianceR
 	read.AssetId = reconcile.KeepStr(cfg.AssetId, read.AssetId)
 	read.Comment = reconcile.KeepStr(cfg.Comment, read.Comment)
 	read.EventDateTime = reconcile.KeepStr(cfg.EventDateTime, read.EventDateTime)
-	read.EventTags = reconcile.KeepStr(cfg.EventTags, read.EventTags)
+	read.EventTags = reconcile.KeepSet(cfg.EventTags, read.EventTags)
 	read.EventType = reconcile.KeepStr(cfg.EventType, read.EventType)
 	read.ExchangeAssetIdQuery = reconcile.KeepStr(cfg.ExchangeAssetIdQuery, read.ExchangeAssetIdQuery)
 	read.Name = reconcile.KeepStr(cfg.Name, read.Name)

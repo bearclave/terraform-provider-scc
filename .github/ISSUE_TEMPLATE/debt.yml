@@ -1,0 +1,29 @@
+# Managed by bearclave/governance (tools/sync.py) - do not edit here.
+name: Debt
+description: Works, but will cost later - a review finding, a manual change not in code, a missing test.
+type: Debt
+assignees:
+  - matej-hrabalek
+body:
+  - type: textarea
+    id: wrong
+    attributes:
+      label: What is wrong
+    validations:
+      required: true
+  - type: textarea
+    id: matters
+    attributes:
+      label: Why it matters
+      description: What it costs or risks if left as it is.
+    validations:
+      required: true
+  - type: textarea
+    id: fix
+    attributes:
+      label: Proposed fix
+  - type: input
+    id: found-in
+    attributes:
+      label: Found in
+      description: Pull request, run, file and line, or the manual change (when, where, what).

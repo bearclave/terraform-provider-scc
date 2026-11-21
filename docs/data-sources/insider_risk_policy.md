@@ -41,7 +41,10 @@ Look up an existing InsiderRiskPolicy object. Set identity or name to select it.
 - `extensible_indicators` (String) Maps to the -ExtensibleIndicators parameter.
 - `extensible_trigger_insight_groups` (String) Maps to the -ExtensibleTriggerInsightGroups parameter.
 - `file_extensions` (String) Maps to the -FileExtensions parameter.
+- `future_termination_window` (Number) Maps to the -FutureTerminationWindow parameter.
+- `historic_time_span` (Number) Maps to the -HistoricTimeSpan parameter.
 - `id` (String) Object identifier (GUID).
+- `in_scope_time_span` (Number) Maps to the -InScopeTimeSpan parameter.
 - `indicators` (String) Maps to the -Indicators parameter.
 - `insider_risk_scenario` (String) Maps to the -InsiderRiskScenario parameter.
 - `irm_adaptive_scope_location` (String) Maps to the -IrmAdaptiveScopeLocation parameter.
@@ -51,6 +54,7 @@ Look up an existing InsiderRiskPolicy object. Set identity or name to select it.
 - `modern_group_location` (String) Maps to the -ModernGroupLocation parameter.
 - `modern_group_location_exception` (String) Maps to the -ModernGroupLocationException parameter.
 - `opt_in_drp_for_dlp` (Boolean) Maps to the -OptInDrpForDlp parameter.
+- `past_termination_window` (Number) Maps to the -PastTerminationWindow parameter.
 - `policy_rbac_scopes` (String) Maps to the -PolicyRBACScopes parameter.
 - `post_termination_activity` (Boolean) Maps to the -PostTerminationActivity parameter.
 - `remove_exchange_location` (String) Maps to the -RemoveExchangeLocation parameter.
@@ -59,6 +63,7 @@ Look up an existing InsiderRiskPolicy object. Set identity or name to select it.
 - `remove_modern_group_location` (String) Maps to the -RemoveModernGroupLocation parameter.
 - `remove_modern_group_location_exception` (String) Maps to the -RemoveModernGroupLocationException parameter.
 - `retry_distribution` (Boolean) Maps to the -RetryDistribution parameter.
+- `schema_version` (Number) Maps to the -SchemaVersion parameter.
 - `sensitivity_labels` (String) Maps to the -SensitivityLabels parameter.
 - `session_recording_settings` (String) Maps to the -SessionRecordingSettings parameter.
 - `sharepoint_sites` (String) Maps to the -SharepointSites parameter.
@@ -68,4 +73,5 @@ Look up an existing InsiderRiskPolicy object. Set identity or name to select it.
 - `triggers` (String) Maps to the -Triggers parameter.
 - `turn_on_analytics` (String) Maps to the -TurnOnAnalytics parameter.
 - `turn_on_dlp_user_risk_sync` (String) Maps to the -TurnOnDLPUserRiskSync parameter.
+- `use_default_template` (Number) Maps to the -UseDefaultTemplate parameter.
 - `user_mail_list` (String) Maps to the -UserMailList parameter.

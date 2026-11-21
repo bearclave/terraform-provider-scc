@@ -67,7 +67,7 @@ func (r *threatResponseRuleResource) Schema(_ context.Context, _ resource.Schema
 		Description: "Manages the ThreatResponseRule object via New-ThreatResponseRule / Get-ThreatResponseRule / Set-ThreatResponseRule / Remove-ThreatResponseRule.",
 		Attributes: map[string]schema.Attribute{
 			"id":                  schema.StringAttribute{Computed: true, Description: "Object identifier (GUID).", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"identity":            schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets."},
+			"identity":            schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"activation_date":     schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ActivationDate parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"comment":             schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -Comment parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"disable_active_sync": schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -DisableActiveSync parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
@@ -107,35 +107,94 @@ func (r *threatResponseRuleResource) Create(ctx context.Context, req resource.Cr
 		return
 	}
 
-	p := purview.NewThreatResponseRuleParams{
-		DisableActiveSync:                     plan.DisableActiveSync.ValueBool(),
-		DisableAutoForwardDefaultRemoteDomain: plan.DisableAutoForwardDefaultRemoteDomain.ValueBool(),
-		DisableBasicAuth:                      plan.DisableBasicAuth.ValueBool(),
-		DisableEWS:                            plan.DisableEWS.ValueBool(),
-		DisableForwardingSMTPAddress:          plan.DisableForwardingSMTPAddress.ValueBool(),
-		DisableIMAP:                           plan.DisableIMAP.ValueBool(),
-		DisableMAPI:                           plan.DisableMAPI.ValueBool(),
-		DisableMAPIOverHTTP:                   plan.DisableMAPIOverHTTP.ValueBool(),
-		DisableOWA:                            plan.DisableOWA.ValueBool(),
-		DisablePOP:                            plan.DisablePOP.ValueBool(),
-		DisableTransportRuleForwarding:        plan.DisableTransportRuleForwarding.ValueBool(),
-		ExceptIfHighRiskUser:                  plan.ExceptIfHighRiskUser.ValueBool(),
-		HighRiskUser:                          plan.HighRiskUser.ValueBool(),
-		Name:                                  plan.Name.ValueString(),
+	var config threatResponseRuleModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
+	if resp.Diagnostics.HasError() {
+		return
 	}
-	if v := plan.ExceptIfMemberOfDL.ValueString(); v != "" {
-		p.ExceptIfMemberOfDL = v
+
+	p := purview.NewThreatResponseRuleParams{}
+	if !config.DisableActiveSync.IsNull() {
+		if !plan.DisableActiveSync.IsUnknown() {
+			p.DisableActiveSync = plan.DisableActiveSync.ValueBoolPointer()
+		}
 	}
-	if v := plan.MemberOfDL.ValueString(); v != "" {
-		p.MemberOfDL = v
+	if !config.DisableAutoForwardDefaultRemoteDomain.IsNull() {
+		if !plan.DisableAutoForwardDefaultRemoteDomain.IsUnknown() {
+			p.DisableAutoForwardDefaultRemoteDomain = plan.DisableAutoForwardDefaultRemoteDomain.ValueBoolPointer()
+		}
 	}
-	if v := plan.Policy.ValueString(); v != "" {
-		p.Policy = v
+	if !config.DisableBasicAuth.IsNull() {
+		if !plan.DisableBasicAuth.IsUnknown() {
+			p.DisableBasicAuth = plan.DisableBasicAuth.ValueBoolPointer()
+		}
+	}
+	if !config.DisableEWS.IsNull() {
+		if !plan.DisableEWS.IsUnknown() {
+			p.DisableEWS = plan.DisableEWS.ValueBoolPointer()
+		}
+	}
+	if !config.DisableForwardingSMTPAddress.IsNull() {
+		if !plan.DisableForwardingSMTPAddress.IsUnknown() {
+			p.DisableForwardingSMTPAddress = plan.DisableForwardingSMTPAddress.ValueBoolPointer()
+		}
+	}
+	if !config.DisableIMAP.IsNull() {
+		if !plan.DisableIMAP.IsUnknown() {
+			p.DisableIMAP = plan.DisableIMAP.ValueBoolPointer()
+		}
+	}
+	if !config.DisableMAPI.IsNull() {
+		if !plan.DisableMAPI.IsUnknown() {
+			p.DisableMAPI = plan.DisableMAPI.ValueBoolPointer()
+		}
+	}
+	if !config.DisableMAPIOverHTTP.IsNull() {
+		if !plan.DisableMAPIOverHTTP.IsUnknown() {
+			p.DisableMAPIOverHTTP = plan.DisableMAPIOverHTTP.ValueBoolPointer()
+		}
+	}
+	if !config.DisableOWA.IsNull() {
+		if !plan.DisableOWA.IsUnknown() {
+			p.DisableOWA = plan.DisableOWA.ValueBoolPointer()
+		}
+	}
+	if !config.DisablePOP.IsNull() {
+		if !plan.DisablePOP.IsUnknown() {
+			p.DisablePOP = plan.DisablePOP.ValueBoolPointer()
+		}
+	}
+	if !config.DisableTransportRuleForwarding.IsNull() {
+		if !plan.DisableTransportRuleForwarding.IsUnknown() {
+			p.DisableTransportRuleForwarding = plan.DisableTransportRuleForwarding.ValueBoolPointer()
+		}
+	}
+	if !config.ExceptIfHighRiskUser.IsNull() {
+		if !plan.ExceptIfHighRiskUser.IsUnknown() {
+			p.ExceptIfHighRiskUser = plan.ExceptIfHighRiskUser.ValueBoolPointer()
+		}
+	}
+	if v := config.ExceptIfMemberOfDL.ValueString(); v != "" {
+		p.ExceptIfMemberOfDL = objectParam(v)
+	}
+	if !config.HighRiskUser.IsNull() {
+		if !plan.HighRiskUser.IsUnknown() {
+			p.HighRiskUser = plan.HighRiskUser.ValueBoolPointer()
+		}
+	}
+	if v := config.MemberOfDL.ValueString(); v != "" {
+		p.MemberOfDL = objectParam(v)
+	}
+	if !config.Name.IsNull() {
+		p.Name = plan.Name.ValueString()
+	}
+	if v := config.Policy.ValueString(); v != "" {
+		p.Policy = objectParam(v)
 	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	res, err := r.client.SCC.NewThreatResponseRule(ctx, p)
+	res, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.NewThreatResponseRule, p, isNotFound)
 	if err != nil {
 		resp.Diagnostics.AddError("New-ThreatResponseRule failed", err.Error())
 		return
@@ -182,49 +241,198 @@ func (r *threatResponseRuleResource) Update(ctx context.Context, req resource.Up
 	id := r.identityOf(state)
 	sp := purview.SetThreatResponseRuleParams{}
 	sp.Identity = id
-	if v := plan.ActivationDate.ValueString(); v != "" {
-		sp.ActivationDate = v
+	if !plan.ActivationDate.Equal(state.ActivationDate) {
+		if v := plan.ActivationDate.ValueString(); v != "" {
+			sp.ActivationDate = objectParam(v)
+		}
 	}
-	sp.Comment = plan.Comment.ValueString()
-	sp.DisableActiveSync = plan.DisableActiveSync.ValueBool()
-	sp.DisableAutoForwardDefaultRemoteDomain = plan.DisableAutoForwardDefaultRemoteDomain.ValueBool()
-	sp.DisableBasicAuth = plan.DisableBasicAuth.ValueBool()
-	sp.DisableEWS = plan.DisableEWS.ValueBool()
-	sp.DisableForwardingSMTPAddress = plan.DisableForwardingSMTPAddress.ValueBool()
-	sp.DisableIMAP = plan.DisableIMAP.ValueBool()
-	sp.DisableMAPI = plan.DisableMAPI.ValueBool()
-	sp.DisableMAPIOverHTTP = plan.DisableMAPIOverHTTP.ValueBool()
-	sp.DisableOWA = plan.DisableOWA.ValueBool()
-	sp.DisablePOP = plan.DisablePOP.ValueBool()
-	sp.DisableTransportRuleForwarding = plan.DisableTransportRuleForwarding.ValueBool()
-	sp.Disabled = plan.Disabled.ValueBool()
-	sp.ExceptIfHighRiskUser = plan.ExceptIfHighRiskUser.ValueBool()
-	if v := plan.ExceptIfMemberOfDL.ValueString(); v != "" {
-		sp.ExceptIfMemberOfDL = v
+	if !plan.Comment.Equal(state.Comment) {
+		sp.Comment = plan.Comment.ValueString()
 	}
-	if v := plan.ExpiryDate.ValueString(); v != "" {
-		sp.ExpiryDate = v
+	if !plan.DisableActiveSync.Equal(state.DisableActiveSync) {
+		if !plan.DisableActiveSync.IsUnknown() {
+			sp.DisableActiveSync = plan.DisableActiveSync.ValueBoolPointer()
+		}
 	}
-	sp.HighRiskUser = plan.HighRiskUser.ValueBool()
-	if v := plan.MemberOfDL.ValueString(); v != "" {
-		sp.MemberOfDL = v
+	if !plan.DisableAutoForwardDefaultRemoteDomain.Equal(state.DisableAutoForwardDefaultRemoteDomain) {
+		if !plan.DisableAutoForwardDefaultRemoteDomain.IsUnknown() {
+			sp.DisableAutoForwardDefaultRemoteDomain = plan.DisableAutoForwardDefaultRemoteDomain.ValueBoolPointer()
+		}
+	}
+	if !plan.DisableBasicAuth.Equal(state.DisableBasicAuth) {
+		if !plan.DisableBasicAuth.IsUnknown() {
+			sp.DisableBasicAuth = plan.DisableBasicAuth.ValueBoolPointer()
+		}
+	}
+	if !plan.DisableEWS.Equal(state.DisableEWS) {
+		if !plan.DisableEWS.IsUnknown() {
+			sp.DisableEWS = plan.DisableEWS.ValueBoolPointer()
+		}
+	}
+	if !plan.DisableForwardingSMTPAddress.Equal(state.DisableForwardingSMTPAddress) {
+		if !plan.DisableForwardingSMTPAddress.IsUnknown() {
+			sp.DisableForwardingSMTPAddress = plan.DisableForwardingSMTPAddress.ValueBoolPointer()
+		}
+	}
+	if !plan.DisableIMAP.Equal(state.DisableIMAP) {
+		if !plan.DisableIMAP.IsUnknown() {
+			sp.DisableIMAP = plan.DisableIMAP.ValueBoolPointer()
+		}
+	}
+	if !plan.DisableMAPI.Equal(state.DisableMAPI) {
+		if !plan.DisableMAPI.IsUnknown() {
+			sp.DisableMAPI = plan.DisableMAPI.ValueBoolPointer()
+		}
+	}
+	if !plan.DisableMAPIOverHTTP.Equal(state.DisableMAPIOverHTTP) {
+		if !plan.DisableMAPIOverHTTP.IsUnknown() {
+			sp.DisableMAPIOverHTTP = plan.DisableMAPIOverHTTP.ValueBoolPointer()
+		}
+	}
+	if !plan.DisableOWA.Equal(state.DisableOWA) {
+		if !plan.DisableOWA.IsUnknown() {
+			sp.DisableOWA = plan.DisableOWA.ValueBoolPointer()
+		}
+	}
+	if !plan.DisablePOP.Equal(state.DisablePOP) {
+		if !plan.DisablePOP.IsUnknown() {
+			sp.DisablePOP = plan.DisablePOP.ValueBoolPointer()
+		}
+	}
+	if !plan.DisableTransportRuleForwarding.Equal(state.DisableTransportRuleForwarding) {
+		if !plan.DisableTransportRuleForwarding.IsUnknown() {
+			sp.DisableTransportRuleForwarding = plan.DisableTransportRuleForwarding.ValueBoolPointer()
+		}
+	}
+	if !plan.Disabled.Equal(state.Disabled) {
+		if !plan.Disabled.IsUnknown() {
+			sp.Disabled = plan.Disabled.ValueBoolPointer()
+		}
+	}
+	if !plan.ExceptIfHighRiskUser.Equal(state.ExceptIfHighRiskUser) {
+		if !plan.ExceptIfHighRiskUser.IsUnknown() {
+			sp.ExceptIfHighRiskUser = plan.ExceptIfHighRiskUser.ValueBoolPointer()
+		}
+	}
+	if !plan.ExceptIfMemberOfDL.Equal(state.ExceptIfMemberOfDL) {
+		if v := plan.ExceptIfMemberOfDL.ValueString(); v != "" {
+			sp.ExceptIfMemberOfDL = objectParam(v)
+		}
+	}
+	if !plan.ExpiryDate.Equal(state.ExpiryDate) {
+		if v := plan.ExpiryDate.ValueString(); v != "" {
+			sp.ExpiryDate = objectParam(v)
+		}
+	}
+	if !plan.HighRiskUser.Equal(state.HighRiskUser) {
+		if !plan.HighRiskUser.IsUnknown() {
+			sp.HighRiskUser = plan.HighRiskUser.ValueBoolPointer()
+		}
+	}
+	if !plan.MemberOfDL.Equal(state.MemberOfDL) {
+		if v := plan.MemberOfDL.ValueString(); v != "" {
+			sp.MemberOfDL = objectParam(v)
+		}
 	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	if _, err := r.client.SCC.SetThreatResponseRule(ctx, sp); err != nil {
+	if _, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.SetThreatResponseRule, sp, isNotFound); err != nil {
 		resp.Diagnostics.AddError("Set-ThreatResponseRule failed", err.Error())
 		return
 	}
 	cfg := plan
 	reflected := reconcile.ReflectsFields(map[string]types.String{
-		"ActivationDate":     cfg.ActivationDate,
-		"Comment":            cfg.Comment,
-		"ExceptIfMemberOfDL": cfg.ExceptIfMemberOfDL,
-		"ExpiryDate":         cfg.ExpiryDate,
-		"MemberOfDL":         cfg.MemberOfDL,
+		"Comment": cfg.Comment,
 	}, getString)
+	if !cfg.DisableActiveSync.IsUnknown() && !cfg.DisableActiveSync.IsNull() && !cfg.DisableActiveSync.Equal(state.DisableActiveSync) {
+		prev, want := reflected, cfg.DisableActiveSync.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["DisableActiveSync"] == nil || getBool(obj, "DisableActiveSync") == want)
+		}
+	}
+	if !cfg.DisableAutoForwardDefaultRemoteDomain.IsUnknown() && !cfg.DisableAutoForwardDefaultRemoteDomain.IsNull() && !cfg.DisableAutoForwardDefaultRemoteDomain.Equal(state.DisableAutoForwardDefaultRemoteDomain) {
+		prev, want := reflected, cfg.DisableAutoForwardDefaultRemoteDomain.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["DisableAutoForwardDefaultRemoteDomain"] == nil || getBool(obj, "DisableAutoForwardDefaultRemoteDomain") == want)
+		}
+	}
+	if !cfg.DisableBasicAuth.IsUnknown() && !cfg.DisableBasicAuth.IsNull() && !cfg.DisableBasicAuth.Equal(state.DisableBasicAuth) {
+		prev, want := reflected, cfg.DisableBasicAuth.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["DisableBasicAuth"] == nil || getBool(obj, "DisableBasicAuth") == want)
+		}
+	}
+	if !cfg.DisableEWS.IsUnknown() && !cfg.DisableEWS.IsNull() && !cfg.DisableEWS.Equal(state.DisableEWS) {
+		prev, want := reflected, cfg.DisableEWS.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["DisableEWS"] == nil || getBool(obj, "DisableEWS") == want)
+		}
+	}
+	if !cfg.DisableForwardingSMTPAddress.IsUnknown() && !cfg.DisableForwardingSMTPAddress.IsNull() && !cfg.DisableForwardingSMTPAddress.Equal(state.DisableForwardingSMTPAddress) {
+		prev, want := reflected, cfg.DisableForwardingSMTPAddress.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["DisableForwardingSMTPAddress"] == nil || getBool(obj, "DisableForwardingSMTPAddress") == want)
+		}
+	}
+	if !cfg.DisableIMAP.IsUnknown() && !cfg.DisableIMAP.IsNull() && !cfg.DisableIMAP.Equal(state.DisableIMAP) {
+		prev, want := reflected, cfg.DisableIMAP.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["DisableIMAP"] == nil || getBool(obj, "DisableIMAP") == want)
+		}
+	}
+	if !cfg.DisableMAPI.IsUnknown() && !cfg.DisableMAPI.IsNull() && !cfg.DisableMAPI.Equal(state.DisableMAPI) {
+		prev, want := reflected, cfg.DisableMAPI.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["DisableMAPI"] == nil || getBool(obj, "DisableMAPI") == want)
+		}
+	}
+	if !cfg.DisableMAPIOverHTTP.IsUnknown() && !cfg.DisableMAPIOverHTTP.IsNull() && !cfg.DisableMAPIOverHTTP.Equal(state.DisableMAPIOverHTTP) {
+		prev, want := reflected, cfg.DisableMAPIOverHTTP.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["DisableMAPIOverHTTP"] == nil || getBool(obj, "DisableMAPIOverHTTP") == want)
+		}
+	}
+	if !cfg.DisableOWA.IsUnknown() && !cfg.DisableOWA.IsNull() && !cfg.DisableOWA.Equal(state.DisableOWA) {
+		prev, want := reflected, cfg.DisableOWA.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["DisableOWA"] == nil || getBool(obj, "DisableOWA") == want)
+		}
+	}
+	if !cfg.DisablePOP.IsUnknown() && !cfg.DisablePOP.IsNull() && !cfg.DisablePOP.Equal(state.DisablePOP) {
+		prev, want := reflected, cfg.DisablePOP.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["DisablePOP"] == nil || getBool(obj, "DisablePOP") == want)
+		}
+	}
+	if !cfg.DisableTransportRuleForwarding.IsUnknown() && !cfg.DisableTransportRuleForwarding.IsNull() && !cfg.DisableTransportRuleForwarding.Equal(state.DisableTransportRuleForwarding) {
+		prev, want := reflected, cfg.DisableTransportRuleForwarding.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["DisableTransportRuleForwarding"] == nil || getBool(obj, "DisableTransportRuleForwarding") == want)
+		}
+	}
+	if !cfg.Disabled.IsUnknown() && !cfg.Disabled.IsNull() && !cfg.Disabled.Equal(state.Disabled) {
+		prev, want := reflected, cfg.Disabled.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["Disabled"] == nil || getBool(obj, "Disabled") == want)
+		}
+	}
+	if !cfg.ExceptIfHighRiskUser.IsUnknown() && !cfg.ExceptIfHighRiskUser.IsNull() && !cfg.ExceptIfHighRiskUser.Equal(state.ExceptIfHighRiskUser) {
+		prev, want := reflected, cfg.ExceptIfHighRiskUser.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["ExceptIfHighRiskUser"] == nil || getBool(obj, "ExceptIfHighRiskUser") == want)
+		}
+	}
+	if !cfg.HighRiskUser.IsUnknown() && !cfg.HighRiskUser.IsNull() && !cfg.HighRiskUser.Equal(state.HighRiskUser) {
+		prev, want := reflected, cfg.HighRiskUser.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["HighRiskUser"] == nil || getBool(obj, "HighRiskUser") == want)
+		}
+	}
 	r.refresh(ctx, id, &plan, &resp.Diagnostics, reflected)
+	if !cfg.ID.IsUnknown() && !cfg.ID.IsNull() {
+		plan.ID = cfg.ID
+	}
 	r.reconcileState(&cfg, &plan)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
@@ -284,7 +492,7 @@ func (r *threatResponseRuleResource) refresh(ctx context.Context, identity strin
 func readThreatResponseRule(ctx context.Context, obj map[string]any, m *threatResponseRuleModel) {
 	m.ID = types.StringValue(firstNonEmptyStr(getString(obj, "Guid"), getString(obj, "Id"), getString(obj, "Identity")))
 	m.Identity = types.StringValue(firstNonEmptyStr(getString(obj, "Identity"), getString(obj, "Guid"), getString(obj, "Name")))
-	m.ActivationDate = types.StringValue(getString(obj, "ActivationDate"))
+	m.ActivationDate = types.StringValue(getObjectJSON(obj, "ActivationDate"))
 	m.Comment = types.StringValue(getString(obj, "Comment"))
 	m.DisableActiveSync = types.BoolValue(getBool(obj, "DisableActiveSync"))
 	m.DisableAutoForwardDefaultRemoteDomain = types.BoolValue(getBool(obj, "DisableAutoForwardDefaultRemoteDomain"))
@@ -299,12 +507,12 @@ func readThreatResponseRule(ctx context.Context, obj map[string]any, m *threatRe
 	m.DisableTransportRuleForwarding = types.BoolValue(getBool(obj, "DisableTransportRuleForwarding"))
 	m.Disabled = types.BoolValue(getBool(obj, "Disabled"))
 	m.ExceptIfHighRiskUser = types.BoolValue(getBool(obj, "ExceptIfHighRiskUser"))
-	m.ExceptIfMemberOfDL = types.StringValue(getString(obj, "ExceptIfMemberOfDL"))
-	m.ExpiryDate = types.StringValue(getString(obj, "ExpiryDate"))
+	m.ExceptIfMemberOfDL = types.StringValue(getObjectJSON(obj, "ExceptIfMemberOfDL"))
+	m.ExpiryDate = types.StringValue(getObjectJSON(obj, "ExpiryDate"))
 	m.HighRiskUser = types.BoolValue(getBool(obj, "HighRiskUser"))
-	m.MemberOfDL = types.StringValue(getString(obj, "MemberOfDL"))
+	m.MemberOfDL = types.StringValue(getObjectJSON(obj, "MemberOfDL"))
 	m.Name = types.StringValue(getString(obj, "Name"))
-	m.Policy = types.StringValue(getString(obj, "Policy"))
+	m.Policy = types.StringValue(getObjectJSON(obj, "Policy"))
 	_ = ctx
 }
 

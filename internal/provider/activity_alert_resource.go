@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -47,6 +48,8 @@ type activityAlertModel struct {
 	RecordType   types.String `tfsdk:"record_type"`
 	ScopeLevel   types.String `tfsdk:"scope_level"`
 	Severity     types.String `tfsdk:"severity"`
+	Threshold    types.Int64  `tfsdk:"threshold"`
+	TimeWindow   types.Int64  `tfsdk:"time_window"`
 	Type         types.String `tfsdk:"type"`
 	UserId       types.String `tfsdk:"user_id"`
 }
@@ -60,20 +63,22 @@ func (r *activityAlertResource) Schema(_ context.Context, _ resource.SchemaReque
 		Description: "Manages the ActivityAlert object via New-ActivityAlert / Get-ActivityAlert / Set-ActivityAlert / Remove-ActivityAlert.",
 		Attributes: map[string]schema.Attribute{
 			"id":            schema.StringAttribute{Computed: true, Description: "Object identifier (GUID).", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"identity":      schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets."},
+			"identity":      schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"category":      schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -Category parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"condition":     schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -Condition parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"description":   schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -Description parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"disabled":      schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -Disabled parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
 			"email_culture": schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -EmailCulture parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"multiplier":    schema.StringAttribute{Required: true, Description: "Maps to the -Multiplier parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
+			"multiplier":    schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -Multiplier parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"name":          schema.StringAttribute{Required: true, Description: "Maps to the -Name parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
-			"notify_user":   schema.StringAttribute{Required: true, Description: "Maps to the -NotifyUser parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
-			"operation":     schema.StringAttribute{Required: true, Description: "Maps to the -Operation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
+			"notify_user":   schema.StringAttribute{Required: true, Description: "Maps to the -NotifyUser parameter."},
+			"operation":     schema.StringAttribute{Required: true, Description: "Maps to the -Operation parameter."},
 			"record_type":   schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -RecordType parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"scope_level":   schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ScopeLevel parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"severity":      schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -Severity parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"type":          schema.StringAttribute{Required: true, Description: "Maps to the -Type parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
+			"threshold":     schema.Int64Attribute{Optional: true, Computed: true, Description: "Maps to the -Threshold parameter.", PlanModifiers: []planmodifier.Int64{int64planmodifier.UseStateForUnknown()}},
+			"time_window":   schema.Int64Attribute{Optional: true, Computed: true, Description: "Maps to the -TimeWindow parameter.", PlanModifiers: []planmodifier.Int64{int64planmodifier.UseStateForUnknown()}},
+			"type":          schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -Type parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace(), stringplanmodifier.UseStateForUnknown()}},
 			"user_id":       schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -UserId parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 		},
 	}
@@ -93,46 +98,71 @@ func (r *activityAlertResource) Create(ctx context.Context, req resource.CreateR
 		return
 	}
 
-	p := purview.NewActivityAlertParams{
-		Condition:   plan.Condition.ValueString(),
-		Description: plan.Description.ValueString(),
-		Disabled:    plan.Disabled.ValueBool(),
-		Name:        plan.Name.ValueString(),
+	var config activityAlertModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
+	if resp.Diagnostics.HasError() {
+		return
 	}
-	if v := plan.Category.ValueString(); v != "" {
-		p.Category = v
+
+	p := purview.NewActivityAlertParams{}
+	if v := config.Category.ValueString(); v != "" {
+		p.Category = objectParam(v)
 	}
-	if v := plan.EmailCulture.ValueString(); v != "" {
-		p.EmailCulture = v
+	if !config.Condition.IsNull() {
+		p.Condition = plan.Condition.ValueString()
 	}
-	if v := plan.Multiplier.ValueString(); v != "" {
-		p.Multiplier = v
+	if !config.Description.IsNull() {
+		p.Description = plan.Description.ValueString()
 	}
-	if v := plan.NotifyUser.ValueString(); v != "" {
-		p.NotifyUser = v
+	if !config.Disabled.IsNull() {
+		if !plan.Disabled.IsUnknown() {
+			p.Disabled = plan.Disabled.ValueBoolPointer()
+		}
 	}
-	if v := plan.Operation.ValueString(); v != "" {
-		p.Operation = v
+	if v := config.EmailCulture.ValueString(); v != "" {
+		p.EmailCulture = objectParam(v)
 	}
-	if v := plan.RecordType.ValueString(); v != "" {
-		p.RecordType = v
+	if v := config.Multiplier.ValueString(); v != "" {
+		p.Multiplier = objectParam(v)
 	}
-	if v := plan.ScopeLevel.ValueString(); v != "" {
-		p.ScopeLevel = v
+	if !config.Name.IsNull() {
+		p.Name = plan.Name.ValueString()
 	}
-	if v := plan.Severity.ValueString(); v != "" {
-		p.Severity = v
+	if v := config.NotifyUser.ValueString(); v != "" {
+		p.NotifyUser = objectParam(v)
 	}
-	if v := plan.Type.ValueString(); v != "" {
-		p.Type = v
+	if v := config.Operation.ValueString(); v != "" {
+		p.Operation = objectParam(v)
 	}
-	if v := plan.UserId.ValueString(); v != "" {
-		p.UserId = v
+	if v := config.RecordType.ValueString(); v != "" {
+		p.RecordType = objectParam(v)
+	}
+	if v := config.ScopeLevel.ValueString(); v != "" {
+		p.ScopeLevel = objectParam(v)
+	}
+	if v := config.Severity.ValueString(); v != "" {
+		p.Severity = objectParam(v)
+	}
+	if !config.Threshold.IsNull() {
+		if !plan.Threshold.IsUnknown() {
+			p.Threshold = plan.Threshold.ValueInt64Pointer()
+		}
+	}
+	if !config.TimeWindow.IsNull() {
+		if !plan.TimeWindow.IsUnknown() {
+			p.TimeWindow = plan.TimeWindow.ValueInt64Pointer()
+		}
+	}
+	if v := config.Type.ValueString(); v != "" {
+		p.Type = objectParam(v)
+	}
+	if v := config.UserId.ValueString(); v != "" {
+		p.UserId = objectParam(v)
 	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	res, err := r.client.SCC.NewActivityAlert(ctx, p)
+	res, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.NewActivityAlert, p, isNotFound)
 	if err != nil {
 		resp.Diagnostics.AddError("New-ActivityAlert failed", err.Error())
 		return
@@ -179,46 +209,106 @@ func (r *activityAlertResource) Update(ctx context.Context, req resource.UpdateR
 	id := r.identityOf(state)
 	sp := purview.SetActivityAlertParams{}
 	sp.Identity = id
-	if v := plan.Category.ValueString(); v != "" {
-		sp.Category = v
+	if !plan.Category.Equal(state.Category) {
+		if v := plan.Category.ValueString(); v != "" {
+			sp.Category = objectParam(v)
+		}
 	}
-	sp.Condition = plan.Condition.ValueString()
-	sp.Description = plan.Description.ValueString()
-	sp.Disabled = plan.Disabled.ValueBool()
-	if v := plan.EmailCulture.ValueString(); v != "" {
-		sp.EmailCulture = v
+	if !plan.Condition.Equal(state.Condition) {
+		sp.Condition = plan.Condition.ValueString()
 	}
-	if v := plan.RecordType.ValueString(); v != "" {
-		sp.RecordType = v
+	if !plan.Description.Equal(state.Description) {
+		sp.Description = plan.Description.ValueString()
 	}
-	if v := plan.ScopeLevel.ValueString(); v != "" {
-		sp.ScopeLevel = v
+	if !plan.Disabled.Equal(state.Disabled) {
+		if !plan.Disabled.IsUnknown() {
+			sp.Disabled = plan.Disabled.ValueBoolPointer()
+		}
 	}
-	if v := plan.Severity.ValueString(); v != "" {
-		sp.Severity = v
+	if !plan.EmailCulture.Equal(state.EmailCulture) {
+		if v := plan.EmailCulture.ValueString(); v != "" {
+			sp.EmailCulture = objectParam(v)
+		}
 	}
-	if v := plan.UserId.ValueString(); v != "" {
-		sp.UserId = v
+	if !plan.Multiplier.Equal(state.Multiplier) {
+		if v := plan.Multiplier.ValueString(); v != "" {
+			sp.Multiplier = objectParam(v)
+		}
+	}
+	if !plan.NotifyUser.Equal(state.NotifyUser) {
+		if v := plan.NotifyUser.ValueString(); v != "" {
+			sp.NotifyUser = objectParam(v)
+		}
+	}
+	if !plan.Operation.Equal(state.Operation) {
+		if v := plan.Operation.ValueString(); v != "" {
+			sp.Operation = objectParam(v)
+		}
+	}
+	if !plan.RecordType.Equal(state.RecordType) {
+		if v := plan.RecordType.ValueString(); v != "" {
+			sp.RecordType = objectParam(v)
+		}
+	}
+	if !plan.ScopeLevel.Equal(state.ScopeLevel) {
+		if v := plan.ScopeLevel.ValueString(); v != "" {
+			sp.ScopeLevel = objectParam(v)
+		}
+	}
+	if !plan.Severity.Equal(state.Severity) {
+		if v := plan.Severity.ValueString(); v != "" {
+			sp.Severity = objectParam(v)
+		}
+	}
+	if !plan.Threshold.Equal(state.Threshold) {
+		if !plan.Threshold.IsUnknown() {
+			sp.Threshold = plan.Threshold.ValueInt64Pointer()
+		}
+	}
+	if !plan.TimeWindow.Equal(state.TimeWindow) {
+		if !plan.TimeWindow.IsUnknown() {
+			sp.TimeWindow = plan.TimeWindow.ValueInt64Pointer()
+		}
+	}
+	if !plan.UserId.Equal(state.UserId) {
+		if v := plan.UserId.ValueString(); v != "" {
+			sp.UserId = objectParam(v)
+		}
 	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	if _, err := r.client.SCC.SetActivityAlert(ctx, sp); err != nil {
+	if _, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.SetActivityAlert, sp, isNotFound); err != nil {
 		resp.Diagnostics.AddError("Set-ActivityAlert failed", err.Error())
 		return
 	}
 	cfg := plan
 	reflected := reconcile.ReflectsFields(map[string]types.String{
-		"Category":     cfg.Category,
-		"Condition":    cfg.Condition,
-		"Description":  cfg.Description,
-		"EmailCulture": cfg.EmailCulture,
-		"RecordType":   cfg.RecordType,
-		"ScopeLevel":   cfg.ScopeLevel,
-		"Severity":     cfg.Severity,
-		"UserId":       cfg.UserId,
+		"Condition":   cfg.Condition,
+		"Description": cfg.Description,
 	}, getString)
+	if !cfg.Disabled.IsUnknown() && !cfg.Disabled.IsNull() && !cfg.Disabled.Equal(state.Disabled) {
+		prev, want := reflected, cfg.Disabled.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["Disabled"] == nil || getBool(obj, "Disabled") == want)
+		}
+	}
+	if !cfg.Threshold.IsUnknown() && !cfg.Threshold.IsNull() && !cfg.Threshold.Equal(state.Threshold) {
+		prev, want := reflected, cfg.Threshold.ValueInt64()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["Threshold"] == nil || getInt(obj, "Threshold") == want)
+		}
+	}
+	if !cfg.TimeWindow.IsUnknown() && !cfg.TimeWindow.IsNull() && !cfg.TimeWindow.Equal(state.TimeWindow) {
+		prev, want := reflected, cfg.TimeWindow.ValueInt64()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["TimeWindow"] == nil || getInt(obj, "TimeWindow") == want)
+		}
+	}
 	r.refresh(ctx, id, &plan, &resp.Diagnostics, reflected)
+	if !cfg.ID.IsUnknown() && !cfg.ID.IsNull() {
+		plan.ID = cfg.ID
+	}
 	r.reconcileState(&cfg, &plan)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
@@ -278,20 +368,22 @@ func (r *activityAlertResource) refresh(ctx context.Context, identity string, m 
 func readActivityAlert(ctx context.Context, obj map[string]any, m *activityAlertModel) {
 	m.ID = types.StringValue(firstNonEmptyStr(getString(obj, "Guid"), getString(obj, "Id"), getString(obj, "Identity")))
 	m.Identity = types.StringValue(firstNonEmptyStr(getString(obj, "Identity"), getString(obj, "Guid"), getString(obj, "Name")))
-	m.Category = types.StringValue(getString(obj, "Category"))
+	m.Category = types.StringValue(getObjectJSON(obj, "Category"))
 	m.Condition = types.StringValue(getString(obj, "Condition"))
 	m.Description = types.StringValue(getString(obj, "Description"))
 	m.Disabled = types.BoolValue(getBool(obj, "Disabled"))
-	m.EmailCulture = types.StringValue(getString(obj, "EmailCulture"))
-	m.Multiplier = types.StringValue(getString(obj, "Multiplier"))
+	m.EmailCulture = types.StringValue(getObjectJSON(obj, "EmailCulture"))
+	m.Multiplier = types.StringValue(getObjectJSON(obj, "Multiplier"))
 	m.Name = types.StringValue(getString(obj, "Name"))
-	m.NotifyUser = types.StringValue(getString(obj, "NotifyUser"))
-	m.Operation = types.StringValue(getString(obj, "Operation"))
-	m.RecordType = types.StringValue(getString(obj, "RecordType"))
-	m.ScopeLevel = types.StringValue(getString(obj, "ScopeLevel"))
-	m.Severity = types.StringValue(getString(obj, "Severity"))
-	m.Type = types.StringValue(getString(obj, "Type"))
-	m.UserId = types.StringValue(getString(obj, "UserId"))
+	m.NotifyUser = types.StringValue(getObjectJSON(obj, "NotifyUser"))
+	m.Operation = types.StringValue(getObjectJSON(obj, "Operation"))
+	m.RecordType = types.StringValue(getObjectJSON(obj, "RecordType"))
+	m.ScopeLevel = types.StringValue(getObjectJSON(obj, "ScopeLevel"))
+	m.Severity = types.StringValue(getObjectJSON(obj, "Severity"))
+	m.Threshold = types.Int64Value(getInt(obj, "Threshold"))
+	m.TimeWindow = types.Int64Value(getInt(obj, "TimeWindow"))
+	m.Type = types.StringValue(getObjectJSON(obj, "Type"))
+	m.UserId = types.StringValue(getObjectJSON(obj, "UserId"))
 	_ = ctx
 }
 
@@ -308,6 +400,8 @@ func (r *activityAlertResource) reconcileState(cfg, read *activityAlertModel) {
 	read.RecordType = reconcile.KeepStr(cfg.RecordType, read.RecordType)
 	read.ScopeLevel = reconcile.KeepStr(cfg.ScopeLevel, read.ScopeLevel)
 	read.Severity = reconcile.KeepStr(cfg.Severity, read.Severity)
+	read.Threshold = reconcile.KeepInt64(cfg.Threshold, read.Threshold)
+	read.TimeWindow = reconcile.KeepInt64(cfg.TimeWindow, read.TimeWindow)
 	read.Type = reconcile.KeepStr(cfg.Type, read.Type)
 	read.UserId = reconcile.KeepStr(cfg.UserId, read.UserId)
 }

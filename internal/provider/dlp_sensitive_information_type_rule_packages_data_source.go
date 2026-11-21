@@ -40,7 +40,7 @@ func (d *dlpSensitiveInformationTypeRulePackageListDataSource) Schema(_ context.
 			"dlp_sensitive_information_type_rule_packages": schema.ListNestedAttribute{Computed: true, Description: "All DlpSensitiveInformationTypeRulePackage objects.", NestedObject: schema.NestedAttributeObject{Attributes: map[string]schema.Attribute{
 				"id":           schema.StringAttribute{Computed: true, Description: "Object identifier (GUID)."},
 				"identity":     schema.StringAttribute{Computed: true, Description: "Identity used to target the object."},
-				"file_data":    schema.SetAttribute{ElementType: types.StringType, Computed: true, Description: "Maps to the -FileData parameter."},
+				"file_data":    schema.StringAttribute{Computed: true, Description: "Maps to the -FileData parameter."},
 				"migration_id": schema.StringAttribute{Computed: true, Description: "Maps to the -MigrationId parameter."},
 			}}},
 		},

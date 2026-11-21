@@ -1,0 +1,38 @@
+# Pull request into main -> security scan, vet and tests, the gate
+# Push to main            -> the same
+# Releases are cut by the owner on his Mac (tools/release.sh), not here.
+#
+# security.yml and checks.yml are local copies of bearclave/ci: a public
+# repository cannot call the private one. Actions minutes of a public
+# repository are free.
+name: ci
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  security:
+    uses: ./.github/workflows/security.yml
+    permissions:
+      contents: read
+
+  pipeline:
+    uses: ./.github/workflows/checks.yml
+    permissions:
+      contents: read
+    with:
+      # The runner's Go downloads the toolchain go.mod asks for.
+      command: |
+        go vet ./...
+        go test ./...

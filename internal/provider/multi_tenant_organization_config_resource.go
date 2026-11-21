@@ -25,6 +25,7 @@ var (
 	_ resource.Resource                = &multiTenantOrganizationConfigResource{}
 	_ resource.ResourceWithConfigure   = &multiTenantOrganizationConfigResource{}
 	_ resource.ResourceWithImportState = &multiTenantOrganizationConfigResource{}
+	_ resource.ResourceWithModifyPlan  = &multiTenantOrganizationConfigResource{}
 )
 
 type multiTenantOrganizationConfigResource struct{ client *clients.Client }
@@ -74,20 +75,33 @@ func (r *multiTenantOrganizationConfigResource) Create(ctx context.Context, req 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	sp := purview.SetMultiTenantOrganizationConfigParams{}
-	sp.Identity = plan.Identity.ValueString()
-	sp.AddAuthorizedMemberTenants = toStringSlice(ctx, plan.AddAuthorizedMemberTenants, &resp.Diagnostics)
-	if v := plan.AuthorizedOwnerTenantForMemberTenant.ValueString(); v != "" {
-		sp.AuthorizedOwnerTenantForMemberTenant = v
-	}
-	if v := plan.IsMultiTenantOrganizationEnabled.ValueString(); v != "" {
-		sp.IsMultiTenantOrganizationEnabled = v
-	}
-	sp.RemoveAuthorizedMemberTenants = toStringSlice(ctx, plan.RemoveAuthorizedMemberTenants, &resp.Diagnostics)
+	var config multiTenantOrganizationConfigModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	if _, err := r.client.SCC.SetMultiTenantOrganizationConfig(ctx, sp); err != nil {
+	sp := purview.SetMultiTenantOrganizationConfigParams{}
+	sp.Identity = plan.Identity.ValueString()
+	if !config.AddAuthorizedMemberTenants.IsNull() {
+		if !plan.AddAuthorizedMemberTenants.IsNull() && !plan.AddAuthorizedMemberTenants.IsUnknown() {
+			sp.AddAuthorizedMemberTenants = append([]string{}, toStringSlice(ctx, plan.AddAuthorizedMemberTenants, &resp.Diagnostics)...)
+		}
+	}
+	if v := config.AuthorizedOwnerTenantForMemberTenant.ValueString(); v != "" {
+		sp.AuthorizedOwnerTenantForMemberTenant = objectParam(v)
+	}
+	if v := config.IsMultiTenantOrganizationEnabled.ValueString(); v != "" {
+		sp.IsMultiTenantOrganizationEnabled = objectParam(v)
+	}
+	if !config.RemoveAuthorizedMemberTenants.IsNull() {
+		if !plan.RemoveAuthorizedMemberTenants.IsNull() && !plan.RemoveAuthorizedMemberTenants.IsUnknown() {
+			sp.RemoveAuthorizedMemberTenants = append([]string{}, toStringSlice(ctx, plan.RemoveAuthorizedMemberTenants, &resp.Diagnostics)...)
+		}
+	}
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	if _, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.SetMultiTenantOrganizationConfig, sp, isNotFound); err != nil {
 		resp.Diagnostics.AddError("Set-MultiTenantOrganizationConfig failed", err.Error())
 		return
 	}
@@ -123,27 +137,39 @@ func (r *multiTenantOrganizationConfigResource) Update(ctx context.Context, req 
 	id := r.identityOf(state)
 	sp := purview.SetMultiTenantOrganizationConfigParams{}
 	sp.Identity = id
-	sp.AddAuthorizedMemberTenants = toStringSlice(ctx, plan.AddAuthorizedMemberTenants, &resp.Diagnostics)
-	if v := plan.AuthorizedOwnerTenantForMemberTenant.ValueString(); v != "" {
-		sp.AuthorizedOwnerTenantForMemberTenant = v
+	if !plan.AddAuthorizedMemberTenants.Equal(state.AddAuthorizedMemberTenants) {
+		if !plan.AddAuthorizedMemberTenants.IsNull() && !plan.AddAuthorizedMemberTenants.IsUnknown() {
+			sp.AddAuthorizedMemberTenants = append([]string{}, toStringSlice(ctx, plan.AddAuthorizedMemberTenants, &resp.Diagnostics)...)
+		}
 	}
-	if v := plan.IsMultiTenantOrganizationEnabled.ValueString(); v != "" {
-		sp.IsMultiTenantOrganizationEnabled = v
+	if !plan.AuthorizedOwnerTenantForMemberTenant.Equal(state.AuthorizedOwnerTenantForMemberTenant) {
+		if v := plan.AuthorizedOwnerTenantForMemberTenant.ValueString(); v != "" {
+			sp.AuthorizedOwnerTenantForMemberTenant = objectParam(v)
+		}
 	}
-	sp.RemoveAuthorizedMemberTenants = toStringSlice(ctx, plan.RemoveAuthorizedMemberTenants, &resp.Diagnostics)
+	if !plan.IsMultiTenantOrganizationEnabled.Equal(state.IsMultiTenantOrganizationEnabled) {
+		if v := plan.IsMultiTenantOrganizationEnabled.ValueString(); v != "" {
+			sp.IsMultiTenantOrganizationEnabled = objectParam(v)
+		}
+	}
+	if !plan.RemoveAuthorizedMemberTenants.Equal(state.RemoveAuthorizedMemberTenants) {
+		if !plan.RemoveAuthorizedMemberTenants.IsNull() && !plan.RemoveAuthorizedMemberTenants.IsUnknown() {
+			sp.RemoveAuthorizedMemberTenants = append([]string{}, toStringSlice(ctx, plan.RemoveAuthorizedMemberTenants, &resp.Diagnostics)...)
+		}
+	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	if _, err := r.client.SCC.SetMultiTenantOrganizationConfig(ctx, sp); err != nil {
+	if _, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.SetMultiTenantOrganizationConfig, sp, isNotFound); err != nil {
 		resp.Diagnostics.AddError("Set-MultiTenantOrganizationConfig failed", err.Error())
 		return
 	}
 	cfg := plan
-	reflected := reconcile.ReflectsFields(map[string]types.String{
-		"AuthorizedOwnerTenantForMemberTenant": cfg.AuthorizedOwnerTenantForMemberTenant,
-		"IsMultiTenantOrganizationEnabled":     cfg.IsMultiTenantOrganizationEnabled,
-	}, getString)
+	reflected := reconcile.ReflectsFields(map[string]types.String{}, getString)
 	r.refresh(ctx, id, &plan, &resp.Diagnostics, reflected)
+	if !cfg.ID.IsUnknown() && !cfg.ID.IsNull() {
+		plan.ID = cfg.ID
+	}
 	r.reconcileState(&cfg, &plan)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
@@ -155,6 +181,50 @@ func (r *multiTenantOrganizationConfigResource) Delete(_ context.Context, _ reso
 func (r *multiTenantOrganizationConfigResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("id"), req.ID)...)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("identity"), req.ID)...)
+}
+
+func (r *multiTenantOrganizationConfigResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
+	if req.Plan.Raw.IsNull() || !req.State.Raw.IsNull() || r.client == nil {
+		return
+	}
+	var plan multiTenantOrganizationConfigModel
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	identity := plan.Identity.ValueString()
+	if identity == "" {
+		return
+	}
+	res, err := r.client.SCC.GetMultiTenantOrganizationConfig(ctx, purview.GetMultiTenantOrganizationConfigParams{Identity: identity})
+	if err != nil {
+		return
+	}
+	obj := firstObject(res.Value)
+	if obj == nil {
+		return
+	}
+	var cur multiTenantOrganizationConfigModel
+	readMultiTenantOrganizationConfig(ctx, obj, &cur)
+	if plan.ID.IsUnknown() {
+		plan.ID = cur.ID
+	}
+	if plan.Identity.IsUnknown() {
+		plan.Identity = cur.Identity
+	}
+	if plan.AddAuthorizedMemberTenants.IsUnknown() {
+		plan.AddAuthorizedMemberTenants = cur.AddAuthorizedMemberTenants
+	}
+	if plan.AuthorizedOwnerTenantForMemberTenant.IsUnknown() {
+		plan.AuthorizedOwnerTenantForMemberTenant = cur.AuthorizedOwnerTenantForMemberTenant
+	}
+	if plan.IsMultiTenantOrganizationEnabled.IsUnknown() {
+		plan.IsMultiTenantOrganizationEnabled = cur.IsMultiTenantOrganizationEnabled
+	}
+	if plan.RemoveAuthorizedMemberTenants.IsUnknown() {
+		plan.RemoveAuthorizedMemberTenants = cur.RemoveAuthorizedMemberTenants
+	}
+	resp.Diagnostics.Append(resp.Plan.Set(ctx, &plan)...)
 }
 
 func (r *multiTenantOrganizationConfigResource) identityOf(m multiTenantOrganizationConfigModel) string {
@@ -194,8 +264,8 @@ func (r *multiTenantOrganizationConfigResource) refresh(ctx context.Context, ide
 func readMultiTenantOrganizationConfig(ctx context.Context, obj map[string]any, m *multiTenantOrganizationConfigModel) {
 	m.ID = types.StringValue(firstNonEmptyStr(getString(obj, "Guid"), getString(obj, "Id"), getString(obj, "Identity")))
 	m.AddAuthorizedMemberTenants = stringSetValue(ctx, getStringSlice(obj, "AddAuthorizedMemberTenants"))
-	m.AuthorizedOwnerTenantForMemberTenant = types.StringValue(getString(obj, "AuthorizedOwnerTenantForMemberTenant"))
-	m.IsMultiTenantOrganizationEnabled = types.StringValue(getString(obj, "IsMultiTenantOrganizationEnabled"))
+	m.AuthorizedOwnerTenantForMemberTenant = types.StringValue(getObjectJSON(obj, "AuthorizedOwnerTenantForMemberTenant"))
+	m.IsMultiTenantOrganizationEnabled = types.StringValue(getObjectJSON(obj, "IsMultiTenantOrganizationEnabled"))
 	m.RemoveAuthorizedMemberTenants = stringSetValue(ctx, getStringSlice(obj, "RemoveAuthorizedMemberTenants"))
 	_ = ctx
 }

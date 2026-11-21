@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
@@ -26,6 +27,7 @@ var (
 	_ resource.Resource                = &policyConfigResource{}
 	_ resource.ResourceWithConfigure   = &policyConfigResource{}
 	_ resource.ResourceWithImportState = &policyConfigResource{}
+	_ resource.ResourceWithModifyPlan  = &policyConfigResource{}
 )
 
 type policyConfigResource struct{ client *clients.Client }
@@ -36,13 +38,14 @@ func NewPolicyConfigResource() resource.Resource { return &policyConfigResource{
 type policyConfigModel struct {
 	ID                                         types.String `tfsdk:"id"`
 	Identity                                   types.String `tfsdk:"identity"`
-	AggregationTimeWindowForDlpAlerts          types.String `tfsdk:"aggregation_time_window_for_dlp_alerts"`
+	AggregationTimeWindowForDlpAlerts          types.Int64  `tfsdk:"aggregation_time_window_for_dlp_alerts"`
+	CaseHoldPolicyLimit                        types.Int64  `tfsdk:"case_hold_policy_limit"`
 	ClassificationScheme                       types.String `tfsdk:"classification_scheme"`
 	ComplianceUrl                              types.String `tfsdk:"compliance_url"`
 	DlpAlertFoldingConfiguration               types.String `tfsdk:"dlp_alert_folding_configuration"`
 	DlpAlertSlaConfig                          types.String `tfsdk:"dlp_alert_sla_config"`
-	DlpAppGroups                               types.Set    `tfsdk:"dlp_app_groups"`
-	DlpAppGroupsPsws                           types.Set    `tfsdk:"dlp_app_groups_psws"`
+	DlpAppGroups                               types.String `tfsdk:"dlp_app_groups"`
+	DlpAppGroupsPsws                           types.String `tfsdk:"dlp_app_groups_psws"`
 	DlpErrorHandlingConfig                     types.String `tfsdk:"dlp_error_handling_config"`
 	DlpExtensionGroups                         types.String `tfsdk:"dlp_extension_groups"`
 	DlpNetworkShareGroups                      types.String `tfsdk:"dlp_network_share_groups"`
@@ -54,8 +57,8 @@ type policyConfigModel struct {
 	EnableLabelCoauth                          types.Bool   `tfsdk:"enable_label_coauth"`
 	EnableSensitivityLabelingForPdf            types.Bool   `tfsdk:"enable_sensitivity_labeling_for_pdf"`
 	EnableSpoAipMigration                      types.Bool   `tfsdk:"enable_spo_aip_migration"`
-	EndpointDlpGlobalSettings                  types.Set    `tfsdk:"endpoint_dlp_global_settings"`
-	EndpointDlpGlobalSettingsPsws              types.Set    `tfsdk:"endpoint_dlp_global_settings_psws"`
+	EndpointDlpGlobalSettings                  types.String `tfsdk:"endpoint_dlp_global_settings"`
+	EndpointDlpGlobalSettingsPsws              types.String `tfsdk:"endpoint_dlp_global_settings_psws"`
 	ExtendTeamsDlpPoliciesToSharePointOneDrive types.Bool   `tfsdk:"extend_teams_dlp_policies_to_share_point_one_drive"`
 	InformationBarrierMode                     types.String `tfsdk:"information_barrier_mode"`
 	InformationBarrierPeopleSearchRestriction  types.String `tfsdk:"information_barrier_people_search_restriction"`
@@ -74,8 +77,8 @@ type policyConfigModel struct {
 	RetentionForwardCrawl                      types.Bool   `tfsdk:"retention_forward_crawl"`
 	RuleErrorAction                            types.String `tfsdk:"rule_error_action"`
 	SenderAddressLocation                      types.String `tfsdk:"sender_address_location"`
-	SiteGroups                                 types.Set    `tfsdk:"site_groups"`
-	SiteGroupsPsws                             types.Set    `tfsdk:"site_groups_psws"`
+	SiteGroups                                 types.String `tfsdk:"site_groups"`
+	SiteGroupsPsws                             types.String `tfsdk:"site_groups_psws"`
 	SpoQuarantineLocation                      types.String `tfsdk:"spo_quarantine_location"`
 	SpoQuarantineText                          types.String `tfsdk:"spo_quarantine_text"`
 	TextExtractionConfig                       types.String `tfsdk:"text_extraction_config"`
@@ -91,13 +94,14 @@ func (r *policyConfigResource) Schema(_ context.Context, _ resource.SchemaReques
 		Attributes: map[string]schema.Attribute{
 			"id":                                                 schema.StringAttribute{Computed: true, Description: "Object identifier (GUID).", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"identity":                                           schema.StringAttribute{Required: true, Description: "Identity of the existing object whose configuration is managed.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
-			"aggregation_time_window_for_dlp_alerts":             schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AggregationTimeWindowForDlpAlerts parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"aggregation_time_window_for_dlp_alerts":             schema.Int64Attribute{Optional: true, Computed: true, Description: "Maps to the -AggregationTimeWindowForDlpAlerts parameter.", PlanModifiers: []planmodifier.Int64{int64planmodifier.UseStateForUnknown()}},
+			"case_hold_policy_limit":                             schema.Int64Attribute{Optional: true, Computed: true, Description: "Maps to the -CaseHoldPolicyLimit parameter.", PlanModifiers: []planmodifier.Int64{int64planmodifier.UseStateForUnknown()}},
 			"classification_scheme":                              schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ClassificationScheme parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"compliance_url":                                     schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ComplianceUrl parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"dlp_alert_folding_configuration":                    schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -DlpAlertFoldingConfiguration parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"dlp_alert_sla_config":                               schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -DlpAlertSlaConfig parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"dlp_app_groups":                                     schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -DlpAppGroups parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
-			"dlp_app_groups_psws":                                schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -DlpAppGroupsPsws parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"dlp_app_groups":                                     schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -DlpAppGroups parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"dlp_app_groups_psws":                                schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -DlpAppGroupsPsws parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"dlp_error_handling_config":                          schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -DlpErrorHandlingConfig parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"dlp_extension_groups":                               schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -DlpExtensionGroups parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"dlp_network_share_groups":                           schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -DlpNetworkShareGroups parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
@@ -109,8 +113,8 @@ func (r *policyConfigResource) Schema(_ context.Context, _ resource.SchemaReques
 			"enable_label_coauth":                                schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -EnableLabelCoauth parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
 			"enable_sensitivity_labeling_for_pdf":                schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -EnableSensitivityLabelingForPdf parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
 			"enable_spo_aip_migration":                           schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -EnableSpoAipMigration parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
-			"endpoint_dlp_global_settings":                       schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -EndpointDlpGlobalSettings parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
-			"endpoint_dlp_global_settings_psws":                  schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -EndpointDlpGlobalSettingsPsws parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"endpoint_dlp_global_settings":                       schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -EndpointDlpGlobalSettings parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"endpoint_dlp_global_settings_psws":                  schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -EndpointDlpGlobalSettingsPsws parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"extend_teams_dlp_policies_to_share_point_one_drive": schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -ExtendTeamsDlpPoliciesToSharePointOneDrive parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
 			"information_barrier_mode":                           schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -InformationBarrierMode parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"information_barrier_people_search_restriction":      schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -InformationBarrierPeopleSearchRestriction parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
@@ -129,8 +133,8 @@ func (r *policyConfigResource) Schema(_ context.Context, _ resource.SchemaReques
 			"retention_forward_crawl":                            schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -RetentionForwardCrawl parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
 			"rule_error_action":                                  schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -RuleErrorAction parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"sender_address_location":                            schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -SenderAddressLocation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"site_groups":                                        schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -SiteGroups parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
-			"site_groups_psws":                                   schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -SiteGroupsPsws parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"site_groups":                                        schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -SiteGroups parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"site_groups_psws":                                   schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -SiteGroupsPsws parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"spo_quarantine_location":                            schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -SpoQuarantineLocation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"spo_quarantine_text":                                schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -SpoQuarantineText parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"text_extraction_config":                             schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -TextExtractionConfig parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
@@ -151,85 +155,183 @@ func (r *policyConfigResource) Create(ctx context.Context, req resource.CreateRe
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	sp := purview.SetPolicyConfigParams{}
-	sp.Identity = plan.Identity.ValueString()
-	if v := plan.AggregationTimeWindowForDlpAlerts.ValueString(); v != "" {
-		sp.AggregationTimeWindowForDlpAlerts = v
-	}
-	if v := plan.ClassificationScheme.ValueString(); v != "" {
-		sp.ClassificationScheme = v
-	}
-	sp.ComplianceUrl = plan.ComplianceUrl.ValueString()
-	if v := plan.DlpAlertFoldingConfiguration.ValueString(); v != "" {
-		sp.DlpAlertFoldingConfiguration = v
-	}
-	sp.DlpAlertSlaConfig = plan.DlpAlertSlaConfig.ValueString()
-	sp.DlpAppGroups = toStringSlice(ctx, plan.DlpAppGroups, &resp.Diagnostics)
-	sp.DlpAppGroupsPsws = toStringSlice(ctx, plan.DlpAppGroupsPsws, &resp.Diagnostics)
-	sp.DlpErrorHandlingConfig = plan.DlpErrorHandlingConfig.ValueString()
-	if v := plan.DlpExtensionGroups.ValueString(); v != "" {
-		sp.DlpExtensionGroups = v
-	}
-	if v := plan.DlpNetworkShareGroups.ValueString(); v != "" {
-		sp.DlpNetworkShareGroups = v
-	}
-	if v := plan.DlpPrinterGroups.ValueString(); v != "" {
-		sp.DlpPrinterGroups = v
-	}
-	if v := plan.DlpRemovableMediaGroups.ValueString(); v != "" {
-		sp.DlpRemovableMediaGroups = v
-	}
-	if v := plan.DocumentIsUnsupportedSeverity.ValueString(); v != "" {
-		sp.DocumentIsUnsupportedSeverity = v
-	}
-	sp.EnableAbacFeature = plan.EnableAbacFeature.ValueBool()
-	sp.EnableAdvancedRuleBuilder = plan.EnableAdvancedRuleBuilder.ValueBool()
-	sp.EnableLabelCoauth = plan.EnableLabelCoauth.ValueBool()
-	sp.EnableSensitivityLabelingForPdf = plan.EnableSensitivityLabelingForPdf.ValueBool()
-	sp.EnableSpoAipMigration = plan.EnableSpoAipMigration.ValueBool()
-	sp.EndpointDlpGlobalSettings = toStringSlice(ctx, plan.EndpointDlpGlobalSettings, &resp.Diagnostics)
-	sp.EndpointDlpGlobalSettingsPsws = toStringSlice(ctx, plan.EndpointDlpGlobalSettingsPsws, &resp.Diagnostics)
-	sp.ExtendTeamsDlpPoliciesToSharePointOneDrive = plan.ExtendTeamsDlpPoliciesToSharePointOneDrive.ValueBool()
-	if v := plan.InformationBarrierMode.ValueString(); v != "" {
-		sp.InformationBarrierMode = v
-	}
-	if v := plan.InformationBarrierPeopleSearchRestriction.ValueString(); v != "" {
-		sp.InformationBarrierPeopleSearchRestriction = v
-	}
-	sp.IsDefaultMlDlpPoliciesOptedOut = plan.IsDefaultMlDlpPoliciesOptedOut.ValueBool()
-	sp.IsDlpSimulationOptedIn = plan.IsDlpSimulationOptedIn.ValueBool()
-	sp.IsEventFoldingOnDlpAlertsOptedOut = plan.IsEventFoldingOnDlpAlertsOptedOut.ValueBool()
-	sp.IsUserBaseDlpAlertAggregationEnabled = plan.IsUserBaseDlpAlertAggregationEnabled.ValueBool()
-	sp.JitEnforcementSettings = plan.JitEnforcementSettings.ValueString()
-	sp.MessageHeadersToRetainInOutlook = toStringSlice(ctx, plan.MessageHeadersToRetainInOutlook, &resp.Diagnostics)
-	sp.MigrateLabelScheme = plan.MigrateLabelScheme.ValueBool()
-	if v := plan.MigrateLabelSchemeDisplayNames.ValueString(); v != "" {
-		sp.MigrateLabelSchemeDisplayNames = v
-	}
-	if v := plan.OnPremisesWorkload.ValueString(); v != "" {
-		sp.OnPremisesWorkload = v
-	}
-	if v := plan.ProcessingLimitExceededSeverity.ValueString(); v != "" {
-		sp.ProcessingLimitExceededSeverity = v
-	}
-	sp.PurviewLabelConsent = plan.PurviewLabelConsent.ValueBool()
-	sp.ReservedForFutureUse = plan.ReservedForFutureUse.ValueBool()
-	sp.RetentionForwardCrawl = plan.RetentionForwardCrawl.ValueBool()
-	if v := plan.RuleErrorAction.ValueString(); v != "" {
-		sp.RuleErrorAction = v
-	}
-	if v := plan.SenderAddressLocation.ValueString(); v != "" {
-		sp.SenderAddressLocation = v
-	}
-	sp.SiteGroups = toStringSlice(ctx, plan.SiteGroups, &resp.Diagnostics)
-	sp.SiteGroupsPsws = toStringSlice(ctx, plan.SiteGroupsPsws, &resp.Diagnostics)
-	sp.SpoQuarantineLocation = plan.SpoQuarantineLocation.ValueString()
-	sp.SpoQuarantineText = plan.SpoQuarantineText.ValueString()
-	sp.TextExtractionConfig = plan.TextExtractionConfig.ValueString()
+	var config policyConfigModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	if _, err := r.client.SCC.SetPolicyConfig(ctx, sp); err != nil {
+	sp := purview.SetPolicyConfigParams{}
+	sp.Identity = plan.Identity.ValueString()
+	if !config.AggregationTimeWindowForDlpAlerts.IsNull() {
+		if !plan.AggregationTimeWindowForDlpAlerts.IsUnknown() {
+			sp.AggregationTimeWindowForDlpAlerts = plan.AggregationTimeWindowForDlpAlerts.ValueInt64Pointer()
+		}
+	}
+	if !config.CaseHoldPolicyLimit.IsNull() {
+		if !plan.CaseHoldPolicyLimit.IsUnknown() {
+			sp.CaseHoldPolicyLimit = plan.CaseHoldPolicyLimit.ValueInt64Pointer()
+		}
+	}
+	if v := config.ClassificationScheme.ValueString(); v != "" {
+		sp.ClassificationScheme = objectParam(v)
+	}
+	if !config.ComplianceUrl.IsNull() {
+		sp.ComplianceUrl = plan.ComplianceUrl.ValueString()
+	}
+	if v := config.DlpAlertFoldingConfiguration.ValueString(); v != "" {
+		sp.DlpAlertFoldingConfiguration = objectParam(v)
+	}
+	if !config.DlpAlertSlaConfig.IsNull() {
+		sp.DlpAlertSlaConfig = plan.DlpAlertSlaConfig.ValueString()
+	}
+	if v := config.DlpAppGroups.ValueString(); v != "" {
+		sp.DlpAppGroups = objectParam(v)
+	}
+	if v := config.DlpAppGroupsPsws.ValueString(); v != "" {
+		sp.DlpAppGroupsPsws = objectParam(v)
+	}
+	if !config.DlpErrorHandlingConfig.IsNull() {
+		sp.DlpErrorHandlingConfig = plan.DlpErrorHandlingConfig.ValueString()
+	}
+	if v := config.DlpExtensionGroups.ValueString(); v != "" {
+		sp.DlpExtensionGroups = objectParam(v)
+	}
+	if v := config.DlpNetworkShareGroups.ValueString(); v != "" {
+		sp.DlpNetworkShareGroups = objectParam(v)
+	}
+	if v := config.DlpPrinterGroups.ValueString(); v != "" {
+		sp.DlpPrinterGroups = objectParam(v)
+	}
+	if v := config.DlpRemovableMediaGroups.ValueString(); v != "" {
+		sp.DlpRemovableMediaGroups = objectParam(v)
+	}
+	if v := config.DocumentIsUnsupportedSeverity.ValueString(); v != "" {
+		sp.DocumentIsUnsupportedSeverity = objectParam(v)
+	}
+	if !config.EnableAbacFeature.IsNull() {
+		if !plan.EnableAbacFeature.IsUnknown() {
+			sp.EnableAbacFeature = plan.EnableAbacFeature.ValueBoolPointer()
+		}
+	}
+	if !config.EnableAdvancedRuleBuilder.IsNull() {
+		if !plan.EnableAdvancedRuleBuilder.IsUnknown() {
+			sp.EnableAdvancedRuleBuilder = plan.EnableAdvancedRuleBuilder.ValueBoolPointer()
+		}
+	}
+	if !config.EnableLabelCoauth.IsNull() {
+		if !plan.EnableLabelCoauth.IsUnknown() {
+			sp.EnableLabelCoauth = plan.EnableLabelCoauth.ValueBoolPointer()
+		}
+	}
+	if !config.EnableSensitivityLabelingForPdf.IsNull() {
+		if !plan.EnableSensitivityLabelingForPdf.IsUnknown() {
+			sp.EnableSensitivityLabelingForPdf = plan.EnableSensitivityLabelingForPdf.ValueBoolPointer()
+		}
+	}
+	if !config.EnableSpoAipMigration.IsNull() {
+		if !plan.EnableSpoAipMigration.IsUnknown() {
+			sp.EnableSpoAipMigration = plan.EnableSpoAipMigration.ValueBoolPointer()
+		}
+	}
+	if v := config.EndpointDlpGlobalSettings.ValueString(); v != "" {
+		sp.EndpointDlpGlobalSettings = objectParam(v)
+	}
+	if v := config.EndpointDlpGlobalSettingsPsws.ValueString(); v != "" {
+		sp.EndpointDlpGlobalSettingsPsws = objectParam(v)
+	}
+	if !config.ExtendTeamsDlpPoliciesToSharePointOneDrive.IsNull() {
+		if !plan.ExtendTeamsDlpPoliciesToSharePointOneDrive.IsUnknown() {
+			sp.ExtendTeamsDlpPoliciesToSharePointOneDrive = plan.ExtendTeamsDlpPoliciesToSharePointOneDrive.ValueBoolPointer()
+		}
+	}
+	if v := config.InformationBarrierMode.ValueString(); v != "" {
+		sp.InformationBarrierMode = objectParam(v)
+	}
+	if v := config.InformationBarrierPeopleSearchRestriction.ValueString(); v != "" {
+		sp.InformationBarrierPeopleSearchRestriction = objectParam(v)
+	}
+	if !config.IsDefaultMlDlpPoliciesOptedOut.IsNull() {
+		if !plan.IsDefaultMlDlpPoliciesOptedOut.IsUnknown() {
+			sp.IsDefaultMlDlpPoliciesOptedOut = plan.IsDefaultMlDlpPoliciesOptedOut.ValueBoolPointer()
+		}
+	}
+	if !config.IsDlpSimulationOptedIn.IsNull() {
+		if !plan.IsDlpSimulationOptedIn.IsUnknown() {
+			sp.IsDlpSimulationOptedIn = plan.IsDlpSimulationOptedIn.ValueBoolPointer()
+		}
+	}
+	if !config.IsEventFoldingOnDlpAlertsOptedOut.IsNull() {
+		if !plan.IsEventFoldingOnDlpAlertsOptedOut.IsUnknown() {
+			sp.IsEventFoldingOnDlpAlertsOptedOut = plan.IsEventFoldingOnDlpAlertsOptedOut.ValueBoolPointer()
+		}
+	}
+	if !config.IsUserBaseDlpAlertAggregationEnabled.IsNull() {
+		if !plan.IsUserBaseDlpAlertAggregationEnabled.IsUnknown() {
+			sp.IsUserBaseDlpAlertAggregationEnabled = plan.IsUserBaseDlpAlertAggregationEnabled.ValueBoolPointer()
+		}
+	}
+	if !config.JitEnforcementSettings.IsNull() {
+		sp.JitEnforcementSettings = plan.JitEnforcementSettings.ValueString()
+	}
+	if !config.MessageHeadersToRetainInOutlook.IsNull() {
+		if !plan.MessageHeadersToRetainInOutlook.IsNull() && !plan.MessageHeadersToRetainInOutlook.IsUnknown() {
+			sp.MessageHeadersToRetainInOutlook = append([]string{}, toStringSlice(ctx, plan.MessageHeadersToRetainInOutlook, &resp.Diagnostics)...)
+		}
+	}
+	if !config.MigrateLabelScheme.IsNull() {
+		if !plan.MigrateLabelScheme.IsUnknown() {
+			sp.MigrateLabelScheme = plan.MigrateLabelScheme.ValueBoolPointer()
+		}
+	}
+	if v := config.MigrateLabelSchemeDisplayNames.ValueString(); v != "" {
+		sp.MigrateLabelSchemeDisplayNames = objectParam(v)
+	}
+	if v := config.OnPremisesWorkload.ValueString(); v != "" {
+		sp.OnPremisesWorkload = objectParam(v)
+	}
+	if v := config.ProcessingLimitExceededSeverity.ValueString(); v != "" {
+		sp.ProcessingLimitExceededSeverity = objectParam(v)
+	}
+	if !config.PurviewLabelConsent.IsNull() {
+		if !plan.PurviewLabelConsent.IsUnknown() {
+			sp.PurviewLabelConsent = plan.PurviewLabelConsent.ValueBoolPointer()
+		}
+	}
+	if !config.ReservedForFutureUse.IsNull() {
+		if !plan.ReservedForFutureUse.IsUnknown() {
+			sp.ReservedForFutureUse = plan.ReservedForFutureUse.ValueBoolPointer()
+		}
+	}
+	if !config.RetentionForwardCrawl.IsNull() {
+		if !plan.RetentionForwardCrawl.IsUnknown() {
+			sp.RetentionForwardCrawl = plan.RetentionForwardCrawl.ValueBoolPointer()
+		}
+	}
+	if v := config.RuleErrorAction.ValueString(); v != "" {
+		sp.RuleErrorAction = objectParam(v)
+	}
+	if v := config.SenderAddressLocation.ValueString(); v != "" {
+		sp.SenderAddressLocation = objectParam(v)
+	}
+	if v := config.SiteGroups.ValueString(); v != "" {
+		sp.SiteGroups = objectParam(v)
+	}
+	if v := config.SiteGroupsPsws.ValueString(); v != "" {
+		sp.SiteGroupsPsws = objectParam(v)
+	}
+	if !config.SpoQuarantineLocation.IsNull() {
+		sp.SpoQuarantineLocation = plan.SpoQuarantineLocation.ValueString()
+	}
+	if !config.SpoQuarantineText.IsNull() {
+		sp.SpoQuarantineText = plan.SpoQuarantineText.ValueString()
+	}
+	if !config.TextExtractionConfig.IsNull() {
+		sp.TextExtractionConfig = plan.TextExtractionConfig.ValueString()
+	}
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	if _, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.SetPolicyConfig, sp, isNotFound); err != nil {
 		resp.Diagnostics.AddError("Set-PolicyConfig failed", err.Error())
 		return
 	}
@@ -265,112 +367,329 @@ func (r *policyConfigResource) Update(ctx context.Context, req resource.UpdateRe
 	id := r.identityOf(state)
 	sp := purview.SetPolicyConfigParams{}
 	sp.Identity = id
-	if v := plan.AggregationTimeWindowForDlpAlerts.ValueString(); v != "" {
-		sp.AggregationTimeWindowForDlpAlerts = v
+	if !plan.AggregationTimeWindowForDlpAlerts.Equal(state.AggregationTimeWindowForDlpAlerts) {
+		if !plan.AggregationTimeWindowForDlpAlerts.IsUnknown() {
+			sp.AggregationTimeWindowForDlpAlerts = plan.AggregationTimeWindowForDlpAlerts.ValueInt64Pointer()
+		}
 	}
-	if v := plan.ClassificationScheme.ValueString(); v != "" {
-		sp.ClassificationScheme = v
+	if !plan.CaseHoldPolicyLimit.Equal(state.CaseHoldPolicyLimit) {
+		if !plan.CaseHoldPolicyLimit.IsUnknown() {
+			sp.CaseHoldPolicyLimit = plan.CaseHoldPolicyLimit.ValueInt64Pointer()
+		}
 	}
-	sp.ComplianceUrl = plan.ComplianceUrl.ValueString()
-	if v := plan.DlpAlertFoldingConfiguration.ValueString(); v != "" {
-		sp.DlpAlertFoldingConfiguration = v
+	if !plan.ClassificationScheme.Equal(state.ClassificationScheme) {
+		if v := plan.ClassificationScheme.ValueString(); v != "" {
+			sp.ClassificationScheme = objectParam(v)
+		}
 	}
-	sp.DlpAlertSlaConfig = plan.DlpAlertSlaConfig.ValueString()
-	sp.DlpAppGroups = toStringSlice(ctx, plan.DlpAppGroups, &resp.Diagnostics)
-	sp.DlpAppGroupsPsws = toStringSlice(ctx, plan.DlpAppGroupsPsws, &resp.Diagnostics)
-	sp.DlpErrorHandlingConfig = plan.DlpErrorHandlingConfig.ValueString()
-	if v := plan.DlpExtensionGroups.ValueString(); v != "" {
-		sp.DlpExtensionGroups = v
+	if !plan.ComplianceUrl.Equal(state.ComplianceUrl) {
+		sp.ComplianceUrl = plan.ComplianceUrl.ValueString()
 	}
-	if v := plan.DlpNetworkShareGroups.ValueString(); v != "" {
-		sp.DlpNetworkShareGroups = v
+	if !plan.DlpAlertFoldingConfiguration.Equal(state.DlpAlertFoldingConfiguration) {
+		if v := plan.DlpAlertFoldingConfiguration.ValueString(); v != "" {
+			sp.DlpAlertFoldingConfiguration = objectParam(v)
+		}
 	}
-	if v := plan.DlpPrinterGroups.ValueString(); v != "" {
-		sp.DlpPrinterGroups = v
+	if !plan.DlpAlertSlaConfig.Equal(state.DlpAlertSlaConfig) {
+		sp.DlpAlertSlaConfig = plan.DlpAlertSlaConfig.ValueString()
 	}
-	if v := plan.DlpRemovableMediaGroups.ValueString(); v != "" {
-		sp.DlpRemovableMediaGroups = v
+	if !plan.DlpAppGroups.Equal(state.DlpAppGroups) {
+		if v := plan.DlpAppGroups.ValueString(); v != "" {
+			sp.DlpAppGroups = objectParam(v)
+		}
 	}
-	if v := plan.DocumentIsUnsupportedSeverity.ValueString(); v != "" {
-		sp.DocumentIsUnsupportedSeverity = v
+	if !plan.DlpAppGroupsPsws.Equal(state.DlpAppGroupsPsws) {
+		if v := plan.DlpAppGroupsPsws.ValueString(); v != "" {
+			sp.DlpAppGroupsPsws = objectParam(v)
+		}
 	}
-	sp.EnableAbacFeature = plan.EnableAbacFeature.ValueBool()
-	sp.EnableAdvancedRuleBuilder = plan.EnableAdvancedRuleBuilder.ValueBool()
-	sp.EnableLabelCoauth = plan.EnableLabelCoauth.ValueBool()
-	sp.EnableSensitivityLabelingForPdf = plan.EnableSensitivityLabelingForPdf.ValueBool()
-	sp.EnableSpoAipMigration = plan.EnableSpoAipMigration.ValueBool()
-	sp.EndpointDlpGlobalSettings = toStringSlice(ctx, plan.EndpointDlpGlobalSettings, &resp.Diagnostics)
-	sp.EndpointDlpGlobalSettingsPsws = toStringSlice(ctx, plan.EndpointDlpGlobalSettingsPsws, &resp.Diagnostics)
-	sp.ExtendTeamsDlpPoliciesToSharePointOneDrive = plan.ExtendTeamsDlpPoliciesToSharePointOneDrive.ValueBool()
-	if v := plan.InformationBarrierMode.ValueString(); v != "" {
-		sp.InformationBarrierMode = v
+	if !plan.DlpErrorHandlingConfig.Equal(state.DlpErrorHandlingConfig) {
+		sp.DlpErrorHandlingConfig = plan.DlpErrorHandlingConfig.ValueString()
 	}
-	if v := plan.InformationBarrierPeopleSearchRestriction.ValueString(); v != "" {
-		sp.InformationBarrierPeopleSearchRestriction = v
+	if !plan.DlpExtensionGroups.Equal(state.DlpExtensionGroups) {
+		if v := plan.DlpExtensionGroups.ValueString(); v != "" {
+			sp.DlpExtensionGroups = objectParam(v)
+		}
 	}
-	sp.IsDefaultMlDlpPoliciesOptedOut = plan.IsDefaultMlDlpPoliciesOptedOut.ValueBool()
-	sp.IsDlpSimulationOptedIn = plan.IsDlpSimulationOptedIn.ValueBool()
-	sp.IsEventFoldingOnDlpAlertsOptedOut = plan.IsEventFoldingOnDlpAlertsOptedOut.ValueBool()
-	sp.IsUserBaseDlpAlertAggregationEnabled = plan.IsUserBaseDlpAlertAggregationEnabled.ValueBool()
-	sp.JitEnforcementSettings = plan.JitEnforcementSettings.ValueString()
-	sp.MessageHeadersToRetainInOutlook = toStringSlice(ctx, plan.MessageHeadersToRetainInOutlook, &resp.Diagnostics)
-	sp.MigrateLabelScheme = plan.MigrateLabelScheme.ValueBool()
-	if v := plan.MigrateLabelSchemeDisplayNames.ValueString(); v != "" {
-		sp.MigrateLabelSchemeDisplayNames = v
+	if !plan.DlpNetworkShareGroups.Equal(state.DlpNetworkShareGroups) {
+		if v := plan.DlpNetworkShareGroups.ValueString(); v != "" {
+			sp.DlpNetworkShareGroups = objectParam(v)
+		}
 	}
-	if v := plan.OnPremisesWorkload.ValueString(); v != "" {
-		sp.OnPremisesWorkload = v
+	if !plan.DlpPrinterGroups.Equal(state.DlpPrinterGroups) {
+		if v := plan.DlpPrinterGroups.ValueString(); v != "" {
+			sp.DlpPrinterGroups = objectParam(v)
+		}
 	}
-	if v := plan.ProcessingLimitExceededSeverity.ValueString(); v != "" {
-		sp.ProcessingLimitExceededSeverity = v
+	if !plan.DlpRemovableMediaGroups.Equal(state.DlpRemovableMediaGroups) {
+		if v := plan.DlpRemovableMediaGroups.ValueString(); v != "" {
+			sp.DlpRemovableMediaGroups = objectParam(v)
+		}
 	}
-	sp.PurviewLabelConsent = plan.PurviewLabelConsent.ValueBool()
-	sp.ReservedForFutureUse = plan.ReservedForFutureUse.ValueBool()
-	sp.RetentionForwardCrawl = plan.RetentionForwardCrawl.ValueBool()
-	if v := plan.RuleErrorAction.ValueString(); v != "" {
-		sp.RuleErrorAction = v
+	if !plan.DocumentIsUnsupportedSeverity.Equal(state.DocumentIsUnsupportedSeverity) {
+		if v := plan.DocumentIsUnsupportedSeverity.ValueString(); v != "" {
+			sp.DocumentIsUnsupportedSeverity = objectParam(v)
+		}
 	}
-	if v := plan.SenderAddressLocation.ValueString(); v != "" {
-		sp.SenderAddressLocation = v
+	if !plan.EnableAbacFeature.Equal(state.EnableAbacFeature) {
+		if !plan.EnableAbacFeature.IsUnknown() {
+			sp.EnableAbacFeature = plan.EnableAbacFeature.ValueBoolPointer()
+		}
 	}
-	sp.SiteGroups = toStringSlice(ctx, plan.SiteGroups, &resp.Diagnostics)
-	sp.SiteGroupsPsws = toStringSlice(ctx, plan.SiteGroupsPsws, &resp.Diagnostics)
-	sp.SpoQuarantineLocation = plan.SpoQuarantineLocation.ValueString()
-	sp.SpoQuarantineText = plan.SpoQuarantineText.ValueString()
-	sp.TextExtractionConfig = plan.TextExtractionConfig.ValueString()
+	if !plan.EnableAdvancedRuleBuilder.Equal(state.EnableAdvancedRuleBuilder) {
+		if !plan.EnableAdvancedRuleBuilder.IsUnknown() {
+			sp.EnableAdvancedRuleBuilder = plan.EnableAdvancedRuleBuilder.ValueBoolPointer()
+		}
+	}
+	if !plan.EnableLabelCoauth.Equal(state.EnableLabelCoauth) {
+		if !plan.EnableLabelCoauth.IsUnknown() {
+			sp.EnableLabelCoauth = plan.EnableLabelCoauth.ValueBoolPointer()
+		}
+	}
+	if !plan.EnableSensitivityLabelingForPdf.Equal(state.EnableSensitivityLabelingForPdf) {
+		if !plan.EnableSensitivityLabelingForPdf.IsUnknown() {
+			sp.EnableSensitivityLabelingForPdf = plan.EnableSensitivityLabelingForPdf.ValueBoolPointer()
+		}
+	}
+	if !plan.EnableSpoAipMigration.Equal(state.EnableSpoAipMigration) {
+		if !plan.EnableSpoAipMigration.IsUnknown() {
+			sp.EnableSpoAipMigration = plan.EnableSpoAipMigration.ValueBoolPointer()
+		}
+	}
+	if !plan.EndpointDlpGlobalSettings.Equal(state.EndpointDlpGlobalSettings) {
+		if v := plan.EndpointDlpGlobalSettings.ValueString(); v != "" {
+			sp.EndpointDlpGlobalSettings = objectParam(v)
+		}
+	}
+	if !plan.EndpointDlpGlobalSettingsPsws.Equal(state.EndpointDlpGlobalSettingsPsws) {
+		if v := plan.EndpointDlpGlobalSettingsPsws.ValueString(); v != "" {
+			sp.EndpointDlpGlobalSettingsPsws = objectParam(v)
+		}
+	}
+	if !plan.ExtendTeamsDlpPoliciesToSharePointOneDrive.Equal(state.ExtendTeamsDlpPoliciesToSharePointOneDrive) {
+		if !plan.ExtendTeamsDlpPoliciesToSharePointOneDrive.IsUnknown() {
+			sp.ExtendTeamsDlpPoliciesToSharePointOneDrive = plan.ExtendTeamsDlpPoliciesToSharePointOneDrive.ValueBoolPointer()
+		}
+	}
+	if !plan.InformationBarrierMode.Equal(state.InformationBarrierMode) {
+		if v := plan.InformationBarrierMode.ValueString(); v != "" {
+			sp.InformationBarrierMode = objectParam(v)
+		}
+	}
+	if !plan.InformationBarrierPeopleSearchRestriction.Equal(state.InformationBarrierPeopleSearchRestriction) {
+		if v := plan.InformationBarrierPeopleSearchRestriction.ValueString(); v != "" {
+			sp.InformationBarrierPeopleSearchRestriction = objectParam(v)
+		}
+	}
+	if !plan.IsDefaultMlDlpPoliciesOptedOut.Equal(state.IsDefaultMlDlpPoliciesOptedOut) {
+		if !plan.IsDefaultMlDlpPoliciesOptedOut.IsUnknown() {
+			sp.IsDefaultMlDlpPoliciesOptedOut = plan.IsDefaultMlDlpPoliciesOptedOut.ValueBoolPointer()
+		}
+	}
+	if !plan.IsDlpSimulationOptedIn.Equal(state.IsDlpSimulationOptedIn) {
+		if !plan.IsDlpSimulationOptedIn.IsUnknown() {
+			sp.IsDlpSimulationOptedIn = plan.IsDlpSimulationOptedIn.ValueBoolPointer()
+		}
+	}
+	if !plan.IsEventFoldingOnDlpAlertsOptedOut.Equal(state.IsEventFoldingOnDlpAlertsOptedOut) {
+		if !plan.IsEventFoldingOnDlpAlertsOptedOut.IsUnknown() {
+			sp.IsEventFoldingOnDlpAlertsOptedOut = plan.IsEventFoldingOnDlpAlertsOptedOut.ValueBoolPointer()
+		}
+	}
+	if !plan.IsUserBaseDlpAlertAggregationEnabled.Equal(state.IsUserBaseDlpAlertAggregationEnabled) {
+		if !plan.IsUserBaseDlpAlertAggregationEnabled.IsUnknown() {
+			sp.IsUserBaseDlpAlertAggregationEnabled = plan.IsUserBaseDlpAlertAggregationEnabled.ValueBoolPointer()
+		}
+	}
+	if !plan.JitEnforcementSettings.Equal(state.JitEnforcementSettings) {
+		sp.JitEnforcementSettings = plan.JitEnforcementSettings.ValueString()
+	}
+	if !plan.MessageHeadersToRetainInOutlook.Equal(state.MessageHeadersToRetainInOutlook) {
+		if !plan.MessageHeadersToRetainInOutlook.IsNull() && !plan.MessageHeadersToRetainInOutlook.IsUnknown() {
+			sp.MessageHeadersToRetainInOutlook = append([]string{}, toStringSlice(ctx, plan.MessageHeadersToRetainInOutlook, &resp.Diagnostics)...)
+		}
+	}
+	if !plan.MigrateLabelScheme.Equal(state.MigrateLabelScheme) {
+		if !plan.MigrateLabelScheme.IsUnknown() {
+			sp.MigrateLabelScheme = plan.MigrateLabelScheme.ValueBoolPointer()
+		}
+	}
+	if !plan.MigrateLabelSchemeDisplayNames.Equal(state.MigrateLabelSchemeDisplayNames) {
+		if v := plan.MigrateLabelSchemeDisplayNames.ValueString(); v != "" {
+			sp.MigrateLabelSchemeDisplayNames = objectParam(v)
+		}
+	}
+	if !plan.OnPremisesWorkload.Equal(state.OnPremisesWorkload) {
+		if v := plan.OnPremisesWorkload.ValueString(); v != "" {
+			sp.OnPremisesWorkload = objectParam(v)
+		}
+	}
+	if !plan.ProcessingLimitExceededSeverity.Equal(state.ProcessingLimitExceededSeverity) {
+		if v := plan.ProcessingLimitExceededSeverity.ValueString(); v != "" {
+			sp.ProcessingLimitExceededSeverity = objectParam(v)
+		}
+	}
+	if !plan.PurviewLabelConsent.Equal(state.PurviewLabelConsent) {
+		if !plan.PurviewLabelConsent.IsUnknown() {
+			sp.PurviewLabelConsent = plan.PurviewLabelConsent.ValueBoolPointer()
+		}
+	}
+	if !plan.ReservedForFutureUse.Equal(state.ReservedForFutureUse) {
+		if !plan.ReservedForFutureUse.IsUnknown() {
+			sp.ReservedForFutureUse = plan.ReservedForFutureUse.ValueBoolPointer()
+		}
+	}
+	if !plan.RetentionForwardCrawl.Equal(state.RetentionForwardCrawl) {
+		if !plan.RetentionForwardCrawl.IsUnknown() {
+			sp.RetentionForwardCrawl = plan.RetentionForwardCrawl.ValueBoolPointer()
+		}
+	}
+	if !plan.RuleErrorAction.Equal(state.RuleErrorAction) {
+		if v := plan.RuleErrorAction.ValueString(); v != "" {
+			sp.RuleErrorAction = objectParam(v)
+		}
+	}
+	if !plan.SenderAddressLocation.Equal(state.SenderAddressLocation) {
+		if v := plan.SenderAddressLocation.ValueString(); v != "" {
+			sp.SenderAddressLocation = objectParam(v)
+		}
+	}
+	if !plan.SiteGroups.Equal(state.SiteGroups) {
+		if v := plan.SiteGroups.ValueString(); v != "" {
+			sp.SiteGroups = objectParam(v)
+		}
+	}
+	if !plan.SiteGroupsPsws.Equal(state.SiteGroupsPsws) {
+		if v := plan.SiteGroupsPsws.ValueString(); v != "" {
+			sp.SiteGroupsPsws = objectParam(v)
+		}
+	}
+	if !plan.SpoQuarantineLocation.Equal(state.SpoQuarantineLocation) {
+		sp.SpoQuarantineLocation = plan.SpoQuarantineLocation.ValueString()
+	}
+	if !plan.SpoQuarantineText.Equal(state.SpoQuarantineText) {
+		sp.SpoQuarantineText = plan.SpoQuarantineText.ValueString()
+	}
+	if !plan.TextExtractionConfig.Equal(state.TextExtractionConfig) {
+		sp.TextExtractionConfig = plan.TextExtractionConfig.ValueString()
+	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	if _, err := r.client.SCC.SetPolicyConfig(ctx, sp); err != nil {
+	if _, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.SetPolicyConfig, sp, isNotFound); err != nil {
 		resp.Diagnostics.AddError("Set-PolicyConfig failed", err.Error())
 		return
 	}
 	cfg := plan
 	reflected := reconcile.ReflectsFields(map[string]types.String{
-		"AggregationTimeWindowForDlpAlerts":         cfg.AggregationTimeWindowForDlpAlerts,
-		"ClassificationScheme":                      cfg.ClassificationScheme,
-		"ComplianceUrl":                             cfg.ComplianceUrl,
-		"DlpAlertFoldingConfiguration":              cfg.DlpAlertFoldingConfiguration,
-		"DlpAlertSlaConfig":                         cfg.DlpAlertSlaConfig,
-		"DlpErrorHandlingConfig":                    cfg.DlpErrorHandlingConfig,
-		"DlpExtensionGroups":                        cfg.DlpExtensionGroups,
-		"DlpNetworkShareGroups":                     cfg.DlpNetworkShareGroups,
-		"DlpPrinterGroups":                          cfg.DlpPrinterGroups,
-		"DlpRemovableMediaGroups":                   cfg.DlpRemovableMediaGroups,
-		"DocumentIsUnsupportedSeverity":             cfg.DocumentIsUnsupportedSeverity,
-		"InformationBarrierMode":                    cfg.InformationBarrierMode,
-		"InformationBarrierPeopleSearchRestriction": cfg.InformationBarrierPeopleSearchRestriction,
-		"JitEnforcementSettings":                    cfg.JitEnforcementSettings,
-		"MigrateLabelSchemeDisplayNames":            cfg.MigrateLabelSchemeDisplayNames,
-		"OnPremisesWorkload":                        cfg.OnPremisesWorkload,
-		"ProcessingLimitExceededSeverity":           cfg.ProcessingLimitExceededSeverity,
-		"RuleErrorAction":                           cfg.RuleErrorAction,
-		"SenderAddressLocation":                     cfg.SenderAddressLocation,
-		"SpoQuarantineLocation":                     cfg.SpoQuarantineLocation,
-		"SpoQuarantineText":                         cfg.SpoQuarantineText,
-		"TextExtractionConfig":                      cfg.TextExtractionConfig,
+		"ComplianceUrl":          cfg.ComplianceUrl,
+		"DlpAlertSlaConfig":      cfg.DlpAlertSlaConfig,
+		"DlpErrorHandlingConfig": cfg.DlpErrorHandlingConfig,
+		"JitEnforcementSettings": cfg.JitEnforcementSettings,
+		"SpoQuarantineLocation":  cfg.SpoQuarantineLocation,
+		"SpoQuarantineText":      cfg.SpoQuarantineText,
+		"TextExtractionConfig":   cfg.TextExtractionConfig,
 	}, getString)
+	if !cfg.AggregationTimeWindowForDlpAlerts.IsUnknown() && !cfg.AggregationTimeWindowForDlpAlerts.IsNull() && !cfg.AggregationTimeWindowForDlpAlerts.Equal(state.AggregationTimeWindowForDlpAlerts) {
+		prev, want := reflected, cfg.AggregationTimeWindowForDlpAlerts.ValueInt64()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["AggregationTimeWindowForDlpAlerts"] == nil || getInt(obj, "AggregationTimeWindowForDlpAlerts") == want)
+		}
+	}
+	if !cfg.CaseHoldPolicyLimit.IsUnknown() && !cfg.CaseHoldPolicyLimit.IsNull() && !cfg.CaseHoldPolicyLimit.Equal(state.CaseHoldPolicyLimit) {
+		prev, want := reflected, cfg.CaseHoldPolicyLimit.ValueInt64()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["CaseHoldPolicyLimit"] == nil || getInt(obj, "CaseHoldPolicyLimit") == want)
+		}
+	}
+	if !cfg.EnableAbacFeature.IsUnknown() && !cfg.EnableAbacFeature.IsNull() && !cfg.EnableAbacFeature.Equal(state.EnableAbacFeature) {
+		prev, want := reflected, cfg.EnableAbacFeature.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["EnableAbacFeature"] == nil || getBool(obj, "EnableAbacFeature") == want)
+		}
+	}
+	if !cfg.EnableAdvancedRuleBuilder.IsUnknown() && !cfg.EnableAdvancedRuleBuilder.IsNull() && !cfg.EnableAdvancedRuleBuilder.Equal(state.EnableAdvancedRuleBuilder) {
+		prev, want := reflected, cfg.EnableAdvancedRuleBuilder.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["EnableAdvancedRuleBuilder"] == nil || getBool(obj, "EnableAdvancedRuleBuilder") == want)
+		}
+	}
+	if !cfg.EnableLabelCoauth.IsUnknown() && !cfg.EnableLabelCoauth.IsNull() && !cfg.EnableLabelCoauth.Equal(state.EnableLabelCoauth) {
+		prev, want := reflected, cfg.EnableLabelCoauth.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["EnableLabelCoauth"] == nil || getBool(obj, "EnableLabelCoauth") == want)
+		}
+	}
+	if !cfg.EnableSensitivityLabelingForPdf.IsUnknown() && !cfg.EnableSensitivityLabelingForPdf.IsNull() && !cfg.EnableSensitivityLabelingForPdf.Equal(state.EnableSensitivityLabelingForPdf) {
+		prev, want := reflected, cfg.EnableSensitivityLabelingForPdf.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["EnableSensitivityLabelingForPdf"] == nil || getBool(obj, "EnableSensitivityLabelingForPdf") == want)
+		}
+	}
+	if !cfg.EnableSpoAipMigration.IsUnknown() && !cfg.EnableSpoAipMigration.IsNull() && !cfg.EnableSpoAipMigration.Equal(state.EnableSpoAipMigration) {
+		prev, want := reflected, cfg.EnableSpoAipMigration.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["EnableSpoAipMigration"] == nil || getBool(obj, "EnableSpoAipMigration") == want)
+		}
+	}
+	if !cfg.ExtendTeamsDlpPoliciesToSharePointOneDrive.IsUnknown() && !cfg.ExtendTeamsDlpPoliciesToSharePointOneDrive.IsNull() && !cfg.ExtendTeamsDlpPoliciesToSharePointOneDrive.Equal(state.ExtendTeamsDlpPoliciesToSharePointOneDrive) {
+		prev, want := reflected, cfg.ExtendTeamsDlpPoliciesToSharePointOneDrive.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["ExtendTeamsDlpPoliciesToSharePointOneDrive"] == nil || getBool(obj, "ExtendTeamsDlpPoliciesToSharePointOneDrive") == want)
+		}
+	}
+	if !cfg.IsDefaultMlDlpPoliciesOptedOut.IsUnknown() && !cfg.IsDefaultMlDlpPoliciesOptedOut.IsNull() && !cfg.IsDefaultMlDlpPoliciesOptedOut.Equal(state.IsDefaultMlDlpPoliciesOptedOut) {
+		prev, want := reflected, cfg.IsDefaultMlDlpPoliciesOptedOut.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["IsDefaultMlDlpPoliciesOptedOut"] == nil || getBool(obj, "IsDefaultMlDlpPoliciesOptedOut") == want)
+		}
+	}
+	if !cfg.IsDlpSimulationOptedIn.IsUnknown() && !cfg.IsDlpSimulationOptedIn.IsNull() && !cfg.IsDlpSimulationOptedIn.Equal(state.IsDlpSimulationOptedIn) {
+		prev, want := reflected, cfg.IsDlpSimulationOptedIn.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["IsDlpSimulationOptedIn"] == nil || getBool(obj, "IsDlpSimulationOptedIn") == want)
+		}
+	}
+	if !cfg.IsEventFoldingOnDlpAlertsOptedOut.IsUnknown() && !cfg.IsEventFoldingOnDlpAlertsOptedOut.IsNull() && !cfg.IsEventFoldingOnDlpAlertsOptedOut.Equal(state.IsEventFoldingOnDlpAlertsOptedOut) {
+		prev, want := reflected, cfg.IsEventFoldingOnDlpAlertsOptedOut.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["IsEventFoldingOnDlpAlertsOptedOut"] == nil || getBool(obj, "IsEventFoldingOnDlpAlertsOptedOut") == want)
+		}
+	}
+	if !cfg.IsUserBaseDlpAlertAggregationEnabled.IsUnknown() && !cfg.IsUserBaseDlpAlertAggregationEnabled.IsNull() && !cfg.IsUserBaseDlpAlertAggregationEnabled.Equal(state.IsUserBaseDlpAlertAggregationEnabled) {
+		prev, want := reflected, cfg.IsUserBaseDlpAlertAggregationEnabled.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["IsUserBaseDlpAlertAggregationEnabled"] == nil || getBool(obj, "IsUserBaseDlpAlertAggregationEnabled") == want)
+		}
+	}
+	if !cfg.MigrateLabelScheme.IsUnknown() && !cfg.MigrateLabelScheme.IsNull() && !cfg.MigrateLabelScheme.Equal(state.MigrateLabelScheme) {
+		prev, want := reflected, cfg.MigrateLabelScheme.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["MigrateLabelScheme"] == nil || getBool(obj, "MigrateLabelScheme") == want)
+		}
+	}
+	if !cfg.PurviewLabelConsent.IsUnknown() && !cfg.PurviewLabelConsent.IsNull() && !cfg.PurviewLabelConsent.Equal(state.PurviewLabelConsent) {
+		prev, want := reflected, cfg.PurviewLabelConsent.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["PurviewLabelConsent"] == nil || getBool(obj, "PurviewLabelConsent") == want)
+		}
+	}
+	if !cfg.ReservedForFutureUse.IsUnknown() && !cfg.ReservedForFutureUse.IsNull() && !cfg.ReservedForFutureUse.Equal(state.ReservedForFutureUse) {
+		prev, want := reflected, cfg.ReservedForFutureUse.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["ReservedForFutureUse"] == nil || getBool(obj, "ReservedForFutureUse") == want)
+		}
+	}
+	if !cfg.RetentionForwardCrawl.IsUnknown() && !cfg.RetentionForwardCrawl.IsNull() && !cfg.RetentionForwardCrawl.Equal(state.RetentionForwardCrawl) {
+		prev, want := reflected, cfg.RetentionForwardCrawl.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["RetentionForwardCrawl"] == nil || getBool(obj, "RetentionForwardCrawl") == want)
+		}
+	}
 	r.refresh(ctx, id, &plan, &resp.Diagnostics, reflected)
+	if !cfg.ID.IsUnknown() && !cfg.ID.IsNull() {
+		plan.ID = cfg.ID
+	}
 	r.reconcileState(&cfg, &plan)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
@@ -382,6 +701,170 @@ func (r *policyConfigResource) Delete(_ context.Context, _ resource.DeleteReques
 func (r *policyConfigResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("id"), req.ID)...)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("identity"), req.ID)...)
+}
+
+func (r *policyConfigResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
+	if req.Plan.Raw.IsNull() || !req.State.Raw.IsNull() || r.client == nil {
+		return
+	}
+	var plan policyConfigModel
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	identity := plan.Identity.ValueString()
+	if identity == "" {
+		return
+	}
+	res, err := r.client.SCC.GetPolicyConfig(ctx, purview.GetPolicyConfigParams{Identity: identity})
+	if err != nil {
+		return
+	}
+	obj := firstObject(res.Value)
+	if obj == nil {
+		return
+	}
+	var cur policyConfigModel
+	readPolicyConfig(ctx, obj, &cur)
+	if plan.ID.IsUnknown() {
+		plan.ID = cur.ID
+	}
+	if plan.Identity.IsUnknown() {
+		plan.Identity = cur.Identity
+	}
+	if plan.AggregationTimeWindowForDlpAlerts.IsUnknown() {
+		plan.AggregationTimeWindowForDlpAlerts = cur.AggregationTimeWindowForDlpAlerts
+	}
+	if plan.CaseHoldPolicyLimit.IsUnknown() {
+		plan.CaseHoldPolicyLimit = cur.CaseHoldPolicyLimit
+	}
+	if plan.ClassificationScheme.IsUnknown() {
+		plan.ClassificationScheme = cur.ClassificationScheme
+	}
+	if plan.ComplianceUrl.IsUnknown() {
+		plan.ComplianceUrl = cur.ComplianceUrl
+	}
+	if plan.DlpAlertFoldingConfiguration.IsUnknown() {
+		plan.DlpAlertFoldingConfiguration = cur.DlpAlertFoldingConfiguration
+	}
+	if plan.DlpAlertSlaConfig.IsUnknown() {
+		plan.DlpAlertSlaConfig = cur.DlpAlertSlaConfig
+	}
+	if plan.DlpAppGroups.IsUnknown() {
+		plan.DlpAppGroups = cur.DlpAppGroups
+	}
+	if plan.DlpAppGroupsPsws.IsUnknown() {
+		plan.DlpAppGroupsPsws = cur.DlpAppGroupsPsws
+	}
+	if plan.DlpErrorHandlingConfig.IsUnknown() {
+		plan.DlpErrorHandlingConfig = cur.DlpErrorHandlingConfig
+	}
+	if plan.DlpExtensionGroups.IsUnknown() {
+		plan.DlpExtensionGroups = cur.DlpExtensionGroups
+	}
+	if plan.DlpNetworkShareGroups.IsUnknown() {
+		plan.DlpNetworkShareGroups = cur.DlpNetworkShareGroups
+	}
+	if plan.DlpPrinterGroups.IsUnknown() {
+		plan.DlpPrinterGroups = cur.DlpPrinterGroups
+	}
+	if plan.DlpRemovableMediaGroups.IsUnknown() {
+		plan.DlpRemovableMediaGroups = cur.DlpRemovableMediaGroups
+	}
+	if plan.DocumentIsUnsupportedSeverity.IsUnknown() {
+		plan.DocumentIsUnsupportedSeverity = cur.DocumentIsUnsupportedSeverity
+	}
+	if plan.EnableAbacFeature.IsUnknown() {
+		plan.EnableAbacFeature = cur.EnableAbacFeature
+	}
+	if plan.EnableAdvancedRuleBuilder.IsUnknown() {
+		plan.EnableAdvancedRuleBuilder = cur.EnableAdvancedRuleBuilder
+	}
+	if plan.EnableLabelCoauth.IsUnknown() {
+		plan.EnableLabelCoauth = cur.EnableLabelCoauth
+	}
+	if plan.EnableSensitivityLabelingForPdf.IsUnknown() {
+		plan.EnableSensitivityLabelingForPdf = cur.EnableSensitivityLabelingForPdf
+	}
+	if plan.EnableSpoAipMigration.IsUnknown() {
+		plan.EnableSpoAipMigration = cur.EnableSpoAipMigration
+	}
+	if plan.EndpointDlpGlobalSettings.IsUnknown() {
+		plan.EndpointDlpGlobalSettings = cur.EndpointDlpGlobalSettings
+	}
+	if plan.EndpointDlpGlobalSettingsPsws.IsUnknown() {
+		plan.EndpointDlpGlobalSettingsPsws = cur.EndpointDlpGlobalSettingsPsws
+	}
+	if plan.ExtendTeamsDlpPoliciesToSharePointOneDrive.IsUnknown() {
+		plan.ExtendTeamsDlpPoliciesToSharePointOneDrive = cur.ExtendTeamsDlpPoliciesToSharePointOneDrive
+	}
+	if plan.InformationBarrierMode.IsUnknown() {
+		plan.InformationBarrierMode = cur.InformationBarrierMode
+	}
+	if plan.InformationBarrierPeopleSearchRestriction.IsUnknown() {
+		plan.InformationBarrierPeopleSearchRestriction = cur.InformationBarrierPeopleSearchRestriction
+	}
+	if plan.IsDefaultMlDlpPoliciesOptedOut.IsUnknown() {
+		plan.IsDefaultMlDlpPoliciesOptedOut = cur.IsDefaultMlDlpPoliciesOptedOut
+	}
+	if plan.IsDlpSimulationOptedIn.IsUnknown() {
+		plan.IsDlpSimulationOptedIn = cur.IsDlpSimulationOptedIn
+	}
+	if plan.IsEventFoldingOnDlpAlertsOptedOut.IsUnknown() {
+		plan.IsEventFoldingOnDlpAlertsOptedOut = cur.IsEventFoldingOnDlpAlertsOptedOut
+	}
+	if plan.IsUserBaseDlpAlertAggregationEnabled.IsUnknown() {
+		plan.IsUserBaseDlpAlertAggregationEnabled = cur.IsUserBaseDlpAlertAggregationEnabled
+	}
+	if plan.JitEnforcementSettings.IsUnknown() {
+		plan.JitEnforcementSettings = cur.JitEnforcementSettings
+	}
+	if plan.MessageHeadersToRetainInOutlook.IsUnknown() {
+		plan.MessageHeadersToRetainInOutlook = cur.MessageHeadersToRetainInOutlook
+	}
+	if plan.MigrateLabelScheme.IsUnknown() {
+		plan.MigrateLabelScheme = cur.MigrateLabelScheme
+	}
+	if plan.MigrateLabelSchemeDisplayNames.IsUnknown() {
+		plan.MigrateLabelSchemeDisplayNames = cur.MigrateLabelSchemeDisplayNames
+	}
+	if plan.OnPremisesWorkload.IsUnknown() {
+		plan.OnPremisesWorkload = cur.OnPremisesWorkload
+	}
+	if plan.ProcessingLimitExceededSeverity.IsUnknown() {
+		plan.ProcessingLimitExceededSeverity = cur.ProcessingLimitExceededSeverity
+	}
+	if plan.PurviewLabelConsent.IsUnknown() {
+		plan.PurviewLabelConsent = cur.PurviewLabelConsent
+	}
+	if plan.ReservedForFutureUse.IsUnknown() {
+		plan.ReservedForFutureUse = cur.ReservedForFutureUse
+	}
+	if plan.RetentionForwardCrawl.IsUnknown() {
+		plan.RetentionForwardCrawl = cur.RetentionForwardCrawl
+	}
+	if plan.RuleErrorAction.IsUnknown() {
+		plan.RuleErrorAction = cur.RuleErrorAction
+	}
+	if plan.SenderAddressLocation.IsUnknown() {
+		plan.SenderAddressLocation = cur.SenderAddressLocation
+	}
+	if plan.SiteGroups.IsUnknown() {
+		plan.SiteGroups = cur.SiteGroups
+	}
+	if plan.SiteGroupsPsws.IsUnknown() {
+		plan.SiteGroupsPsws = cur.SiteGroupsPsws
+	}
+	if plan.SpoQuarantineLocation.IsUnknown() {
+		plan.SpoQuarantineLocation = cur.SpoQuarantineLocation
+	}
+	if plan.SpoQuarantineText.IsUnknown() {
+		plan.SpoQuarantineText = cur.SpoQuarantineText
+	}
+	if plan.TextExtractionConfig.IsUnknown() {
+		plan.TextExtractionConfig = cur.TextExtractionConfig
+	}
+	resp.Diagnostics.Append(resp.Plan.Set(ctx, &plan)...)
 }
 
 func (r *policyConfigResource) identityOf(m policyConfigModel) string {
@@ -420,29 +903,30 @@ func (r *policyConfigResource) refresh(ctx context.Context, identity string, m *
 
 func readPolicyConfig(ctx context.Context, obj map[string]any, m *policyConfigModel) {
 	m.ID = types.StringValue(firstNonEmptyStr(getString(obj, "Guid"), getString(obj, "Id"), getString(obj, "Identity")))
-	m.AggregationTimeWindowForDlpAlerts = types.StringValue(getString(obj, "AggregationTimeWindowForDlpAlerts"))
-	m.ClassificationScheme = types.StringValue(getString(obj, "ClassificationScheme"))
+	m.AggregationTimeWindowForDlpAlerts = types.Int64Value(getInt(obj, "AggregationTimeWindowForDlpAlerts"))
+	m.CaseHoldPolicyLimit = types.Int64Value(getInt(obj, "CaseHoldPolicyLimit"))
+	m.ClassificationScheme = types.StringValue(getObjectJSON(obj, "ClassificationScheme"))
 	m.ComplianceUrl = types.StringValue(getString(obj, "ComplianceUrl"))
-	m.DlpAlertFoldingConfiguration = types.StringValue(getString(obj, "DlpAlertFoldingConfiguration"))
+	m.DlpAlertFoldingConfiguration = types.StringValue(getObjectJSON(obj, "DlpAlertFoldingConfiguration"))
 	m.DlpAlertSlaConfig = types.StringValue(getString(obj, "DlpAlertSlaConfig"))
-	m.DlpAppGroups = stringSetValue(ctx, getStringSlice(obj, "DlpAppGroups"))
-	m.DlpAppGroupsPsws = stringSetValue(ctx, getStringSlice(obj, "DlpAppGroupsPsws"))
+	m.DlpAppGroups = types.StringValue(getObjectJSON(obj, "DlpAppGroups"))
+	m.DlpAppGroupsPsws = types.StringValue(getObjectJSON(obj, "DlpAppGroupsPsws"))
 	m.DlpErrorHandlingConfig = types.StringValue(getString(obj, "DlpErrorHandlingConfig"))
-	m.DlpExtensionGroups = types.StringValue(getString(obj, "DlpExtensionGroups"))
-	m.DlpNetworkShareGroups = types.StringValue(getString(obj, "DlpNetworkShareGroups"))
-	m.DlpPrinterGroups = types.StringValue(getString(obj, "DlpPrinterGroups"))
-	m.DlpRemovableMediaGroups = types.StringValue(getString(obj, "DlpRemovableMediaGroups"))
-	m.DocumentIsUnsupportedSeverity = types.StringValue(getString(obj, "DocumentIsUnsupportedSeverity"))
+	m.DlpExtensionGroups = types.StringValue(getObjectJSON(obj, "DlpExtensionGroups"))
+	m.DlpNetworkShareGroups = types.StringValue(getObjectJSON(obj, "DlpNetworkShareGroups"))
+	m.DlpPrinterGroups = types.StringValue(getObjectJSON(obj, "DlpPrinterGroups"))
+	m.DlpRemovableMediaGroups = types.StringValue(getObjectJSON(obj, "DlpRemovableMediaGroups"))
+	m.DocumentIsUnsupportedSeverity = types.StringValue(getObjectJSON(obj, "DocumentIsUnsupportedSeverity"))
 	m.EnableAbacFeature = types.BoolValue(getBool(obj, "EnableAbacFeature"))
 	m.EnableAdvancedRuleBuilder = types.BoolValue(getBool(obj, "EnableAdvancedRuleBuilder"))
 	m.EnableLabelCoauth = types.BoolValue(getBool(obj, "EnableLabelCoauth"))
 	m.EnableSensitivityLabelingForPdf = types.BoolValue(getBool(obj, "EnableSensitivityLabelingForPdf"))
 	m.EnableSpoAipMigration = types.BoolValue(getBool(obj, "EnableSpoAipMigration"))
-	m.EndpointDlpGlobalSettings = stringSetValue(ctx, getStringSlice(obj, "EndpointDlpGlobalSettings"))
-	m.EndpointDlpGlobalSettingsPsws = stringSetValue(ctx, getStringSlice(obj, "EndpointDlpGlobalSettingsPsws"))
+	m.EndpointDlpGlobalSettings = types.StringValue(getObjectJSON(obj, "EndpointDlpGlobalSettings"))
+	m.EndpointDlpGlobalSettingsPsws = types.StringValue(getObjectJSON(obj, "EndpointDlpGlobalSettingsPsws"))
 	m.ExtendTeamsDlpPoliciesToSharePointOneDrive = types.BoolValue(getBool(obj, "ExtendTeamsDlpPoliciesToSharePointOneDrive"))
-	m.InformationBarrierMode = types.StringValue(getString(obj, "InformationBarrierMode"))
-	m.InformationBarrierPeopleSearchRestriction = types.StringValue(getString(obj, "InformationBarrierPeopleSearchRestriction"))
+	m.InformationBarrierMode = types.StringValue(getObjectJSON(obj, "InformationBarrierMode"))
+	m.InformationBarrierPeopleSearchRestriction = types.StringValue(getObjectJSON(obj, "InformationBarrierPeopleSearchRestriction"))
 	m.IsDefaultMlDlpPoliciesOptedOut = types.BoolValue(getBool(obj, "IsDefaultMlDlpPoliciesOptedOut"))
 	m.IsDlpSimulationOptedIn = types.BoolValue(getBool(obj, "IsDlpSimulationOptedIn"))
 	m.IsEventFoldingOnDlpAlertsOptedOut = types.BoolValue(getBool(obj, "IsEventFoldingOnDlpAlertsOptedOut"))
@@ -450,16 +934,16 @@ func readPolicyConfig(ctx context.Context, obj map[string]any, m *policyConfigMo
 	m.JitEnforcementSettings = types.StringValue(getString(obj, "JitEnforcementSettings"))
 	m.MessageHeadersToRetainInOutlook = stringSetValue(ctx, getStringSlice(obj, "MessageHeadersToRetainInOutlook"))
 	m.MigrateLabelScheme = types.BoolValue(getBool(obj, "MigrateLabelScheme"))
-	m.MigrateLabelSchemeDisplayNames = types.StringValue(getString(obj, "MigrateLabelSchemeDisplayNames"))
-	m.OnPremisesWorkload = types.StringValue(getString(obj, "OnPremisesWorkload"))
-	m.ProcessingLimitExceededSeverity = types.StringValue(getString(obj, "ProcessingLimitExceededSeverity"))
+	m.MigrateLabelSchemeDisplayNames = types.StringValue(getObjectJSON(obj, "MigrateLabelSchemeDisplayNames"))
+	m.OnPremisesWorkload = types.StringValue(getObjectJSON(obj, "OnPremisesWorkload"))
+	m.ProcessingLimitExceededSeverity = types.StringValue(getObjectJSON(obj, "ProcessingLimitExceededSeverity"))
 	m.PurviewLabelConsent = types.BoolValue(getBool(obj, "PurviewLabelConsent"))
 	m.ReservedForFutureUse = types.BoolValue(getBool(obj, "ReservedForFutureUse"))
 	m.RetentionForwardCrawl = types.BoolValue(getBool(obj, "RetentionForwardCrawl"))
-	m.RuleErrorAction = types.StringValue(getString(obj, "RuleErrorAction"))
-	m.SenderAddressLocation = types.StringValue(getString(obj, "SenderAddressLocation"))
-	m.SiteGroups = stringSetValue(ctx, getStringSlice(obj, "SiteGroups"))
-	m.SiteGroupsPsws = stringSetValue(ctx, getStringSlice(obj, "SiteGroupsPsws"))
+	m.RuleErrorAction = types.StringValue(getObjectJSON(obj, "RuleErrorAction"))
+	m.SenderAddressLocation = types.StringValue(getObjectJSON(obj, "SenderAddressLocation"))
+	m.SiteGroups = types.StringValue(getObjectJSON(obj, "SiteGroups"))
+	m.SiteGroupsPsws = types.StringValue(getObjectJSON(obj, "SiteGroupsPsws"))
 	m.SpoQuarantineLocation = types.StringValue(getString(obj, "SpoQuarantineLocation"))
 	m.SpoQuarantineText = types.StringValue(getString(obj, "SpoQuarantineText"))
 	m.TextExtractionConfig = types.StringValue(getString(obj, "TextExtractionConfig"))
@@ -467,13 +951,14 @@ func readPolicyConfig(ctx context.Context, obj map[string]any, m *policyConfigMo
 }
 
 func (r *policyConfigResource) reconcileState(cfg, read *policyConfigModel) {
-	read.AggregationTimeWindowForDlpAlerts = reconcile.KeepStr(cfg.AggregationTimeWindowForDlpAlerts, read.AggregationTimeWindowForDlpAlerts)
+	read.AggregationTimeWindowForDlpAlerts = reconcile.KeepInt64(cfg.AggregationTimeWindowForDlpAlerts, read.AggregationTimeWindowForDlpAlerts)
+	read.CaseHoldPolicyLimit = reconcile.KeepInt64(cfg.CaseHoldPolicyLimit, read.CaseHoldPolicyLimit)
 	read.ClassificationScheme = reconcile.KeepStr(cfg.ClassificationScheme, read.ClassificationScheme)
 	read.ComplianceUrl = reconcile.KeepStr(cfg.ComplianceUrl, read.ComplianceUrl)
 	read.DlpAlertFoldingConfiguration = reconcile.KeepStr(cfg.DlpAlertFoldingConfiguration, read.DlpAlertFoldingConfiguration)
 	read.DlpAlertSlaConfig = reconcile.KeepStr(cfg.DlpAlertSlaConfig, read.DlpAlertSlaConfig)
-	read.DlpAppGroups = reconcile.KeepSet(cfg.DlpAppGroups, read.DlpAppGroups)
-	read.DlpAppGroupsPsws = reconcile.KeepSet(cfg.DlpAppGroupsPsws, read.DlpAppGroupsPsws)
+	read.DlpAppGroups = reconcile.KeepStr(cfg.DlpAppGroups, read.DlpAppGroups)
+	read.DlpAppGroupsPsws = reconcile.KeepStr(cfg.DlpAppGroupsPsws, read.DlpAppGroupsPsws)
 	read.DlpErrorHandlingConfig = reconcile.KeepStr(cfg.DlpErrorHandlingConfig, read.DlpErrorHandlingConfig)
 	read.DlpExtensionGroups = reconcile.KeepStr(cfg.DlpExtensionGroups, read.DlpExtensionGroups)
 	read.DlpNetworkShareGroups = reconcile.KeepStr(cfg.DlpNetworkShareGroups, read.DlpNetworkShareGroups)
@@ -485,8 +970,8 @@ func (r *policyConfigResource) reconcileState(cfg, read *policyConfigModel) {
 	read.EnableLabelCoauth = reconcile.KeepBool(cfg.EnableLabelCoauth, read.EnableLabelCoauth)
 	read.EnableSensitivityLabelingForPdf = reconcile.KeepBool(cfg.EnableSensitivityLabelingForPdf, read.EnableSensitivityLabelingForPdf)
 	read.EnableSpoAipMigration = reconcile.KeepBool(cfg.EnableSpoAipMigration, read.EnableSpoAipMigration)
-	read.EndpointDlpGlobalSettings = reconcile.KeepSet(cfg.EndpointDlpGlobalSettings, read.EndpointDlpGlobalSettings)
-	read.EndpointDlpGlobalSettingsPsws = reconcile.KeepSet(cfg.EndpointDlpGlobalSettingsPsws, read.EndpointDlpGlobalSettingsPsws)
+	read.EndpointDlpGlobalSettings = reconcile.KeepStr(cfg.EndpointDlpGlobalSettings, read.EndpointDlpGlobalSettings)
+	read.EndpointDlpGlobalSettingsPsws = reconcile.KeepStr(cfg.EndpointDlpGlobalSettingsPsws, read.EndpointDlpGlobalSettingsPsws)
 	read.ExtendTeamsDlpPoliciesToSharePointOneDrive = reconcile.KeepBool(cfg.ExtendTeamsDlpPoliciesToSharePointOneDrive, read.ExtendTeamsDlpPoliciesToSharePointOneDrive)
 	read.InformationBarrierMode = reconcile.KeepStr(cfg.InformationBarrierMode, read.InformationBarrierMode)
 	read.InformationBarrierPeopleSearchRestriction = reconcile.KeepStr(cfg.InformationBarrierPeopleSearchRestriction, read.InformationBarrierPeopleSearchRestriction)
@@ -505,8 +990,8 @@ func (r *policyConfigResource) reconcileState(cfg, read *policyConfigModel) {
 	read.RetentionForwardCrawl = reconcile.KeepBool(cfg.RetentionForwardCrawl, read.RetentionForwardCrawl)
 	read.RuleErrorAction = reconcile.KeepStr(cfg.RuleErrorAction, read.RuleErrorAction)
 	read.SenderAddressLocation = reconcile.KeepStr(cfg.SenderAddressLocation, read.SenderAddressLocation)
-	read.SiteGroups = reconcile.KeepSet(cfg.SiteGroups, read.SiteGroups)
-	read.SiteGroupsPsws = reconcile.KeepSet(cfg.SiteGroupsPsws, read.SiteGroupsPsws)
+	read.SiteGroups = reconcile.KeepStr(cfg.SiteGroups, read.SiteGroups)
+	read.SiteGroupsPsws = reconcile.KeepStr(cfg.SiteGroupsPsws, read.SiteGroupsPsws)
 	read.SpoQuarantineLocation = reconcile.KeepStr(cfg.SpoQuarantineLocation, read.SpoQuarantineLocation)
 	read.SpoQuarantineText = reconcile.KeepStr(cfg.SpoQuarantineText, read.SpoQuarantineText)
 	read.TextExtractionConfig = reconcile.KeepStr(cfg.TextExtractionConfig, read.TextExtractionConfig)

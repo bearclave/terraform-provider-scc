@@ -27,7 +27,7 @@ Read-Only:
 - `archive_enabled` (Boolean) Maps to the -ArchiveEnabled parameter.
 - `archive_trigger_based_on` (String) Maps to the -ArchiveTriggerBasedOn parameter.
 - `archive_trigger_in_days` (String) Maps to the -ArchiveTriggerInDays parameter.
-- `auto_approval_period` (String) Maps to the -AutoApprovalPeriod parameter.
+- `auto_approval_period` (Number) Maps to the -AutoApprovalPeriod parameter.
 - `comment` (String) Maps to the -Comment parameter.
 - `compliance_tag_for_next_stage` (String) Maps to the -ComplianceTagForNextStage parameter.
 - `event_type` (String) Maps to the -EventType parameter.
@@ -35,7 +35,7 @@ Read-Only:
 - `flow_id` (String) Maps to the -FlowId parameter.
 - `id` (String) Object identifier (GUID).
 - `identity` (String) Identity used to target the object.
-- `is_record_label` (String) Maps to the -IsRecordLabel parameter.
+- `is_record_label` (Boolean) Maps to the -IsRecordLabel parameter.
 - `is_record_unlocked_as_default` (Boolean) Maps to the -IsRecordUnlockedAsDefault parameter.
 - `multi_stage_review_property` (String) Maps to the -MultiStageReviewProperty parameter.
 - `name` (String) Maps to the -Name parameter.

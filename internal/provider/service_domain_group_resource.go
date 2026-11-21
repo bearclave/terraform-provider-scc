@@ -49,7 +49,7 @@ func (r *serviceDomainGroupResource) Schema(_ context.Context, _ resource.Schema
 		Description: "Manages the ServiceDomainGroup object via New-ServiceDomainGroup / Get-ServiceDomainGroup / Set-ServiceDomainGroup / Remove-ServiceDomainGroup.",
 		Attributes: map[string]schema.Attribute{
 			"id":             schema.StringAttribute{Computed: true, Description: "Object identifier (GUID).", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"identity":       schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets."},
+			"identity":       schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"name":           schema.StringAttribute{Required: true, Description: "Maps to the -Name parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
 			"organization":   schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -Organization parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace(), stringplanmodifier.UseStateForUnknown()}},
 			"site_addresses": schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -SiteAddresses parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
@@ -72,18 +72,29 @@ func (r *serviceDomainGroupResource) Create(ctx context.Context, req resource.Cr
 		return
 	}
 
-	p := purview.NewServiceDomainGroupParams{
-		Name:          plan.Name.ValueString(),
-		SiteAddresses: plan.SiteAddresses.ValueString(),
-		SiteGroupId:   plan.SiteGroupId.ValueString(),
+	var config serviceDomainGroupModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
+	if resp.Diagnostics.HasError() {
+		return
 	}
-	if v := plan.Organization.ValueString(); v != "" {
-		p.Organization = v
+
+	p := purview.NewServiceDomainGroupParams{}
+	if !config.Name.IsNull() {
+		p.Name = plan.Name.ValueString()
+	}
+	if v := config.Organization.ValueString(); v != "" {
+		p.Organization = objectParam(v)
+	}
+	if !config.SiteAddresses.IsNull() {
+		p.SiteAddresses = plan.SiteAddresses.ValueString()
+	}
+	if !config.SiteGroupId.IsNull() {
+		p.SiteGroupId = plan.SiteGroupId.ValueString()
 	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	res, err := r.client.SCC.NewServiceDomainGroup(ctx, p)
+	res, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.NewServiceDomainGroup, p, isNotFound)
 	if err != nil {
 		resp.Diagnostics.AddError("New-ServiceDomainGroup failed", err.Error())
 		return
@@ -130,11 +141,13 @@ func (r *serviceDomainGroupResource) Update(ctx context.Context, req resource.Up
 	id := r.identityOf(state)
 	sp := purview.SetServiceDomainGroupParams{}
 	sp.Identity = id
-	sp.SiteAddresses = plan.SiteAddresses.ValueString()
+	if !plan.SiteAddresses.Equal(state.SiteAddresses) {
+		sp.SiteAddresses = plan.SiteAddresses.ValueString()
+	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	if _, err := r.client.SCC.SetServiceDomainGroup(ctx, sp); err != nil {
+	if _, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.SetServiceDomainGroup, sp, isNotFound); err != nil {
 		resp.Diagnostics.AddError("Set-ServiceDomainGroup failed", err.Error())
 		return
 	}
@@ -143,6 +156,9 @@ func (r *serviceDomainGroupResource) Update(ctx context.Context, req resource.Up
 		"SiteAddresses": cfg.SiteAddresses,
 	}, getString)
 	r.refresh(ctx, id, &plan, &resp.Diagnostics, reflected)
+	if !cfg.ID.IsUnknown() && !cfg.ID.IsNull() {
+		plan.ID = cfg.ID
+	}
 	r.reconcileState(&cfg, &plan)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
@@ -203,7 +219,7 @@ func readServiceDomainGroup(ctx context.Context, obj map[string]any, m *serviceD
 	m.ID = types.StringValue(firstNonEmptyStr(getString(obj, "Guid"), getString(obj, "Id"), getString(obj, "Identity")))
 	m.Identity = types.StringValue(firstNonEmptyStr(getString(obj, "Identity"), getString(obj, "Guid"), getString(obj, "Name")))
 	m.Name = types.StringValue(getString(obj, "Name"))
-	m.Organization = types.StringValue(getString(obj, "Organization"))
+	m.Organization = types.StringValue(getObjectJSON(obj, "Organization"))
 	m.SiteAddresses = types.StringValue(getString(obj, "SiteAddresses"))
 	m.SiteGroupId = types.StringValue(getString(obj, "SiteGroupId"))
 	_ = ctx

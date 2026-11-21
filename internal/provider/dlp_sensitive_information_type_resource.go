@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
@@ -39,12 +40,12 @@ type dlpSensitiveInformationTypeModel struct {
 	ID              types.String `tfsdk:"id"`
 	Identity        types.String `tfsdk:"identity"`
 	Description     types.String `tfsdk:"description"`
-	FileData        types.Set    `tfsdk:"file_data"`
-	Fingerprints    types.String `tfsdk:"fingerprints"`
+	FileData        types.String `tfsdk:"file_data"`
+	Fingerprints    types.Set    `tfsdk:"fingerprints"`
 	IsExact         types.Bool   `tfsdk:"is_exact"`
 	Locale          types.String `tfsdk:"locale"`
 	Name            types.String `tfsdk:"name"`
-	Threshold       types.String `tfsdk:"threshold"`
+	Threshold       types.Int64  `tfsdk:"threshold"`
 	ThresholdConfig types.String `tfsdk:"threshold_config"`
 }
 
@@ -59,12 +60,12 @@ func (r *dlpSensitiveInformationTypeResource) Schema(_ context.Context, _ resour
 			"id":               schema.StringAttribute{Computed: true, Description: "Object identifier (GUID).", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"identity":         schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets."},
 			"description":      schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -Description parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"file_data":        schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -FileData parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
-			"fingerprints":     schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -Fingerprints parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"file_data":        schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -FileData parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"fingerprints":     schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -Fingerprints parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
 			"is_exact":         schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -IsExact parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
 			"locale":           schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -Locale parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"name":             schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -Name parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"threshold":        schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -Threshold parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"threshold":        schema.Int64Attribute{Optional: true, Computed: true, Description: "Maps to the -Threshold parameter.", PlanModifiers: []planmodifier.Int64{int64planmodifier.UseStateForUnknown()}},
 			"threshold_config": schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ThresholdConfig parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 		},
 	}
@@ -84,28 +85,47 @@ func (r *dlpSensitiveInformationTypeResource) Create(ctx context.Context, req re
 		return
 	}
 
-	p := purview.NewDlpSensitiveInformationTypeParams{
-		Description: plan.Description.ValueString(),
-		FileData:    toStringSlice(ctx, plan.FileData, &resp.Diagnostics),
-		IsExact:     plan.IsExact.ValueBool(),
-		Name:        plan.Name.ValueString(),
+	var config dlpSensitiveInformationTypeModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
+	if resp.Diagnostics.HasError() {
+		return
 	}
-	if v := plan.Fingerprints.ValueString(); v != "" {
-		p.Fingerprints = v
+
+	p := purview.NewDlpSensitiveInformationTypeParams{}
+	if !config.Description.IsNull() {
+		p.Description = plan.Description.ValueString()
 	}
-	if v := plan.Locale.ValueString(); v != "" {
-		p.Locale = v
+	if v := config.FileData.ValueString(); v != "" {
+		p.FileData = objectParam(v)
 	}
-	if v := plan.Threshold.ValueString(); v != "" {
-		p.Threshold = v
+	if !config.Fingerprints.IsNull() {
+		if v := toStringSlice(ctx, plan.Fingerprints, &resp.Diagnostics); len(v) > 0 {
+			p.Fingerprints = v
+		}
 	}
-	if v := plan.ThresholdConfig.ValueString(); v != "" {
-		p.ThresholdConfig = v
+	if !config.IsExact.IsNull() {
+		if !plan.IsExact.IsUnknown() {
+			p.IsExact = plan.IsExact.ValueBoolPointer()
+		}
+	}
+	if v := config.Locale.ValueString(); v != "" {
+		p.Locale = objectParam(v)
+	}
+	if !config.Name.IsNull() {
+		p.Name = plan.Name.ValueString()
+	}
+	if !config.Threshold.IsNull() {
+		if !plan.Threshold.IsUnknown() {
+			p.Threshold = plan.Threshold.ValueInt64Pointer()
+		}
+	}
+	if v := config.ThresholdConfig.ValueString(); v != "" {
+		p.ThresholdConfig = objectParam(v)
 	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	res, err := r.client.SCC.NewDlpSensitiveInformationType(ctx, p)
+	res, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.NewDlpSensitiveInformationType, p, isNotFound)
 	if err != nil {
 		resp.Diagnostics.AddError("New-DlpSensitiveInformationType failed", err.Error())
 		return
@@ -152,39 +172,92 @@ func (r *dlpSensitiveInformationTypeResource) Update(ctx context.Context, req re
 	id := r.identityOf(state)
 	sp := purview.SetDlpSensitiveInformationTypeParams{}
 	sp.Identity = id
-	sp.Description = plan.Description.ValueString()
-	sp.FileData = toStringSlice(ctx, plan.FileData, &resp.Diagnostics)
-	if v := plan.Fingerprints.ValueString(); v != "" {
-		sp.Fingerprints = v
+	var cur *dlpSensitiveInformationTypeModel
+	curRead := false
+	current := func() *dlpSensitiveInformationTypeModel {
+		if !curRead {
+			curRead = true
+			var m dlpSensitiveInformationTypeModel
+			if r.refresh(ctx, id, &m, &resp.Diagnostics, nil) {
+				cur = &m
+			} else if !resp.Diagnostics.HasError() {
+				resp.Diagnostics.AddError("Get-DlpSensitiveInformationType failed", "the object could not be read to determine the list values to remove; nothing was changed")
+			}
+		}
+		return cur
 	}
-	sp.IsExact = plan.IsExact.ValueBool()
-	if v := plan.Locale.ValueString(); v != "" {
-		sp.Locale = v
+	if !plan.Description.Equal(state.Description) {
+		sp.Description = plan.Description.ValueString()
 	}
-	sp.Name = plan.Name.ValueString()
-	if v := plan.Threshold.ValueString(); v != "" {
-		sp.Threshold = v
+	if !plan.FileData.Equal(state.FileData) {
+		if v := plan.FileData.ValueString(); v != "" {
+			sp.FileData = objectParam(v)
+		}
 	}
-	if v := plan.ThresholdConfig.ValueString(); v != "" {
-		sp.ThresholdConfig = v
+	if !plan.Fingerprints.Equal(state.Fingerprints) {
+		if !plan.Fingerprints.IsNull() && !plan.Fingerprints.IsUnknown() {
+			if v := toStringSlice(ctx, plan.Fingerprints, &resp.Diagnostics); len(v) > 0 {
+				sp.Fingerprints = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.Fingerprints, &resp.Diagnostics); len(rm) > 0 {
+						sp.FingerprintsDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
+	}
+	if !plan.IsExact.Equal(state.IsExact) {
+		if !plan.IsExact.IsUnknown() {
+			sp.IsExact = plan.IsExact.ValueBoolPointer()
+		}
+	}
+	if !plan.Locale.Equal(state.Locale) {
+		if v := plan.Locale.ValueString(); v != "" {
+			sp.Locale = objectParam(v)
+		}
+	}
+	if !plan.Name.Equal(state.Name) {
+		sp.Name = plan.Name.ValueString()
+	}
+	if !plan.Threshold.Equal(state.Threshold) {
+		if !plan.Threshold.IsUnknown() {
+			sp.Threshold = plan.Threshold.ValueInt64Pointer()
+		}
+	}
+	if !plan.ThresholdConfig.Equal(state.ThresholdConfig) {
+		if v := plan.ThresholdConfig.ValueString(); v != "" {
+			sp.ThresholdConfig = objectParam(v)
+		}
 	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	if _, err := r.client.SCC.SetDlpSensitiveInformationType(ctx, sp); err != nil {
+	if _, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.SetDlpSensitiveInformationType, sp, isNotFound); err != nil {
 		resp.Diagnostics.AddError("Set-DlpSensitiveInformationType failed", err.Error())
 		return
 	}
 	cfg := plan
 	reflected := reconcile.ReflectsFields(map[string]types.String{
-		"Description":     cfg.Description,
-		"Fingerprints":    cfg.Fingerprints,
-		"Locale":          cfg.Locale,
-		"Name":            cfg.Name,
-		"Threshold":       cfg.Threshold,
-		"ThresholdConfig": cfg.ThresholdConfig,
+		"Description": cfg.Description,
+		"Name":        cfg.Name,
 	}, getString)
+	if !cfg.IsExact.IsUnknown() && !cfg.IsExact.IsNull() && !cfg.IsExact.Equal(state.IsExact) {
+		prev, want := reflected, cfg.IsExact.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["IsExact"] == nil || getBool(obj, "IsExact") == want)
+		}
+	}
+	if !cfg.Threshold.IsUnknown() && !cfg.Threshold.IsNull() && !cfg.Threshold.Equal(state.Threshold) {
+		prev, want := reflected, cfg.Threshold.ValueInt64()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["Threshold"] == nil || getInt(obj, "Threshold") == want)
+		}
+	}
 	r.refresh(ctx, id, &plan, &resp.Diagnostics, reflected)
+	if !cfg.ID.IsUnknown() && !cfg.ID.IsNull() {
+		plan.ID = cfg.ID
+	}
 	r.reconcileState(&cfg, &plan)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
@@ -245,23 +318,23 @@ func readDlpSensitiveInformationType(ctx context.Context, obj map[string]any, m 
 	m.ID = types.StringValue(firstNonEmptyStr(getString(obj, "Guid"), getString(obj, "Id"), getString(obj, "Identity")))
 	m.Identity = types.StringValue(firstNonEmptyStr(getString(obj, "Identity"), getString(obj, "Guid"), getString(obj, "Name")))
 	m.Description = types.StringValue(getString(obj, "Description"))
-	m.FileData = stringSetValue(ctx, getStringSlice(obj, "FileData"))
-	m.Fingerprints = types.StringValue(getString(obj, "Fingerprints"))
+	m.FileData = types.StringValue(getObjectJSON(obj, "FileData"))
+	m.Fingerprints = stringSetValue(ctx, getStringSlice(obj, "Fingerprints"))
 	m.IsExact = types.BoolValue(getBool(obj, "IsExact"))
-	m.Locale = types.StringValue(getString(obj, "Locale"))
+	m.Locale = types.StringValue(getObjectJSON(obj, "Locale"))
 	m.Name = types.StringValue(getString(obj, "Name"))
-	m.Threshold = types.StringValue(getString(obj, "Threshold"))
-	m.ThresholdConfig = types.StringValue(getString(obj, "ThresholdConfig"))
+	m.Threshold = types.Int64Value(getInt(obj, "Threshold"))
+	m.ThresholdConfig = types.StringValue(getObjectJSON(obj, "ThresholdConfig"))
 	_ = ctx
 }
 
 func (r *dlpSensitiveInformationTypeResource) reconcileState(cfg, read *dlpSensitiveInformationTypeModel) {
 	read.Description = reconcile.KeepStr(cfg.Description, read.Description)
-	read.FileData = reconcile.KeepSet(cfg.FileData, read.FileData)
-	read.Fingerprints = reconcile.KeepStr(cfg.Fingerprints, read.Fingerprints)
+	read.FileData = reconcile.KeepStr(cfg.FileData, read.FileData)
+	read.Fingerprints = reconcile.KeepSet(cfg.Fingerprints, read.Fingerprints)
 	read.IsExact = reconcile.KeepBool(cfg.IsExact, read.IsExact)
 	read.Locale = reconcile.KeepStr(cfg.Locale, read.Locale)
 	read.Name = reconcile.KeepStr(cfg.Name, read.Name)
-	read.Threshold = reconcile.KeepStr(cfg.Threshold, read.Threshold)
+	read.Threshold = reconcile.KeepInt64(cfg.Threshold, read.Threshold)
 	read.ThresholdConfig = reconcile.KeepStr(cfg.ThresholdConfig, read.ThresholdConfig)
 }

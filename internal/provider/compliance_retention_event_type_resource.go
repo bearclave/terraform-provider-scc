@@ -49,7 +49,7 @@ func (r *complianceRetentionEventTypeResource) Schema(_ context.Context, _ resou
 		Description: "Manages the ComplianceRetentionEventType object via New-ComplianceRetentionEventType / Get-ComplianceRetentionEventType / Set-ComplianceRetentionEventType / Remove-ComplianceRetentionEventType.",
 		Attributes: map[string]schema.Attribute{
 			"id":       schema.StringAttribute{Computed: true, Description: "Object identifier (GUID).", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"identity": schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets."},
+			"identity": schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"comment":  schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -Comment parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"name":     schema.StringAttribute{Required: true, Description: "Maps to the -Name parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
 		},
@@ -70,14 +70,23 @@ func (r *complianceRetentionEventTypeResource) Create(ctx context.Context, req r
 		return
 	}
 
-	p := purview.NewComplianceRetentionEventTypeParams{
-		Comment: plan.Comment.ValueString(),
-		Name:    plan.Name.ValueString(),
+	var config complianceRetentionEventTypeModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	p := purview.NewComplianceRetentionEventTypeParams{}
+	if !config.Comment.IsNull() {
+		p.Comment = plan.Comment.ValueString()
+	}
+	if !config.Name.IsNull() {
+		p.Name = plan.Name.ValueString()
 	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	res, err := r.client.SCC.NewComplianceRetentionEventType(ctx, p)
+	res, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.NewComplianceRetentionEventType, p, isNotFound)
 	if err != nil {
 		resp.Diagnostics.AddError("New-ComplianceRetentionEventType failed", err.Error())
 		return
@@ -124,11 +133,13 @@ func (r *complianceRetentionEventTypeResource) Update(ctx context.Context, req r
 	id := r.identityOf(state)
 	sp := purview.SetComplianceRetentionEventTypeParams{}
 	sp.Identity = id
-	sp.Comment = plan.Comment.ValueString()
+	if !plan.Comment.Equal(state.Comment) {
+		sp.Comment = plan.Comment.ValueString()
+	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	if _, err := r.client.SCC.SetComplianceRetentionEventType(ctx, sp); err != nil {
+	if _, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.SetComplianceRetentionEventType, sp, isNotFound); err != nil {
 		resp.Diagnostics.AddError("Set-ComplianceRetentionEventType failed", err.Error())
 		return
 	}
@@ -137,6 +148,9 @@ func (r *complianceRetentionEventTypeResource) Update(ctx context.Context, req r
 		"Comment": cfg.Comment,
 	}, getString)
 	r.refresh(ctx, id, &plan, &resp.Diagnostics, reflected)
+	if !cfg.ID.IsUnknown() && !cfg.ID.IsNull() {
+		plan.ID = cfg.ID
+	}
 	r.reconcileState(&cfg, &plan)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }

@@ -10,7 +10,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
@@ -38,32 +40,32 @@ type labelModel struct {
 	AbacEnabled                                           types.String `tfsdk:"abac_enabled"`
 	AdvancedSettings                                      types.String `tfsdk:"advanced_settings"`
 	ApplyContentMarkingFooterAlignment                    types.String `tfsdk:"apply_content_marking_footer_alignment"`
-	ApplyContentMarkingFooterEnabled                      types.String `tfsdk:"apply_content_marking_footer_enabled"`
+	ApplyContentMarkingFooterEnabled                      types.Bool   `tfsdk:"apply_content_marking_footer_enabled"`
 	ApplyContentMarkingFooterFontColor                    types.String `tfsdk:"apply_content_marking_footer_font_color"`
 	ApplyContentMarkingFooterFontName                     types.String `tfsdk:"apply_content_marking_footer_font_name"`
-	ApplyContentMarkingFooterFontSize                     types.String `tfsdk:"apply_content_marking_footer_font_size"`
-	ApplyContentMarkingFooterMargin                       types.String `tfsdk:"apply_content_marking_footer_margin"`
+	ApplyContentMarkingFooterFontSize                     types.Int64  `tfsdk:"apply_content_marking_footer_font_size"`
+	ApplyContentMarkingFooterMargin                       types.Int64  `tfsdk:"apply_content_marking_footer_margin"`
 	ApplyContentMarkingFooterText                         types.String `tfsdk:"apply_content_marking_footer_text"`
 	ApplyContentMarkingHeaderAlignment                    types.String `tfsdk:"apply_content_marking_header_alignment"`
-	ApplyContentMarkingHeaderEnabled                      types.String `tfsdk:"apply_content_marking_header_enabled"`
+	ApplyContentMarkingHeaderEnabled                      types.Bool   `tfsdk:"apply_content_marking_header_enabled"`
 	ApplyContentMarkingHeaderFontColor                    types.String `tfsdk:"apply_content_marking_header_font_color"`
 	ApplyContentMarkingHeaderFontName                     types.String `tfsdk:"apply_content_marking_header_font_name"`
-	ApplyContentMarkingHeaderFontSize                     types.String `tfsdk:"apply_content_marking_header_font_size"`
-	ApplyContentMarkingHeaderMargin                       types.String `tfsdk:"apply_content_marking_header_margin"`
+	ApplyContentMarkingHeaderFontSize                     types.Int64  `tfsdk:"apply_content_marking_header_font_size"`
+	ApplyContentMarkingHeaderMargin                       types.Int64  `tfsdk:"apply_content_marking_header_margin"`
 	ApplyContentMarkingHeaderText                         types.String `tfsdk:"apply_content_marking_header_text"`
-	ApplyDynamicWatermarkingEnabled                       types.String `tfsdk:"apply_dynamic_watermarking_enabled"`
+	ApplyDynamicWatermarkingEnabled                       types.Bool   `tfsdk:"apply_dynamic_watermarking_enabled"`
 	ApplyMessageMetaData                                  types.String `tfsdk:"apply_message_meta_data"`
 	ApplyMessageMetaDataEnabled                           types.String `tfsdk:"apply_message_meta_data_enabled"`
-	ApplyWaterMarkingEnabled                              types.String `tfsdk:"apply_water_marking_enabled"`
+	ApplyWaterMarkingEnabled                              types.Bool   `tfsdk:"apply_water_marking_enabled"`
 	ApplyWaterMarkingFontColor                            types.String `tfsdk:"apply_water_marking_font_color"`
 	ApplyWaterMarkingFontName                             types.String `tfsdk:"apply_water_marking_font_name"`
-	ApplyWaterMarkingFontSize                             types.String `tfsdk:"apply_water_marking_font_size"`
+	ApplyWaterMarkingFontSize                             types.Int64  `tfsdk:"apply_water_marking_font_size"`
 	ApplyWaterMarkingLayout                               types.String `tfsdk:"apply_water_marking_layout"`
 	ApplyWaterMarkingText                                 types.String `tfsdk:"apply_water_marking_text"`
 	ColumnAssetCondition                                  types.String `tfsdk:"column_asset_condition"`
 	Comment                                               types.String `tfsdk:"comment"`
 	ConditionalAccessAuthContext                          types.String `tfsdk:"conditional_access_auth_context"`
-	Conditions                                            types.String `tfsdk:"conditions"`
+	Conditions                                            types.Set    `tfsdk:"conditions"`
 	ContentType                                           types.String `tfsdk:"content_type"`
 	DefaultContentLabel                                   types.String `tfsdk:"default_content_label"`
 	DenyAccessEnabled                                     types.String `tfsdk:"deny_access_enabled"`
@@ -76,13 +78,13 @@ type labelModel struct {
 	EncryptionAipTemplateScopes                           types.String `tfsdk:"encryption_aip_template_scopes"`
 	EncryptionContentExpiredOnDateInDaysOrNever           types.String `tfsdk:"encryption_content_expired_on_date_in_days_or_never"`
 	EncryptionDisableAutomaticOwnerRights                 types.String `tfsdk:"encryption_disable_automatic_owner_rights"`
-	EncryptionDoNotForward                                types.String `tfsdk:"encryption_do_not_forward"`
+	EncryptionDoNotForward                                types.Bool   `tfsdk:"encryption_do_not_forward"`
 	EncryptionDoubleKeyEncryptionUrl                      types.String `tfsdk:"encryption_double_key_encryption_url"`
-	EncryptionEnabled                                     types.String `tfsdk:"encryption_enabled"`
-	EncryptionEncryptOnly                                 types.String `tfsdk:"encryption_encrypt_only"`
+	EncryptionEnabled                                     types.Bool   `tfsdk:"encryption_enabled"`
+	EncryptionEncryptOnly                                 types.Bool   `tfsdk:"encryption_encrypt_only"`
 	EncryptionLinkedTemplateId                            types.String `tfsdk:"encryption_linked_template_id"`
-	EncryptionOfflineAccessDays                           types.String `tfsdk:"encryption_offline_access_days"`
-	EncryptionPromptUser                                  types.String `tfsdk:"encryption_prompt_user"`
+	EncryptionOfflineAccessDays                           types.Int64  `tfsdk:"encryption_offline_access_days"`
+	EncryptionPromptUser                                  types.Bool   `tfsdk:"encryption_prompt_user"`
 	EncryptionProtectionType                              types.String `tfsdk:"encryption_protection_type"`
 	EncryptionRightsDefinitions                           types.String `tfsdk:"encryption_rights_definitions"`
 	EncryptionRightsUrl                                   types.String `tfsdk:"encryption_rights_url"`
@@ -90,45 +92,45 @@ type labelModel struct {
 	InformationProtectionAttributeRequired                types.String `tfsdk:"information_protection_attribute_required"`
 	InheritToChildItems                                   types.String `tfsdk:"inherit_to_child_items"`
 	IsLabelGroup                                          types.Bool   `tfsdk:"is_label_group"`
-	LabelActions                                          types.String `tfsdk:"label_actions"`
-	LocaleSettings                                        types.String `tfsdk:"locale_settings"`
+	LabelActions                                          types.Set    `tfsdk:"label_actions"`
+	LocaleSettings                                        types.Set    `tfsdk:"locale_settings"`
 	MigrationId                                           types.String `tfsdk:"migration_id"`
 	Name                                                  types.String `tfsdk:"name"`
 	NextLabel                                             types.String `tfsdk:"next_label"`
 	ParentId                                              types.String `tfsdk:"parent_id"`
 	PreviousLabel                                         types.String `tfsdk:"previous_label"`
-	Priority                                              types.String `tfsdk:"priority"`
+	Priority                                              types.Int64  `tfsdk:"priority"`
 	RemoveParentLink                                      types.Bool   `tfsdk:"remove_parent_link"`
 	RuleBlob                                              types.String `tfsdk:"rule_blob"`
 	SchematizedDataCondition                              types.String `tfsdk:"schematized_data_condition"`
 	Setting                                               types.String `tfsdk:"setting"`
 	Settings                                              types.String `tfsdk:"settings"`
-	SiteAndGroupProtectionAllowAccessToGuestUsers         types.String `tfsdk:"site_and_group_protection_allow_access_to_guest_users"`
-	SiteAndGroupProtectionAllowEmailFromGuestUsers        types.String `tfsdk:"site_and_group_protection_allow_email_from_guest_users"`
-	SiteAndGroupProtectionAllowFullAccess                 types.String `tfsdk:"site_and_group_protection_allow_full_access"`
-	SiteAndGroupProtectionAllowLimitedAccess              types.String `tfsdk:"site_and_group_protection_allow_limited_access"`
-	SiteAndGroupProtectionBlockAccess                     types.String `tfsdk:"site_and_group_protection_block_access"`
-	SiteAndGroupProtectionEnabled                         types.String `tfsdk:"site_and_group_protection_enabled"`
+	SiteAndGroupProtectionAllowAccessToGuestUsers         types.Bool   `tfsdk:"site_and_group_protection_allow_access_to_guest_users"`
+	SiteAndGroupProtectionAllowEmailFromGuestUsers        types.Bool   `tfsdk:"site_and_group_protection_allow_email_from_guest_users"`
+	SiteAndGroupProtectionAllowFullAccess                 types.Bool   `tfsdk:"site_and_group_protection_allow_full_access"`
+	SiteAndGroupProtectionAllowLimitedAccess              types.Bool   `tfsdk:"site_and_group_protection_allow_limited_access"`
+	SiteAndGroupProtectionBlockAccess                     types.Bool   `tfsdk:"site_and_group_protection_block_access"`
+	SiteAndGroupProtectionEnabled                         types.Bool   `tfsdk:"site_and_group_protection_enabled"`
 	SiteAndGroupProtectionLevel                           types.String `tfsdk:"site_and_group_protection_level"`
 	SiteAndGroupProtectionPrivacy                         types.String `tfsdk:"site_and_group_protection_privacy"`
 	SiteExternalSharingControlType                        types.String `tfsdk:"site_external_sharing_control_type"`
 	TeamsAllowMeetingChat                                 types.String `tfsdk:"teams_allow_meeting_chat"`
-	TeamsAllowPrivateTeamsToBeDiscoverableUsingSearch     types.String `tfsdk:"teams_allow_private_teams_to_be_discoverable_using_search"`
+	TeamsAllowPrivateTeamsToBeDiscoverableUsingSearch     types.Bool   `tfsdk:"teams_allow_private_teams_to_be_discoverable_using_search"`
 	TeamsAllowedPresenters                                types.String `tfsdk:"teams_allowed_presenters"`
-	TeamsBypassLobbyForDialInUsers                        types.String `tfsdk:"teams_bypass_lobby_for_dial_in_users"`
-	TeamsChannelProtectionEnabled                         types.String `tfsdk:"teams_channel_protection_enabled"`
-	TeamsChannelSharedWithExternalTenants                 types.String `tfsdk:"teams_channel_shared_with_external_tenants"`
-	TeamsChannelSharedWithPrivateTeamsOnly                types.String `tfsdk:"teams_channel_shared_with_private_teams_only"`
-	TeamsChannelSharedWithSameLabelOnly                   types.String `tfsdk:"teams_channel_shared_with_same_label_only"`
-	TeamsCopyRestrictionEnforced                          types.String `tfsdk:"teams_copy_restriction_enforced"`
-	TeamsDetectSensitiveContentDuringScreenSharingEnabled types.String `tfsdk:"teams_detect_sensitive_content_during_screen_sharing_enabled"`
-	TeamsDisableLobby                                     types.String `tfsdk:"teams_disable_lobby"`
-	TeamsEndToEndEncryptionEnabled                        types.String `tfsdk:"teams_end_to_end_encryption_enabled"`
+	TeamsBypassLobbyForDialInUsers                        types.Bool   `tfsdk:"teams_bypass_lobby_for_dial_in_users"`
+	TeamsChannelProtectionEnabled                         types.Bool   `tfsdk:"teams_channel_protection_enabled"`
+	TeamsChannelSharedWithExternalTenants                 types.Bool   `tfsdk:"teams_channel_shared_with_external_tenants"`
+	TeamsChannelSharedWithPrivateTeamsOnly                types.Bool   `tfsdk:"teams_channel_shared_with_private_teams_only"`
+	TeamsChannelSharedWithSameLabelOnly                   types.Bool   `tfsdk:"teams_channel_shared_with_same_label_only"`
+	TeamsCopyRestrictionEnforced                          types.Bool   `tfsdk:"teams_copy_restriction_enforced"`
+	TeamsDetectSensitiveContentDuringScreenSharingEnabled types.Bool   `tfsdk:"teams_detect_sensitive_content_during_screen_sharing_enabled"`
+	TeamsDisableLobby                                     types.Bool   `tfsdk:"teams_disable_lobby"`
+	TeamsEndToEndEncryptionEnabled                        types.Bool   `tfsdk:"teams_end_to_end_encryption_enabled"`
 	TeamsLobbyBypassScope                                 types.String `tfsdk:"teams_lobby_bypass_scope"`
-	TeamsLobbyRestrictionEnforced                         types.String `tfsdk:"teams_lobby_restriction_enforced"`
-	TeamsPresentersRestrictionEnforced                    types.String `tfsdk:"teams_presenters_restriction_enforced"`
-	TeamsProtectionEnabled                                types.String `tfsdk:"teams_protection_enabled"`
-	TeamsRecordAutomatically                              types.String `tfsdk:"teams_record_automatically"`
+	TeamsLobbyRestrictionEnforced                         types.Bool   `tfsdk:"teams_lobby_restriction_enforced"`
+	TeamsPresentersRestrictionEnforced                    types.Bool   `tfsdk:"teams_presenters_restriction_enforced"`
+	TeamsProtectionEnabled                                types.Bool   `tfsdk:"teams_protection_enabled"`
+	TeamsRecordAutomatically                              types.Bool   `tfsdk:"teams_record_automatically"`
 	TeamsVideoWatermark                                   types.String `tfsdk:"teams_video_watermark"`
 	TeamsWhoCanRecord                                     types.String `tfsdk:"teams_who_can_record"`
 	Tooltip                                               types.String `tfsdk:"tooltip"`
@@ -143,36 +145,36 @@ func (r *labelResource) Schema(_ context.Context, _ resource.SchemaRequest, resp
 		Description: "Manages the Label object via New-Label / Get-Label / Set-Label / Remove-Label.",
 		Attributes: map[string]schema.Attribute{
 			"id":                                     schema.StringAttribute{Computed: true, Description: "Object identifier (GUID).", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"identity":                               schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets."},
+			"identity":                               schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"abac_enabled":                           schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AbacEnabled parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"advanced_settings":                      schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AdvancedSettings parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"apply_content_marking_footer_alignment": schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ApplyContentMarkingFooterAlignment parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"apply_content_marking_footer_enabled":   schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ApplyContentMarkingFooterEnabled parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"apply_content_marking_footer_enabled":   schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -ApplyContentMarkingFooterEnabled parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
 			"apply_content_marking_footer_font_color":                      schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ApplyContentMarkingFooterFontColor parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"apply_content_marking_footer_font_name":                       schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ApplyContentMarkingFooterFontName parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"apply_content_marking_footer_font_size":                       schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ApplyContentMarkingFooterFontSize parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"apply_content_marking_footer_margin":                          schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ApplyContentMarkingFooterMargin parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"apply_content_marking_footer_font_size":                       schema.Int64Attribute{Optional: true, Computed: true, Description: "Maps to the -ApplyContentMarkingFooterFontSize parameter.", PlanModifiers: []planmodifier.Int64{int64planmodifier.UseStateForUnknown()}},
+			"apply_content_marking_footer_margin":                          schema.Int64Attribute{Optional: true, Computed: true, Description: "Maps to the -ApplyContentMarkingFooterMargin parameter.", PlanModifiers: []planmodifier.Int64{int64planmodifier.UseStateForUnknown()}},
 			"apply_content_marking_footer_text":                            schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ApplyContentMarkingFooterText parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"apply_content_marking_header_alignment":                       schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ApplyContentMarkingHeaderAlignment parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"apply_content_marking_header_enabled":                         schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ApplyContentMarkingHeaderEnabled parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"apply_content_marking_header_enabled":                         schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -ApplyContentMarkingHeaderEnabled parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
 			"apply_content_marking_header_font_color":                      schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ApplyContentMarkingHeaderFontColor parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"apply_content_marking_header_font_name":                       schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ApplyContentMarkingHeaderFontName parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"apply_content_marking_header_font_size":                       schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ApplyContentMarkingHeaderFontSize parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"apply_content_marking_header_margin":                          schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ApplyContentMarkingHeaderMargin parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"apply_content_marking_header_font_size":                       schema.Int64Attribute{Optional: true, Computed: true, Description: "Maps to the -ApplyContentMarkingHeaderFontSize parameter.", PlanModifiers: []planmodifier.Int64{int64planmodifier.UseStateForUnknown()}},
+			"apply_content_marking_header_margin":                          schema.Int64Attribute{Optional: true, Computed: true, Description: "Maps to the -ApplyContentMarkingHeaderMargin parameter.", PlanModifiers: []planmodifier.Int64{int64planmodifier.UseStateForUnknown()}},
 			"apply_content_marking_header_text":                            schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ApplyContentMarkingHeaderText parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"apply_dynamic_watermarking_enabled":                           schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ApplyDynamicWatermarkingEnabled parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"apply_dynamic_watermarking_enabled":                           schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -ApplyDynamicWatermarkingEnabled parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
 			"apply_message_meta_data":                                      schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ApplyMessageMetaData parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"apply_message_meta_data_enabled":                              schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ApplyMessageMetaDataEnabled parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"apply_water_marking_enabled":                                  schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ApplyWaterMarkingEnabled parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"apply_water_marking_enabled":                                  schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -ApplyWaterMarkingEnabled parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
 			"apply_water_marking_font_color":                               schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ApplyWaterMarkingFontColor parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"apply_water_marking_font_name":                                schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ApplyWaterMarkingFontName parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"apply_water_marking_font_size":                                schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ApplyWaterMarkingFontSize parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"apply_water_marking_font_size":                                schema.Int64Attribute{Optional: true, Computed: true, Description: "Maps to the -ApplyWaterMarkingFontSize parameter.", PlanModifiers: []planmodifier.Int64{int64planmodifier.UseStateForUnknown()}},
 			"apply_water_marking_layout":                                   schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ApplyWaterMarkingLayout parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"apply_water_marking_text":                                     schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ApplyWaterMarkingText parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"column_asset_condition":                                       schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ColumnAssetCondition parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"comment":                                                      schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -Comment parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"conditional_access_auth_context":                              schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ConditionalAccessAuthContext parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"conditions":                                                   schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -Conditions parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"conditions":                                                   schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -Conditions parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
 			"content_type":                                                 schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ContentType parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"default_content_label":                                        schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -DefaultContentLabel parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"deny_access_enabled":                                          schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -DenyAccessEnabled parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
@@ -180,18 +182,18 @@ func (r *labelResource) Schema(_ context.Context, _ resource.SchemaRequest, resp
 			"deny_access_included_principals":                              schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -DenyAccessIncludedPrincipals parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"deny_access_rights":                                           schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -DenyAccessRights parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"deny_access_workload":                                         schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -DenyAccessWorkload parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"display_name":                                                 schema.StringAttribute{Required: true, Description: "Maps to the -DisplayName parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
+			"display_name":                                                 schema.StringAttribute{Required: true, Description: "Maps to the -DisplayName parameter."},
 			"dynamic_watermark_display":                                    schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -DynamicWatermarkDisplay parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"encryption_aip_template_scopes":                               schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -EncryptionAipTemplateScopes parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace(), stringplanmodifier.UseStateForUnknown()}},
 			"encryption_content_expired_on_date_in_days_or_never":          schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -EncryptionContentExpiredOnDateInDaysOrNever parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"encryption_disable_automatic_owner_rights":                    schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -EncryptionDisableAutomaticOwnerRights parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"encryption_do_not_forward":                                    schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -EncryptionDoNotForward parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"encryption_do_not_forward":                                    schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -EncryptionDoNotForward parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
 			"encryption_double_key_encryption_url":                         schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -EncryptionDoubleKeyEncryptionUrl parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"encryption_enabled":                                           schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -EncryptionEnabled parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"encryption_encrypt_only":                                      schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -EncryptionEncryptOnly parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"encryption_enabled":                                           schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -EncryptionEnabled parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
+			"encryption_encrypt_only":                                      schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -EncryptionEncryptOnly parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
 			"encryption_linked_template_id":                                schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -EncryptionLinkedTemplateId parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace(), stringplanmodifier.UseStateForUnknown()}},
-			"encryption_offline_access_days":                               schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -EncryptionOfflineAccessDays parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"encryption_prompt_user":                                       schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -EncryptionPromptUser parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"encryption_offline_access_days":                               schema.Int64Attribute{Optional: true, Computed: true, Description: "Maps to the -EncryptionOfflineAccessDays parameter.", PlanModifiers: []planmodifier.Int64{int64planmodifier.UseStateForUnknown()}},
+			"encryption_prompt_user":                                       schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -EncryptionPromptUser parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
 			"encryption_protection_type":                                   schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -EncryptionProtectionType parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"encryption_rights_definitions":                                schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -EncryptionRightsDefinitions parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"encryption_rights_url":                                        schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -EncryptionRightsUrl parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
@@ -199,48 +201,48 @@ func (r *labelResource) Schema(_ context.Context, _ resource.SchemaRequest, resp
 			"information_protection_attribute_required":                    schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -InformationProtectionAttributeRequired parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"inherit_to_child_items":                                       schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -InheritToChildItems parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"is_label_group":                                               schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -IsLabelGroup parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.RequiresReplace(), boolplanmodifier.UseStateForUnknown()}},
-			"label_actions":                                                schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -LabelActions parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"locale_settings":                                              schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -LocaleSettings parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"label_actions":                                                schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -LabelActions parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"locale_settings":                                              schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -LocaleSettings parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
 			"migration_id":                                                 schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -MigrationId parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"name":                                                         schema.StringAttribute{Required: true, Description: "Maps to the -Name parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
 			"next_label":                                                   schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -NextLabel parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"parent_id":                                                    schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ParentId parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"previous_label":                                               schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -PreviousLabel parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"priority":                                                     schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -Priority parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"priority":                                                     schema.Int64Attribute{Optional: true, Computed: true, Description: "Maps to the -Priority parameter.", PlanModifiers: []planmodifier.Int64{int64planmodifier.UseStateForUnknown()}},
 			"remove_parent_link":                                           schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -RemoveParentLink parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
 			"rule_blob":                                                    schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -RuleBlob parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"schematized_data_condition":                                   schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -SchematizedDataCondition parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"setting":                                                      schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -Setting parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"settings":                                                     schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -Settings parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"site_and_group_protection_allow_access_to_guest_users":        schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -SiteAndGroupProtectionAllowAccessToGuestUsers parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"site_and_group_protection_allow_email_from_guest_users":       schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -SiteAndGroupProtectionAllowEmailFromGuestUsers parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"site_and_group_protection_allow_full_access":                  schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -SiteAndGroupProtectionAllowFullAccess parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"site_and_group_protection_allow_limited_access":               schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -SiteAndGroupProtectionAllowLimitedAccess parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"site_and_group_protection_block_access":                       schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -SiteAndGroupProtectionBlockAccess parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"site_and_group_protection_enabled":                            schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -SiteAndGroupProtectionEnabled parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"site_and_group_protection_allow_access_to_guest_users":        schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -SiteAndGroupProtectionAllowAccessToGuestUsers parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
+			"site_and_group_protection_allow_email_from_guest_users":       schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -SiteAndGroupProtectionAllowEmailFromGuestUsers parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
+			"site_and_group_protection_allow_full_access":                  schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -SiteAndGroupProtectionAllowFullAccess parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
+			"site_and_group_protection_allow_limited_access":               schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -SiteAndGroupProtectionAllowLimitedAccess parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
+			"site_and_group_protection_block_access":                       schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -SiteAndGroupProtectionBlockAccess parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
+			"site_and_group_protection_enabled":                            schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -SiteAndGroupProtectionEnabled parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
 			"site_and_group_protection_level":                              schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -SiteAndGroupProtectionLevel parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"site_and_group_protection_privacy":                            schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -SiteAndGroupProtectionPrivacy parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"site_external_sharing_control_type":                           schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -SiteExternalSharingControlType parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"teams_allow_meeting_chat":                                     schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -TeamsAllowMeetingChat parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"teams_allow_private_teams_to_be_discoverable_using_search":    schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -TeamsAllowPrivateTeamsToBeDiscoverableUsingSearch parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"teams_allow_private_teams_to_be_discoverable_using_search":    schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -TeamsAllowPrivateTeamsToBeDiscoverableUsingSearch parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
 			"teams_allowed_presenters":                                     schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -TeamsAllowedPresenters parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"teams_bypass_lobby_for_dial_in_users":                         schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -TeamsBypassLobbyForDialInUsers parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"teams_channel_protection_enabled":                             schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -TeamsChannelProtectionEnabled parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"teams_channel_shared_with_external_tenants":                   schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -TeamsChannelSharedWithExternalTenants parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"teams_channel_shared_with_private_teams_only":                 schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -TeamsChannelSharedWithPrivateTeamsOnly parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"teams_channel_shared_with_same_label_only":                    schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -TeamsChannelSharedWithSameLabelOnly parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"teams_copy_restriction_enforced":                              schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -TeamsCopyRestrictionEnforced parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"teams_detect_sensitive_content_during_screen_sharing_enabled": schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -TeamsDetectSensitiveContentDuringScreenSharingEnabled parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"teams_disable_lobby":                                          schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -TeamsDisableLobby parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"teams_end_to_end_encryption_enabled":                          schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -TeamsEndToEndEncryptionEnabled parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"teams_bypass_lobby_for_dial_in_users":                         schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -TeamsBypassLobbyForDialInUsers parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
+			"teams_channel_protection_enabled":                             schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -TeamsChannelProtectionEnabled parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
+			"teams_channel_shared_with_external_tenants":                   schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -TeamsChannelSharedWithExternalTenants parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
+			"teams_channel_shared_with_private_teams_only":                 schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -TeamsChannelSharedWithPrivateTeamsOnly parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
+			"teams_channel_shared_with_same_label_only":                    schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -TeamsChannelSharedWithSameLabelOnly parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
+			"teams_copy_restriction_enforced":                              schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -TeamsCopyRestrictionEnforced parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
+			"teams_detect_sensitive_content_during_screen_sharing_enabled": schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -TeamsDetectSensitiveContentDuringScreenSharingEnabled parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
+			"teams_disable_lobby":                                          schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -TeamsDisableLobby parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
+			"teams_end_to_end_encryption_enabled":                          schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -TeamsEndToEndEncryptionEnabled parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
 			"teams_lobby_bypass_scope":                                     schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -TeamsLobbyBypassScope parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"teams_lobby_restriction_enforced":                             schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -TeamsLobbyRestrictionEnforced parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"teams_presenters_restriction_enforced":                        schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -TeamsPresentersRestrictionEnforced parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"teams_protection_enabled":                                     schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -TeamsProtectionEnabled parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"teams_record_automatically":                                   schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -TeamsRecordAutomatically parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"teams_lobby_restriction_enforced":                             schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -TeamsLobbyRestrictionEnforced parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
+			"teams_presenters_restriction_enforced":                        schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -TeamsPresentersRestrictionEnforced parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
+			"teams_protection_enabled":                                     schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -TeamsProtectionEnabled parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
+			"teams_record_automatically":                                   schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -TeamsRecordAutomatically parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
 			"teams_video_watermark":                                        schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -TeamsVideoWatermark parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"teams_who_can_record":                                         schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -TeamsWhoCanRecord parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"tooltip":                                                      schema.StringAttribute{Required: true, Description: "Maps to the -Tooltip parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
+			"tooltip":                                                      schema.StringAttribute{Required: true, Description: "Maps to the -Tooltip parameter."},
 		},
 	}
 }
@@ -259,229 +261,372 @@ func (r *labelResource) Create(ctx context.Context, req resource.CreateRequest, 
 		return
 	}
 
-	p := purview.NewLabelParams{
-		ApplyContentMarkingFooterFontColor:          plan.ApplyContentMarkingFooterFontColor.ValueString(),
-		ApplyContentMarkingFooterFontName:           plan.ApplyContentMarkingFooterFontName.ValueString(),
-		ApplyContentMarkingFooterText:               plan.ApplyContentMarkingFooterText.ValueString(),
-		ApplyContentMarkingHeaderFontColor:          plan.ApplyContentMarkingHeaderFontColor.ValueString(),
-		ApplyContentMarkingHeaderFontName:           plan.ApplyContentMarkingHeaderFontName.ValueString(),
-		ApplyContentMarkingHeaderText:               plan.ApplyContentMarkingHeaderText.ValueString(),
-		ApplyWaterMarkingFontColor:                  plan.ApplyWaterMarkingFontColor.ValueString(),
-		ApplyWaterMarkingFontName:                   plan.ApplyWaterMarkingFontName.ValueString(),
-		ApplyWaterMarkingText:                       plan.ApplyWaterMarkingText.ValueString(),
-		ColumnAssetCondition:                        plan.ColumnAssetCondition.ValueString(),
-		Comment:                                     plan.Comment.ValueString(),
-		ConditionalAccessAuthContext:                plan.ConditionalAccessAuthContext.ValueString(),
-		DefaultContentLabel:                         plan.DefaultContentLabel.ValueString(),
-		DenyAccessExcludedPrincipals:                plan.DenyAccessExcludedPrincipals.ValueString(),
-		DenyAccessIncludedPrincipals:                plan.DenyAccessIncludedPrincipals.ValueString(),
-		DenyAccessRights:                            plan.DenyAccessRights.ValueString(),
-		DenyAccessWorkload:                          plan.DenyAccessWorkload.ValueString(),
-		DisplayName:                                 plan.DisplayName.ValueString(),
-		DynamicWatermarkDisplay:                     plan.DynamicWatermarkDisplay.ValueString(),
-		EncryptionAipTemplateScopes:                 plan.EncryptionAipTemplateScopes.ValueString(),
-		EncryptionContentExpiredOnDateInDaysOrNever: plan.EncryptionContentExpiredOnDateInDaysOrNever.ValueString(),
-		EncryptionDoubleKeyEncryptionUrl:            plan.EncryptionDoubleKeyEncryptionUrl.ValueString(),
-		EncryptionLinkedTemplateId:                  plan.EncryptionLinkedTemplateId.ValueString(),
-		EncryptionRightsUrl:                         plan.EncryptionRightsUrl.ValueString(),
-		EncryptionTemplateId:                        plan.EncryptionTemplateId.ValueString(),
-		IsLabelGroup:                                plan.IsLabelGroup.ValueBool(),
-		MigrationId:                                 plan.MigrationId.ValueString(),
-		Name:                                        plan.Name.ValueString(),
-		RuleBlob:                                    plan.RuleBlob.ValueString(),
-		SchematizedDataCondition:                    plan.SchematizedDataCondition.ValueString(),
-		Tooltip:                                     plan.Tooltip.ValueString(),
+	var config labelModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
+	if resp.Diagnostics.HasError() {
+		return
 	}
-	if v := plan.AbacEnabled.ValueString(); v != "" {
-		p.AbacEnabled = v
+
+	p := purview.NewLabelParams{}
+	if v := config.AbacEnabled.ValueString(); v != "" {
+		p.AbacEnabled = objectParam(v)
 	}
-	if v := plan.AdvancedSettings.ValueString(); v != "" {
-		p.AdvancedSettings = v
+	if v := config.AdvancedSettings.ValueString(); v != "" {
+		p.AdvancedSettings = objectParam(v)
 	}
-	if v := plan.ApplyContentMarkingFooterAlignment.ValueString(); v != "" {
-		p.ApplyContentMarkingFooterAlignment = v
+	if v := config.ApplyContentMarkingFooterAlignment.ValueString(); v != "" {
+		p.ApplyContentMarkingFooterAlignment = objectParam(v)
 	}
-	if v := plan.ApplyContentMarkingFooterEnabled.ValueString(); v != "" {
-		p.ApplyContentMarkingFooterEnabled = v
+	if !config.ApplyContentMarkingFooterEnabled.IsNull() {
+		if !plan.ApplyContentMarkingFooterEnabled.IsUnknown() {
+			p.ApplyContentMarkingFooterEnabled = plan.ApplyContentMarkingFooterEnabled.ValueBoolPointer()
+		}
 	}
-	if v := plan.ApplyContentMarkingFooterFontSize.ValueString(); v != "" {
-		p.ApplyContentMarkingFooterFontSize = v
+	if !config.ApplyContentMarkingFooterFontColor.IsNull() {
+		p.ApplyContentMarkingFooterFontColor = plan.ApplyContentMarkingFooterFontColor.ValueString()
 	}
-	if v := plan.ApplyContentMarkingFooterMargin.ValueString(); v != "" {
-		p.ApplyContentMarkingFooterMargin = v
+	if !config.ApplyContentMarkingFooterFontName.IsNull() {
+		p.ApplyContentMarkingFooterFontName = plan.ApplyContentMarkingFooterFontName.ValueString()
 	}
-	if v := plan.ApplyContentMarkingHeaderAlignment.ValueString(); v != "" {
-		p.ApplyContentMarkingHeaderAlignment = v
+	if !config.ApplyContentMarkingFooterFontSize.IsNull() {
+		if !plan.ApplyContentMarkingFooterFontSize.IsUnknown() {
+			p.ApplyContentMarkingFooterFontSize = plan.ApplyContentMarkingFooterFontSize.ValueInt64Pointer()
+		}
 	}
-	if v := plan.ApplyContentMarkingHeaderEnabled.ValueString(); v != "" {
-		p.ApplyContentMarkingHeaderEnabled = v
+	if !config.ApplyContentMarkingFooterMargin.IsNull() {
+		if !plan.ApplyContentMarkingFooterMargin.IsUnknown() {
+			p.ApplyContentMarkingFooterMargin = plan.ApplyContentMarkingFooterMargin.ValueInt64Pointer()
+		}
 	}
-	if v := plan.ApplyContentMarkingHeaderFontSize.ValueString(); v != "" {
-		p.ApplyContentMarkingHeaderFontSize = v
+	if !config.ApplyContentMarkingFooterText.IsNull() {
+		p.ApplyContentMarkingFooterText = plan.ApplyContentMarkingFooterText.ValueString()
 	}
-	if v := plan.ApplyContentMarkingHeaderMargin.ValueString(); v != "" {
-		p.ApplyContentMarkingHeaderMargin = v
+	if v := config.ApplyContentMarkingHeaderAlignment.ValueString(); v != "" {
+		p.ApplyContentMarkingHeaderAlignment = objectParam(v)
 	}
-	if v := plan.ApplyDynamicWatermarkingEnabled.ValueString(); v != "" {
-		p.ApplyDynamicWatermarkingEnabled = v
+	if !config.ApplyContentMarkingHeaderEnabled.IsNull() {
+		if !plan.ApplyContentMarkingHeaderEnabled.IsUnknown() {
+			p.ApplyContentMarkingHeaderEnabled = plan.ApplyContentMarkingHeaderEnabled.ValueBoolPointer()
+		}
 	}
-	if v := plan.ApplyMessageMetaData.ValueString(); v != "" {
-		p.ApplyMessageMetaData = v
+	if !config.ApplyContentMarkingHeaderFontColor.IsNull() {
+		p.ApplyContentMarkingHeaderFontColor = plan.ApplyContentMarkingHeaderFontColor.ValueString()
 	}
-	if v := plan.ApplyMessageMetaDataEnabled.ValueString(); v != "" {
-		p.ApplyMessageMetaDataEnabled = v
+	if !config.ApplyContentMarkingHeaderFontName.IsNull() {
+		p.ApplyContentMarkingHeaderFontName = plan.ApplyContentMarkingHeaderFontName.ValueString()
 	}
-	if v := plan.ApplyWaterMarkingEnabled.ValueString(); v != "" {
-		p.ApplyWaterMarkingEnabled = v
+	if !config.ApplyContentMarkingHeaderFontSize.IsNull() {
+		if !plan.ApplyContentMarkingHeaderFontSize.IsUnknown() {
+			p.ApplyContentMarkingHeaderFontSize = plan.ApplyContentMarkingHeaderFontSize.ValueInt64Pointer()
+		}
 	}
-	if v := plan.ApplyWaterMarkingFontSize.ValueString(); v != "" {
-		p.ApplyWaterMarkingFontSize = v
+	if !config.ApplyContentMarkingHeaderMargin.IsNull() {
+		if !plan.ApplyContentMarkingHeaderMargin.IsUnknown() {
+			p.ApplyContentMarkingHeaderMargin = plan.ApplyContentMarkingHeaderMargin.ValueInt64Pointer()
+		}
 	}
-	if v := plan.ApplyWaterMarkingLayout.ValueString(); v != "" {
-		p.ApplyWaterMarkingLayout = v
+	if !config.ApplyContentMarkingHeaderText.IsNull() {
+		p.ApplyContentMarkingHeaderText = plan.ApplyContentMarkingHeaderText.ValueString()
 	}
-	if v := plan.Conditions.ValueString(); v != "" {
-		p.Conditions = v
+	if !config.ApplyDynamicWatermarkingEnabled.IsNull() {
+		if !plan.ApplyDynamicWatermarkingEnabled.IsUnknown() {
+			p.ApplyDynamicWatermarkingEnabled = plan.ApplyDynamicWatermarkingEnabled.ValueBoolPointer()
+		}
 	}
-	if v := plan.ContentType.ValueString(); v != "" {
-		p.ContentType = v
+	if v := config.ApplyMessageMetaData.ValueString(); v != "" {
+		p.ApplyMessageMetaData = objectParam(v)
 	}
-	if v := plan.DenyAccessEnabled.ValueString(); v != "" {
-		p.DenyAccessEnabled = v
+	if v := config.ApplyMessageMetaDataEnabled.ValueString(); v != "" {
+		p.ApplyMessageMetaDataEnabled = objectParam(v)
 	}
-	if v := plan.EncryptionDisableAutomaticOwnerRights.ValueString(); v != "" {
-		p.EncryptionDisableAutomaticOwnerRights = v
+	if !config.ApplyWaterMarkingEnabled.IsNull() {
+		if !plan.ApplyWaterMarkingEnabled.IsUnknown() {
+			p.ApplyWaterMarkingEnabled = plan.ApplyWaterMarkingEnabled.ValueBoolPointer()
+		}
 	}
-	if v := plan.EncryptionDoNotForward.ValueString(); v != "" {
-		p.EncryptionDoNotForward = v
+	if !config.ApplyWaterMarkingFontColor.IsNull() {
+		p.ApplyWaterMarkingFontColor = plan.ApplyWaterMarkingFontColor.ValueString()
 	}
-	if v := plan.EncryptionEnabled.ValueString(); v != "" {
-		p.EncryptionEnabled = v
+	if !config.ApplyWaterMarkingFontName.IsNull() {
+		p.ApplyWaterMarkingFontName = plan.ApplyWaterMarkingFontName.ValueString()
 	}
-	if v := plan.EncryptionEncryptOnly.ValueString(); v != "" {
-		p.EncryptionEncryptOnly = v
+	if !config.ApplyWaterMarkingFontSize.IsNull() {
+		if !plan.ApplyWaterMarkingFontSize.IsUnknown() {
+			p.ApplyWaterMarkingFontSize = plan.ApplyWaterMarkingFontSize.ValueInt64Pointer()
+		}
 	}
-	if v := plan.EncryptionOfflineAccessDays.ValueString(); v != "" {
-		p.EncryptionOfflineAccessDays = v
+	if v := config.ApplyWaterMarkingLayout.ValueString(); v != "" {
+		p.ApplyWaterMarkingLayout = objectParam(v)
 	}
-	if v := plan.EncryptionPromptUser.ValueString(); v != "" {
-		p.EncryptionPromptUser = v
+	if !config.ApplyWaterMarkingText.IsNull() {
+		p.ApplyWaterMarkingText = plan.ApplyWaterMarkingText.ValueString()
 	}
-	if v := plan.EncryptionProtectionType.ValueString(); v != "" {
-		p.EncryptionProtectionType = v
+	if !config.ColumnAssetCondition.IsNull() {
+		p.ColumnAssetCondition = plan.ColumnAssetCondition.ValueString()
 	}
-	if v := plan.EncryptionRightsDefinitions.ValueString(); v != "" {
-		p.EncryptionRightsDefinitions = v
+	if !config.Comment.IsNull() {
+		p.Comment = plan.Comment.ValueString()
 	}
-	if v := plan.InformationProtectionAttributeRequired.ValueString(); v != "" {
-		p.InformationProtectionAttributeRequired = v
+	if !config.ConditionalAccessAuthContext.IsNull() {
+		p.ConditionalAccessAuthContext = plan.ConditionalAccessAuthContext.ValueString()
 	}
-	if v := plan.InheritToChildItems.ValueString(); v != "" {
-		p.InheritToChildItems = v
+	if !config.Conditions.IsNull() {
+		if v := toStringSlice(ctx, plan.Conditions, &resp.Diagnostics); len(v) > 0 {
+			p.Conditions = v
+		}
 	}
-	if v := plan.LabelActions.ValueString(); v != "" {
-		p.LabelActions = v
+	if v := config.ContentType.ValueString(); v != "" {
+		p.ContentType = objectParam(v)
 	}
-	if v := plan.LocaleSettings.ValueString(); v != "" {
-		p.LocaleSettings = v
+	if !config.DefaultContentLabel.IsNull() {
+		p.DefaultContentLabel = plan.DefaultContentLabel.ValueString()
 	}
-	if v := plan.ParentId.ValueString(); v != "" {
-		p.ParentId = v
+	if v := config.DenyAccessEnabled.ValueString(); v != "" {
+		p.DenyAccessEnabled = objectParam(v)
 	}
-	if v := plan.Setting.ValueString(); v != "" {
-		p.Setting = v
+	if !config.DenyAccessExcludedPrincipals.IsNull() {
+		p.DenyAccessExcludedPrincipals = plan.DenyAccessExcludedPrincipals.ValueString()
 	}
-	if v := plan.Settings.ValueString(); v != "" {
-		p.Settings = v
+	if !config.DenyAccessIncludedPrincipals.IsNull() {
+		p.DenyAccessIncludedPrincipals = plan.DenyAccessIncludedPrincipals.ValueString()
 	}
-	if v := plan.SiteAndGroupProtectionAllowAccessToGuestUsers.ValueString(); v != "" {
-		p.SiteAndGroupProtectionAllowAccessToGuestUsers = v
+	if !config.DenyAccessRights.IsNull() {
+		p.DenyAccessRights = plan.DenyAccessRights.ValueString()
 	}
-	if v := plan.SiteAndGroupProtectionAllowEmailFromGuestUsers.ValueString(); v != "" {
-		p.SiteAndGroupProtectionAllowEmailFromGuestUsers = v
+	if !config.DenyAccessWorkload.IsNull() {
+		p.DenyAccessWorkload = plan.DenyAccessWorkload.ValueString()
 	}
-	if v := plan.SiteAndGroupProtectionAllowFullAccess.ValueString(); v != "" {
-		p.SiteAndGroupProtectionAllowFullAccess = v
+	if !config.DisplayName.IsNull() {
+		p.DisplayName = plan.DisplayName.ValueString()
 	}
-	if v := plan.SiteAndGroupProtectionAllowLimitedAccess.ValueString(); v != "" {
-		p.SiteAndGroupProtectionAllowLimitedAccess = v
+	if !config.DynamicWatermarkDisplay.IsNull() {
+		p.DynamicWatermarkDisplay = plan.DynamicWatermarkDisplay.ValueString()
 	}
-	if v := plan.SiteAndGroupProtectionBlockAccess.ValueString(); v != "" {
-		p.SiteAndGroupProtectionBlockAccess = v
+	if !config.EncryptionAipTemplateScopes.IsNull() {
+		p.EncryptionAipTemplateScopes = plan.EncryptionAipTemplateScopes.ValueString()
 	}
-	if v := plan.SiteAndGroupProtectionEnabled.ValueString(); v != "" {
-		p.SiteAndGroupProtectionEnabled = v
+	if !config.EncryptionContentExpiredOnDateInDaysOrNever.IsNull() {
+		p.EncryptionContentExpiredOnDateInDaysOrNever = plan.EncryptionContentExpiredOnDateInDaysOrNever.ValueString()
 	}
-	if v := plan.SiteAndGroupProtectionLevel.ValueString(); v != "" {
-		p.SiteAndGroupProtectionLevel = v
+	if v := config.EncryptionDisableAutomaticOwnerRights.ValueString(); v != "" {
+		p.EncryptionDisableAutomaticOwnerRights = objectParam(v)
 	}
-	if v := plan.SiteAndGroupProtectionPrivacy.ValueString(); v != "" {
-		p.SiteAndGroupProtectionPrivacy = v
+	if !config.EncryptionDoNotForward.IsNull() {
+		if !plan.EncryptionDoNotForward.IsUnknown() {
+			p.EncryptionDoNotForward = plan.EncryptionDoNotForward.ValueBoolPointer()
+		}
 	}
-	if v := plan.SiteExternalSharingControlType.ValueString(); v != "" {
-		p.SiteExternalSharingControlType = v
+	if !config.EncryptionDoubleKeyEncryptionUrl.IsNull() {
+		p.EncryptionDoubleKeyEncryptionUrl = plan.EncryptionDoubleKeyEncryptionUrl.ValueString()
 	}
-	if v := plan.TeamsAllowMeetingChat.ValueString(); v != "" {
-		p.TeamsAllowMeetingChat = v
+	if !config.EncryptionEnabled.IsNull() {
+		if !plan.EncryptionEnabled.IsUnknown() {
+			p.EncryptionEnabled = plan.EncryptionEnabled.ValueBoolPointer()
+		}
 	}
-	if v := plan.TeamsAllowPrivateTeamsToBeDiscoverableUsingSearch.ValueString(); v != "" {
-		p.TeamsAllowPrivateTeamsToBeDiscoverableUsingSearch = v
+	if !config.EncryptionEncryptOnly.IsNull() {
+		if !plan.EncryptionEncryptOnly.IsUnknown() {
+			p.EncryptionEncryptOnly = plan.EncryptionEncryptOnly.ValueBoolPointer()
+		}
 	}
-	if v := plan.TeamsAllowedPresenters.ValueString(); v != "" {
-		p.TeamsAllowedPresenters = v
+	if !config.EncryptionLinkedTemplateId.IsNull() {
+		p.EncryptionLinkedTemplateId = plan.EncryptionLinkedTemplateId.ValueString()
 	}
-	if v := plan.TeamsBypassLobbyForDialInUsers.ValueString(); v != "" {
-		p.TeamsBypassLobbyForDialInUsers = v
+	if !config.EncryptionOfflineAccessDays.IsNull() {
+		if !plan.EncryptionOfflineAccessDays.IsUnknown() {
+			p.EncryptionOfflineAccessDays = plan.EncryptionOfflineAccessDays.ValueInt64Pointer()
+		}
 	}
-	if v := plan.TeamsChannelProtectionEnabled.ValueString(); v != "" {
-		p.TeamsChannelProtectionEnabled = v
+	if !config.EncryptionPromptUser.IsNull() {
+		if !plan.EncryptionPromptUser.IsUnknown() {
+			p.EncryptionPromptUser = plan.EncryptionPromptUser.ValueBoolPointer()
+		}
 	}
-	if v := plan.TeamsChannelSharedWithExternalTenants.ValueString(); v != "" {
-		p.TeamsChannelSharedWithExternalTenants = v
+	if v := config.EncryptionProtectionType.ValueString(); v != "" {
+		p.EncryptionProtectionType = objectParam(v)
 	}
-	if v := plan.TeamsChannelSharedWithPrivateTeamsOnly.ValueString(); v != "" {
-		p.TeamsChannelSharedWithPrivateTeamsOnly = v
+	if v := config.EncryptionRightsDefinitions.ValueString(); v != "" {
+		p.EncryptionRightsDefinitions = objectParam(v)
 	}
-	if v := plan.TeamsChannelSharedWithSameLabelOnly.ValueString(); v != "" {
-		p.TeamsChannelSharedWithSameLabelOnly = v
+	if !config.EncryptionRightsUrl.IsNull() {
+		p.EncryptionRightsUrl = plan.EncryptionRightsUrl.ValueString()
 	}
-	if v := plan.TeamsCopyRestrictionEnforced.ValueString(); v != "" {
-		p.TeamsCopyRestrictionEnforced = v
+	if !config.EncryptionTemplateId.IsNull() {
+		p.EncryptionTemplateId = plan.EncryptionTemplateId.ValueString()
 	}
-	if v := plan.TeamsDetectSensitiveContentDuringScreenSharingEnabled.ValueString(); v != "" {
-		p.TeamsDetectSensitiveContentDuringScreenSharingEnabled = v
+	if v := config.InformationProtectionAttributeRequired.ValueString(); v != "" {
+		p.InformationProtectionAttributeRequired = objectParam(v)
 	}
-	if v := plan.TeamsDisableLobby.ValueString(); v != "" {
-		p.TeamsDisableLobby = v
+	if v := config.InheritToChildItems.ValueString(); v != "" {
+		p.InheritToChildItems = objectParam(v)
 	}
-	if v := plan.TeamsEndToEndEncryptionEnabled.ValueString(); v != "" {
-		p.TeamsEndToEndEncryptionEnabled = v
+	if !config.IsLabelGroup.IsNull() {
+		if !plan.IsLabelGroup.IsUnknown() {
+			p.IsLabelGroup = plan.IsLabelGroup.ValueBoolPointer()
+		}
 	}
-	if v := plan.TeamsLobbyBypassScope.ValueString(); v != "" {
-		p.TeamsLobbyBypassScope = v
+	if !config.LabelActions.IsNull() {
+		if v := toStringSlice(ctx, plan.LabelActions, &resp.Diagnostics); len(v) > 0 {
+			p.LabelActions = v
+		}
 	}
-	if v := plan.TeamsLobbyRestrictionEnforced.ValueString(); v != "" {
-		p.TeamsLobbyRestrictionEnforced = v
+	if !config.LocaleSettings.IsNull() {
+		if v := toStringSlice(ctx, plan.LocaleSettings, &resp.Diagnostics); len(v) > 0 {
+			p.LocaleSettings = v
+		}
 	}
-	if v := plan.TeamsPresentersRestrictionEnforced.ValueString(); v != "" {
-		p.TeamsPresentersRestrictionEnforced = v
+	if !config.MigrationId.IsNull() {
+		p.MigrationId = plan.MigrationId.ValueString()
 	}
-	if v := plan.TeamsProtectionEnabled.ValueString(); v != "" {
-		p.TeamsProtectionEnabled = v
+	if !config.Name.IsNull() {
+		p.Name = plan.Name.ValueString()
 	}
-	if v := plan.TeamsRecordAutomatically.ValueString(); v != "" {
-		p.TeamsRecordAutomatically = v
+	if v := config.ParentId.ValueString(); v != "" {
+		p.ParentId = objectParam(v)
 	}
-	if v := plan.TeamsVideoWatermark.ValueString(); v != "" {
-		p.TeamsVideoWatermark = v
+	if !config.RuleBlob.IsNull() {
+		p.RuleBlob = plan.RuleBlob.ValueString()
 	}
-	if v := plan.TeamsWhoCanRecord.ValueString(); v != "" {
-		p.TeamsWhoCanRecord = v
+	if !config.SchematizedDataCondition.IsNull() {
+		p.SchematizedDataCondition = plan.SchematizedDataCondition.ValueString()
+	}
+	if v := config.Setting.ValueString(); v != "" {
+		p.Setting = objectParam(v)
+	}
+	if v := config.Settings.ValueString(); v != "" {
+		p.Settings = objectParam(v)
+	}
+	if !config.SiteAndGroupProtectionAllowAccessToGuestUsers.IsNull() {
+		if !plan.SiteAndGroupProtectionAllowAccessToGuestUsers.IsUnknown() {
+			p.SiteAndGroupProtectionAllowAccessToGuestUsers = plan.SiteAndGroupProtectionAllowAccessToGuestUsers.ValueBoolPointer()
+		}
+	}
+	if !config.SiteAndGroupProtectionAllowEmailFromGuestUsers.IsNull() {
+		if !plan.SiteAndGroupProtectionAllowEmailFromGuestUsers.IsUnknown() {
+			p.SiteAndGroupProtectionAllowEmailFromGuestUsers = plan.SiteAndGroupProtectionAllowEmailFromGuestUsers.ValueBoolPointer()
+		}
+	}
+	if !config.SiteAndGroupProtectionAllowFullAccess.IsNull() {
+		if !plan.SiteAndGroupProtectionAllowFullAccess.IsUnknown() {
+			p.SiteAndGroupProtectionAllowFullAccess = plan.SiteAndGroupProtectionAllowFullAccess.ValueBoolPointer()
+		}
+	}
+	if !config.SiteAndGroupProtectionAllowLimitedAccess.IsNull() {
+		if !plan.SiteAndGroupProtectionAllowLimitedAccess.IsUnknown() {
+			p.SiteAndGroupProtectionAllowLimitedAccess = plan.SiteAndGroupProtectionAllowLimitedAccess.ValueBoolPointer()
+		}
+	}
+	if !config.SiteAndGroupProtectionBlockAccess.IsNull() {
+		if !plan.SiteAndGroupProtectionBlockAccess.IsUnknown() {
+			p.SiteAndGroupProtectionBlockAccess = plan.SiteAndGroupProtectionBlockAccess.ValueBoolPointer()
+		}
+	}
+	if !config.SiteAndGroupProtectionEnabled.IsNull() {
+		if !plan.SiteAndGroupProtectionEnabled.IsUnknown() {
+			p.SiteAndGroupProtectionEnabled = plan.SiteAndGroupProtectionEnabled.ValueBoolPointer()
+		}
+	}
+	if v := config.SiteAndGroupProtectionLevel.ValueString(); v != "" {
+		p.SiteAndGroupProtectionLevel = objectParam(v)
+	}
+	if v := config.SiteAndGroupProtectionPrivacy.ValueString(); v != "" {
+		p.SiteAndGroupProtectionPrivacy = objectParam(v)
+	}
+	if v := config.SiteExternalSharingControlType.ValueString(); v != "" {
+		p.SiteExternalSharingControlType = objectParam(v)
+	}
+	if v := config.TeamsAllowMeetingChat.ValueString(); v != "" {
+		p.TeamsAllowMeetingChat = objectParam(v)
+	}
+	if !config.TeamsAllowPrivateTeamsToBeDiscoverableUsingSearch.IsNull() {
+		if !plan.TeamsAllowPrivateTeamsToBeDiscoverableUsingSearch.IsUnknown() {
+			p.TeamsAllowPrivateTeamsToBeDiscoverableUsingSearch = plan.TeamsAllowPrivateTeamsToBeDiscoverableUsingSearch.ValueBoolPointer()
+		}
+	}
+	if v := config.TeamsAllowedPresenters.ValueString(); v != "" {
+		p.TeamsAllowedPresenters = objectParam(v)
+	}
+	if !config.TeamsBypassLobbyForDialInUsers.IsNull() {
+		if !plan.TeamsBypassLobbyForDialInUsers.IsUnknown() {
+			p.TeamsBypassLobbyForDialInUsers = plan.TeamsBypassLobbyForDialInUsers.ValueBoolPointer()
+		}
+	}
+	if !config.TeamsChannelProtectionEnabled.IsNull() {
+		if !plan.TeamsChannelProtectionEnabled.IsUnknown() {
+			p.TeamsChannelProtectionEnabled = plan.TeamsChannelProtectionEnabled.ValueBoolPointer()
+		}
+	}
+	if !config.TeamsChannelSharedWithExternalTenants.IsNull() {
+		if !plan.TeamsChannelSharedWithExternalTenants.IsUnknown() {
+			p.TeamsChannelSharedWithExternalTenants = plan.TeamsChannelSharedWithExternalTenants.ValueBoolPointer()
+		}
+	}
+	if !config.TeamsChannelSharedWithPrivateTeamsOnly.IsNull() {
+		if !plan.TeamsChannelSharedWithPrivateTeamsOnly.IsUnknown() {
+			p.TeamsChannelSharedWithPrivateTeamsOnly = plan.TeamsChannelSharedWithPrivateTeamsOnly.ValueBoolPointer()
+		}
+	}
+	if !config.TeamsChannelSharedWithSameLabelOnly.IsNull() {
+		if !plan.TeamsChannelSharedWithSameLabelOnly.IsUnknown() {
+			p.TeamsChannelSharedWithSameLabelOnly = plan.TeamsChannelSharedWithSameLabelOnly.ValueBoolPointer()
+		}
+	}
+	if !config.TeamsCopyRestrictionEnforced.IsNull() {
+		if !plan.TeamsCopyRestrictionEnforced.IsUnknown() {
+			p.TeamsCopyRestrictionEnforced = plan.TeamsCopyRestrictionEnforced.ValueBoolPointer()
+		}
+	}
+	if !config.TeamsDetectSensitiveContentDuringScreenSharingEnabled.IsNull() {
+		if !plan.TeamsDetectSensitiveContentDuringScreenSharingEnabled.IsUnknown() {
+			p.TeamsDetectSensitiveContentDuringScreenSharingEnabled = plan.TeamsDetectSensitiveContentDuringScreenSharingEnabled.ValueBoolPointer()
+		}
+	}
+	if !config.TeamsDisableLobby.IsNull() {
+		if !plan.TeamsDisableLobby.IsUnknown() {
+			p.TeamsDisableLobby = plan.TeamsDisableLobby.ValueBoolPointer()
+		}
+	}
+	if !config.TeamsEndToEndEncryptionEnabled.IsNull() {
+		if !plan.TeamsEndToEndEncryptionEnabled.IsUnknown() {
+			p.TeamsEndToEndEncryptionEnabled = plan.TeamsEndToEndEncryptionEnabled.ValueBoolPointer()
+		}
+	}
+	if v := config.TeamsLobbyBypassScope.ValueString(); v != "" {
+		p.TeamsLobbyBypassScope = objectParam(v)
+	}
+	if !config.TeamsLobbyRestrictionEnforced.IsNull() {
+		if !plan.TeamsLobbyRestrictionEnforced.IsUnknown() {
+			p.TeamsLobbyRestrictionEnforced = plan.TeamsLobbyRestrictionEnforced.ValueBoolPointer()
+		}
+	}
+	if !config.TeamsPresentersRestrictionEnforced.IsNull() {
+		if !plan.TeamsPresentersRestrictionEnforced.IsUnknown() {
+			p.TeamsPresentersRestrictionEnforced = plan.TeamsPresentersRestrictionEnforced.ValueBoolPointer()
+		}
+	}
+	if !config.TeamsProtectionEnabled.IsNull() {
+		if !plan.TeamsProtectionEnabled.IsUnknown() {
+			p.TeamsProtectionEnabled = plan.TeamsProtectionEnabled.ValueBoolPointer()
+		}
+	}
+	if !config.TeamsRecordAutomatically.IsNull() {
+		if !plan.TeamsRecordAutomatically.IsUnknown() {
+			p.TeamsRecordAutomatically = plan.TeamsRecordAutomatically.ValueBoolPointer()
+		}
+	}
+	if v := config.TeamsVideoWatermark.ValueString(); v != "" {
+		p.TeamsVideoWatermark = objectParam(v)
+	}
+	if v := config.TeamsWhoCanRecord.ValueString(); v != "" {
+		p.TeamsWhoCanRecord = objectParam(v)
+	}
+	if !config.Tooltip.IsNull() {
+		p.Tooltip = plan.Tooltip.ValueString()
 	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	res, err := r.client.SCC.NewLabel(ctx, p)
+	res, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.NewLabel, p, isNotFound)
 	if err != nil {
 		resp.Diagnostics.AddError("New-Label failed", err.Error())
 		return
@@ -528,326 +673,708 @@ func (r *labelResource) Update(ctx context.Context, req resource.UpdateRequest, 
 	id := r.identityOf(state)
 	sp := purview.SetLabelParams{}
 	sp.Identity = id
-	if v := plan.AbacEnabled.ValueString(); v != "" {
-		sp.AbacEnabled = v
-	}
-	if v := plan.AdvancedSettings.ValueString(); v != "" {
-		sp.AdvancedSettings = v
-	}
-	if v := plan.ApplyContentMarkingFooterAlignment.ValueString(); v != "" {
-		sp.ApplyContentMarkingFooterAlignment = v
-	}
-	if v := plan.ApplyContentMarkingFooterEnabled.ValueString(); v != "" {
-		sp.ApplyContentMarkingFooterEnabled = v
-	}
-	sp.ApplyContentMarkingFooterFontColor = plan.ApplyContentMarkingFooterFontColor.ValueString()
-	sp.ApplyContentMarkingFooterFontName = plan.ApplyContentMarkingFooterFontName.ValueString()
-	if v := plan.ApplyContentMarkingFooterFontSize.ValueString(); v != "" {
-		sp.ApplyContentMarkingFooterFontSize = v
-	}
-	if v := plan.ApplyContentMarkingFooterMargin.ValueString(); v != "" {
-		sp.ApplyContentMarkingFooterMargin = v
-	}
-	sp.ApplyContentMarkingFooterText = plan.ApplyContentMarkingFooterText.ValueString()
-	if v := plan.ApplyContentMarkingHeaderAlignment.ValueString(); v != "" {
-		sp.ApplyContentMarkingHeaderAlignment = v
-	}
-	if v := plan.ApplyContentMarkingHeaderEnabled.ValueString(); v != "" {
-		sp.ApplyContentMarkingHeaderEnabled = v
-	}
-	sp.ApplyContentMarkingHeaderFontColor = plan.ApplyContentMarkingHeaderFontColor.ValueString()
-	sp.ApplyContentMarkingHeaderFontName = plan.ApplyContentMarkingHeaderFontName.ValueString()
-	if v := plan.ApplyContentMarkingHeaderFontSize.ValueString(); v != "" {
-		sp.ApplyContentMarkingHeaderFontSize = v
-	}
-	if v := plan.ApplyContentMarkingHeaderMargin.ValueString(); v != "" {
-		sp.ApplyContentMarkingHeaderMargin = v
-	}
-	sp.ApplyContentMarkingHeaderText = plan.ApplyContentMarkingHeaderText.ValueString()
-	if v := plan.ApplyDynamicWatermarkingEnabled.ValueString(); v != "" {
-		sp.ApplyDynamicWatermarkingEnabled = v
-	}
-	if v := plan.ApplyMessageMetaData.ValueString(); v != "" {
-		sp.ApplyMessageMetaData = v
-	}
-	if v := plan.ApplyMessageMetaDataEnabled.ValueString(); v != "" {
-		sp.ApplyMessageMetaDataEnabled = v
-	}
-	if v := plan.ApplyWaterMarkingEnabled.ValueString(); v != "" {
-		sp.ApplyWaterMarkingEnabled = v
-	}
-	sp.ApplyWaterMarkingFontColor = plan.ApplyWaterMarkingFontColor.ValueString()
-	sp.ApplyWaterMarkingFontName = plan.ApplyWaterMarkingFontName.ValueString()
-	if v := plan.ApplyWaterMarkingFontSize.ValueString(); v != "" {
-		sp.ApplyWaterMarkingFontSize = v
-	}
-	if v := plan.ApplyWaterMarkingLayout.ValueString(); v != "" {
-		sp.ApplyWaterMarkingLayout = v
-	}
-	sp.ApplyWaterMarkingText = plan.ApplyWaterMarkingText.ValueString()
-	sp.ColumnAssetCondition = plan.ColumnAssetCondition.ValueString()
-	sp.Comment = plan.Comment.ValueString()
-	sp.ConditionalAccessAuthContext = plan.ConditionalAccessAuthContext.ValueString()
-	if v := plan.Conditions.ValueString(); v != "" {
-		sp.Conditions = v
-	}
-	if v := plan.ContentType.ValueString(); v != "" {
-		sp.ContentType = v
-	}
-	sp.DefaultContentLabel = plan.DefaultContentLabel.ValueString()
-	if v := plan.DenyAccessEnabled.ValueString(); v != "" {
-		sp.DenyAccessEnabled = v
-	}
-	sp.DenyAccessExcludedPrincipals = plan.DenyAccessExcludedPrincipals.ValueString()
-	sp.DenyAccessIncludedPrincipals = plan.DenyAccessIncludedPrincipals.ValueString()
-	sp.DenyAccessRights = plan.DenyAccessRights.ValueString()
-	sp.DenyAccessWorkload = plan.DenyAccessWorkload.ValueString()
-	sp.DynamicWatermarkDisplay = plan.DynamicWatermarkDisplay.ValueString()
-	sp.EncryptionContentExpiredOnDateInDaysOrNever = plan.EncryptionContentExpiredOnDateInDaysOrNever.ValueString()
-	if v := plan.EncryptionDisableAutomaticOwnerRights.ValueString(); v != "" {
-		sp.EncryptionDisableAutomaticOwnerRights = v
-	}
-	if v := plan.EncryptionDoNotForward.ValueString(); v != "" {
-		sp.EncryptionDoNotForward = v
-	}
-	sp.EncryptionDoubleKeyEncryptionUrl = plan.EncryptionDoubleKeyEncryptionUrl.ValueString()
-	if v := plan.EncryptionEnabled.ValueString(); v != "" {
-		sp.EncryptionEnabled = v
-	}
-	if v := plan.EncryptionEncryptOnly.ValueString(); v != "" {
-		sp.EncryptionEncryptOnly = v
-	}
-	if v := plan.EncryptionOfflineAccessDays.ValueString(); v != "" {
-		sp.EncryptionOfflineAccessDays = v
-	}
-	if v := plan.EncryptionPromptUser.ValueString(); v != "" {
-		sp.EncryptionPromptUser = v
-	}
-	if v := plan.EncryptionProtectionType.ValueString(); v != "" {
-		sp.EncryptionProtectionType = v
-	}
-	if v := plan.EncryptionRightsDefinitions.ValueString(); v != "" {
-		sp.EncryptionRightsDefinitions = v
-	}
-	sp.EncryptionRightsUrl = plan.EncryptionRightsUrl.ValueString()
-	if v := plan.InformationProtectionAttributeRequired.ValueString(); v != "" {
-		sp.InformationProtectionAttributeRequired = v
-	}
-	if v := plan.InheritToChildItems.ValueString(); v != "" {
-		sp.InheritToChildItems = v
-	}
-	if v := plan.LabelActions.ValueString(); v != "" {
-		sp.LabelActions = v
-	}
-	if v := plan.LocaleSettings.ValueString(); v != "" {
-		sp.LocaleSettings = v
-	}
-	sp.MigrationId = plan.MigrationId.ValueString()
-	if v := plan.NextLabel.ValueString(); v != "" {
-		sp.NextLabel = v
-	}
-	if v := plan.ParentId.ValueString(); v != "" {
-		sp.ParentId = v
-	}
-	if v := plan.PreviousLabel.ValueString(); v != "" {
-		sp.PreviousLabel = v
-	}
-	if v := plan.Priority.ValueString(); v != "" {
-		sp.Priority = v
-	}
-	sp.RemoveParentLink = plan.RemoveParentLink.ValueBool()
-	sp.RuleBlob = plan.RuleBlob.ValueString()
-	sp.SchematizedDataCondition = plan.SchematizedDataCondition.ValueString()
-	if v := plan.Setting.ValueString(); v != "" {
-		sp.Setting = v
-	}
-	if v := plan.Settings.ValueString(); v != "" {
-		sp.Settings = v
-	}
-	if v := plan.SiteAndGroupProtectionAllowAccessToGuestUsers.ValueString(); v != "" {
-		sp.SiteAndGroupProtectionAllowAccessToGuestUsers = v
-	}
-	if v := plan.SiteAndGroupProtectionAllowEmailFromGuestUsers.ValueString(); v != "" {
-		sp.SiteAndGroupProtectionAllowEmailFromGuestUsers = v
-	}
-	if v := plan.SiteAndGroupProtectionAllowFullAccess.ValueString(); v != "" {
-		sp.SiteAndGroupProtectionAllowFullAccess = v
-	}
-	if v := plan.SiteAndGroupProtectionAllowLimitedAccess.ValueString(); v != "" {
-		sp.SiteAndGroupProtectionAllowLimitedAccess = v
-	}
-	if v := plan.SiteAndGroupProtectionBlockAccess.ValueString(); v != "" {
-		sp.SiteAndGroupProtectionBlockAccess = v
-	}
-	if v := plan.SiteAndGroupProtectionEnabled.ValueString(); v != "" {
-		sp.SiteAndGroupProtectionEnabled = v
-	}
-	if v := plan.SiteAndGroupProtectionLevel.ValueString(); v != "" {
-		sp.SiteAndGroupProtectionLevel = v
-	}
-	if v := plan.SiteAndGroupProtectionPrivacy.ValueString(); v != "" {
-		sp.SiteAndGroupProtectionPrivacy = v
-	}
-	if v := plan.SiteExternalSharingControlType.ValueString(); v != "" {
-		sp.SiteExternalSharingControlType = v
-	}
-	if v := plan.TeamsAllowMeetingChat.ValueString(); v != "" {
-		sp.TeamsAllowMeetingChat = v
-	}
-	if v := plan.TeamsAllowPrivateTeamsToBeDiscoverableUsingSearch.ValueString(); v != "" {
-		sp.TeamsAllowPrivateTeamsToBeDiscoverableUsingSearch = v
-	}
-	if v := plan.TeamsAllowedPresenters.ValueString(); v != "" {
-		sp.TeamsAllowedPresenters = v
-	}
-	if v := plan.TeamsBypassLobbyForDialInUsers.ValueString(); v != "" {
-		sp.TeamsBypassLobbyForDialInUsers = v
-	}
-	if v := plan.TeamsChannelProtectionEnabled.ValueString(); v != "" {
-		sp.TeamsChannelProtectionEnabled = v
-	}
-	if v := plan.TeamsChannelSharedWithExternalTenants.ValueString(); v != "" {
-		sp.TeamsChannelSharedWithExternalTenants = v
-	}
-	if v := plan.TeamsChannelSharedWithPrivateTeamsOnly.ValueString(); v != "" {
-		sp.TeamsChannelSharedWithPrivateTeamsOnly = v
-	}
-	if v := plan.TeamsChannelSharedWithSameLabelOnly.ValueString(); v != "" {
-		sp.TeamsChannelSharedWithSameLabelOnly = v
-	}
-	if v := plan.TeamsCopyRestrictionEnforced.ValueString(); v != "" {
-		sp.TeamsCopyRestrictionEnforced = v
-	}
-	if v := plan.TeamsDetectSensitiveContentDuringScreenSharingEnabled.ValueString(); v != "" {
-		sp.TeamsDetectSensitiveContentDuringScreenSharingEnabled = v
-	}
-	if v := plan.TeamsDisableLobby.ValueString(); v != "" {
-		sp.TeamsDisableLobby = v
-	}
-	if v := plan.TeamsEndToEndEncryptionEnabled.ValueString(); v != "" {
-		sp.TeamsEndToEndEncryptionEnabled = v
-	}
-	if v := plan.TeamsLobbyBypassScope.ValueString(); v != "" {
-		sp.TeamsLobbyBypassScope = v
-	}
-	if v := plan.TeamsLobbyRestrictionEnforced.ValueString(); v != "" {
-		sp.TeamsLobbyRestrictionEnforced = v
-	}
-	if v := plan.TeamsPresentersRestrictionEnforced.ValueString(); v != "" {
-		sp.TeamsPresentersRestrictionEnforced = v
-	}
-	if v := plan.TeamsProtectionEnabled.ValueString(); v != "" {
-		sp.TeamsProtectionEnabled = v
-	}
-	if v := plan.TeamsRecordAutomatically.ValueString(); v != "" {
-		sp.TeamsRecordAutomatically = v
-	}
-	if v := plan.TeamsVideoWatermark.ValueString(); v != "" {
-		sp.TeamsVideoWatermark = v
-	}
-	if v := plan.TeamsWhoCanRecord.ValueString(); v != "" {
-		sp.TeamsWhoCanRecord = v
+	var cur *labelModel
+	curRead := false
+	current := func() *labelModel {
+		if !curRead {
+			curRead = true
+			var m labelModel
+			if r.refresh(ctx, id, &m, &resp.Diagnostics, nil) {
+				cur = &m
+			} else if !resp.Diagnostics.HasError() {
+				resp.Diagnostics.AddError("Get-Label failed", "the object could not be read to determine the list values to remove; nothing was changed")
+			}
+		}
+		return cur
+	}
+	if !plan.AbacEnabled.Equal(state.AbacEnabled) {
+		if v := plan.AbacEnabled.ValueString(); v != "" {
+			sp.AbacEnabled = objectParam(v)
+		}
+	}
+	if !plan.AdvancedSettings.Equal(state.AdvancedSettings) {
+		if v := plan.AdvancedSettings.ValueString(); v != "" {
+			sp.AdvancedSettings = objectParam(v)
+		}
+	}
+	if !plan.ApplyContentMarkingFooterAlignment.Equal(state.ApplyContentMarkingFooterAlignment) {
+		if v := plan.ApplyContentMarkingFooterAlignment.ValueString(); v != "" {
+			sp.ApplyContentMarkingFooterAlignment = objectParam(v)
+		}
+	}
+	if !plan.ApplyContentMarkingFooterEnabled.Equal(state.ApplyContentMarkingFooterEnabled) {
+		if !plan.ApplyContentMarkingFooterEnabled.IsUnknown() {
+			sp.ApplyContentMarkingFooterEnabled = plan.ApplyContentMarkingFooterEnabled.ValueBoolPointer()
+		}
+	}
+	if !plan.ApplyContentMarkingFooterFontColor.Equal(state.ApplyContentMarkingFooterFontColor) {
+		sp.ApplyContentMarkingFooterFontColor = plan.ApplyContentMarkingFooterFontColor.ValueString()
+	}
+	if !plan.ApplyContentMarkingFooterFontName.Equal(state.ApplyContentMarkingFooterFontName) {
+		sp.ApplyContentMarkingFooterFontName = plan.ApplyContentMarkingFooterFontName.ValueString()
+	}
+	if !plan.ApplyContentMarkingFooterFontSize.Equal(state.ApplyContentMarkingFooterFontSize) {
+		if !plan.ApplyContentMarkingFooterFontSize.IsUnknown() {
+			sp.ApplyContentMarkingFooterFontSize = plan.ApplyContentMarkingFooterFontSize.ValueInt64Pointer()
+		}
+	}
+	if !plan.ApplyContentMarkingFooterMargin.Equal(state.ApplyContentMarkingFooterMargin) {
+		if !plan.ApplyContentMarkingFooterMargin.IsUnknown() {
+			sp.ApplyContentMarkingFooterMargin = plan.ApplyContentMarkingFooterMargin.ValueInt64Pointer()
+		}
+	}
+	if !plan.ApplyContentMarkingFooterText.Equal(state.ApplyContentMarkingFooterText) {
+		sp.ApplyContentMarkingFooterText = plan.ApplyContentMarkingFooterText.ValueString()
+	}
+	if !plan.ApplyContentMarkingHeaderAlignment.Equal(state.ApplyContentMarkingHeaderAlignment) {
+		if v := plan.ApplyContentMarkingHeaderAlignment.ValueString(); v != "" {
+			sp.ApplyContentMarkingHeaderAlignment = objectParam(v)
+		}
+	}
+	if !plan.ApplyContentMarkingHeaderEnabled.Equal(state.ApplyContentMarkingHeaderEnabled) {
+		if !plan.ApplyContentMarkingHeaderEnabled.IsUnknown() {
+			sp.ApplyContentMarkingHeaderEnabled = plan.ApplyContentMarkingHeaderEnabled.ValueBoolPointer()
+		}
+	}
+	if !plan.ApplyContentMarkingHeaderFontColor.Equal(state.ApplyContentMarkingHeaderFontColor) {
+		sp.ApplyContentMarkingHeaderFontColor = plan.ApplyContentMarkingHeaderFontColor.ValueString()
+	}
+	if !plan.ApplyContentMarkingHeaderFontName.Equal(state.ApplyContentMarkingHeaderFontName) {
+		sp.ApplyContentMarkingHeaderFontName = plan.ApplyContentMarkingHeaderFontName.ValueString()
+	}
+	if !plan.ApplyContentMarkingHeaderFontSize.Equal(state.ApplyContentMarkingHeaderFontSize) {
+		if !plan.ApplyContentMarkingHeaderFontSize.IsUnknown() {
+			sp.ApplyContentMarkingHeaderFontSize = plan.ApplyContentMarkingHeaderFontSize.ValueInt64Pointer()
+		}
+	}
+	if !plan.ApplyContentMarkingHeaderMargin.Equal(state.ApplyContentMarkingHeaderMargin) {
+		if !plan.ApplyContentMarkingHeaderMargin.IsUnknown() {
+			sp.ApplyContentMarkingHeaderMargin = plan.ApplyContentMarkingHeaderMargin.ValueInt64Pointer()
+		}
+	}
+	if !plan.ApplyContentMarkingHeaderText.Equal(state.ApplyContentMarkingHeaderText) {
+		sp.ApplyContentMarkingHeaderText = plan.ApplyContentMarkingHeaderText.ValueString()
+	}
+	if !plan.ApplyDynamicWatermarkingEnabled.Equal(state.ApplyDynamicWatermarkingEnabled) {
+		if !plan.ApplyDynamicWatermarkingEnabled.IsUnknown() {
+			sp.ApplyDynamicWatermarkingEnabled = plan.ApplyDynamicWatermarkingEnabled.ValueBoolPointer()
+		}
+	}
+	if !plan.ApplyMessageMetaData.Equal(state.ApplyMessageMetaData) {
+		if v := plan.ApplyMessageMetaData.ValueString(); v != "" {
+			sp.ApplyMessageMetaData = objectParam(v)
+		}
+	}
+	if !plan.ApplyMessageMetaDataEnabled.Equal(state.ApplyMessageMetaDataEnabled) {
+		if v := plan.ApplyMessageMetaDataEnabled.ValueString(); v != "" {
+			sp.ApplyMessageMetaDataEnabled = objectParam(v)
+		}
+	}
+	if !plan.ApplyWaterMarkingEnabled.Equal(state.ApplyWaterMarkingEnabled) {
+		if !plan.ApplyWaterMarkingEnabled.IsUnknown() {
+			sp.ApplyWaterMarkingEnabled = plan.ApplyWaterMarkingEnabled.ValueBoolPointer()
+		}
+	}
+	if !plan.ApplyWaterMarkingFontColor.Equal(state.ApplyWaterMarkingFontColor) {
+		sp.ApplyWaterMarkingFontColor = plan.ApplyWaterMarkingFontColor.ValueString()
+	}
+	if !plan.ApplyWaterMarkingFontName.Equal(state.ApplyWaterMarkingFontName) {
+		sp.ApplyWaterMarkingFontName = plan.ApplyWaterMarkingFontName.ValueString()
+	}
+	if !plan.ApplyWaterMarkingFontSize.Equal(state.ApplyWaterMarkingFontSize) {
+		if !plan.ApplyWaterMarkingFontSize.IsUnknown() {
+			sp.ApplyWaterMarkingFontSize = plan.ApplyWaterMarkingFontSize.ValueInt64Pointer()
+		}
+	}
+	if !plan.ApplyWaterMarkingLayout.Equal(state.ApplyWaterMarkingLayout) {
+		if v := plan.ApplyWaterMarkingLayout.ValueString(); v != "" {
+			sp.ApplyWaterMarkingLayout = objectParam(v)
+		}
+	}
+	if !plan.ApplyWaterMarkingText.Equal(state.ApplyWaterMarkingText) {
+		sp.ApplyWaterMarkingText = plan.ApplyWaterMarkingText.ValueString()
+	}
+	if !plan.ColumnAssetCondition.Equal(state.ColumnAssetCondition) {
+		sp.ColumnAssetCondition = plan.ColumnAssetCondition.ValueString()
+	}
+	if !plan.Comment.Equal(state.Comment) {
+		sp.Comment = plan.Comment.ValueString()
+	}
+	if !plan.ConditionalAccessAuthContext.Equal(state.ConditionalAccessAuthContext) {
+		sp.ConditionalAccessAuthContext = plan.ConditionalAccessAuthContext.ValueString()
+	}
+	if !plan.Conditions.Equal(state.Conditions) {
+		if !plan.Conditions.IsNull() && !plan.Conditions.IsUnknown() {
+			if v := toStringSlice(ctx, plan.Conditions, &resp.Diagnostics); len(v) > 0 {
+				sp.Conditions = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.Conditions, &resp.Diagnostics); len(rm) > 0 {
+						sp.ConditionsDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
+	}
+	if !plan.ContentType.Equal(state.ContentType) {
+		if v := plan.ContentType.ValueString(); v != "" {
+			sp.ContentType = objectParam(v)
+		}
+	}
+	if !plan.DefaultContentLabel.Equal(state.DefaultContentLabel) {
+		sp.DefaultContentLabel = plan.DefaultContentLabel.ValueString()
+	}
+	if !plan.DenyAccessEnabled.Equal(state.DenyAccessEnabled) {
+		if v := plan.DenyAccessEnabled.ValueString(); v != "" {
+			sp.DenyAccessEnabled = objectParam(v)
+		}
+	}
+	if !plan.DenyAccessExcludedPrincipals.Equal(state.DenyAccessExcludedPrincipals) {
+		sp.DenyAccessExcludedPrincipals = plan.DenyAccessExcludedPrincipals.ValueString()
+	}
+	if !plan.DenyAccessIncludedPrincipals.Equal(state.DenyAccessIncludedPrincipals) {
+		sp.DenyAccessIncludedPrincipals = plan.DenyAccessIncludedPrincipals.ValueString()
+	}
+	if !plan.DenyAccessRights.Equal(state.DenyAccessRights) {
+		sp.DenyAccessRights = plan.DenyAccessRights.ValueString()
+	}
+	if !plan.DenyAccessWorkload.Equal(state.DenyAccessWorkload) {
+		sp.DenyAccessWorkload = plan.DenyAccessWorkload.ValueString()
+	}
+	if !plan.DisplayName.Equal(state.DisplayName) {
+		sp.DisplayName = plan.DisplayName.ValueString()
+	}
+	if !plan.DynamicWatermarkDisplay.Equal(state.DynamicWatermarkDisplay) {
+		sp.DynamicWatermarkDisplay = plan.DynamicWatermarkDisplay.ValueString()
+	}
+	if !plan.EncryptionContentExpiredOnDateInDaysOrNever.Equal(state.EncryptionContentExpiredOnDateInDaysOrNever) {
+		sp.EncryptionContentExpiredOnDateInDaysOrNever = plan.EncryptionContentExpiredOnDateInDaysOrNever.ValueString()
+	}
+	if !plan.EncryptionDisableAutomaticOwnerRights.Equal(state.EncryptionDisableAutomaticOwnerRights) {
+		if v := plan.EncryptionDisableAutomaticOwnerRights.ValueString(); v != "" {
+			sp.EncryptionDisableAutomaticOwnerRights = objectParam(v)
+		}
+	}
+	if !plan.EncryptionDoNotForward.Equal(state.EncryptionDoNotForward) {
+		if !plan.EncryptionDoNotForward.IsUnknown() {
+			sp.EncryptionDoNotForward = plan.EncryptionDoNotForward.ValueBoolPointer()
+		}
+	}
+	if !plan.EncryptionDoubleKeyEncryptionUrl.Equal(state.EncryptionDoubleKeyEncryptionUrl) {
+		sp.EncryptionDoubleKeyEncryptionUrl = plan.EncryptionDoubleKeyEncryptionUrl.ValueString()
+	}
+	if !plan.EncryptionEnabled.Equal(state.EncryptionEnabled) {
+		if !plan.EncryptionEnabled.IsUnknown() {
+			sp.EncryptionEnabled = plan.EncryptionEnabled.ValueBoolPointer()
+		}
+	}
+	if !plan.EncryptionEncryptOnly.Equal(state.EncryptionEncryptOnly) {
+		if !plan.EncryptionEncryptOnly.IsUnknown() {
+			sp.EncryptionEncryptOnly = plan.EncryptionEncryptOnly.ValueBoolPointer()
+		}
+	}
+	if !plan.EncryptionOfflineAccessDays.Equal(state.EncryptionOfflineAccessDays) {
+		if !plan.EncryptionOfflineAccessDays.IsUnknown() {
+			sp.EncryptionOfflineAccessDays = plan.EncryptionOfflineAccessDays.ValueInt64Pointer()
+		}
+	}
+	if !plan.EncryptionPromptUser.Equal(state.EncryptionPromptUser) {
+		if !plan.EncryptionPromptUser.IsUnknown() {
+			sp.EncryptionPromptUser = plan.EncryptionPromptUser.ValueBoolPointer()
+		}
+	}
+	if !plan.EncryptionProtectionType.Equal(state.EncryptionProtectionType) {
+		if v := plan.EncryptionProtectionType.ValueString(); v != "" {
+			sp.EncryptionProtectionType = objectParam(v)
+		}
+	}
+	if !plan.EncryptionRightsDefinitions.Equal(state.EncryptionRightsDefinitions) {
+		if v := plan.EncryptionRightsDefinitions.ValueString(); v != "" {
+			sp.EncryptionRightsDefinitions = objectParam(v)
+		}
+	}
+	if !plan.EncryptionRightsUrl.Equal(state.EncryptionRightsUrl) {
+		sp.EncryptionRightsUrl = plan.EncryptionRightsUrl.ValueString()
+	}
+	if !plan.InformationProtectionAttributeRequired.Equal(state.InformationProtectionAttributeRequired) {
+		if v := plan.InformationProtectionAttributeRequired.ValueString(); v != "" {
+			sp.InformationProtectionAttributeRequired = objectParam(v)
+		}
+	}
+	if !plan.InheritToChildItems.Equal(state.InheritToChildItems) {
+		if v := plan.InheritToChildItems.ValueString(); v != "" {
+			sp.InheritToChildItems = objectParam(v)
+		}
+	}
+	if !plan.LabelActions.Equal(state.LabelActions) {
+		if !plan.LabelActions.IsNull() && !plan.LabelActions.IsUnknown() {
+			if v := toStringSlice(ctx, plan.LabelActions, &resp.Diagnostics); len(v) > 0 {
+				sp.LabelActions = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.LabelActions, &resp.Diagnostics); len(rm) > 0 {
+						sp.LabelActionsDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
+	}
+	if !plan.LocaleSettings.Equal(state.LocaleSettings) {
+		if !plan.LocaleSettings.IsNull() && !plan.LocaleSettings.IsUnknown() {
+			if v := toStringSlice(ctx, plan.LocaleSettings, &resp.Diagnostics); len(v) > 0 {
+				sp.LocaleSettings = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.LocaleSettings, &resp.Diagnostics); len(rm) > 0 {
+						sp.LocaleSettingsDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
+	}
+	if !plan.MigrationId.Equal(state.MigrationId) {
+		sp.MigrationId = plan.MigrationId.ValueString()
+	}
+	if !plan.NextLabel.Equal(state.NextLabel) {
+		if v := plan.NextLabel.ValueString(); v != "" {
+			sp.NextLabel = objectParam(v)
+		}
+	}
+	if !plan.ParentId.Equal(state.ParentId) {
+		if v := plan.ParentId.ValueString(); v != "" {
+			sp.ParentId = objectParam(v)
+		}
+	}
+	if !plan.PreviousLabel.Equal(state.PreviousLabel) {
+		if v := plan.PreviousLabel.ValueString(); v != "" {
+			sp.PreviousLabel = objectParam(v)
+		}
+	}
+	if !plan.Priority.Equal(state.Priority) {
+		if !plan.Priority.IsUnknown() {
+			sp.Priority = plan.Priority.ValueInt64Pointer()
+		}
+	}
+	if !plan.RemoveParentLink.Equal(state.RemoveParentLink) {
+		if !plan.RemoveParentLink.IsUnknown() {
+			sp.RemoveParentLink = plan.RemoveParentLink.ValueBoolPointer()
+		}
+	}
+	if !plan.RuleBlob.Equal(state.RuleBlob) {
+		sp.RuleBlob = plan.RuleBlob.ValueString()
+	}
+	if !plan.SchematizedDataCondition.Equal(state.SchematizedDataCondition) {
+		sp.SchematizedDataCondition = plan.SchematizedDataCondition.ValueString()
+	}
+	if !plan.Setting.Equal(state.Setting) {
+		if v := plan.Setting.ValueString(); v != "" {
+			sp.Setting = objectParam(v)
+		}
+	}
+	if !plan.Settings.Equal(state.Settings) {
+		if v := plan.Settings.ValueString(); v != "" {
+			sp.Settings = objectParam(v)
+		}
+	}
+	if !plan.SiteAndGroupProtectionAllowAccessToGuestUsers.Equal(state.SiteAndGroupProtectionAllowAccessToGuestUsers) {
+		if !plan.SiteAndGroupProtectionAllowAccessToGuestUsers.IsUnknown() {
+			sp.SiteAndGroupProtectionAllowAccessToGuestUsers = plan.SiteAndGroupProtectionAllowAccessToGuestUsers.ValueBoolPointer()
+		}
+	}
+	if !plan.SiteAndGroupProtectionAllowEmailFromGuestUsers.Equal(state.SiteAndGroupProtectionAllowEmailFromGuestUsers) {
+		if !plan.SiteAndGroupProtectionAllowEmailFromGuestUsers.IsUnknown() {
+			sp.SiteAndGroupProtectionAllowEmailFromGuestUsers = plan.SiteAndGroupProtectionAllowEmailFromGuestUsers.ValueBoolPointer()
+		}
+	}
+	if !plan.SiteAndGroupProtectionAllowFullAccess.Equal(state.SiteAndGroupProtectionAllowFullAccess) {
+		if !plan.SiteAndGroupProtectionAllowFullAccess.IsUnknown() {
+			sp.SiteAndGroupProtectionAllowFullAccess = plan.SiteAndGroupProtectionAllowFullAccess.ValueBoolPointer()
+		}
+	}
+	if !plan.SiteAndGroupProtectionAllowLimitedAccess.Equal(state.SiteAndGroupProtectionAllowLimitedAccess) {
+		if !plan.SiteAndGroupProtectionAllowLimitedAccess.IsUnknown() {
+			sp.SiteAndGroupProtectionAllowLimitedAccess = plan.SiteAndGroupProtectionAllowLimitedAccess.ValueBoolPointer()
+		}
+	}
+	if !plan.SiteAndGroupProtectionBlockAccess.Equal(state.SiteAndGroupProtectionBlockAccess) {
+		if !plan.SiteAndGroupProtectionBlockAccess.IsUnknown() {
+			sp.SiteAndGroupProtectionBlockAccess = plan.SiteAndGroupProtectionBlockAccess.ValueBoolPointer()
+		}
+	}
+	if !plan.SiteAndGroupProtectionEnabled.Equal(state.SiteAndGroupProtectionEnabled) {
+		if !plan.SiteAndGroupProtectionEnabled.IsUnknown() {
+			sp.SiteAndGroupProtectionEnabled = plan.SiteAndGroupProtectionEnabled.ValueBoolPointer()
+		}
+	}
+	if !plan.SiteAndGroupProtectionLevel.Equal(state.SiteAndGroupProtectionLevel) {
+		if v := plan.SiteAndGroupProtectionLevel.ValueString(); v != "" {
+			sp.SiteAndGroupProtectionLevel = objectParam(v)
+		}
+	}
+	if !plan.SiteAndGroupProtectionPrivacy.Equal(state.SiteAndGroupProtectionPrivacy) {
+		if v := plan.SiteAndGroupProtectionPrivacy.ValueString(); v != "" {
+			sp.SiteAndGroupProtectionPrivacy = objectParam(v)
+		}
+	}
+	if !plan.SiteExternalSharingControlType.Equal(state.SiteExternalSharingControlType) {
+		if v := plan.SiteExternalSharingControlType.ValueString(); v != "" {
+			sp.SiteExternalSharingControlType = objectParam(v)
+		}
+	}
+	if !plan.TeamsAllowMeetingChat.Equal(state.TeamsAllowMeetingChat) {
+		if v := plan.TeamsAllowMeetingChat.ValueString(); v != "" {
+			sp.TeamsAllowMeetingChat = objectParam(v)
+		}
+	}
+	if !plan.TeamsAllowPrivateTeamsToBeDiscoverableUsingSearch.Equal(state.TeamsAllowPrivateTeamsToBeDiscoverableUsingSearch) {
+		if !plan.TeamsAllowPrivateTeamsToBeDiscoverableUsingSearch.IsUnknown() {
+			sp.TeamsAllowPrivateTeamsToBeDiscoverableUsingSearch = plan.TeamsAllowPrivateTeamsToBeDiscoverableUsingSearch.ValueBoolPointer()
+		}
+	}
+	if !plan.TeamsAllowedPresenters.Equal(state.TeamsAllowedPresenters) {
+		if v := plan.TeamsAllowedPresenters.ValueString(); v != "" {
+			sp.TeamsAllowedPresenters = objectParam(v)
+		}
+	}
+	if !plan.TeamsBypassLobbyForDialInUsers.Equal(state.TeamsBypassLobbyForDialInUsers) {
+		if !plan.TeamsBypassLobbyForDialInUsers.IsUnknown() {
+			sp.TeamsBypassLobbyForDialInUsers = plan.TeamsBypassLobbyForDialInUsers.ValueBoolPointer()
+		}
+	}
+	if !plan.TeamsChannelProtectionEnabled.Equal(state.TeamsChannelProtectionEnabled) {
+		if !plan.TeamsChannelProtectionEnabled.IsUnknown() {
+			sp.TeamsChannelProtectionEnabled = plan.TeamsChannelProtectionEnabled.ValueBoolPointer()
+		}
+	}
+	if !plan.TeamsChannelSharedWithExternalTenants.Equal(state.TeamsChannelSharedWithExternalTenants) {
+		if !plan.TeamsChannelSharedWithExternalTenants.IsUnknown() {
+			sp.TeamsChannelSharedWithExternalTenants = plan.TeamsChannelSharedWithExternalTenants.ValueBoolPointer()
+		}
+	}
+	if !plan.TeamsChannelSharedWithPrivateTeamsOnly.Equal(state.TeamsChannelSharedWithPrivateTeamsOnly) {
+		if !plan.TeamsChannelSharedWithPrivateTeamsOnly.IsUnknown() {
+			sp.TeamsChannelSharedWithPrivateTeamsOnly = plan.TeamsChannelSharedWithPrivateTeamsOnly.ValueBoolPointer()
+		}
+	}
+	if !plan.TeamsChannelSharedWithSameLabelOnly.Equal(state.TeamsChannelSharedWithSameLabelOnly) {
+		if !plan.TeamsChannelSharedWithSameLabelOnly.IsUnknown() {
+			sp.TeamsChannelSharedWithSameLabelOnly = plan.TeamsChannelSharedWithSameLabelOnly.ValueBoolPointer()
+		}
+	}
+	if !plan.TeamsCopyRestrictionEnforced.Equal(state.TeamsCopyRestrictionEnforced) {
+		if !plan.TeamsCopyRestrictionEnforced.IsUnknown() {
+			sp.TeamsCopyRestrictionEnforced = plan.TeamsCopyRestrictionEnforced.ValueBoolPointer()
+		}
+	}
+	if !plan.TeamsDetectSensitiveContentDuringScreenSharingEnabled.Equal(state.TeamsDetectSensitiveContentDuringScreenSharingEnabled) {
+		if !plan.TeamsDetectSensitiveContentDuringScreenSharingEnabled.IsUnknown() {
+			sp.TeamsDetectSensitiveContentDuringScreenSharingEnabled = plan.TeamsDetectSensitiveContentDuringScreenSharingEnabled.ValueBoolPointer()
+		}
+	}
+	if !plan.TeamsDisableLobby.Equal(state.TeamsDisableLobby) {
+		if !plan.TeamsDisableLobby.IsUnknown() {
+			sp.TeamsDisableLobby = plan.TeamsDisableLobby.ValueBoolPointer()
+		}
+	}
+	if !plan.TeamsEndToEndEncryptionEnabled.Equal(state.TeamsEndToEndEncryptionEnabled) {
+		if !plan.TeamsEndToEndEncryptionEnabled.IsUnknown() {
+			sp.TeamsEndToEndEncryptionEnabled = plan.TeamsEndToEndEncryptionEnabled.ValueBoolPointer()
+		}
+	}
+	if !plan.TeamsLobbyBypassScope.Equal(state.TeamsLobbyBypassScope) {
+		if v := plan.TeamsLobbyBypassScope.ValueString(); v != "" {
+			sp.TeamsLobbyBypassScope = objectParam(v)
+		}
+	}
+	if !plan.TeamsLobbyRestrictionEnforced.Equal(state.TeamsLobbyRestrictionEnforced) {
+		if !plan.TeamsLobbyRestrictionEnforced.IsUnknown() {
+			sp.TeamsLobbyRestrictionEnforced = plan.TeamsLobbyRestrictionEnforced.ValueBoolPointer()
+		}
+	}
+	if !plan.TeamsPresentersRestrictionEnforced.Equal(state.TeamsPresentersRestrictionEnforced) {
+		if !plan.TeamsPresentersRestrictionEnforced.IsUnknown() {
+			sp.TeamsPresentersRestrictionEnforced = plan.TeamsPresentersRestrictionEnforced.ValueBoolPointer()
+		}
+	}
+	if !plan.TeamsProtectionEnabled.Equal(state.TeamsProtectionEnabled) {
+		if !plan.TeamsProtectionEnabled.IsUnknown() {
+			sp.TeamsProtectionEnabled = plan.TeamsProtectionEnabled.ValueBoolPointer()
+		}
+	}
+	if !plan.TeamsRecordAutomatically.Equal(state.TeamsRecordAutomatically) {
+		if !plan.TeamsRecordAutomatically.IsUnknown() {
+			sp.TeamsRecordAutomatically = plan.TeamsRecordAutomatically.ValueBoolPointer()
+		}
+	}
+	if !plan.TeamsVideoWatermark.Equal(state.TeamsVideoWatermark) {
+		if v := plan.TeamsVideoWatermark.ValueString(); v != "" {
+			sp.TeamsVideoWatermark = objectParam(v)
+		}
+	}
+	if !plan.TeamsWhoCanRecord.Equal(state.TeamsWhoCanRecord) {
+		if v := plan.TeamsWhoCanRecord.ValueString(); v != "" {
+			sp.TeamsWhoCanRecord = objectParam(v)
+		}
+	}
+	if !plan.Tooltip.Equal(state.Tooltip) {
+		sp.Tooltip = plan.Tooltip.ValueString()
 	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	if _, err := r.client.SCC.SetLabel(ctx, sp); err != nil {
+	if _, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.SetLabel, sp, isNotFound); err != nil {
 		resp.Diagnostics.AddError("Set-Label failed", err.Error())
 		return
 	}
 	cfg := plan
 	reflected := reconcile.ReflectsFields(map[string]types.String{
-		"AbacEnabled":                                           cfg.AbacEnabled,
-		"AdvancedSettings":                                      cfg.AdvancedSettings,
-		"ApplyContentMarkingFooterAlignment":                    cfg.ApplyContentMarkingFooterAlignment,
-		"ApplyContentMarkingFooterEnabled":                      cfg.ApplyContentMarkingFooterEnabled,
-		"ApplyContentMarkingFooterFontColor":                    cfg.ApplyContentMarkingFooterFontColor,
-		"ApplyContentMarkingFooterFontName":                     cfg.ApplyContentMarkingFooterFontName,
-		"ApplyContentMarkingFooterFontSize":                     cfg.ApplyContentMarkingFooterFontSize,
-		"ApplyContentMarkingFooterMargin":                       cfg.ApplyContentMarkingFooterMargin,
-		"ApplyContentMarkingFooterText":                         cfg.ApplyContentMarkingFooterText,
-		"ApplyContentMarkingHeaderAlignment":                    cfg.ApplyContentMarkingHeaderAlignment,
-		"ApplyContentMarkingHeaderEnabled":                      cfg.ApplyContentMarkingHeaderEnabled,
-		"ApplyContentMarkingHeaderFontColor":                    cfg.ApplyContentMarkingHeaderFontColor,
-		"ApplyContentMarkingHeaderFontName":                     cfg.ApplyContentMarkingHeaderFontName,
-		"ApplyContentMarkingHeaderFontSize":                     cfg.ApplyContentMarkingHeaderFontSize,
-		"ApplyContentMarkingHeaderMargin":                       cfg.ApplyContentMarkingHeaderMargin,
-		"ApplyContentMarkingHeaderText":                         cfg.ApplyContentMarkingHeaderText,
-		"ApplyDynamicWatermarkingEnabled":                       cfg.ApplyDynamicWatermarkingEnabled,
-		"ApplyMessageMetaData":                                  cfg.ApplyMessageMetaData,
-		"ApplyMessageMetaDataEnabled":                           cfg.ApplyMessageMetaDataEnabled,
-		"ApplyWaterMarkingEnabled":                              cfg.ApplyWaterMarkingEnabled,
-		"ApplyWaterMarkingFontColor":                            cfg.ApplyWaterMarkingFontColor,
-		"ApplyWaterMarkingFontName":                             cfg.ApplyWaterMarkingFontName,
-		"ApplyWaterMarkingFontSize":                             cfg.ApplyWaterMarkingFontSize,
-		"ApplyWaterMarkingLayout":                               cfg.ApplyWaterMarkingLayout,
-		"ApplyWaterMarkingText":                                 cfg.ApplyWaterMarkingText,
-		"ColumnAssetCondition":                                  cfg.ColumnAssetCondition,
-		"Comment":                                               cfg.Comment,
-		"ConditionalAccessAuthContext":                          cfg.ConditionalAccessAuthContext,
-		"Conditions":                                            cfg.Conditions,
-		"ContentType":                                           cfg.ContentType,
-		"DefaultContentLabel":                                   cfg.DefaultContentLabel,
-		"DenyAccessEnabled":                                     cfg.DenyAccessEnabled,
-		"DenyAccessExcludedPrincipals":                          cfg.DenyAccessExcludedPrincipals,
-		"DenyAccessIncludedPrincipals":                          cfg.DenyAccessIncludedPrincipals,
-		"DenyAccessRights":                                      cfg.DenyAccessRights,
-		"DenyAccessWorkload":                                    cfg.DenyAccessWorkload,
-		"DynamicWatermarkDisplay":                               cfg.DynamicWatermarkDisplay,
-		"EncryptionContentExpiredOnDateInDaysOrNever":           cfg.EncryptionContentExpiredOnDateInDaysOrNever,
-		"EncryptionDisableAutomaticOwnerRights":                 cfg.EncryptionDisableAutomaticOwnerRights,
-		"EncryptionDoNotForward":                                cfg.EncryptionDoNotForward,
-		"EncryptionDoubleKeyEncryptionUrl":                      cfg.EncryptionDoubleKeyEncryptionUrl,
-		"EncryptionEnabled":                                     cfg.EncryptionEnabled,
-		"EncryptionEncryptOnly":                                 cfg.EncryptionEncryptOnly,
-		"EncryptionOfflineAccessDays":                           cfg.EncryptionOfflineAccessDays,
-		"EncryptionPromptUser":                                  cfg.EncryptionPromptUser,
-		"EncryptionProtectionType":                              cfg.EncryptionProtectionType,
-		"EncryptionRightsDefinitions":                           cfg.EncryptionRightsDefinitions,
-		"EncryptionRightsUrl":                                   cfg.EncryptionRightsUrl,
-		"InformationProtectionAttributeRequired":                cfg.InformationProtectionAttributeRequired,
-		"InheritToChildItems":                                   cfg.InheritToChildItems,
-		"LabelActions":                                          cfg.LabelActions,
-		"LocaleSettings":                                        cfg.LocaleSettings,
-		"MigrationId":                                           cfg.MigrationId,
-		"NextLabel":                                             cfg.NextLabel,
-		"ParentId":                                              cfg.ParentId,
-		"PreviousLabel":                                         cfg.PreviousLabel,
-		"Priority":                                              cfg.Priority,
-		"RuleBlob":                                              cfg.RuleBlob,
-		"SchematizedDataCondition":                              cfg.SchematizedDataCondition,
-		"Setting":                                               cfg.Setting,
-		"Settings":                                              cfg.Settings,
-		"SiteAndGroupProtectionAllowAccessToGuestUsers":         cfg.SiteAndGroupProtectionAllowAccessToGuestUsers,
-		"SiteAndGroupProtectionAllowEmailFromGuestUsers":        cfg.SiteAndGroupProtectionAllowEmailFromGuestUsers,
-		"SiteAndGroupProtectionAllowFullAccess":                 cfg.SiteAndGroupProtectionAllowFullAccess,
-		"SiteAndGroupProtectionAllowLimitedAccess":              cfg.SiteAndGroupProtectionAllowLimitedAccess,
-		"SiteAndGroupProtectionBlockAccess":                     cfg.SiteAndGroupProtectionBlockAccess,
-		"SiteAndGroupProtectionEnabled":                         cfg.SiteAndGroupProtectionEnabled,
-		"SiteAndGroupProtectionLevel":                           cfg.SiteAndGroupProtectionLevel,
-		"SiteAndGroupProtectionPrivacy":                         cfg.SiteAndGroupProtectionPrivacy,
-		"SiteExternalSharingControlType":                        cfg.SiteExternalSharingControlType,
-		"TeamsAllowMeetingChat":                                 cfg.TeamsAllowMeetingChat,
-		"TeamsAllowPrivateTeamsToBeDiscoverableUsingSearch":     cfg.TeamsAllowPrivateTeamsToBeDiscoverableUsingSearch,
-		"TeamsAllowedPresenters":                                cfg.TeamsAllowedPresenters,
-		"TeamsBypassLobbyForDialInUsers":                        cfg.TeamsBypassLobbyForDialInUsers,
-		"TeamsChannelProtectionEnabled":                         cfg.TeamsChannelProtectionEnabled,
-		"TeamsChannelSharedWithExternalTenants":                 cfg.TeamsChannelSharedWithExternalTenants,
-		"TeamsChannelSharedWithPrivateTeamsOnly":                cfg.TeamsChannelSharedWithPrivateTeamsOnly,
-		"TeamsChannelSharedWithSameLabelOnly":                   cfg.TeamsChannelSharedWithSameLabelOnly,
-		"TeamsCopyRestrictionEnforced":                          cfg.TeamsCopyRestrictionEnforced,
-		"TeamsDetectSensitiveContentDuringScreenSharingEnabled": cfg.TeamsDetectSensitiveContentDuringScreenSharingEnabled,
-		"TeamsDisableLobby":                                     cfg.TeamsDisableLobby,
-		"TeamsEndToEndEncryptionEnabled":                        cfg.TeamsEndToEndEncryptionEnabled,
-		"TeamsLobbyBypassScope":                                 cfg.TeamsLobbyBypassScope,
-		"TeamsLobbyRestrictionEnforced":                         cfg.TeamsLobbyRestrictionEnforced,
-		"TeamsPresentersRestrictionEnforced":                    cfg.TeamsPresentersRestrictionEnforced,
-		"TeamsProtectionEnabled":                                cfg.TeamsProtectionEnabled,
-		"TeamsRecordAutomatically":                              cfg.TeamsRecordAutomatically,
-		"TeamsVideoWatermark":                                   cfg.TeamsVideoWatermark,
-		"TeamsWhoCanRecord":                                     cfg.TeamsWhoCanRecord,
+		"ApplyContentMarkingFooterFontColor":          cfg.ApplyContentMarkingFooterFontColor,
+		"ApplyContentMarkingFooterFontName":           cfg.ApplyContentMarkingFooterFontName,
+		"ApplyContentMarkingFooterText":               cfg.ApplyContentMarkingFooterText,
+		"ApplyContentMarkingHeaderFontColor":          cfg.ApplyContentMarkingHeaderFontColor,
+		"ApplyContentMarkingHeaderFontName":           cfg.ApplyContentMarkingHeaderFontName,
+		"ApplyContentMarkingHeaderText":               cfg.ApplyContentMarkingHeaderText,
+		"ApplyWaterMarkingFontColor":                  cfg.ApplyWaterMarkingFontColor,
+		"ApplyWaterMarkingFontName":                   cfg.ApplyWaterMarkingFontName,
+		"ApplyWaterMarkingText":                       cfg.ApplyWaterMarkingText,
+		"ColumnAssetCondition":                        cfg.ColumnAssetCondition,
+		"Comment":                                     cfg.Comment,
+		"ConditionalAccessAuthContext":                cfg.ConditionalAccessAuthContext,
+		"DefaultContentLabel":                         cfg.DefaultContentLabel,
+		"DenyAccessExcludedPrincipals":                cfg.DenyAccessExcludedPrincipals,
+		"DenyAccessIncludedPrincipals":                cfg.DenyAccessIncludedPrincipals,
+		"DenyAccessRights":                            cfg.DenyAccessRights,
+		"DenyAccessWorkload":                          cfg.DenyAccessWorkload,
+		"DisplayName":                                 cfg.DisplayName,
+		"DynamicWatermarkDisplay":                     cfg.DynamicWatermarkDisplay,
+		"EncryptionContentExpiredOnDateInDaysOrNever": cfg.EncryptionContentExpiredOnDateInDaysOrNever,
+		"EncryptionDoubleKeyEncryptionUrl":            cfg.EncryptionDoubleKeyEncryptionUrl,
+		"EncryptionRightsUrl":                         cfg.EncryptionRightsUrl,
+		"MigrationId":                                 cfg.MigrationId,
+		"RuleBlob":                                    cfg.RuleBlob,
+		"SchematizedDataCondition":                    cfg.SchematizedDataCondition,
+		"Tooltip":                                     cfg.Tooltip,
 	}, getString)
+	if !cfg.ApplyContentMarkingFooterEnabled.IsUnknown() && !cfg.ApplyContentMarkingFooterEnabled.IsNull() && !cfg.ApplyContentMarkingFooterEnabled.Equal(state.ApplyContentMarkingFooterEnabled) {
+		prev, want := reflected, cfg.ApplyContentMarkingFooterEnabled.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["ApplyContentMarkingFooterEnabled"] == nil || getBool(obj, "ApplyContentMarkingFooterEnabled") == want)
+		}
+	}
+	if !cfg.ApplyContentMarkingFooterFontSize.IsUnknown() && !cfg.ApplyContentMarkingFooterFontSize.IsNull() && !cfg.ApplyContentMarkingFooterFontSize.Equal(state.ApplyContentMarkingFooterFontSize) {
+		prev, want := reflected, cfg.ApplyContentMarkingFooterFontSize.ValueInt64()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["ApplyContentMarkingFooterFontSize"] == nil || getInt(obj, "ApplyContentMarkingFooterFontSize") == want)
+		}
+	}
+	if !cfg.ApplyContentMarkingFooterMargin.IsUnknown() && !cfg.ApplyContentMarkingFooterMargin.IsNull() && !cfg.ApplyContentMarkingFooterMargin.Equal(state.ApplyContentMarkingFooterMargin) {
+		prev, want := reflected, cfg.ApplyContentMarkingFooterMargin.ValueInt64()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["ApplyContentMarkingFooterMargin"] == nil || getInt(obj, "ApplyContentMarkingFooterMargin") == want)
+		}
+	}
+	if !cfg.ApplyContentMarkingHeaderEnabled.IsUnknown() && !cfg.ApplyContentMarkingHeaderEnabled.IsNull() && !cfg.ApplyContentMarkingHeaderEnabled.Equal(state.ApplyContentMarkingHeaderEnabled) {
+		prev, want := reflected, cfg.ApplyContentMarkingHeaderEnabled.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["ApplyContentMarkingHeaderEnabled"] == nil || getBool(obj, "ApplyContentMarkingHeaderEnabled") == want)
+		}
+	}
+	if !cfg.ApplyContentMarkingHeaderFontSize.IsUnknown() && !cfg.ApplyContentMarkingHeaderFontSize.IsNull() && !cfg.ApplyContentMarkingHeaderFontSize.Equal(state.ApplyContentMarkingHeaderFontSize) {
+		prev, want := reflected, cfg.ApplyContentMarkingHeaderFontSize.ValueInt64()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["ApplyContentMarkingHeaderFontSize"] == nil || getInt(obj, "ApplyContentMarkingHeaderFontSize") == want)
+		}
+	}
+	if !cfg.ApplyContentMarkingHeaderMargin.IsUnknown() && !cfg.ApplyContentMarkingHeaderMargin.IsNull() && !cfg.ApplyContentMarkingHeaderMargin.Equal(state.ApplyContentMarkingHeaderMargin) {
+		prev, want := reflected, cfg.ApplyContentMarkingHeaderMargin.ValueInt64()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["ApplyContentMarkingHeaderMargin"] == nil || getInt(obj, "ApplyContentMarkingHeaderMargin") == want)
+		}
+	}
+	if !cfg.ApplyDynamicWatermarkingEnabled.IsUnknown() && !cfg.ApplyDynamicWatermarkingEnabled.IsNull() && !cfg.ApplyDynamicWatermarkingEnabled.Equal(state.ApplyDynamicWatermarkingEnabled) {
+		prev, want := reflected, cfg.ApplyDynamicWatermarkingEnabled.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["ApplyDynamicWatermarkingEnabled"] == nil || getBool(obj, "ApplyDynamicWatermarkingEnabled") == want)
+		}
+	}
+	if !cfg.ApplyWaterMarkingEnabled.IsUnknown() && !cfg.ApplyWaterMarkingEnabled.IsNull() && !cfg.ApplyWaterMarkingEnabled.Equal(state.ApplyWaterMarkingEnabled) {
+		prev, want := reflected, cfg.ApplyWaterMarkingEnabled.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["ApplyWaterMarkingEnabled"] == nil || getBool(obj, "ApplyWaterMarkingEnabled") == want)
+		}
+	}
+	if !cfg.ApplyWaterMarkingFontSize.IsUnknown() && !cfg.ApplyWaterMarkingFontSize.IsNull() && !cfg.ApplyWaterMarkingFontSize.Equal(state.ApplyWaterMarkingFontSize) {
+		prev, want := reflected, cfg.ApplyWaterMarkingFontSize.ValueInt64()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["ApplyWaterMarkingFontSize"] == nil || getInt(obj, "ApplyWaterMarkingFontSize") == want)
+		}
+	}
+	if !cfg.EncryptionDoNotForward.IsUnknown() && !cfg.EncryptionDoNotForward.IsNull() && !cfg.EncryptionDoNotForward.Equal(state.EncryptionDoNotForward) {
+		prev, want := reflected, cfg.EncryptionDoNotForward.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["EncryptionDoNotForward"] == nil || getBool(obj, "EncryptionDoNotForward") == want)
+		}
+	}
+	if !cfg.EncryptionEnabled.IsUnknown() && !cfg.EncryptionEnabled.IsNull() && !cfg.EncryptionEnabled.Equal(state.EncryptionEnabled) {
+		prev, want := reflected, cfg.EncryptionEnabled.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["EncryptionEnabled"] == nil || getBool(obj, "EncryptionEnabled") == want)
+		}
+	}
+	if !cfg.EncryptionEncryptOnly.IsUnknown() && !cfg.EncryptionEncryptOnly.IsNull() && !cfg.EncryptionEncryptOnly.Equal(state.EncryptionEncryptOnly) {
+		prev, want := reflected, cfg.EncryptionEncryptOnly.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["EncryptionEncryptOnly"] == nil || getBool(obj, "EncryptionEncryptOnly") == want)
+		}
+	}
+	if !cfg.EncryptionOfflineAccessDays.IsUnknown() && !cfg.EncryptionOfflineAccessDays.IsNull() && !cfg.EncryptionOfflineAccessDays.Equal(state.EncryptionOfflineAccessDays) {
+		prev, want := reflected, cfg.EncryptionOfflineAccessDays.ValueInt64()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["EncryptionOfflineAccessDays"] == nil || getInt(obj, "EncryptionOfflineAccessDays") == want)
+		}
+	}
+	if !cfg.EncryptionPromptUser.IsUnknown() && !cfg.EncryptionPromptUser.IsNull() && !cfg.EncryptionPromptUser.Equal(state.EncryptionPromptUser) {
+		prev, want := reflected, cfg.EncryptionPromptUser.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["EncryptionPromptUser"] == nil || getBool(obj, "EncryptionPromptUser") == want)
+		}
+	}
+	if !cfg.Priority.IsUnknown() && !cfg.Priority.IsNull() && !cfg.Priority.Equal(state.Priority) {
+		prev, want := reflected, cfg.Priority.ValueInt64()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["Priority"] == nil || getInt(obj, "Priority") == want)
+		}
+	}
+	if !cfg.RemoveParentLink.IsUnknown() && !cfg.RemoveParentLink.IsNull() && !cfg.RemoveParentLink.Equal(state.RemoveParentLink) {
+		prev, want := reflected, cfg.RemoveParentLink.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["RemoveParentLink"] == nil || getBool(obj, "RemoveParentLink") == want)
+		}
+	}
+	if !cfg.SiteAndGroupProtectionAllowAccessToGuestUsers.IsUnknown() && !cfg.SiteAndGroupProtectionAllowAccessToGuestUsers.IsNull() && !cfg.SiteAndGroupProtectionAllowAccessToGuestUsers.Equal(state.SiteAndGroupProtectionAllowAccessToGuestUsers) {
+		prev, want := reflected, cfg.SiteAndGroupProtectionAllowAccessToGuestUsers.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["SiteAndGroupProtectionAllowAccessToGuestUsers"] == nil || getBool(obj, "SiteAndGroupProtectionAllowAccessToGuestUsers") == want)
+		}
+	}
+	if !cfg.SiteAndGroupProtectionAllowEmailFromGuestUsers.IsUnknown() && !cfg.SiteAndGroupProtectionAllowEmailFromGuestUsers.IsNull() && !cfg.SiteAndGroupProtectionAllowEmailFromGuestUsers.Equal(state.SiteAndGroupProtectionAllowEmailFromGuestUsers) {
+		prev, want := reflected, cfg.SiteAndGroupProtectionAllowEmailFromGuestUsers.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["SiteAndGroupProtectionAllowEmailFromGuestUsers"] == nil || getBool(obj, "SiteAndGroupProtectionAllowEmailFromGuestUsers") == want)
+		}
+	}
+	if !cfg.SiteAndGroupProtectionAllowFullAccess.IsUnknown() && !cfg.SiteAndGroupProtectionAllowFullAccess.IsNull() && !cfg.SiteAndGroupProtectionAllowFullAccess.Equal(state.SiteAndGroupProtectionAllowFullAccess) {
+		prev, want := reflected, cfg.SiteAndGroupProtectionAllowFullAccess.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["SiteAndGroupProtectionAllowFullAccess"] == nil || getBool(obj, "SiteAndGroupProtectionAllowFullAccess") == want)
+		}
+	}
+	if !cfg.SiteAndGroupProtectionAllowLimitedAccess.IsUnknown() && !cfg.SiteAndGroupProtectionAllowLimitedAccess.IsNull() && !cfg.SiteAndGroupProtectionAllowLimitedAccess.Equal(state.SiteAndGroupProtectionAllowLimitedAccess) {
+		prev, want := reflected, cfg.SiteAndGroupProtectionAllowLimitedAccess.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["SiteAndGroupProtectionAllowLimitedAccess"] == nil || getBool(obj, "SiteAndGroupProtectionAllowLimitedAccess") == want)
+		}
+	}
+	if !cfg.SiteAndGroupProtectionBlockAccess.IsUnknown() && !cfg.SiteAndGroupProtectionBlockAccess.IsNull() && !cfg.SiteAndGroupProtectionBlockAccess.Equal(state.SiteAndGroupProtectionBlockAccess) {
+		prev, want := reflected, cfg.SiteAndGroupProtectionBlockAccess.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["SiteAndGroupProtectionBlockAccess"] == nil || getBool(obj, "SiteAndGroupProtectionBlockAccess") == want)
+		}
+	}
+	if !cfg.SiteAndGroupProtectionEnabled.IsUnknown() && !cfg.SiteAndGroupProtectionEnabled.IsNull() && !cfg.SiteAndGroupProtectionEnabled.Equal(state.SiteAndGroupProtectionEnabled) {
+		prev, want := reflected, cfg.SiteAndGroupProtectionEnabled.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["SiteAndGroupProtectionEnabled"] == nil || getBool(obj, "SiteAndGroupProtectionEnabled") == want)
+		}
+	}
+	if !cfg.TeamsAllowPrivateTeamsToBeDiscoverableUsingSearch.IsUnknown() && !cfg.TeamsAllowPrivateTeamsToBeDiscoverableUsingSearch.IsNull() && !cfg.TeamsAllowPrivateTeamsToBeDiscoverableUsingSearch.Equal(state.TeamsAllowPrivateTeamsToBeDiscoverableUsingSearch) {
+		prev, want := reflected, cfg.TeamsAllowPrivateTeamsToBeDiscoverableUsingSearch.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["TeamsAllowPrivateTeamsToBeDiscoverableUsingSearch"] == nil || getBool(obj, "TeamsAllowPrivateTeamsToBeDiscoverableUsingSearch") == want)
+		}
+	}
+	if !cfg.TeamsBypassLobbyForDialInUsers.IsUnknown() && !cfg.TeamsBypassLobbyForDialInUsers.IsNull() && !cfg.TeamsBypassLobbyForDialInUsers.Equal(state.TeamsBypassLobbyForDialInUsers) {
+		prev, want := reflected, cfg.TeamsBypassLobbyForDialInUsers.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["TeamsBypassLobbyForDialInUsers"] == nil || getBool(obj, "TeamsBypassLobbyForDialInUsers") == want)
+		}
+	}
+	if !cfg.TeamsChannelProtectionEnabled.IsUnknown() && !cfg.TeamsChannelProtectionEnabled.IsNull() && !cfg.TeamsChannelProtectionEnabled.Equal(state.TeamsChannelProtectionEnabled) {
+		prev, want := reflected, cfg.TeamsChannelProtectionEnabled.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["TeamsChannelProtectionEnabled"] == nil || getBool(obj, "TeamsChannelProtectionEnabled") == want)
+		}
+	}
+	if !cfg.TeamsChannelSharedWithExternalTenants.IsUnknown() && !cfg.TeamsChannelSharedWithExternalTenants.IsNull() && !cfg.TeamsChannelSharedWithExternalTenants.Equal(state.TeamsChannelSharedWithExternalTenants) {
+		prev, want := reflected, cfg.TeamsChannelSharedWithExternalTenants.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["TeamsChannelSharedWithExternalTenants"] == nil || getBool(obj, "TeamsChannelSharedWithExternalTenants") == want)
+		}
+	}
+	if !cfg.TeamsChannelSharedWithPrivateTeamsOnly.IsUnknown() && !cfg.TeamsChannelSharedWithPrivateTeamsOnly.IsNull() && !cfg.TeamsChannelSharedWithPrivateTeamsOnly.Equal(state.TeamsChannelSharedWithPrivateTeamsOnly) {
+		prev, want := reflected, cfg.TeamsChannelSharedWithPrivateTeamsOnly.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["TeamsChannelSharedWithPrivateTeamsOnly"] == nil || getBool(obj, "TeamsChannelSharedWithPrivateTeamsOnly") == want)
+		}
+	}
+	if !cfg.TeamsChannelSharedWithSameLabelOnly.IsUnknown() && !cfg.TeamsChannelSharedWithSameLabelOnly.IsNull() && !cfg.TeamsChannelSharedWithSameLabelOnly.Equal(state.TeamsChannelSharedWithSameLabelOnly) {
+		prev, want := reflected, cfg.TeamsChannelSharedWithSameLabelOnly.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["TeamsChannelSharedWithSameLabelOnly"] == nil || getBool(obj, "TeamsChannelSharedWithSameLabelOnly") == want)
+		}
+	}
+	if !cfg.TeamsCopyRestrictionEnforced.IsUnknown() && !cfg.TeamsCopyRestrictionEnforced.IsNull() && !cfg.TeamsCopyRestrictionEnforced.Equal(state.TeamsCopyRestrictionEnforced) {
+		prev, want := reflected, cfg.TeamsCopyRestrictionEnforced.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["TeamsCopyRestrictionEnforced"] == nil || getBool(obj, "TeamsCopyRestrictionEnforced") == want)
+		}
+	}
+	if !cfg.TeamsDetectSensitiveContentDuringScreenSharingEnabled.IsUnknown() && !cfg.TeamsDetectSensitiveContentDuringScreenSharingEnabled.IsNull() && !cfg.TeamsDetectSensitiveContentDuringScreenSharingEnabled.Equal(state.TeamsDetectSensitiveContentDuringScreenSharingEnabled) {
+		prev, want := reflected, cfg.TeamsDetectSensitiveContentDuringScreenSharingEnabled.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["TeamsDetectSensitiveContentDuringScreenSharingEnabled"] == nil || getBool(obj, "TeamsDetectSensitiveContentDuringScreenSharingEnabled") == want)
+		}
+	}
+	if !cfg.TeamsDisableLobby.IsUnknown() && !cfg.TeamsDisableLobby.IsNull() && !cfg.TeamsDisableLobby.Equal(state.TeamsDisableLobby) {
+		prev, want := reflected, cfg.TeamsDisableLobby.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["TeamsDisableLobby"] == nil || getBool(obj, "TeamsDisableLobby") == want)
+		}
+	}
+	if !cfg.TeamsEndToEndEncryptionEnabled.IsUnknown() && !cfg.TeamsEndToEndEncryptionEnabled.IsNull() && !cfg.TeamsEndToEndEncryptionEnabled.Equal(state.TeamsEndToEndEncryptionEnabled) {
+		prev, want := reflected, cfg.TeamsEndToEndEncryptionEnabled.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["TeamsEndToEndEncryptionEnabled"] == nil || getBool(obj, "TeamsEndToEndEncryptionEnabled") == want)
+		}
+	}
+	if !cfg.TeamsLobbyRestrictionEnforced.IsUnknown() && !cfg.TeamsLobbyRestrictionEnforced.IsNull() && !cfg.TeamsLobbyRestrictionEnforced.Equal(state.TeamsLobbyRestrictionEnforced) {
+		prev, want := reflected, cfg.TeamsLobbyRestrictionEnforced.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["TeamsLobbyRestrictionEnforced"] == nil || getBool(obj, "TeamsLobbyRestrictionEnforced") == want)
+		}
+	}
+	if !cfg.TeamsPresentersRestrictionEnforced.IsUnknown() && !cfg.TeamsPresentersRestrictionEnforced.IsNull() && !cfg.TeamsPresentersRestrictionEnforced.Equal(state.TeamsPresentersRestrictionEnforced) {
+		prev, want := reflected, cfg.TeamsPresentersRestrictionEnforced.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["TeamsPresentersRestrictionEnforced"] == nil || getBool(obj, "TeamsPresentersRestrictionEnforced") == want)
+		}
+	}
+	if !cfg.TeamsProtectionEnabled.IsUnknown() && !cfg.TeamsProtectionEnabled.IsNull() && !cfg.TeamsProtectionEnabled.Equal(state.TeamsProtectionEnabled) {
+		prev, want := reflected, cfg.TeamsProtectionEnabled.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["TeamsProtectionEnabled"] == nil || getBool(obj, "TeamsProtectionEnabled") == want)
+		}
+	}
+	if !cfg.TeamsRecordAutomatically.IsUnknown() && !cfg.TeamsRecordAutomatically.IsNull() && !cfg.TeamsRecordAutomatically.Equal(state.TeamsRecordAutomatically) {
+		prev, want := reflected, cfg.TeamsRecordAutomatically.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["TeamsRecordAutomatically"] == nil || getBool(obj, "TeamsRecordAutomatically") == want)
+		}
+	}
 	r.refresh(ctx, id, &plan, &resp.Diagnostics, reflected)
+	if !cfg.ID.IsUnknown() && !cfg.ID.IsNull() {
+		plan.ID = cfg.ID
+	}
 	r.reconcileState(&cfg, &plan)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
@@ -907,38 +1434,38 @@ func (r *labelResource) refresh(ctx context.Context, identity string, m *labelMo
 func readLabel(ctx context.Context, obj map[string]any, m *labelModel) {
 	m.ID = types.StringValue(firstNonEmptyStr(getString(obj, "Guid"), getString(obj, "Id"), getString(obj, "Identity")))
 	m.Identity = types.StringValue(firstNonEmptyStr(getString(obj, "Identity"), getString(obj, "Guid"), getString(obj, "Name")))
-	m.AbacEnabled = types.StringValue(getString(obj, "AbacEnabled"))
-	m.AdvancedSettings = types.StringValue(getString(obj, "AdvancedSettings"))
-	m.ApplyContentMarkingFooterAlignment = types.StringValue(getString(obj, "ApplyContentMarkingFooterAlignment"))
-	m.ApplyContentMarkingFooterEnabled = types.StringValue(getString(obj, "ApplyContentMarkingFooterEnabled"))
+	m.AbacEnabled = types.StringValue(getObjectJSON(obj, "AbacEnabled"))
+	m.AdvancedSettings = types.StringValue(getObjectJSON(obj, "AdvancedSettings"))
+	m.ApplyContentMarkingFooterAlignment = types.StringValue(getObjectJSON(obj, "ApplyContentMarkingFooterAlignment"))
+	m.ApplyContentMarkingFooterEnabled = types.BoolValue(getBool(obj, "ApplyContentMarkingFooterEnabled"))
 	m.ApplyContentMarkingFooterFontColor = types.StringValue(getString(obj, "ApplyContentMarkingFooterFontColor"))
 	m.ApplyContentMarkingFooterFontName = types.StringValue(getString(obj, "ApplyContentMarkingFooterFontName"))
-	m.ApplyContentMarkingFooterFontSize = types.StringValue(getString(obj, "ApplyContentMarkingFooterFontSize"))
-	m.ApplyContentMarkingFooterMargin = types.StringValue(getString(obj, "ApplyContentMarkingFooterMargin"))
+	m.ApplyContentMarkingFooterFontSize = types.Int64Value(getInt(obj, "ApplyContentMarkingFooterFontSize"))
+	m.ApplyContentMarkingFooterMargin = types.Int64Value(getInt(obj, "ApplyContentMarkingFooterMargin"))
 	m.ApplyContentMarkingFooterText = types.StringValue(getString(obj, "ApplyContentMarkingFooterText"))
-	m.ApplyContentMarkingHeaderAlignment = types.StringValue(getString(obj, "ApplyContentMarkingHeaderAlignment"))
-	m.ApplyContentMarkingHeaderEnabled = types.StringValue(getString(obj, "ApplyContentMarkingHeaderEnabled"))
+	m.ApplyContentMarkingHeaderAlignment = types.StringValue(getObjectJSON(obj, "ApplyContentMarkingHeaderAlignment"))
+	m.ApplyContentMarkingHeaderEnabled = types.BoolValue(getBool(obj, "ApplyContentMarkingHeaderEnabled"))
 	m.ApplyContentMarkingHeaderFontColor = types.StringValue(getString(obj, "ApplyContentMarkingHeaderFontColor"))
 	m.ApplyContentMarkingHeaderFontName = types.StringValue(getString(obj, "ApplyContentMarkingHeaderFontName"))
-	m.ApplyContentMarkingHeaderFontSize = types.StringValue(getString(obj, "ApplyContentMarkingHeaderFontSize"))
-	m.ApplyContentMarkingHeaderMargin = types.StringValue(getString(obj, "ApplyContentMarkingHeaderMargin"))
+	m.ApplyContentMarkingHeaderFontSize = types.Int64Value(getInt(obj, "ApplyContentMarkingHeaderFontSize"))
+	m.ApplyContentMarkingHeaderMargin = types.Int64Value(getInt(obj, "ApplyContentMarkingHeaderMargin"))
 	m.ApplyContentMarkingHeaderText = types.StringValue(getString(obj, "ApplyContentMarkingHeaderText"))
-	m.ApplyDynamicWatermarkingEnabled = types.StringValue(getString(obj, "ApplyDynamicWatermarkingEnabled"))
-	m.ApplyMessageMetaData = types.StringValue(getString(obj, "ApplyMessageMetaData"))
-	m.ApplyMessageMetaDataEnabled = types.StringValue(getString(obj, "ApplyMessageMetaDataEnabled"))
-	m.ApplyWaterMarkingEnabled = types.StringValue(getString(obj, "ApplyWaterMarkingEnabled"))
+	m.ApplyDynamicWatermarkingEnabled = types.BoolValue(getBool(obj, "ApplyDynamicWatermarkingEnabled"))
+	m.ApplyMessageMetaData = types.StringValue(getObjectJSON(obj, "ApplyMessageMetaData"))
+	m.ApplyMessageMetaDataEnabled = types.StringValue(getObjectJSON(obj, "ApplyMessageMetaDataEnabled"))
+	m.ApplyWaterMarkingEnabled = types.BoolValue(getBool(obj, "ApplyWaterMarkingEnabled"))
 	m.ApplyWaterMarkingFontColor = types.StringValue(getString(obj, "ApplyWaterMarkingFontColor"))
 	m.ApplyWaterMarkingFontName = types.StringValue(getString(obj, "ApplyWaterMarkingFontName"))
-	m.ApplyWaterMarkingFontSize = types.StringValue(getString(obj, "ApplyWaterMarkingFontSize"))
-	m.ApplyWaterMarkingLayout = types.StringValue(getString(obj, "ApplyWaterMarkingLayout"))
+	m.ApplyWaterMarkingFontSize = types.Int64Value(getInt(obj, "ApplyWaterMarkingFontSize"))
+	m.ApplyWaterMarkingLayout = types.StringValue(getObjectJSON(obj, "ApplyWaterMarkingLayout"))
 	m.ApplyWaterMarkingText = types.StringValue(getString(obj, "ApplyWaterMarkingText"))
 	m.ColumnAssetCondition = types.StringValue(getString(obj, "ColumnAssetCondition"))
 	m.Comment = types.StringValue(getString(obj, "Comment"))
 	m.ConditionalAccessAuthContext = types.StringValue(getString(obj, "ConditionalAccessAuthContext"))
-	m.Conditions = types.StringValue(getString(obj, "Conditions"))
-	m.ContentType = types.StringValue(getString(obj, "ContentType"))
+	m.Conditions = stringSetValue(ctx, getStringSlice(obj, "Conditions"))
+	m.ContentType = types.StringValue(getObjectJSON(obj, "ContentType"))
 	m.DefaultContentLabel = types.StringValue(getString(obj, "DefaultContentLabel"))
-	m.DenyAccessEnabled = types.StringValue(getString(obj, "DenyAccessEnabled"))
+	m.DenyAccessEnabled = types.StringValue(getObjectJSON(obj, "DenyAccessEnabled"))
 	m.DenyAccessExcludedPrincipals = types.StringValue(getString(obj, "DenyAccessExcludedPrincipals"))
 	m.DenyAccessIncludedPrincipals = types.StringValue(getString(obj, "DenyAccessIncludedPrincipals"))
 	m.DenyAccessRights = types.StringValue(getString(obj, "DenyAccessRights"))
@@ -947,62 +1474,62 @@ func readLabel(ctx context.Context, obj map[string]any, m *labelModel) {
 	m.DynamicWatermarkDisplay = types.StringValue(getString(obj, "DynamicWatermarkDisplay"))
 	m.EncryptionAipTemplateScopes = types.StringValue(getString(obj, "EncryptionAipTemplateScopes"))
 	m.EncryptionContentExpiredOnDateInDaysOrNever = types.StringValue(getString(obj, "EncryptionContentExpiredOnDateInDaysOrNever"))
-	m.EncryptionDisableAutomaticOwnerRights = types.StringValue(getString(obj, "EncryptionDisableAutomaticOwnerRights"))
-	m.EncryptionDoNotForward = types.StringValue(getString(obj, "EncryptionDoNotForward"))
+	m.EncryptionDisableAutomaticOwnerRights = types.StringValue(getObjectJSON(obj, "EncryptionDisableAutomaticOwnerRights"))
+	m.EncryptionDoNotForward = types.BoolValue(getBool(obj, "EncryptionDoNotForward"))
 	m.EncryptionDoubleKeyEncryptionUrl = types.StringValue(getString(obj, "EncryptionDoubleKeyEncryptionUrl"))
-	m.EncryptionEnabled = types.StringValue(getString(obj, "EncryptionEnabled"))
-	m.EncryptionEncryptOnly = types.StringValue(getString(obj, "EncryptionEncryptOnly"))
+	m.EncryptionEnabled = types.BoolValue(getBool(obj, "EncryptionEnabled"))
+	m.EncryptionEncryptOnly = types.BoolValue(getBool(obj, "EncryptionEncryptOnly"))
 	m.EncryptionLinkedTemplateId = types.StringValue(getString(obj, "EncryptionLinkedTemplateId"))
-	m.EncryptionOfflineAccessDays = types.StringValue(getString(obj, "EncryptionOfflineAccessDays"))
-	m.EncryptionPromptUser = types.StringValue(getString(obj, "EncryptionPromptUser"))
-	m.EncryptionProtectionType = types.StringValue(getString(obj, "EncryptionProtectionType"))
-	m.EncryptionRightsDefinitions = types.StringValue(getString(obj, "EncryptionRightsDefinitions"))
+	m.EncryptionOfflineAccessDays = types.Int64Value(getInt(obj, "EncryptionOfflineAccessDays"))
+	m.EncryptionPromptUser = types.BoolValue(getBool(obj, "EncryptionPromptUser"))
+	m.EncryptionProtectionType = types.StringValue(getObjectJSON(obj, "EncryptionProtectionType"))
+	m.EncryptionRightsDefinitions = types.StringValue(getObjectJSON(obj, "EncryptionRightsDefinitions"))
 	m.EncryptionRightsUrl = types.StringValue(getString(obj, "EncryptionRightsUrl"))
 	m.EncryptionTemplateId = types.StringValue(getString(obj, "EncryptionTemplateId"))
-	m.InformationProtectionAttributeRequired = types.StringValue(getString(obj, "InformationProtectionAttributeRequired"))
-	m.InheritToChildItems = types.StringValue(getString(obj, "InheritToChildItems"))
+	m.InformationProtectionAttributeRequired = types.StringValue(getObjectJSON(obj, "InformationProtectionAttributeRequired"))
+	m.InheritToChildItems = types.StringValue(getObjectJSON(obj, "InheritToChildItems"))
 	m.IsLabelGroup = types.BoolValue(getBool(obj, "IsLabelGroup"))
-	m.LabelActions = types.StringValue(getString(obj, "LabelActions"))
-	m.LocaleSettings = types.StringValue(getString(obj, "LocaleSettings"))
+	m.LabelActions = stringSetValue(ctx, getStringSlice(obj, "LabelActions"))
+	m.LocaleSettings = stringSetValue(ctx, getStringSlice(obj, "LocaleSettings"))
 	m.MigrationId = types.StringValue(getString(obj, "MigrationId"))
 	m.Name = types.StringValue(getString(obj, "Name"))
-	m.NextLabel = types.StringValue(getString(obj, "NextLabel"))
-	m.ParentId = types.StringValue(getString(obj, "ParentId"))
-	m.PreviousLabel = types.StringValue(getString(obj, "PreviousLabel"))
-	m.Priority = types.StringValue(getString(obj, "Priority"))
+	m.NextLabel = types.StringValue(getObjectJSON(obj, "NextLabel"))
+	m.ParentId = types.StringValue(getObjectJSON(obj, "ParentId"))
+	m.PreviousLabel = types.StringValue(getObjectJSON(obj, "PreviousLabel"))
+	m.Priority = types.Int64Value(getInt(obj, "Priority"))
 	m.RemoveParentLink = types.BoolValue(getBool(obj, "RemoveParentLink"))
 	m.RuleBlob = types.StringValue(getString(obj, "RuleBlob"))
 	m.SchematizedDataCondition = types.StringValue(getString(obj, "SchematizedDataCondition"))
-	m.Setting = types.StringValue(getString(obj, "Setting"))
-	m.Settings = types.StringValue(getString(obj, "Settings"))
-	m.SiteAndGroupProtectionAllowAccessToGuestUsers = types.StringValue(getString(obj, "SiteAndGroupProtectionAllowAccessToGuestUsers"))
-	m.SiteAndGroupProtectionAllowEmailFromGuestUsers = types.StringValue(getString(obj, "SiteAndGroupProtectionAllowEmailFromGuestUsers"))
-	m.SiteAndGroupProtectionAllowFullAccess = types.StringValue(getString(obj, "SiteAndGroupProtectionAllowFullAccess"))
-	m.SiteAndGroupProtectionAllowLimitedAccess = types.StringValue(getString(obj, "SiteAndGroupProtectionAllowLimitedAccess"))
-	m.SiteAndGroupProtectionBlockAccess = types.StringValue(getString(obj, "SiteAndGroupProtectionBlockAccess"))
-	m.SiteAndGroupProtectionEnabled = types.StringValue(getString(obj, "SiteAndGroupProtectionEnabled"))
-	m.SiteAndGroupProtectionLevel = types.StringValue(getString(obj, "SiteAndGroupProtectionLevel"))
-	m.SiteAndGroupProtectionPrivacy = types.StringValue(getString(obj, "SiteAndGroupProtectionPrivacy"))
-	m.SiteExternalSharingControlType = types.StringValue(getString(obj, "SiteExternalSharingControlType"))
-	m.TeamsAllowMeetingChat = types.StringValue(getString(obj, "TeamsAllowMeetingChat"))
-	m.TeamsAllowPrivateTeamsToBeDiscoverableUsingSearch = types.StringValue(getString(obj, "TeamsAllowPrivateTeamsToBeDiscoverableUsingSearch"))
-	m.TeamsAllowedPresenters = types.StringValue(getString(obj, "TeamsAllowedPresenters"))
-	m.TeamsBypassLobbyForDialInUsers = types.StringValue(getString(obj, "TeamsBypassLobbyForDialInUsers"))
-	m.TeamsChannelProtectionEnabled = types.StringValue(getString(obj, "TeamsChannelProtectionEnabled"))
-	m.TeamsChannelSharedWithExternalTenants = types.StringValue(getString(obj, "TeamsChannelSharedWithExternalTenants"))
-	m.TeamsChannelSharedWithPrivateTeamsOnly = types.StringValue(getString(obj, "TeamsChannelSharedWithPrivateTeamsOnly"))
-	m.TeamsChannelSharedWithSameLabelOnly = types.StringValue(getString(obj, "TeamsChannelSharedWithSameLabelOnly"))
-	m.TeamsCopyRestrictionEnforced = types.StringValue(getString(obj, "TeamsCopyRestrictionEnforced"))
-	m.TeamsDetectSensitiveContentDuringScreenSharingEnabled = types.StringValue(getString(obj, "TeamsDetectSensitiveContentDuringScreenSharingEnabled"))
-	m.TeamsDisableLobby = types.StringValue(getString(obj, "TeamsDisableLobby"))
-	m.TeamsEndToEndEncryptionEnabled = types.StringValue(getString(obj, "TeamsEndToEndEncryptionEnabled"))
-	m.TeamsLobbyBypassScope = types.StringValue(getString(obj, "TeamsLobbyBypassScope"))
-	m.TeamsLobbyRestrictionEnforced = types.StringValue(getString(obj, "TeamsLobbyRestrictionEnforced"))
-	m.TeamsPresentersRestrictionEnforced = types.StringValue(getString(obj, "TeamsPresentersRestrictionEnforced"))
-	m.TeamsProtectionEnabled = types.StringValue(getString(obj, "TeamsProtectionEnabled"))
-	m.TeamsRecordAutomatically = types.StringValue(getString(obj, "TeamsRecordAutomatically"))
-	m.TeamsVideoWatermark = types.StringValue(getString(obj, "TeamsVideoWatermark"))
-	m.TeamsWhoCanRecord = types.StringValue(getString(obj, "TeamsWhoCanRecord"))
+	m.Setting = types.StringValue(getObjectJSON(obj, "Setting"))
+	m.Settings = types.StringValue(getObjectJSON(obj, "Settings"))
+	m.SiteAndGroupProtectionAllowAccessToGuestUsers = types.BoolValue(getBool(obj, "SiteAndGroupProtectionAllowAccessToGuestUsers"))
+	m.SiteAndGroupProtectionAllowEmailFromGuestUsers = types.BoolValue(getBool(obj, "SiteAndGroupProtectionAllowEmailFromGuestUsers"))
+	m.SiteAndGroupProtectionAllowFullAccess = types.BoolValue(getBool(obj, "SiteAndGroupProtectionAllowFullAccess"))
+	m.SiteAndGroupProtectionAllowLimitedAccess = types.BoolValue(getBool(obj, "SiteAndGroupProtectionAllowLimitedAccess"))
+	m.SiteAndGroupProtectionBlockAccess = types.BoolValue(getBool(obj, "SiteAndGroupProtectionBlockAccess"))
+	m.SiteAndGroupProtectionEnabled = types.BoolValue(getBool(obj, "SiteAndGroupProtectionEnabled"))
+	m.SiteAndGroupProtectionLevel = types.StringValue(getObjectJSON(obj, "SiteAndGroupProtectionLevel"))
+	m.SiteAndGroupProtectionPrivacy = types.StringValue(getObjectJSON(obj, "SiteAndGroupProtectionPrivacy"))
+	m.SiteExternalSharingControlType = types.StringValue(getObjectJSON(obj, "SiteExternalSharingControlType"))
+	m.TeamsAllowMeetingChat = types.StringValue(getObjectJSON(obj, "TeamsAllowMeetingChat"))
+	m.TeamsAllowPrivateTeamsToBeDiscoverableUsingSearch = types.BoolValue(getBool(obj, "TeamsAllowPrivateTeamsToBeDiscoverableUsingSearch"))
+	m.TeamsAllowedPresenters = types.StringValue(getObjectJSON(obj, "TeamsAllowedPresenters"))
+	m.TeamsBypassLobbyForDialInUsers = types.BoolValue(getBool(obj, "TeamsBypassLobbyForDialInUsers"))
+	m.TeamsChannelProtectionEnabled = types.BoolValue(getBool(obj, "TeamsChannelProtectionEnabled"))
+	m.TeamsChannelSharedWithExternalTenants = types.BoolValue(getBool(obj, "TeamsChannelSharedWithExternalTenants"))
+	m.TeamsChannelSharedWithPrivateTeamsOnly = types.BoolValue(getBool(obj, "TeamsChannelSharedWithPrivateTeamsOnly"))
+	m.TeamsChannelSharedWithSameLabelOnly = types.BoolValue(getBool(obj, "TeamsChannelSharedWithSameLabelOnly"))
+	m.TeamsCopyRestrictionEnforced = types.BoolValue(getBool(obj, "TeamsCopyRestrictionEnforced"))
+	m.TeamsDetectSensitiveContentDuringScreenSharingEnabled = types.BoolValue(getBool(obj, "TeamsDetectSensitiveContentDuringScreenSharingEnabled"))
+	m.TeamsDisableLobby = types.BoolValue(getBool(obj, "TeamsDisableLobby"))
+	m.TeamsEndToEndEncryptionEnabled = types.BoolValue(getBool(obj, "TeamsEndToEndEncryptionEnabled"))
+	m.TeamsLobbyBypassScope = types.StringValue(getObjectJSON(obj, "TeamsLobbyBypassScope"))
+	m.TeamsLobbyRestrictionEnforced = types.BoolValue(getBool(obj, "TeamsLobbyRestrictionEnforced"))
+	m.TeamsPresentersRestrictionEnforced = types.BoolValue(getBool(obj, "TeamsPresentersRestrictionEnforced"))
+	m.TeamsProtectionEnabled = types.BoolValue(getBool(obj, "TeamsProtectionEnabled"))
+	m.TeamsRecordAutomatically = types.BoolValue(getBool(obj, "TeamsRecordAutomatically"))
+	m.TeamsVideoWatermark = types.StringValue(getObjectJSON(obj, "TeamsVideoWatermark"))
+	m.TeamsWhoCanRecord = types.StringValue(getObjectJSON(obj, "TeamsWhoCanRecord"))
 	m.Tooltip = types.StringValue(getString(obj, "Tooltip"))
 	_ = ctx
 }
@@ -1011,32 +1538,32 @@ func (r *labelResource) reconcileState(cfg, read *labelModel) {
 	read.AbacEnabled = reconcile.KeepStr(cfg.AbacEnabled, read.AbacEnabled)
 	read.AdvancedSettings = reconcile.KeepStr(cfg.AdvancedSettings, read.AdvancedSettings)
 	read.ApplyContentMarkingFooterAlignment = reconcile.KeepStr(cfg.ApplyContentMarkingFooterAlignment, read.ApplyContentMarkingFooterAlignment)
-	read.ApplyContentMarkingFooterEnabled = reconcile.KeepStr(cfg.ApplyContentMarkingFooterEnabled, read.ApplyContentMarkingFooterEnabled)
+	read.ApplyContentMarkingFooterEnabled = reconcile.KeepBool(cfg.ApplyContentMarkingFooterEnabled, read.ApplyContentMarkingFooterEnabled)
 	read.ApplyContentMarkingFooterFontColor = reconcile.KeepStr(cfg.ApplyContentMarkingFooterFontColor, read.ApplyContentMarkingFooterFontColor)
 	read.ApplyContentMarkingFooterFontName = reconcile.KeepStr(cfg.ApplyContentMarkingFooterFontName, read.ApplyContentMarkingFooterFontName)
-	read.ApplyContentMarkingFooterFontSize = reconcile.KeepStr(cfg.ApplyContentMarkingFooterFontSize, read.ApplyContentMarkingFooterFontSize)
-	read.ApplyContentMarkingFooterMargin = reconcile.KeepStr(cfg.ApplyContentMarkingFooterMargin, read.ApplyContentMarkingFooterMargin)
+	read.ApplyContentMarkingFooterFontSize = reconcile.KeepInt64(cfg.ApplyContentMarkingFooterFontSize, read.ApplyContentMarkingFooterFontSize)
+	read.ApplyContentMarkingFooterMargin = reconcile.KeepInt64(cfg.ApplyContentMarkingFooterMargin, read.ApplyContentMarkingFooterMargin)
 	read.ApplyContentMarkingFooterText = reconcile.KeepStr(cfg.ApplyContentMarkingFooterText, read.ApplyContentMarkingFooterText)
 	read.ApplyContentMarkingHeaderAlignment = reconcile.KeepStr(cfg.ApplyContentMarkingHeaderAlignment, read.ApplyContentMarkingHeaderAlignment)
-	read.ApplyContentMarkingHeaderEnabled = reconcile.KeepStr(cfg.ApplyContentMarkingHeaderEnabled, read.ApplyContentMarkingHeaderEnabled)
+	read.ApplyContentMarkingHeaderEnabled = reconcile.KeepBool(cfg.ApplyContentMarkingHeaderEnabled, read.ApplyContentMarkingHeaderEnabled)
 	read.ApplyContentMarkingHeaderFontColor = reconcile.KeepStr(cfg.ApplyContentMarkingHeaderFontColor, read.ApplyContentMarkingHeaderFontColor)
 	read.ApplyContentMarkingHeaderFontName = reconcile.KeepStr(cfg.ApplyContentMarkingHeaderFontName, read.ApplyContentMarkingHeaderFontName)
-	read.ApplyContentMarkingHeaderFontSize = reconcile.KeepStr(cfg.ApplyContentMarkingHeaderFontSize, read.ApplyContentMarkingHeaderFontSize)
-	read.ApplyContentMarkingHeaderMargin = reconcile.KeepStr(cfg.ApplyContentMarkingHeaderMargin, read.ApplyContentMarkingHeaderMargin)
+	read.ApplyContentMarkingHeaderFontSize = reconcile.KeepInt64(cfg.ApplyContentMarkingHeaderFontSize, read.ApplyContentMarkingHeaderFontSize)
+	read.ApplyContentMarkingHeaderMargin = reconcile.KeepInt64(cfg.ApplyContentMarkingHeaderMargin, read.ApplyContentMarkingHeaderMargin)
 	read.ApplyContentMarkingHeaderText = reconcile.KeepStr(cfg.ApplyContentMarkingHeaderText, read.ApplyContentMarkingHeaderText)
-	read.ApplyDynamicWatermarkingEnabled = reconcile.KeepStr(cfg.ApplyDynamicWatermarkingEnabled, read.ApplyDynamicWatermarkingEnabled)
+	read.ApplyDynamicWatermarkingEnabled = reconcile.KeepBool(cfg.ApplyDynamicWatermarkingEnabled, read.ApplyDynamicWatermarkingEnabled)
 	read.ApplyMessageMetaData = reconcile.KeepStr(cfg.ApplyMessageMetaData, read.ApplyMessageMetaData)
 	read.ApplyMessageMetaDataEnabled = reconcile.KeepStr(cfg.ApplyMessageMetaDataEnabled, read.ApplyMessageMetaDataEnabled)
-	read.ApplyWaterMarkingEnabled = reconcile.KeepStr(cfg.ApplyWaterMarkingEnabled, read.ApplyWaterMarkingEnabled)
+	read.ApplyWaterMarkingEnabled = reconcile.KeepBool(cfg.ApplyWaterMarkingEnabled, read.ApplyWaterMarkingEnabled)
 	read.ApplyWaterMarkingFontColor = reconcile.KeepStr(cfg.ApplyWaterMarkingFontColor, read.ApplyWaterMarkingFontColor)
 	read.ApplyWaterMarkingFontName = reconcile.KeepStr(cfg.ApplyWaterMarkingFontName, read.ApplyWaterMarkingFontName)
-	read.ApplyWaterMarkingFontSize = reconcile.KeepStr(cfg.ApplyWaterMarkingFontSize, read.ApplyWaterMarkingFontSize)
+	read.ApplyWaterMarkingFontSize = reconcile.KeepInt64(cfg.ApplyWaterMarkingFontSize, read.ApplyWaterMarkingFontSize)
 	read.ApplyWaterMarkingLayout = reconcile.KeepStr(cfg.ApplyWaterMarkingLayout, read.ApplyWaterMarkingLayout)
 	read.ApplyWaterMarkingText = reconcile.KeepStr(cfg.ApplyWaterMarkingText, read.ApplyWaterMarkingText)
 	read.ColumnAssetCondition = reconcile.KeepStr(cfg.ColumnAssetCondition, read.ColumnAssetCondition)
 	read.Comment = reconcile.KeepStr(cfg.Comment, read.Comment)
 	read.ConditionalAccessAuthContext = reconcile.KeepStr(cfg.ConditionalAccessAuthContext, read.ConditionalAccessAuthContext)
-	read.Conditions = reconcile.KeepStr(cfg.Conditions, read.Conditions)
+	read.Conditions = reconcile.KeepSet(cfg.Conditions, read.Conditions)
 	read.ContentType = reconcile.KeepStr(cfg.ContentType, read.ContentType)
 	read.DefaultContentLabel = reconcile.KeepStr(cfg.DefaultContentLabel, read.DefaultContentLabel)
 	read.DenyAccessEnabled = reconcile.KeepStr(cfg.DenyAccessEnabled, read.DenyAccessEnabled)
@@ -1049,13 +1576,13 @@ func (r *labelResource) reconcileState(cfg, read *labelModel) {
 	read.EncryptionAipTemplateScopes = reconcile.KeepStr(cfg.EncryptionAipTemplateScopes, read.EncryptionAipTemplateScopes)
 	read.EncryptionContentExpiredOnDateInDaysOrNever = reconcile.KeepStr(cfg.EncryptionContentExpiredOnDateInDaysOrNever, read.EncryptionContentExpiredOnDateInDaysOrNever)
 	read.EncryptionDisableAutomaticOwnerRights = reconcile.KeepStr(cfg.EncryptionDisableAutomaticOwnerRights, read.EncryptionDisableAutomaticOwnerRights)
-	read.EncryptionDoNotForward = reconcile.KeepStr(cfg.EncryptionDoNotForward, read.EncryptionDoNotForward)
+	read.EncryptionDoNotForward = reconcile.KeepBool(cfg.EncryptionDoNotForward, read.EncryptionDoNotForward)
 	read.EncryptionDoubleKeyEncryptionUrl = reconcile.KeepStr(cfg.EncryptionDoubleKeyEncryptionUrl, read.EncryptionDoubleKeyEncryptionUrl)
-	read.EncryptionEnabled = reconcile.KeepStr(cfg.EncryptionEnabled, read.EncryptionEnabled)
-	read.EncryptionEncryptOnly = reconcile.KeepStr(cfg.EncryptionEncryptOnly, read.EncryptionEncryptOnly)
+	read.EncryptionEnabled = reconcile.KeepBool(cfg.EncryptionEnabled, read.EncryptionEnabled)
+	read.EncryptionEncryptOnly = reconcile.KeepBool(cfg.EncryptionEncryptOnly, read.EncryptionEncryptOnly)
 	read.EncryptionLinkedTemplateId = reconcile.KeepStr(cfg.EncryptionLinkedTemplateId, read.EncryptionLinkedTemplateId)
-	read.EncryptionOfflineAccessDays = reconcile.KeepStr(cfg.EncryptionOfflineAccessDays, read.EncryptionOfflineAccessDays)
-	read.EncryptionPromptUser = reconcile.KeepStr(cfg.EncryptionPromptUser, read.EncryptionPromptUser)
+	read.EncryptionOfflineAccessDays = reconcile.KeepInt64(cfg.EncryptionOfflineAccessDays, read.EncryptionOfflineAccessDays)
+	read.EncryptionPromptUser = reconcile.KeepBool(cfg.EncryptionPromptUser, read.EncryptionPromptUser)
 	read.EncryptionProtectionType = reconcile.KeepStr(cfg.EncryptionProtectionType, read.EncryptionProtectionType)
 	read.EncryptionRightsDefinitions = reconcile.KeepStr(cfg.EncryptionRightsDefinitions, read.EncryptionRightsDefinitions)
 	read.EncryptionRightsUrl = reconcile.KeepStr(cfg.EncryptionRightsUrl, read.EncryptionRightsUrl)
@@ -1063,45 +1590,45 @@ func (r *labelResource) reconcileState(cfg, read *labelModel) {
 	read.InformationProtectionAttributeRequired = reconcile.KeepStr(cfg.InformationProtectionAttributeRequired, read.InformationProtectionAttributeRequired)
 	read.InheritToChildItems = reconcile.KeepStr(cfg.InheritToChildItems, read.InheritToChildItems)
 	read.IsLabelGroup = reconcile.KeepBool(cfg.IsLabelGroup, read.IsLabelGroup)
-	read.LabelActions = reconcile.KeepStr(cfg.LabelActions, read.LabelActions)
-	read.LocaleSettings = reconcile.KeepStr(cfg.LocaleSettings, read.LocaleSettings)
+	read.LabelActions = reconcile.KeepSet(cfg.LabelActions, read.LabelActions)
+	read.LocaleSettings = reconcile.KeepSet(cfg.LocaleSettings, read.LocaleSettings)
 	read.MigrationId = reconcile.KeepStr(cfg.MigrationId, read.MigrationId)
 	read.Name = reconcile.KeepStr(cfg.Name, read.Name)
 	read.NextLabel = reconcile.KeepStr(cfg.NextLabel, read.NextLabel)
 	read.ParentId = reconcile.KeepStr(cfg.ParentId, read.ParentId)
 	read.PreviousLabel = reconcile.KeepStr(cfg.PreviousLabel, read.PreviousLabel)
-	read.Priority = reconcile.KeepStr(cfg.Priority, read.Priority)
+	read.Priority = reconcile.KeepInt64(cfg.Priority, read.Priority)
 	read.RemoveParentLink = reconcile.KeepBool(cfg.RemoveParentLink, read.RemoveParentLink)
 	read.RuleBlob = reconcile.KeepStr(cfg.RuleBlob, read.RuleBlob)
 	read.SchematizedDataCondition = reconcile.KeepStr(cfg.SchematizedDataCondition, read.SchematizedDataCondition)
 	read.Setting = reconcile.KeepStr(cfg.Setting, read.Setting)
 	read.Settings = reconcile.KeepStr(cfg.Settings, read.Settings)
-	read.SiteAndGroupProtectionAllowAccessToGuestUsers = reconcile.KeepStr(cfg.SiteAndGroupProtectionAllowAccessToGuestUsers, read.SiteAndGroupProtectionAllowAccessToGuestUsers)
-	read.SiteAndGroupProtectionAllowEmailFromGuestUsers = reconcile.KeepStr(cfg.SiteAndGroupProtectionAllowEmailFromGuestUsers, read.SiteAndGroupProtectionAllowEmailFromGuestUsers)
-	read.SiteAndGroupProtectionAllowFullAccess = reconcile.KeepStr(cfg.SiteAndGroupProtectionAllowFullAccess, read.SiteAndGroupProtectionAllowFullAccess)
-	read.SiteAndGroupProtectionAllowLimitedAccess = reconcile.KeepStr(cfg.SiteAndGroupProtectionAllowLimitedAccess, read.SiteAndGroupProtectionAllowLimitedAccess)
-	read.SiteAndGroupProtectionBlockAccess = reconcile.KeepStr(cfg.SiteAndGroupProtectionBlockAccess, read.SiteAndGroupProtectionBlockAccess)
-	read.SiteAndGroupProtectionEnabled = reconcile.KeepStr(cfg.SiteAndGroupProtectionEnabled, read.SiteAndGroupProtectionEnabled)
+	read.SiteAndGroupProtectionAllowAccessToGuestUsers = reconcile.KeepBool(cfg.SiteAndGroupProtectionAllowAccessToGuestUsers, read.SiteAndGroupProtectionAllowAccessToGuestUsers)
+	read.SiteAndGroupProtectionAllowEmailFromGuestUsers = reconcile.KeepBool(cfg.SiteAndGroupProtectionAllowEmailFromGuestUsers, read.SiteAndGroupProtectionAllowEmailFromGuestUsers)
+	read.SiteAndGroupProtectionAllowFullAccess = reconcile.KeepBool(cfg.SiteAndGroupProtectionAllowFullAccess, read.SiteAndGroupProtectionAllowFullAccess)
+	read.SiteAndGroupProtectionAllowLimitedAccess = reconcile.KeepBool(cfg.SiteAndGroupProtectionAllowLimitedAccess, read.SiteAndGroupProtectionAllowLimitedAccess)
+	read.SiteAndGroupProtectionBlockAccess = reconcile.KeepBool(cfg.SiteAndGroupProtectionBlockAccess, read.SiteAndGroupProtectionBlockAccess)
+	read.SiteAndGroupProtectionEnabled = reconcile.KeepBool(cfg.SiteAndGroupProtectionEnabled, read.SiteAndGroupProtectionEnabled)
 	read.SiteAndGroupProtectionLevel = reconcile.KeepStr(cfg.SiteAndGroupProtectionLevel, read.SiteAndGroupProtectionLevel)
 	read.SiteAndGroupProtectionPrivacy = reconcile.KeepStr(cfg.SiteAndGroupProtectionPrivacy, read.SiteAndGroupProtectionPrivacy)
 	read.SiteExternalSharingControlType = reconcile.KeepStr(cfg.SiteExternalSharingControlType, read.SiteExternalSharingControlType)
 	read.TeamsAllowMeetingChat = reconcile.KeepStr(cfg.TeamsAllowMeetingChat, read.TeamsAllowMeetingChat)
-	read.TeamsAllowPrivateTeamsToBeDiscoverableUsingSearch = reconcile.KeepStr(cfg.TeamsAllowPrivateTeamsToBeDiscoverableUsingSearch, read.TeamsAllowPrivateTeamsToBeDiscoverableUsingSearch)
+	read.TeamsAllowPrivateTeamsToBeDiscoverableUsingSearch = reconcile.KeepBool(cfg.TeamsAllowPrivateTeamsToBeDiscoverableUsingSearch, read.TeamsAllowPrivateTeamsToBeDiscoverableUsingSearch)
 	read.TeamsAllowedPresenters = reconcile.KeepStr(cfg.TeamsAllowedPresenters, read.TeamsAllowedPresenters)
-	read.TeamsBypassLobbyForDialInUsers = reconcile.KeepStr(cfg.TeamsBypassLobbyForDialInUsers, read.TeamsBypassLobbyForDialInUsers)
-	read.TeamsChannelProtectionEnabled = reconcile.KeepStr(cfg.TeamsChannelProtectionEnabled, read.TeamsChannelProtectionEnabled)
-	read.TeamsChannelSharedWithExternalTenants = reconcile.KeepStr(cfg.TeamsChannelSharedWithExternalTenants, read.TeamsChannelSharedWithExternalTenants)
-	read.TeamsChannelSharedWithPrivateTeamsOnly = reconcile.KeepStr(cfg.TeamsChannelSharedWithPrivateTeamsOnly, read.TeamsChannelSharedWithPrivateTeamsOnly)
-	read.TeamsChannelSharedWithSameLabelOnly = reconcile.KeepStr(cfg.TeamsChannelSharedWithSameLabelOnly, read.TeamsChannelSharedWithSameLabelOnly)
-	read.TeamsCopyRestrictionEnforced = reconcile.KeepStr(cfg.TeamsCopyRestrictionEnforced, read.TeamsCopyRestrictionEnforced)
-	read.TeamsDetectSensitiveContentDuringScreenSharingEnabled = reconcile.KeepStr(cfg.TeamsDetectSensitiveContentDuringScreenSharingEnabled, read.TeamsDetectSensitiveContentDuringScreenSharingEnabled)
-	read.TeamsDisableLobby = reconcile.KeepStr(cfg.TeamsDisableLobby, read.TeamsDisableLobby)
-	read.TeamsEndToEndEncryptionEnabled = reconcile.KeepStr(cfg.TeamsEndToEndEncryptionEnabled, read.TeamsEndToEndEncryptionEnabled)
+	read.TeamsBypassLobbyForDialInUsers = reconcile.KeepBool(cfg.TeamsBypassLobbyForDialInUsers, read.TeamsBypassLobbyForDialInUsers)
+	read.TeamsChannelProtectionEnabled = reconcile.KeepBool(cfg.TeamsChannelProtectionEnabled, read.TeamsChannelProtectionEnabled)
+	read.TeamsChannelSharedWithExternalTenants = reconcile.KeepBool(cfg.TeamsChannelSharedWithExternalTenants, read.TeamsChannelSharedWithExternalTenants)
+	read.TeamsChannelSharedWithPrivateTeamsOnly = reconcile.KeepBool(cfg.TeamsChannelSharedWithPrivateTeamsOnly, read.TeamsChannelSharedWithPrivateTeamsOnly)
+	read.TeamsChannelSharedWithSameLabelOnly = reconcile.KeepBool(cfg.TeamsChannelSharedWithSameLabelOnly, read.TeamsChannelSharedWithSameLabelOnly)
+	read.TeamsCopyRestrictionEnforced = reconcile.KeepBool(cfg.TeamsCopyRestrictionEnforced, read.TeamsCopyRestrictionEnforced)
+	read.TeamsDetectSensitiveContentDuringScreenSharingEnabled = reconcile.KeepBool(cfg.TeamsDetectSensitiveContentDuringScreenSharingEnabled, read.TeamsDetectSensitiveContentDuringScreenSharingEnabled)
+	read.TeamsDisableLobby = reconcile.KeepBool(cfg.TeamsDisableLobby, read.TeamsDisableLobby)
+	read.TeamsEndToEndEncryptionEnabled = reconcile.KeepBool(cfg.TeamsEndToEndEncryptionEnabled, read.TeamsEndToEndEncryptionEnabled)
 	read.TeamsLobbyBypassScope = reconcile.KeepStr(cfg.TeamsLobbyBypassScope, read.TeamsLobbyBypassScope)
-	read.TeamsLobbyRestrictionEnforced = reconcile.KeepStr(cfg.TeamsLobbyRestrictionEnforced, read.TeamsLobbyRestrictionEnforced)
-	read.TeamsPresentersRestrictionEnforced = reconcile.KeepStr(cfg.TeamsPresentersRestrictionEnforced, read.TeamsPresentersRestrictionEnforced)
-	read.TeamsProtectionEnabled = reconcile.KeepStr(cfg.TeamsProtectionEnabled, read.TeamsProtectionEnabled)
-	read.TeamsRecordAutomatically = reconcile.KeepStr(cfg.TeamsRecordAutomatically, read.TeamsRecordAutomatically)
+	read.TeamsLobbyRestrictionEnforced = reconcile.KeepBool(cfg.TeamsLobbyRestrictionEnforced, read.TeamsLobbyRestrictionEnforced)
+	read.TeamsPresentersRestrictionEnforced = reconcile.KeepBool(cfg.TeamsPresentersRestrictionEnforced, read.TeamsPresentersRestrictionEnforced)
+	read.TeamsProtectionEnabled = reconcile.KeepBool(cfg.TeamsProtectionEnabled, read.TeamsProtectionEnabled)
+	read.TeamsRecordAutomatically = reconcile.KeepBool(cfg.TeamsRecordAutomatically, read.TeamsRecordAutomatically)
 	read.TeamsVideoWatermark = reconcile.KeepStr(cfg.TeamsVideoWatermark, read.TeamsVideoWatermark)
 	read.TeamsWhoCanRecord = reconcile.KeepStr(cfg.TeamsWhoCanRecord, read.TeamsWhoCanRecord)
 	read.Tooltip = reconcile.KeepStr(cfg.Tooltip, read.Tooltip)

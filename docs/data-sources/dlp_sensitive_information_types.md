@@ -25,12 +25,12 @@ List every DlpSensitiveInformationType object (Get-DlpSensitiveInformationType).
 Read-Only:
 
 - `description` (String) Maps to the -Description parameter.
-- `file_data` (Set of String) Maps to the -FileData parameter.
-- `fingerprints` (String) Maps to the -Fingerprints parameter.
+- `file_data` (String) Maps to the -FileData parameter.
+- `fingerprints` (Set of String) Maps to the -Fingerprints parameter.
 - `id` (String) Object identifier (GUID).
 - `identity` (String) Identity used to target the object.
 - `is_exact` (Boolean) Maps to the -IsExact parameter.
 - `locale` (String) Maps to the -Locale parameter.
 - `name` (String) Maps to the -Name parameter.
-- `threshold` (String) Maps to the -Threshold parameter.
+- `threshold` (Number) Maps to the -Threshold parameter.
 - `threshold_config` (String) Maps to the -ThresholdConfig parameter.

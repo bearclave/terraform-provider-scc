@@ -46,6 +46,8 @@ func (d *activityAlertDataSource) Schema(_ context.Context, _ datasource.SchemaR
 			"record_type":   schema.StringAttribute{Computed: true, Description: "Maps to the -RecordType parameter."},
 			"scope_level":   schema.StringAttribute{Computed: true, Description: "Maps to the -ScopeLevel parameter."},
 			"severity":      schema.StringAttribute{Computed: true, Description: "Maps to the -Severity parameter."},
+			"threshold":     schema.Int64Attribute{Computed: true, Description: "Maps to the -Threshold parameter."},
+			"time_window":   schema.Int64Attribute{Computed: true, Description: "Maps to the -TimeWindow parameter."},
 			"type":          schema.StringAttribute{Computed: true, Description: "Maps to the -Type parameter."},
 			"user_id":       schema.StringAttribute{Computed: true, Description: "Maps to the -UserId parameter."},
 		},

@@ -1,7 +1,23 @@
 # terraform-provider-scc
 
-[![Test](https://github.com/terraprovider/terraform-provider-scc/actions/workflows/test.yml/badge.svg)](https://github.com/terraprovider/terraform-provider-scc/actions/workflows/test.yml)
-[![Build](https://github.com/terraprovider/terraform-provider-scc/actions/workflows/build.yml/badge.svg)](https://github.com/terraprovider/terraform-provider-scc/actions/workflows/build.yml)
+Fork of [terraprovider/terraform-provider-scc](https://github.com/terraprovider/terraform-provider-scc),
+published as `bearclave/scc` on the Terraform Registry for `bearclave/iac-purview`:
+regenerated on tf-msadmin v0.9.5 and fixed so that sensitivity labels, label
+policies, DLP and retention are managed in place
+([upstream #11](https://github.com/terraprovider/terraform-provider-scc/issues/11)).
+Changes go back upstream; once upstream releases them, the fork is archived.
+
+| Trigger | What runs | Identity |
+|---|---|---|
+| Pull request, push to `main` | `ci.yml`: `security.yml` and `checks.yml`, local copies of `bearclave/ci` v2.9.1 (`go vet`, `go test`) | none |
+| Pull request | `pr.yml`: title, branch and description sections (`pr / check`) | none |
+| Release | `tools/release.sh` on the owner's Mac: tag, goreleaser, signed with the key from `kv-tech-sec-weu-001` | the owner |
+
+> Branch protection, required checks, merge settings and labels are
+> defined in [`bearclave/iac-github`](https://github.com/bearclave/iac-github)
+> (`infrastructure/repositories/terraform-provider-scc`). Engineering standards:
+> [`bearclave/governance`](https://github.com/bearclave/governance/tree/main/standards).
+
 
 A Terraform / OpenTofu provider for **Microsoft Purview / Security & Compliance**,
 driven by the same Admin API the `ExchangeOnlineManagement` module's
@@ -47,7 +63,29 @@ cd tools && go generate ./...        # regenerate docs (tfplugindocs)
 ```
 
 Resource files under `internal/provider/*_resource.go` are generated
-(`DO NOT EDIT`); change the generator, not the output. Local development against
+(`DO NOT EDIT`); change the generator, not the output.
+
+### Overrides
+
+Where the cmdlets do not fit the generic New/Get/Set/Remove mapping, the
+generated resource is wrapped instead of edited:
+
+- `cmd/gen-tf/overrides.go` lists the overridden nouns (labels, label
+  policies, DLP and retention policies and rules). The generator detects lists
+  that only `New-*` takes and `Set-*` changes through `-Add<X>`/`-Remove<X>`
+  (labels, every `*_location`), makes them updatable in place, drops the
+  `add_*`/`remove_*` companions and emits `zz_generated_overrides.go`.
+- `internal/provider/overrides*.go` applies those list deltas on update,
+  applies `Set-*`-only parameters (`Set-Label -Priority`) right after create,
+  and on refresh keeps the configured value when the read-back is equivalent
+  (`semantic.go`: JSON by content, case-insensitive enums and lists, locations
+  by any identity).
+- `internal/provider/readback.go` rewrites `Get-Label` / `Get-LabelPolicy`
+  responses: `LabelActions` JSON and `Settings` "[key, value]" strings become
+  the `ApplyContentMarking*`, `ApplyWaterMarking*`, `Encryption*` and
+  `AdvancedSettings` properties the write parameters use.
+- Every resource has schema version 1; state from 0.2.x (version 0) is
+  converted by shape (`versioned.go`). Local development against
 sibling module checkouts uses the git-ignored `go.work`.
 
 ## License

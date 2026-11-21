@@ -53,7 +53,7 @@ func (r *classificationGradingPolicyResource) Schema(_ context.Context, _ resour
 		Description: "Manages the ClassificationGradingPolicy object via New-ClassificationGradingPolicy / Get-ClassificationGradingPolicy / Set-ClassificationGradingPolicy / Remove-ClassificationGradingPolicy.",
 		Attributes: map[string]schema.Attribute{
 			"id":                             schema.StringAttribute{Computed: true, Description: "Object identifier (GUID).", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"identity":                       schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets."},
+			"identity":                       schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"end_date_time":                  schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -EndDateTime parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"grader_id":                      schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -GraderId parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace(), stringplanmodifier.UseStateForUnknown()}},
 			"name":                           schema.StringAttribute{Required: true, Description: "Maps to the -Name parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
@@ -77,23 +77,34 @@ func (r *classificationGradingPolicyResource) Create(ctx context.Context, req re
 		return
 	}
 
-	p := purview.NewClassificationGradingPolicyParams{
-		Name:                        plan.Name.ValueString(),
-		SensitiveInformationTypeIds: toStringSlice(ctx, plan.SensitiveInformationTypeIds, &resp.Diagnostics),
+	var config classificationGradingPolicyModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
+	if resp.Diagnostics.HasError() {
+		return
 	}
-	if v := plan.EndDateTime.ValueString(); v != "" {
-		p.EndDateTime = v
+
+	p := purview.NewClassificationGradingPolicyParams{}
+	if v := config.EndDateTime.ValueString(); v != "" {
+		p.EndDateTime = objectParam(v)
 	}
-	if v := plan.GraderId.ValueString(); v != "" {
-		p.GraderId = v
+	if v := config.GraderId.ValueString(); v != "" {
+		p.GraderId = objectParam(v)
 	}
-	if v := plan.StartDateTime.ValueString(); v != "" {
-		p.StartDateTime = v
+	if !config.Name.IsNull() {
+		p.Name = plan.Name.ValueString()
+	}
+	if !config.SensitiveInformationTypeIds.IsNull() {
+		if v := toStringSlice(ctx, plan.SensitiveInformationTypeIds, &resp.Diagnostics); len(v) > 0 {
+			p.SensitiveInformationTypeIds = v
+		}
+	}
+	if v := config.StartDateTime.ValueString(); v != "" {
+		p.StartDateTime = objectParam(v)
 	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	res, err := r.client.SCC.NewClassificationGradingPolicy(ctx, p)
+	res, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.NewClassificationGradingPolicy, p, isNotFound)
 	if err != nil {
 		resp.Diagnostics.AddError("New-ClassificationGradingPolicy failed", err.Error())
 		return
@@ -140,22 +151,29 @@ func (r *classificationGradingPolicyResource) Update(ctx context.Context, req re
 	id := r.identityOf(state)
 	sp := purview.SetClassificationGradingPolicyParams{}
 	sp.Identity = id
-	if v := plan.EndDateTime.ValueString(); v != "" {
-		sp.EndDateTime = v
+	if !plan.EndDateTime.Equal(state.EndDateTime) {
+		if v := plan.EndDateTime.ValueString(); v != "" {
+			sp.EndDateTime = objectParam(v)
+		}
 	}
-	sp.SensitiveInformationTypeIds = toStringSlice(ctx, plan.SensitiveInformationTypeIds, &resp.Diagnostics)
+	if !plan.SensitiveInformationTypeIds.Equal(state.SensitiveInformationTypeIds) {
+		if !plan.SensitiveInformationTypeIds.IsNull() && !plan.SensitiveInformationTypeIds.IsUnknown() {
+			sp.SensitiveInformationTypeIds = append([]string{}, toStringSlice(ctx, plan.SensitiveInformationTypeIds, &resp.Diagnostics)...)
+		}
+	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	if _, err := r.client.SCC.SetClassificationGradingPolicy(ctx, sp); err != nil {
+	if _, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.SetClassificationGradingPolicy, sp, isNotFound); err != nil {
 		resp.Diagnostics.AddError("Set-ClassificationGradingPolicy failed", err.Error())
 		return
 	}
 	cfg := plan
-	reflected := reconcile.ReflectsFields(map[string]types.String{
-		"EndDateTime": cfg.EndDateTime,
-	}, getString)
+	reflected := reconcile.ReflectsFields(map[string]types.String{}, getString)
 	r.refresh(ctx, id, &plan, &resp.Diagnostics, reflected)
+	if !cfg.ID.IsUnknown() && !cfg.ID.IsNull() {
+		plan.ID = cfg.ID
+	}
 	r.reconcileState(&cfg, &plan)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
@@ -215,11 +233,11 @@ func (r *classificationGradingPolicyResource) refresh(ctx context.Context, ident
 func readClassificationGradingPolicy(ctx context.Context, obj map[string]any, m *classificationGradingPolicyModel) {
 	m.ID = types.StringValue(firstNonEmptyStr(getString(obj, "Guid"), getString(obj, "Id"), getString(obj, "Identity")))
 	m.Identity = types.StringValue(firstNonEmptyStr(getString(obj, "Identity"), getString(obj, "Guid"), getString(obj, "Name")))
-	m.EndDateTime = types.StringValue(getString(obj, "EndDateTime"))
-	m.GraderId = types.StringValue(getString(obj, "GraderId"))
+	m.EndDateTime = types.StringValue(getObjectJSON(obj, "EndDateTime"))
+	m.GraderId = types.StringValue(getObjectJSON(obj, "GraderId"))
 	m.Name = types.StringValue(getString(obj, "Name"))
 	m.SensitiveInformationTypeIds = stringSetValue(ctx, getStringSlice(obj, "SensitiveInformationTypeIds"))
-	m.StartDateTime = types.StringValue(getString(obj, "StartDateTime"))
+	m.StartDateTime = types.StringValue(getObjectJSON(obj, "StartDateTime"))
 	_ = ctx
 }
 

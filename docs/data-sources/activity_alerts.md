@@ -38,5 +38,7 @@ Read-Only:
 - `record_type` (String) Maps to the -RecordType parameter.
 - `scope_level` (String) Maps to the -ScopeLevel parameter.
 - `severity` (String) Maps to the -Severity parameter.
+- `threshold` (Number) Maps to the -Threshold parameter.
+- `time_window` (Number) Maps to the -TimeWindow parameter.
 - `type` (String) Maps to the -Type parameter.
 - `user_id` (String) Maps to the -UserId parameter.

@@ -73,7 +73,7 @@ func (r *jitConfigurationResource) Schema(_ context.Context, _ resource.SchemaRe
 		Description: "Manages the JitConfiguration object via New-JitConfiguration / Get-JitConfiguration / Set-JitConfiguration / Remove-JitConfiguration.",
 		Attributes: map[string]schema.Attribute{
 			"id":                                      schema.StringAttribute{Computed: true, Description: "Object identifier (GUID).", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"identity":                                schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets."},
+			"identity":                                schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"add_endpoint_dlp_location":               schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AddEndpointDlpLocation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"add_endpoint_dlp_location_exception":     schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AddEndpointDlpLocationException parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"add_one_drive_location":                  schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AddOneDriveLocation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
@@ -119,43 +119,70 @@ func (r *jitConfigurationResource) Create(ctx context.Context, req resource.Crea
 		return
 	}
 
-	p := purview.NewJitConfigurationParams{
-		Comment:                          plan.Comment.ValueString(),
-		EndpointConfig:                   plan.EndpointConfig.ValueString(),
-		ExceptIfOneDriveSharedBy:         toStringSlice(ctx, plan.ExceptIfOneDriveSharedBy, &resp.Diagnostics),
-		ExceptIfOneDriveSharedByMemberOf: toStringSlice(ctx, plan.ExceptIfOneDriveSharedByMemberOf, &resp.Diagnostics),
-		Name:                             plan.Name.ValueString(),
-		OneDriveSharedBy:                 toStringSlice(ctx, plan.OneDriveSharedBy, &resp.Diagnostics),
-		OneDriveSharedByMemberOf:         toStringSlice(ctx, plan.OneDriveSharedByMemberOf, &resp.Diagnostics),
+	var config jitConfigurationModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
+	if resp.Diagnostics.HasError() {
+		return
 	}
-	if v := plan.EndpointDlpLocation.ValueString(); v != "" {
-		p.EndpointDlpLocation = v
+
+	p := purview.NewJitConfigurationParams{}
+	if !config.Comment.IsNull() {
+		p.Comment = plan.Comment.ValueString()
 	}
-	if v := plan.EndpointDlpLocationException.ValueString(); v != "" {
-		p.EndpointDlpLocationException = v
+	if !config.EndpointConfig.IsNull() {
+		p.EndpointConfig = plan.EndpointConfig.ValueString()
 	}
-	if v := plan.Mode.ValueString(); v != "" {
-		p.Mode = v
+	if v := config.EndpointDlpLocation.ValueString(); v != "" {
+		p.EndpointDlpLocation = objectParam(v)
 	}
-	if v := plan.OneDriveLocation.ValueString(); v != "" {
-		p.OneDriveLocation = v
+	if v := config.EndpointDlpLocationException.ValueString(); v != "" {
+		p.EndpointDlpLocationException = objectParam(v)
 	}
-	if v := plan.OneDriveLocationException.ValueString(); v != "" {
-		p.OneDriveLocationException = v
+	if !config.ExceptIfOneDriveSharedBy.IsNull() {
+		if v := toStringSlice(ctx, plan.ExceptIfOneDriveSharedBy, &resp.Diagnostics); len(v) > 0 {
+			p.ExceptIfOneDriveSharedBy = v
+		}
 	}
-	if v := plan.Organization.ValueString(); v != "" {
-		p.Organization = v
+	if !config.ExceptIfOneDriveSharedByMemberOf.IsNull() {
+		if v := toStringSlice(ctx, plan.ExceptIfOneDriveSharedByMemberOf, &resp.Diagnostics); len(v) > 0 {
+			p.ExceptIfOneDriveSharedByMemberOf = v
+		}
 	}
-	if v := plan.SharePointLocation.ValueString(); v != "" {
-		p.SharePointLocation = v
+	if v := config.Mode.ValueString(); v != "" {
+		p.Mode = objectParam(v)
 	}
-	if v := plan.SharePointLocationException.ValueString(); v != "" {
-		p.SharePointLocationException = v
+	if !config.Name.IsNull() {
+		p.Name = plan.Name.ValueString()
+	}
+	if v := config.OneDriveLocation.ValueString(); v != "" {
+		p.OneDriveLocation = objectParam(v)
+	}
+	if v := config.OneDriveLocationException.ValueString(); v != "" {
+		p.OneDriveLocationException = objectParam(v)
+	}
+	if !config.OneDriveSharedBy.IsNull() {
+		if v := toStringSlice(ctx, plan.OneDriveSharedBy, &resp.Diagnostics); len(v) > 0 {
+			p.OneDriveSharedBy = v
+		}
+	}
+	if !config.OneDriveSharedByMemberOf.IsNull() {
+		if v := toStringSlice(ctx, plan.OneDriveSharedByMemberOf, &resp.Diagnostics); len(v) > 0 {
+			p.OneDriveSharedByMemberOf = v
+		}
+	}
+	if v := config.Organization.ValueString(); v != "" {
+		p.Organization = objectParam(v)
+	}
+	if v := config.SharePointLocation.ValueString(); v != "" {
+		p.SharePointLocation = objectParam(v)
+	}
+	if v := config.SharePointLocationException.ValueString(); v != "" {
+		p.SharePointLocationException = objectParam(v)
 	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	res, err := r.client.SCC.NewJitConfiguration(ctx, p)
+	res, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.NewJitConfiguration, p, isNotFound)
 	if err != nil {
 		resp.Diagnostics.AddError("New-JitConfiguration failed", err.Error())
 		return
@@ -202,77 +229,113 @@ func (r *jitConfigurationResource) Update(ctx context.Context, req resource.Upda
 	id := r.identityOf(state)
 	sp := purview.SetJitConfigurationParams{}
 	sp.Identity = id
-	if v := plan.AddEndpointDlpLocation.ValueString(); v != "" {
-		sp.AddEndpointDlpLocation = v
+	if !plan.AddEndpointDlpLocation.Equal(state.AddEndpointDlpLocation) {
+		if v := plan.AddEndpointDlpLocation.ValueString(); v != "" {
+			sp.AddEndpointDlpLocation = objectParam(v)
+		}
 	}
-	if v := plan.AddEndpointDlpLocationException.ValueString(); v != "" {
-		sp.AddEndpointDlpLocationException = v
+	if !plan.AddEndpointDlpLocationException.Equal(state.AddEndpointDlpLocationException) {
+		if v := plan.AddEndpointDlpLocationException.ValueString(); v != "" {
+			sp.AddEndpointDlpLocationException = objectParam(v)
+		}
 	}
-	if v := plan.AddOneDriveLocation.ValueString(); v != "" {
-		sp.AddOneDriveLocation = v
+	if !plan.AddOneDriveLocation.Equal(state.AddOneDriveLocation) {
+		if v := plan.AddOneDriveLocation.ValueString(); v != "" {
+			sp.AddOneDriveLocation = objectParam(v)
+		}
 	}
-	if v := plan.AddOneDriveLocationException.ValueString(); v != "" {
-		sp.AddOneDriveLocationException = v
+	if !plan.AddOneDriveLocationException.Equal(state.AddOneDriveLocationException) {
+		if v := plan.AddOneDriveLocationException.ValueString(); v != "" {
+			sp.AddOneDriveLocationException = objectParam(v)
+		}
 	}
-	if v := plan.AddSharePointLocation.ValueString(); v != "" {
-		sp.AddSharePointLocation = v
+	if !plan.AddSharePointLocation.Equal(state.AddSharePointLocation) {
+		if v := plan.AddSharePointLocation.ValueString(); v != "" {
+			sp.AddSharePointLocation = objectParam(v)
+		}
 	}
-	if v := plan.AddSharePointLocationException.ValueString(); v != "" {
-		sp.AddSharePointLocationException = v
+	if !plan.AddSharePointLocationException.Equal(state.AddSharePointLocationException) {
+		if v := plan.AddSharePointLocationException.ValueString(); v != "" {
+			sp.AddSharePointLocationException = objectParam(v)
+		}
 	}
-	sp.Comment = plan.Comment.ValueString()
-	sp.EndpointConfig = plan.EndpointConfig.ValueString()
-	sp.ExceptIfOneDriveSharedBy = toStringSlice(ctx, plan.ExceptIfOneDriveSharedBy, &resp.Diagnostics)
-	sp.ExceptIfOneDriveSharedByMemberOf = toStringSlice(ctx, plan.ExceptIfOneDriveSharedByMemberOf, &resp.Diagnostics)
-	if v := plan.Mode.ValueString(); v != "" {
-		sp.Mode = v
+	if !plan.Comment.Equal(state.Comment) {
+		sp.Comment = plan.Comment.ValueString()
 	}
-	sp.OneDriveSharedBy = toStringSlice(ctx, plan.OneDriveSharedBy, &resp.Diagnostics)
-	sp.OneDriveSharedByMemberOf = toStringSlice(ctx, plan.OneDriveSharedByMemberOf, &resp.Diagnostics)
-	if v := plan.RemoveEndpointDlpLocation.ValueString(); v != "" {
-		sp.RemoveEndpointDlpLocation = v
+	if !plan.EndpointConfig.Equal(state.EndpointConfig) {
+		sp.EndpointConfig = plan.EndpointConfig.ValueString()
 	}
-	if v := plan.RemoveEndpointDlpLocationException.ValueString(); v != "" {
-		sp.RemoveEndpointDlpLocationException = v
+	if !plan.ExceptIfOneDriveSharedBy.Equal(state.ExceptIfOneDriveSharedBy) {
+		if !plan.ExceptIfOneDriveSharedBy.IsNull() && !plan.ExceptIfOneDriveSharedBy.IsUnknown() {
+			sp.ExceptIfOneDriveSharedBy = append([]string{}, toStringSlice(ctx, plan.ExceptIfOneDriveSharedBy, &resp.Diagnostics)...)
+		}
 	}
-	if v := plan.RemoveOneDriveLocation.ValueString(); v != "" {
-		sp.RemoveOneDriveLocation = v
+	if !plan.ExceptIfOneDriveSharedByMemberOf.Equal(state.ExceptIfOneDriveSharedByMemberOf) {
+		if !plan.ExceptIfOneDriveSharedByMemberOf.IsNull() && !plan.ExceptIfOneDriveSharedByMemberOf.IsUnknown() {
+			sp.ExceptIfOneDriveSharedByMemberOf = append([]string{}, toStringSlice(ctx, plan.ExceptIfOneDriveSharedByMemberOf, &resp.Diagnostics)...)
+		}
 	}
-	if v := plan.RemoveOneDriveLocationException.ValueString(); v != "" {
-		sp.RemoveOneDriveLocationException = v
+	if !plan.Mode.Equal(state.Mode) {
+		if v := plan.Mode.ValueString(); v != "" {
+			sp.Mode = objectParam(v)
+		}
 	}
-	if v := plan.RemoveSharePointLocation.ValueString(); v != "" {
-		sp.RemoveSharePointLocation = v
+	if !plan.OneDriveSharedBy.Equal(state.OneDriveSharedBy) {
+		if !plan.OneDriveSharedBy.IsNull() && !plan.OneDriveSharedBy.IsUnknown() {
+			sp.OneDriveSharedBy = append([]string{}, toStringSlice(ctx, plan.OneDriveSharedBy, &resp.Diagnostics)...)
+		}
 	}
-	if v := plan.RemoveSharePointLocationException.ValueString(); v != "" {
-		sp.RemoveSharePointLocationException = v
+	if !plan.OneDriveSharedByMemberOf.Equal(state.OneDriveSharedByMemberOf) {
+		if !plan.OneDriveSharedByMemberOf.IsNull() && !plan.OneDriveSharedByMemberOf.IsUnknown() {
+			sp.OneDriveSharedByMemberOf = append([]string{}, toStringSlice(ctx, plan.OneDriveSharedByMemberOf, &resp.Diagnostics)...)
+		}
+	}
+	if !plan.RemoveEndpointDlpLocation.Equal(state.RemoveEndpointDlpLocation) {
+		if v := plan.RemoveEndpointDlpLocation.ValueString(); v != "" {
+			sp.RemoveEndpointDlpLocation = objectParam(v)
+		}
+	}
+	if !plan.RemoveEndpointDlpLocationException.Equal(state.RemoveEndpointDlpLocationException) {
+		if v := plan.RemoveEndpointDlpLocationException.ValueString(); v != "" {
+			sp.RemoveEndpointDlpLocationException = objectParam(v)
+		}
+	}
+	if !plan.RemoveOneDriveLocation.Equal(state.RemoveOneDriveLocation) {
+		if v := plan.RemoveOneDriveLocation.ValueString(); v != "" {
+			sp.RemoveOneDriveLocation = objectParam(v)
+		}
+	}
+	if !plan.RemoveOneDriveLocationException.Equal(state.RemoveOneDriveLocationException) {
+		if v := plan.RemoveOneDriveLocationException.ValueString(); v != "" {
+			sp.RemoveOneDriveLocationException = objectParam(v)
+		}
+	}
+	if !plan.RemoveSharePointLocation.Equal(state.RemoveSharePointLocation) {
+		if v := plan.RemoveSharePointLocation.ValueString(); v != "" {
+			sp.RemoveSharePointLocation = objectParam(v)
+		}
+	}
+	if !plan.RemoveSharePointLocationException.Equal(state.RemoveSharePointLocationException) {
+		if v := plan.RemoveSharePointLocationException.ValueString(); v != "" {
+			sp.RemoveSharePointLocationException = objectParam(v)
+		}
 	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	if _, err := r.client.SCC.SetJitConfiguration(ctx, sp); err != nil {
+	if _, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.SetJitConfiguration, sp, isNotFound); err != nil {
 		resp.Diagnostics.AddError("Set-JitConfiguration failed", err.Error())
 		return
 	}
 	cfg := plan
 	reflected := reconcile.ReflectsFields(map[string]types.String{
-		"AddEndpointDlpLocation":             cfg.AddEndpointDlpLocation,
-		"AddEndpointDlpLocationException":    cfg.AddEndpointDlpLocationException,
-		"AddOneDriveLocation":                cfg.AddOneDriveLocation,
-		"AddOneDriveLocationException":       cfg.AddOneDriveLocationException,
-		"AddSharePointLocation":              cfg.AddSharePointLocation,
-		"AddSharePointLocationException":     cfg.AddSharePointLocationException,
-		"Comment":                            cfg.Comment,
-		"EndpointConfig":                     cfg.EndpointConfig,
-		"Mode":                               cfg.Mode,
-		"RemoveEndpointDlpLocation":          cfg.RemoveEndpointDlpLocation,
-		"RemoveEndpointDlpLocationException": cfg.RemoveEndpointDlpLocationException,
-		"RemoveOneDriveLocation":             cfg.RemoveOneDriveLocation,
-		"RemoveOneDriveLocationException":    cfg.RemoveOneDriveLocationException,
-		"RemoveSharePointLocation":           cfg.RemoveSharePointLocation,
-		"RemoveSharePointLocationException":  cfg.RemoveSharePointLocationException,
+		"Comment":        cfg.Comment,
+		"EndpointConfig": cfg.EndpointConfig,
 	}, getString)
 	r.refresh(ctx, id, &plan, &resp.Diagnostics, reflected)
+	if !cfg.ID.IsUnknown() && !cfg.ID.IsNull() {
+		plan.ID = cfg.ID
+	}
 	r.reconcileState(&cfg, &plan)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
@@ -332,33 +395,33 @@ func (r *jitConfigurationResource) refresh(ctx context.Context, identity string,
 func readJitConfiguration(ctx context.Context, obj map[string]any, m *jitConfigurationModel) {
 	m.ID = types.StringValue(firstNonEmptyStr(getString(obj, "Guid"), getString(obj, "Id"), getString(obj, "Identity")))
 	m.Identity = types.StringValue(firstNonEmptyStr(getString(obj, "Identity"), getString(obj, "Guid"), getString(obj, "Name")))
-	m.AddEndpointDlpLocation = types.StringValue(getString(obj, "AddEndpointDlpLocation"))
-	m.AddEndpointDlpLocationException = types.StringValue(getString(obj, "AddEndpointDlpLocationException"))
-	m.AddOneDriveLocation = types.StringValue(getString(obj, "AddOneDriveLocation"))
-	m.AddOneDriveLocationException = types.StringValue(getString(obj, "AddOneDriveLocationException"))
-	m.AddSharePointLocation = types.StringValue(getString(obj, "AddSharePointLocation"))
-	m.AddSharePointLocationException = types.StringValue(getString(obj, "AddSharePointLocationException"))
+	m.AddEndpointDlpLocation = types.StringValue(getObjectJSON(obj, "AddEndpointDlpLocation"))
+	m.AddEndpointDlpLocationException = types.StringValue(getObjectJSON(obj, "AddEndpointDlpLocationException"))
+	m.AddOneDriveLocation = types.StringValue(getObjectJSON(obj, "AddOneDriveLocation"))
+	m.AddOneDriveLocationException = types.StringValue(getObjectJSON(obj, "AddOneDriveLocationException"))
+	m.AddSharePointLocation = types.StringValue(getObjectJSON(obj, "AddSharePointLocation"))
+	m.AddSharePointLocationException = types.StringValue(getObjectJSON(obj, "AddSharePointLocationException"))
 	m.Comment = types.StringValue(getString(obj, "Comment"))
 	m.EndpointConfig = types.StringValue(getString(obj, "EndpointConfig"))
-	m.EndpointDlpLocation = types.StringValue(getString(obj, "EndpointDlpLocation"))
-	m.EndpointDlpLocationException = types.StringValue(getString(obj, "EndpointDlpLocationException"))
+	m.EndpointDlpLocation = types.StringValue(getObjectJSON(obj, "EndpointDlpLocation"))
+	m.EndpointDlpLocationException = types.StringValue(getObjectJSON(obj, "EndpointDlpLocationException"))
 	m.ExceptIfOneDriveSharedBy = stringSetValue(ctx, getStringSlice(obj, "ExceptIfOneDriveSharedBy"))
 	m.ExceptIfOneDriveSharedByMemberOf = stringSetValue(ctx, getStringSlice(obj, "ExceptIfOneDriveSharedByMemberOf"))
-	m.Mode = types.StringValue(getString(obj, "Mode"))
+	m.Mode = types.StringValue(getObjectJSON(obj, "Mode"))
 	m.Name = types.StringValue(getString(obj, "Name"))
-	m.OneDriveLocation = types.StringValue(getString(obj, "OneDriveLocation"))
-	m.OneDriveLocationException = types.StringValue(getString(obj, "OneDriveLocationException"))
+	m.OneDriveLocation = types.StringValue(getObjectJSON(obj, "OneDriveLocation"))
+	m.OneDriveLocationException = types.StringValue(getObjectJSON(obj, "OneDriveLocationException"))
 	m.OneDriveSharedBy = stringSetValue(ctx, getStringSlice(obj, "OneDriveSharedBy"))
 	m.OneDriveSharedByMemberOf = stringSetValue(ctx, getStringSlice(obj, "OneDriveSharedByMemberOf"))
-	m.Organization = types.StringValue(getString(obj, "Organization"))
-	m.RemoveEndpointDlpLocation = types.StringValue(getString(obj, "RemoveEndpointDlpLocation"))
-	m.RemoveEndpointDlpLocationException = types.StringValue(getString(obj, "RemoveEndpointDlpLocationException"))
-	m.RemoveOneDriveLocation = types.StringValue(getString(obj, "RemoveOneDriveLocation"))
-	m.RemoveOneDriveLocationException = types.StringValue(getString(obj, "RemoveOneDriveLocationException"))
-	m.RemoveSharePointLocation = types.StringValue(getString(obj, "RemoveSharePointLocation"))
-	m.RemoveSharePointLocationException = types.StringValue(getString(obj, "RemoveSharePointLocationException"))
-	m.SharePointLocation = types.StringValue(getString(obj, "SharePointLocation"))
-	m.SharePointLocationException = types.StringValue(getString(obj, "SharePointLocationException"))
+	m.Organization = types.StringValue(getObjectJSON(obj, "Organization"))
+	m.RemoveEndpointDlpLocation = types.StringValue(getObjectJSON(obj, "RemoveEndpointDlpLocation"))
+	m.RemoveEndpointDlpLocationException = types.StringValue(getObjectJSON(obj, "RemoveEndpointDlpLocationException"))
+	m.RemoveOneDriveLocation = types.StringValue(getObjectJSON(obj, "RemoveOneDriveLocation"))
+	m.RemoveOneDriveLocationException = types.StringValue(getObjectJSON(obj, "RemoveOneDriveLocationException"))
+	m.RemoveSharePointLocation = types.StringValue(getObjectJSON(obj, "RemoveSharePointLocation"))
+	m.RemoveSharePointLocationException = types.StringValue(getObjectJSON(obj, "RemoveSharePointLocationException"))
+	m.SharePointLocation = types.StringValue(getObjectJSON(obj, "SharePointLocation"))
+	m.SharePointLocationException = types.StringValue(getObjectJSON(obj, "SharePointLocationException"))
 	_ = ctx
 }
 

@@ -1,0 +1,8 @@
+# Managed by bearclave/governance (tools/sync.py) - do not edit here.
+# Issues are opened from a form; a blank issue would skip the sections.
+# Rules: https://github.com/bearclave/governance/blob/main/standards/issues.md
+blank_issues_enabled: false
+contact_links:
+  - name: Engineering standards
+    url: https://github.com/bearclave/governance/tree/main/standards
+    about: How issues, branches and pull requests are written in this organisation.

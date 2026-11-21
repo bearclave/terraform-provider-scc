@@ -59,18 +59,18 @@ func (r *complianceNoticeResource) Schema(_ context.Context, _ resource.SchemaRe
 		Description: "Manages the ComplianceNotice object via New-ComplianceNotice / Get-ComplianceNotice / Set-ComplianceNotice / Remove-ComplianceNotice.",
 		Attributes: map[string]schema.Attribute{
 			"id":                      schema.StringAttribute{Computed: true, Description: "Object identifier (GUID).", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"identity":                schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets."},
+			"identity":                schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"acknowledged":            schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -Acknowledged parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
 			"acknowledged_custodians": schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -AcknowledgedCustodians parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
 			"added_custodians":        schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -AddedCustodians parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
 			"case":                    schema.StringAttribute{Required: true, Description: "Maps to the -Case parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
-			"content_body":            schema.StringAttribute{Required: true, Description: "Maps to the -ContentBody parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
+			"content_body":            schema.StringAttribute{Required: true, Description: "Maps to the -ContentBody parameter."},
 			"custodian_ids":           schema.SetAttribute{ElementType: types.StringType, Required: true, Description: "Maps to the -CustodianIds parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.RequiresReplace()}},
-			"from":                    schema.StringAttribute{Required: true, Description: "Maps to the -From parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
+			"from":                    schema.StringAttribute{Required: true, Description: "Maps to the -From parameter."},
 			"is_high_priority":        schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -IsHighPriority parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
 			"name":                    schema.StringAttribute{Required: true, Description: "Maps to the -Name parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
-			"subject":                 schema.StringAttribute{Required: true, Description: "Maps to the -Subject parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
-			"type":                    schema.StringAttribute{Required: true, Description: "Maps to the -Type parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
+			"subject":                 schema.StringAttribute{Required: true, Description: "Maps to the -Subject parameter."},
+			"type":                    schema.StringAttribute{Required: true, Description: "Maps to the -Type parameter."},
 			"url_pattern":             schema.StringAttribute{Required: true, Description: "Maps to the -UrlPattern parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
 		},
 	}
@@ -90,21 +90,48 @@ func (r *complianceNoticeResource) Create(ctx context.Context, req resource.Crea
 		return
 	}
 
-	p := purview.NewComplianceNoticeParams{
-		Case:           plan.Case.ValueString(),
-		ContentBody:    plan.ContentBody.ValueString(),
-		CustodianIds:   toStringSlice(ctx, plan.CustodianIds, &resp.Diagnostics),
-		From:           plan.From.ValueString(),
-		IsHighPriority: plan.IsHighPriority.ValueBool(),
-		Name:           plan.Name.ValueString(),
-		Subject:        plan.Subject.ValueString(),
-		Type:           plan.Type.ValueString(),
-		UrlPattern:     plan.UrlPattern.ValueString(),
+	var config complianceNoticeModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	p := purview.NewComplianceNoticeParams{}
+	if !config.Case.IsNull() {
+		p.Case = plan.Case.ValueString()
+	}
+	if !config.ContentBody.IsNull() {
+		p.ContentBody = plan.ContentBody.ValueString()
+	}
+	if !config.CustodianIds.IsNull() {
+		if v := toStringSlice(ctx, plan.CustodianIds, &resp.Diagnostics); len(v) > 0 {
+			p.CustodianIds = v
+		}
+	}
+	if !config.From.IsNull() {
+		p.From = plan.From.ValueString()
+	}
+	if !config.IsHighPriority.IsNull() {
+		if !plan.IsHighPriority.IsUnknown() {
+			p.IsHighPriority = plan.IsHighPriority.ValueBoolPointer()
+		}
+	}
+	if !config.Name.IsNull() {
+		p.Name = plan.Name.ValueString()
+	}
+	if !config.Subject.IsNull() {
+		p.Subject = plan.Subject.ValueString()
+	}
+	if !config.Type.IsNull() {
+		p.Type = plan.Type.ValueString()
+	}
+	if !config.UrlPattern.IsNull() {
+		p.UrlPattern = plan.UrlPattern.ValueString()
 	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	res, err := r.client.SCC.NewComplianceNotice(ctx, p)
+	res, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.NewComplianceNotice, p, isNotFound)
 	if err != nil {
 		resp.Diagnostics.AddError("New-ComplianceNotice failed", err.Error())
 		return
@@ -151,20 +178,68 @@ func (r *complianceNoticeResource) Update(ctx context.Context, req resource.Upda
 	id := r.identityOf(state)
 	sp := purview.SetComplianceNoticeParams{}
 	sp.Identity = id
-	sp.Acknowledged = plan.Acknowledged.ValueBool()
-	sp.AcknowledgedCustodians = toStringSlice(ctx, plan.AcknowledgedCustodians, &resp.Diagnostics)
-	sp.AddedCustodians = toStringSlice(ctx, plan.AddedCustodians, &resp.Diagnostics)
-	sp.IsHighPriority = plan.IsHighPriority.ValueBool()
+	if !plan.Acknowledged.Equal(state.Acknowledged) {
+		if !plan.Acknowledged.IsUnknown() {
+			sp.Acknowledged = plan.Acknowledged.ValueBoolPointer()
+		}
+	}
+	if !plan.AcknowledgedCustodians.Equal(state.AcknowledgedCustodians) {
+		if !plan.AcknowledgedCustodians.IsNull() && !plan.AcknowledgedCustodians.IsUnknown() {
+			sp.AcknowledgedCustodians = append([]string{}, toStringSlice(ctx, plan.AcknowledgedCustodians, &resp.Diagnostics)...)
+		}
+	}
+	if !plan.AddedCustodians.Equal(state.AddedCustodians) {
+		if !plan.AddedCustodians.IsNull() && !plan.AddedCustodians.IsUnknown() {
+			sp.AddedCustodians = append([]string{}, toStringSlice(ctx, plan.AddedCustodians, &resp.Diagnostics)...)
+		}
+	}
+	if !plan.ContentBody.Equal(state.ContentBody) {
+		sp.ContentBody = plan.ContentBody.ValueString()
+	}
+	if !plan.From.Equal(state.From) {
+		sp.From = plan.From.ValueString()
+	}
+	if !plan.IsHighPriority.Equal(state.IsHighPriority) {
+		if !plan.IsHighPriority.IsUnknown() {
+			sp.IsHighPriority = plan.IsHighPriority.ValueBoolPointer()
+		}
+	}
+	if !plan.Subject.Equal(state.Subject) {
+		sp.Subject = plan.Subject.ValueString()
+	}
+	if !plan.Type.Equal(state.Type) {
+		sp.Type = plan.Type.ValueString()
+	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	if _, err := r.client.SCC.SetComplianceNotice(ctx, sp); err != nil {
+	if _, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.SetComplianceNotice, sp, isNotFound); err != nil {
 		resp.Diagnostics.AddError("Set-ComplianceNotice failed", err.Error())
 		return
 	}
 	cfg := plan
-	reflected := reconcile.ReflectsFields(map[string]types.String{}, getString)
+	reflected := reconcile.ReflectsFields(map[string]types.String{
+		"ContentBody": cfg.ContentBody,
+		"From":        cfg.From,
+		"Subject":     cfg.Subject,
+		"Type":        cfg.Type,
+	}, getString)
+	if !cfg.Acknowledged.IsUnknown() && !cfg.Acknowledged.IsNull() && !cfg.Acknowledged.Equal(state.Acknowledged) {
+		prev, want := reflected, cfg.Acknowledged.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["Acknowledged"] == nil || getBool(obj, "Acknowledged") == want)
+		}
+	}
+	if !cfg.IsHighPriority.IsUnknown() && !cfg.IsHighPriority.IsNull() && !cfg.IsHighPriority.Equal(state.IsHighPriority) {
+		prev, want := reflected, cfg.IsHighPriority.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["IsHighPriority"] == nil || getBool(obj, "IsHighPriority") == want)
+		}
+	}
 	r.refresh(ctx, id, &plan, &resp.Diagnostics, reflected)
+	if !cfg.ID.IsUnknown() && !cfg.ID.IsNull() {
+		plan.ID = cfg.ID
+	}
 	r.reconcileState(&cfg, &plan)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }

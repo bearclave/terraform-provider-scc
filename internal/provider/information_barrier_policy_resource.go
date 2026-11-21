@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
@@ -42,8 +43,8 @@ type informationBarrierPolicyModel struct {
 	ModerationAllowed    types.Bool   `tfsdk:"moderation_allowed"`
 	Name                 types.String `tfsdk:"name"`
 	SegmentAllowedFilter types.String `tfsdk:"segment_allowed_filter"`
-	SegmentsAllowed      types.String `tfsdk:"segments_allowed"`
-	SegmentsBlocked      types.String `tfsdk:"segments_blocked"`
+	SegmentsAllowed      types.Set    `tfsdk:"segments_allowed"`
+	SegmentsBlocked      types.Set    `tfsdk:"segments_blocked"`
 	State                types.String `tfsdk:"state"`
 }
 
@@ -56,14 +57,14 @@ func (r *informationBarrierPolicyResource) Schema(_ context.Context, _ resource.
 		Description: "Manages the InformationBarrierPolicy object via New-InformationBarrierPolicy / Get-InformationBarrierPolicy / Set-InformationBarrierPolicy / Remove-InformationBarrierPolicy.",
 		Attributes: map[string]schema.Attribute{
 			"id":                     schema.StringAttribute{Computed: true, Description: "Object identifier (GUID).", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"identity":               schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets."},
+			"identity":               schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"assigned_segment":       schema.StringAttribute{Required: true, Description: "Maps to the -AssignedSegment parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
 			"comment":                schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -Comment parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"moderation_allowed":     schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -ModerationAllowed parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
 			"name":                   schema.StringAttribute{Required: true, Description: "Maps to the -Name parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
-			"segment_allowed_filter": schema.StringAttribute{Required: true, Description: "Maps to the -SegmentAllowedFilter parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
-			"segments_allowed":       schema.StringAttribute{Required: true, Description: "Maps to the -SegmentsAllowed parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
-			"segments_blocked":       schema.StringAttribute{Required: true, Description: "Maps to the -SegmentsBlocked parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
+			"segment_allowed_filter": schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -SegmentAllowedFilter parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"segments_allowed":       schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -SegmentsAllowed parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"segments_blocked":       schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -SegmentsBlocked parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
 			"state":                  schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -State parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 		},
 	}
@@ -83,26 +84,47 @@ func (r *informationBarrierPolicyResource) Create(ctx context.Context, req resou
 		return
 	}
 
-	p := purview.NewInformationBarrierPolicyParams{
-		AssignedSegment:      plan.AssignedSegment.ValueString(),
-		Comment:              plan.Comment.ValueString(),
-		ModerationAllowed:    plan.ModerationAllowed.ValueBool(),
-		Name:                 plan.Name.ValueString(),
-		SegmentAllowedFilter: plan.SegmentAllowedFilter.ValueString(),
+	var config informationBarrierPolicyModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
+	if resp.Diagnostics.HasError() {
+		return
 	}
-	if v := plan.SegmentsAllowed.ValueString(); v != "" {
-		p.SegmentsAllowed = v
+
+	p := purview.NewInformationBarrierPolicyParams{}
+	if !config.AssignedSegment.IsNull() {
+		p.AssignedSegment = plan.AssignedSegment.ValueString()
 	}
-	if v := plan.SegmentsBlocked.ValueString(); v != "" {
-		p.SegmentsBlocked = v
+	if !config.Comment.IsNull() {
+		p.Comment = plan.Comment.ValueString()
 	}
-	if v := plan.State.ValueString(); v != "" {
-		p.State = v
+	if !config.ModerationAllowed.IsNull() {
+		if !plan.ModerationAllowed.IsUnknown() {
+			p.ModerationAllowed = plan.ModerationAllowed.ValueBoolPointer()
+		}
+	}
+	if !config.Name.IsNull() {
+		p.Name = plan.Name.ValueString()
+	}
+	if !config.SegmentAllowedFilter.IsNull() {
+		p.SegmentAllowedFilter = plan.SegmentAllowedFilter.ValueString()
+	}
+	if !config.SegmentsAllowed.IsNull() {
+		if v := toStringSlice(ctx, plan.SegmentsAllowed, &resp.Diagnostics); len(v) > 0 {
+			p.SegmentsAllowed = v
+		}
+	}
+	if !config.SegmentsBlocked.IsNull() {
+		if v := toStringSlice(ctx, plan.SegmentsBlocked, &resp.Diagnostics); len(v) > 0 {
+			p.SegmentsBlocked = v
+		}
+	}
+	if v := config.State.ValueString(); v != "" {
+		p.State = objectParam(v)
 	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	res, err := r.client.SCC.NewInformationBarrierPolicy(ctx, p)
+	res, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.NewInformationBarrierPolicy, p, isNotFound)
 	if err != nil {
 		resp.Diagnostics.AddError("New-InformationBarrierPolicy failed", err.Error())
 		return
@@ -149,24 +171,84 @@ func (r *informationBarrierPolicyResource) Update(ctx context.Context, req resou
 	id := r.identityOf(state)
 	sp := purview.SetInformationBarrierPolicyParams{}
 	sp.Identity = id
-	sp.Comment = plan.Comment.ValueString()
-	sp.ModerationAllowed = plan.ModerationAllowed.ValueBool()
-	if v := plan.State.ValueString(); v != "" {
-		sp.State = v
+	var cur *informationBarrierPolicyModel
+	curRead := false
+	current := func() *informationBarrierPolicyModel {
+		if !curRead {
+			curRead = true
+			var m informationBarrierPolicyModel
+			if r.refresh(ctx, id, &m, &resp.Diagnostics, nil) {
+				cur = &m
+			} else if !resp.Diagnostics.HasError() {
+				resp.Diagnostics.AddError("Get-InformationBarrierPolicy failed", "the object could not be read to determine the list values to remove; nothing was changed")
+			}
+		}
+		return cur
+	}
+	if !plan.Comment.Equal(state.Comment) {
+		sp.Comment = plan.Comment.ValueString()
+	}
+	if !plan.ModerationAllowed.Equal(state.ModerationAllowed) {
+		if !plan.ModerationAllowed.IsUnknown() {
+			sp.ModerationAllowed = plan.ModerationAllowed.ValueBoolPointer()
+		}
+	}
+	if !plan.SegmentAllowedFilter.Equal(state.SegmentAllowedFilter) {
+		sp.SegmentAllowedFilter = plan.SegmentAllowedFilter.ValueString()
+	}
+	if !plan.SegmentsAllowed.Equal(state.SegmentsAllowed) {
+		if !plan.SegmentsAllowed.IsNull() && !plan.SegmentsAllowed.IsUnknown() {
+			if v := toStringSlice(ctx, plan.SegmentsAllowed, &resp.Diagnostics); len(v) > 0 {
+				sp.SegmentsAllowed = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.SegmentsAllowed, &resp.Diagnostics); len(rm) > 0 {
+						sp.SegmentsAllowedDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
+	}
+	if !plan.SegmentsBlocked.Equal(state.SegmentsBlocked) {
+		if !plan.SegmentsBlocked.IsNull() && !plan.SegmentsBlocked.IsUnknown() {
+			if v := toStringSlice(ctx, plan.SegmentsBlocked, &resp.Diagnostics); len(v) > 0 {
+				sp.SegmentsBlocked = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.SegmentsBlocked, &resp.Diagnostics); len(rm) > 0 {
+						sp.SegmentsBlockedDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
+	}
+	if !plan.State.Equal(state.State) {
+		if v := plan.State.ValueString(); v != "" {
+			sp.State = objectParam(v)
+		}
 	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	if _, err := r.client.SCC.SetInformationBarrierPolicy(ctx, sp); err != nil {
+	if _, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.SetInformationBarrierPolicy, sp, isNotFound); err != nil {
 		resp.Diagnostics.AddError("Set-InformationBarrierPolicy failed", err.Error())
 		return
 	}
 	cfg := plan
 	reflected := reconcile.ReflectsFields(map[string]types.String{
-		"Comment": cfg.Comment,
-		"State":   cfg.State,
+		"Comment":              cfg.Comment,
+		"SegmentAllowedFilter": cfg.SegmentAllowedFilter,
 	}, getString)
+	if !cfg.ModerationAllowed.IsUnknown() && !cfg.ModerationAllowed.IsNull() && !cfg.ModerationAllowed.Equal(state.ModerationAllowed) {
+		prev, want := reflected, cfg.ModerationAllowed.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["ModerationAllowed"] == nil || getBool(obj, "ModerationAllowed") == want)
+		}
+	}
 	r.refresh(ctx, id, &plan, &resp.Diagnostics, reflected)
+	if !cfg.ID.IsUnknown() && !cfg.ID.IsNull() {
+		plan.ID = cfg.ID
+	}
 	r.reconcileState(&cfg, &plan)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
@@ -231,9 +313,9 @@ func readInformationBarrierPolicy(ctx context.Context, obj map[string]any, m *in
 	m.ModerationAllowed = types.BoolValue(getBool(obj, "ModerationAllowed"))
 	m.Name = types.StringValue(getString(obj, "Name"))
 	m.SegmentAllowedFilter = types.StringValue(getString(obj, "SegmentAllowedFilter"))
-	m.SegmentsAllowed = types.StringValue(getString(obj, "SegmentsAllowed"))
-	m.SegmentsBlocked = types.StringValue(getString(obj, "SegmentsBlocked"))
-	m.State = types.StringValue(getString(obj, "State"))
+	m.SegmentsAllowed = stringSetValue(ctx, getStringSlice(obj, "SegmentsAllowed"))
+	m.SegmentsBlocked = stringSetValue(ctx, getStringSlice(obj, "SegmentsBlocked"))
+	m.State = types.StringValue(getObjectJSON(obj, "State"))
 	_ = ctx
 }
 
@@ -243,7 +325,7 @@ func (r *informationBarrierPolicyResource) reconcileState(cfg, read *information
 	read.ModerationAllowed = reconcile.KeepBool(cfg.ModerationAllowed, read.ModerationAllowed)
 	read.Name = reconcile.KeepStr(cfg.Name, read.Name)
 	read.SegmentAllowedFilter = reconcile.KeepStr(cfg.SegmentAllowedFilter, read.SegmentAllowedFilter)
-	read.SegmentsAllowed = reconcile.KeepStr(cfg.SegmentsAllowed, read.SegmentsAllowed)
-	read.SegmentsBlocked = reconcile.KeepStr(cfg.SegmentsBlocked, read.SegmentsBlocked)
+	read.SegmentsAllowed = reconcile.KeepSet(cfg.SegmentsAllowed, read.SegmentsAllowed)
+	read.SegmentsBlocked = reconcile.KeepSet(cfg.SegmentsBlocked, read.SegmentsBlocked)
 	read.State = reconcile.KeepStr(cfg.State, read.State)
 }

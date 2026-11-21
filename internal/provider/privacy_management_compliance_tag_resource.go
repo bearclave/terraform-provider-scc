@@ -51,11 +51,11 @@ func (r *privacyManagementComplianceTagResource) Schema(_ context.Context, _ res
 		Description: "Manages the PrivacyManagementComplianceTag object via New-PrivacyManagementComplianceTag / Get-PrivacyManagementComplianceTag / Set-PrivacyManagementComplianceTag / Remove-PrivacyManagementComplianceTag.",
 		Attributes: map[string]schema.Attribute{
 			"id":                 schema.StringAttribute{Computed: true, Description: "Object identifier (GUID).", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"identity":           schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets."},
+			"identity":           schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"comment":            schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -Comment parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"name":               schema.StringAttribute{Required: true, Description: "Maps to the -Name parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
-			"retention_action":   schema.StringAttribute{Required: true, Description: "Maps to the -RetentionAction parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
-			"retention_duration": schema.StringAttribute{Required: true, Description: "Maps to the -RetentionDuration parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
+			"retention_action":   schema.StringAttribute{Required: true, Description: "Maps to the -RetentionAction parameter."},
+			"retention_duration": schema.StringAttribute{Required: true, Description: "Maps to the -RetentionDuration parameter."},
 		},
 	}
 }
@@ -74,18 +74,29 @@ func (r *privacyManagementComplianceTagResource) Create(ctx context.Context, req
 		return
 	}
 
-	p := purview.NewPrivacyManagementComplianceTagParams{
-		Comment:         plan.Comment.ValueString(),
-		Name:            plan.Name.ValueString(),
-		RetentionAction: plan.RetentionAction.ValueString(),
+	var config privacyManagementComplianceTagModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
+	if resp.Diagnostics.HasError() {
+		return
 	}
-	if v := plan.RetentionDuration.ValueString(); v != "" {
-		p.RetentionDuration = v
+
+	p := purview.NewPrivacyManagementComplianceTagParams{}
+	if !config.Comment.IsNull() {
+		p.Comment = plan.Comment.ValueString()
+	}
+	if !config.Name.IsNull() {
+		p.Name = plan.Name.ValueString()
+	}
+	if !config.RetentionAction.IsNull() {
+		p.RetentionAction = plan.RetentionAction.ValueString()
+	}
+	if v := config.RetentionDuration.ValueString(); v != "" {
+		p.RetentionDuration = objectParam(v)
 	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	res, err := r.client.SCC.NewPrivacyManagementComplianceTag(ctx, p)
+	res, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.NewPrivacyManagementComplianceTag, p, isNotFound)
 	if err != nil {
 		resp.Diagnostics.AddError("New-PrivacyManagementComplianceTag failed", err.Error())
 		return
@@ -132,19 +143,33 @@ func (r *privacyManagementComplianceTagResource) Update(ctx context.Context, req
 	id := r.identityOf(state)
 	sp := purview.SetPrivacyManagementComplianceTagParams{}
 	sp.Identity = id
-	sp.Comment = plan.Comment.ValueString()
+	if !plan.Comment.Equal(state.Comment) {
+		sp.Comment = plan.Comment.ValueString()
+	}
+	if !plan.RetentionAction.Equal(state.RetentionAction) {
+		sp.RetentionAction = plan.RetentionAction.ValueString()
+	}
+	if !plan.RetentionDuration.Equal(state.RetentionDuration) {
+		if v := plan.RetentionDuration.ValueString(); v != "" {
+			sp.RetentionDuration = objectParam(v)
+		}
+	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	if _, err := r.client.SCC.SetPrivacyManagementComplianceTag(ctx, sp); err != nil {
+	if _, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.SetPrivacyManagementComplianceTag, sp, isNotFound); err != nil {
 		resp.Diagnostics.AddError("Set-PrivacyManagementComplianceTag failed", err.Error())
 		return
 	}
 	cfg := plan
 	reflected := reconcile.ReflectsFields(map[string]types.String{
-		"Comment": cfg.Comment,
+		"Comment":         cfg.Comment,
+		"RetentionAction": cfg.RetentionAction,
 	}, getString)
 	r.refresh(ctx, id, &plan, &resp.Diagnostics, reflected)
+	if !cfg.ID.IsUnknown() && !cfg.ID.IsNull() {
+		plan.ID = cfg.ID
+	}
 	r.reconcileState(&cfg, &plan)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
@@ -207,7 +232,7 @@ func readPrivacyManagementComplianceTag(ctx context.Context, obj map[string]any,
 	m.Comment = types.StringValue(getString(obj, "Comment"))
 	m.Name = types.StringValue(getString(obj, "Name"))
 	m.RetentionAction = types.StringValue(getString(obj, "RetentionAction"))
-	m.RetentionDuration = types.StringValue(getString(obj, "RetentionDuration"))
+	m.RetentionDuration = types.StringValue(getObjectJSON(obj, "RetentionDuration"))
 	_ = ctx
 }
 

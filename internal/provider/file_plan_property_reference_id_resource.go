@@ -49,7 +49,7 @@ func (r *filePlanPropertyReferenceIdResource) Schema(_ context.Context, _ resour
 		Description: "Manages the FilePlanPropertyReferenceId object via New-FilePlanPropertyReferenceId / Get-FilePlanPropertyReferenceId / Set-FilePlanPropertyReferenceId / Remove-FilePlanPropertyReferenceId.",
 		Attributes: map[string]schema.Attribute{
 			"id":           schema.StringAttribute{Computed: true, Description: "Object identifier (GUID).", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"identity":     schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets."},
+			"identity":     schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"display_name": schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -DisplayName parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"name":         schema.StringAttribute{Required: true, Description: "Maps to the -Name parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
 		},
@@ -70,13 +70,20 @@ func (r *filePlanPropertyReferenceIdResource) Create(ctx context.Context, req re
 		return
 	}
 
-	p := purview.NewFilePlanPropertyReferenceIdParams{
-		Name: plan.Name.ValueString(),
+	var config filePlanPropertyReferenceIdModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	p := purview.NewFilePlanPropertyReferenceIdParams{}
+	if !config.Name.IsNull() {
+		p.Name = plan.Name.ValueString()
 	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	res, err := r.client.SCC.NewFilePlanPropertyReferenceId(ctx, p)
+	res, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.NewFilePlanPropertyReferenceId, p, isNotFound)
 	if err != nil {
 		resp.Diagnostics.AddError("New-FilePlanPropertyReferenceId failed", err.Error())
 		return
@@ -123,11 +130,13 @@ func (r *filePlanPropertyReferenceIdResource) Update(ctx context.Context, req re
 	id := r.identityOf(state)
 	sp := purview.SetFilePlanPropertyReferenceIdParams{}
 	sp.Identity = id
-	sp.DisplayName = plan.DisplayName.ValueString()
+	if !plan.DisplayName.Equal(state.DisplayName) {
+		sp.DisplayName = plan.DisplayName.ValueString()
+	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	if _, err := r.client.SCC.SetFilePlanPropertyReferenceId(ctx, sp); err != nil {
+	if _, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.SetFilePlanPropertyReferenceId, sp, isNotFound); err != nil {
 		resp.Diagnostics.AddError("Set-FilePlanPropertyReferenceId failed", err.Error())
 		return
 	}
@@ -136,6 +145,9 @@ func (r *filePlanPropertyReferenceIdResource) Update(ctx context.Context, req re
 		"DisplayName": cfg.DisplayName,
 	}, getString)
 	r.refresh(ctx, id, &plan, &resp.Diagnostics, reflected)
+	if !cfg.ID.IsUnknown() && !cfg.ID.IsNull() {
+		plan.ID = cfg.ID
+	}
 	r.reconcileState(&cfg, &plan)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }

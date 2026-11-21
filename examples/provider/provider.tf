@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     scc = {
-      source = "terraprovider/scc"
+      source = "bearclave/scc"
     }
   }
 }

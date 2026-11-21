@@ -10,7 +10,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
@@ -37,7 +36,7 @@ func NewDlpSensitiveInformationTypeRulePackageResource() resource.Resource {
 type dlpSensitiveInformationTypeRulePackageModel struct {
 	ID          types.String `tfsdk:"id"`
 	Identity    types.String `tfsdk:"identity"`
-	FileData    types.Set    `tfsdk:"file_data"`
+	FileData    types.String `tfsdk:"file_data"`
 	MigrationId types.String `tfsdk:"migration_id"`
 }
 
@@ -50,8 +49,8 @@ func (r *dlpSensitiveInformationTypeRulePackageResource) Schema(_ context.Contex
 		Description: "Manages the DlpSensitiveInformationTypeRulePackage object via New-DlpSensitiveInformationTypeRulePackage / Get-DlpSensitiveInformationTypeRulePackage / Set-DlpSensitiveInformationTypeRulePackage / Remove-DlpSensitiveInformationTypeRulePackage.",
 		Attributes: map[string]schema.Attribute{
 			"id":           schema.StringAttribute{Computed: true, Description: "Object identifier (GUID).", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"identity":     schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets."},
-			"file_data":    schema.SetAttribute{ElementType: types.StringType, Required: true, Description: "Maps to the -FileData parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.RequiresReplace()}},
+			"identity":     schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"file_data":    schema.StringAttribute{Required: true, Description: "Maps to the -FileData parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
 			"migration_id": schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -MigrationId parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace(), stringplanmodifier.UseStateForUnknown()}},
 		},
 	}
@@ -71,14 +70,23 @@ func (r *dlpSensitiveInformationTypeRulePackageResource) Create(ctx context.Cont
 		return
 	}
 
-	p := purview.NewDlpSensitiveInformationTypeRulePackageParams{
-		FileData:    toStringSlice(ctx, plan.FileData, &resp.Diagnostics),
-		MigrationId: plan.MigrationId.ValueString(),
+	var config dlpSensitiveInformationTypeRulePackageModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	p := purview.NewDlpSensitiveInformationTypeRulePackageParams{}
+	if v := config.FileData.ValueString(); v != "" {
+		p.FileData = objectParam(v)
+	}
+	if !config.MigrationId.IsNull() {
+		p.MigrationId = plan.MigrationId.ValueString()
 	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	res, err := r.client.SCC.NewDlpSensitiveInformationTypeRulePackage(ctx, p)
+	res, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.NewDlpSensitiveInformationTypeRulePackage, p, isNotFound)
 	if err != nil {
 		resp.Diagnostics.AddError("New-DlpSensitiveInformationTypeRulePackage failed", err.Error())
 		return
@@ -127,13 +135,16 @@ func (r *dlpSensitiveInformationTypeRulePackageResource) Update(ctx context.Cont
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	if _, err := r.client.SCC.SetDlpSensitiveInformationTypeRulePackage(ctx, sp); err != nil {
+	if _, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.SetDlpSensitiveInformationTypeRulePackage, sp, isNotFound); err != nil {
 		resp.Diagnostics.AddError("Set-DlpSensitiveInformationTypeRulePackage failed", err.Error())
 		return
 	}
 	cfg := plan
 	reflected := reconcile.ReflectsFields(map[string]types.String{}, getString)
 	r.refresh(ctx, id, &plan, &resp.Diagnostics, reflected)
+	if !cfg.ID.IsUnknown() && !cfg.ID.IsNull() {
+		plan.ID = cfg.ID
+	}
 	r.reconcileState(&cfg, &plan)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
@@ -193,12 +204,12 @@ func (r *dlpSensitiveInformationTypeRulePackageResource) refresh(ctx context.Con
 func readDlpSensitiveInformationTypeRulePackage(ctx context.Context, obj map[string]any, m *dlpSensitiveInformationTypeRulePackageModel) {
 	m.ID = types.StringValue(firstNonEmptyStr(getString(obj, "Guid"), getString(obj, "Id"), getString(obj, "Identity")))
 	m.Identity = types.StringValue(firstNonEmptyStr(getString(obj, "Identity"), getString(obj, "Guid"), getString(obj, "Name")))
-	m.FileData = stringSetValue(ctx, getStringSlice(obj, "FileData"))
+	m.FileData = types.StringValue(getObjectJSON(obj, "FileData"))
 	m.MigrationId = types.StringValue(getString(obj, "MigrationId"))
 	_ = ctx
 }
 
 func (r *dlpSensitiveInformationTypeRulePackageResource) reconcileState(cfg, read *dlpSensitiveInformationTypeRulePackageModel) {
-	read.FileData = reconcile.KeepSet(cfg.FileData, read.FileData)
+	read.FileData = reconcile.KeepStr(cfg.FileData, read.FileData)
 	read.MigrationId = reconcile.KeepStr(cfg.MigrationId, read.MigrationId)
 }

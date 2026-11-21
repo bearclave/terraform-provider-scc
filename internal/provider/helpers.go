@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"strconv"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -51,36 +52,128 @@ func firstObject(v []map[string]any) map[string]any {
 	return v[0]
 }
 
+// getString returns the value under key as the string a string-typed
+// attribute stores. The Admin API returns PowerShell booleans as JSON
+// booleans, numbers as JSON numbers and multivalued parameters as arrays;
+// treating any of those as "" makes Read never match the configured value
+// and yields a perpetual diff (e.g. ExternalInOutlook.Enabled).
 func getString(m map[string]any, key string) string {
-	if v, ok := m[key]; ok && v != nil {
-		if s, ok := v.(string); ok {
-			return s
-		}
+	v, ok := m[key]
+	if !ok || v == nil {
+		return ""
 	}
-	return ""
+	return coerceString(v)
+}
+
+func coerceString(v any) string {
+	switch t := v.(type) {
+	case string:
+		return t
+	case bool:
+		return strconv.FormatBool(t)
+	case float64:
+		return strconv.FormatFloat(t, 'f', -1, 64)
+	case json.Number:
+		return t.String()
+	case []any:
+		parts := make([]string, 0, len(t))
+		for _, e := range t {
+			if s := coerceString(e); s != "" {
+				parts = append(parts, s)
+			}
+		}
+		return strings.Join(parts, ",")
+	default:
+		return ""
+	}
 }
 
 func getBool(m map[string]any, key string) bool {
 	if v, ok := m[key]; ok && v != nil {
-		if b, ok := v.(bool); ok {
+		switch b := v.(type) {
+		case bool:
 			return b
+		case string: // e.g. "True" inside a label action's settings
+			return strings.EqualFold(strings.TrimSpace(b), "true")
 		}
 	}
 	return false
 }
 
+// getStateBool reads a bool that the object reports as a state string, e.g. a
+// rule's State ("Enabled"/"Disabled"). Objects without that property (journal
+// rules report a bool Enabled instead) fall back to getBool(m, boolKey).
+func getStateBool(m map[string]any, stateKey, boolKey string) bool {
+	if v, ok := m[stateKey]; ok && v != nil {
+		if s, ok := v.(string); ok {
+			return strings.EqualFold(s, "Enabled")
+		}
+	}
+	return getBool(m, boolKey)
+}
+
+// getStringSlice returns a multi-value property as a slice. Empty entries are
+// dropped (the Admin API returns an empty list as [""], which would otherwise
+// read back as a one-element set and diff against []), and a scalar string is
+// treated as a one-element list.
 func getStringSlice(m map[string]any, key string) []string {
 	v, ok := m[key]
 	if !ok || v == nil {
 		return nil
 	}
-	arr, ok := v.([]any)
-	if !ok {
+	var arr []any
+	switch t := v.(type) {
+	case []any:
+		arr = t
+	case string:
+		arr = []any{t}
+	default:
 		return nil
 	}
 	out := make([]string, 0, len(arr))
 	for _, e := range arr {
-		if s, ok := e.(string); ok {
+		if s := elementString(e); s != "" {
+			out = append(out, s)
+		}
+	}
+	return out
+}
+
+// identityKeys are the properties that identify an element of an object-valued
+// multi-value property, in order of preference. Purview returns policy
+// locations as objects, e.g. ExchangeLocation
+// [{"Name":"All","ImmutableIdentity":"All","DisplayName":"All","Guid":...}].
+var identityKeys = []string{"Name", "ImmutableIdentity", "PrimarySmtpAddress", "Identity", "DisplayName", "Guid", "Id"}
+
+// elementString reads one element of a multi-value property: scalars as
+// coerceString does, identity objects as their first populated identity key.
+func elementString(e any) string {
+	if m, ok := e.(map[string]any); ok {
+		for _, k := range identityKeys {
+			if s := coerceString(m[k]); s != "" {
+				return s
+			}
+		}
+		return ""
+	}
+	return coerceString(e)
+}
+
+// elementAliases returns every string an element can be referred to by: the
+// scalar itself, or each identity key value of an identity object. Overrides
+// use it to keep the configured spelling of a location (an SMTP address, a
+// site URL) when the read-back reports it under another key.
+func elementAliases(e any) []string {
+	m, ok := e.(map[string]any)
+	if !ok {
+		if s := coerceString(e); s != "" {
+			return []string{s}
+		}
+		return nil
+	}
+	var out []string
+	for _, k := range identityKeys {
+		if s := coerceString(m[k]); s != "" {
 			out = append(out, s)
 		}
 	}
@@ -111,4 +204,74 @@ func isNotFound(err error) bool {
 			strings.Contains(msg, "wasn't found")
 	}
 	return false
+}
+
+// getInt returns the value under key as the int64 an int-typed attribute
+// stores. The Admin API decodes numbers as float64 (or json.Number) and
+// occasionally renders them as strings; anything else reads as 0.
+func getInt(m map[string]any, key string) int64 {
+	v, ok := m[key]
+	if !ok || v == nil {
+		return 0
+	}
+	switch t := v.(type) {
+	case float64:
+		return int64(t)
+	case json.Number:
+		n, err := t.Int64()
+		if err != nil {
+			return 0
+		}
+		return n
+	case string:
+		n, err := strconv.ParseInt(strings.TrimSpace(t), 10, 64)
+		if err != nil {
+			return 0
+		}
+		return n
+	case bool:
+		if t {
+			return 1
+		}
+	}
+	return 0
+}
+
+// objectParam converts an untyped (System.Object) attribute's configured string
+// for a write. A value that looks like JSON (starts with '[' or '{') is sent as
+// the decoded structure; anything else as the plain string.
+func objectParam(s string) any {
+	t := strings.TrimSpace(s)
+	if len(t) > 0 && (t[0] == '[' || t[0] == '{') {
+		var v any
+		if json.Unmarshal([]byte(t), &v) == nil {
+			return v
+		}
+	}
+	return s
+}
+
+// getObjectJSON reads an untyped (System.Object) attribute back as a string:
+// strings as-is, any other value (number, bool, object, array) as compact JSON,
+// so it round-trips against a literal or jsonencode() config.
+func getObjectJSON(m map[string]any, key string) string {
+	v, ok := m[key]
+	if !ok || v == nil {
+		return ""
+	}
+	if s, ok := v.(string); ok {
+		return s
+	}
+	b, err := json.Marshal(v)
+	if err != nil {
+		return ""
+	}
+	return string(b)
+}
+
+// listRemoveDelta builds the Remove delta that clears a multi-value property:
+// the Admin API ignores an empty list, like -AllowList @() in PowerShell, and
+// needs -AllowList @{Remove=...} instead.
+func listRemoveDelta(v []string) *adminapi.StringDelta {
+	return &adminapi.StringDelta{Remove: v}
 }

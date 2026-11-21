@@ -17,27 +17,27 @@ Manages the ComplianceTag object via New-ComplianceTag / Get-ComplianceTag / Set
 
 ### Required
 
-- `multi_stage_review_property` (String) Maps to the -MultiStageReviewProperty parameter.
 - `name` (String) Maps to the -Name parameter.
-- `retention_action` (String) Maps to the -RetentionAction parameter.
-- `retention_duration` (String) Maps to the -RetentionDuration parameter.
-- `retention_type` (String) Maps to the -RetentionType parameter.
 
 ### Optional
 
 - `archive_enabled` (Boolean) Maps to the -ArchiveEnabled parameter.
 - `archive_trigger_based_on` (String) Maps to the -ArchiveTriggerBasedOn parameter.
 - `archive_trigger_in_days` (String) Maps to the -ArchiveTriggerInDays parameter.
-- `auto_approval_period` (String) Maps to the -AutoApprovalPeriod parameter.
+- `auto_approval_period` (Number) Maps to the -AutoApprovalPeriod parameter.
 - `comment` (String) Maps to the -Comment parameter.
 - `compliance_tag_for_next_stage` (String) Maps to the -ComplianceTagForNextStage parameter.
 - `event_type` (String) Maps to the -EventType parameter.
 - `file_plan_property` (String) Maps to the -FilePlanProperty parameter.
 - `flow_id` (String) Maps to the -FlowId parameter.
-- `is_record_label` (String) Maps to the -IsRecordLabel parameter.
+- `is_record_label` (Boolean) Maps to the -IsRecordLabel parameter.
 - `is_record_unlocked_as_default` (Boolean) Maps to the -IsRecordUnlockedAsDefault parameter.
+- `multi_stage_review_property` (String) Maps to the -MultiStageReviewProperty parameter.
 - `notes` (String) Maps to the -Notes parameter.
 - `regulatory` (Boolean) Maps to the -Regulatory parameter.
+- `retention_action` (String) Maps to the -RetentionAction parameter.
+- `retention_duration` (String) Maps to the -RetentionDuration parameter.
+- `retention_type` (String) Maps to the -RetentionType parameter.
 - `reviewer_email` (Set of String) Maps to the -ReviewerEmail parameter.
 - `web_hook_url` (String) Maps to the -WebHookUrl parameter.
 

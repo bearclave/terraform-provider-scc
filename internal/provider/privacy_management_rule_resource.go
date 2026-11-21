@@ -68,7 +68,7 @@ func (r *privacyManagementRuleResource) Schema(_ context.Context, _ resource.Sch
 		Description: "Manages the PrivacyManagementRule object via New-PrivacyManagementRule / Get-PrivacyManagementRule / Set-PrivacyManagementRule / Remove-PrivacyManagementRule.",
 		Attributes: map[string]schema.Attribute{
 			"id":                                     schema.StringAttribute{Computed: true, Description: "Object identifier (GUID).", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"identity":                               schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets."},
+			"identity":                               schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"comment":                                schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -Comment parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"content_contains_sensitive_information": schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -ContentContainsSensitiveInformation parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
 			"cross_boundary_transfers":               schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -CrossBoundaryTransfers parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
@@ -108,52 +108,85 @@ func (r *privacyManagementRuleResource) Create(ctx context.Context, req resource
 		return
 	}
 
-	p := purview.NewPrivacyManagementRuleParams{
-		Comment:                             plan.Comment.ValueString(),
-		ContentContainsSensitiveInformation: toStringSlice(ctx, plan.ContentContainsSensitiveInformation, &resp.Diagnostics),
-		CrossBoundaryTransfers:              toStringSlice(ctx, plan.CrossBoundaryTransfers, &resp.Diagnostics),
-		EndpointOperations:                  toStringSlice(ctx, plan.EndpointOperations, &resp.Diagnostics),
-		Locations:                           plan.Locations.ValueString(),
-		Name:                                plan.Name.ValueString(),
-		PolicySettings:                      plan.PolicySettings.ValueString(),
-		PrivacyAccessLevel:                  toStringSlice(ctx, plan.PrivacyAccessLevel, &resp.Diagnostics),
-		SettingsVersion:                     plan.SettingsVersion.ValueString(),
-		TenantSettings:                      plan.TenantSettings.ValueString(),
+	var config privacyManagementRuleModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
+	if resp.Diagnostics.HasError() {
+		return
 	}
-	if v := plan.ExchangeSites.ValueString(); v != "" {
-		p.ExchangeSites = v
+
+	p := purview.NewPrivacyManagementRuleParams{}
+	if !config.Comment.IsNull() {
+		p.Comment = plan.Comment.ValueString()
 	}
-	if v := plan.Groups.ValueString(); v != "" {
-		p.Groups = v
+	if !config.ContentContainsSensitiveInformation.IsNull() {
+		if v := toStringSlice(ctx, plan.ContentContainsSensitiveInformation, &resp.Diagnostics); len(v) > 0 {
+			p.ContentContainsSensitiveInformation = v
+		}
 	}
-	if v := plan.LastModifiedThresholdInDays.ValueString(); v != "" {
-		p.LastModifiedThresholdInDays = v
+	if !config.CrossBoundaryTransfers.IsNull() {
+		if v := toStringSlice(ctx, plan.CrossBoundaryTransfers, &resp.Diagnostics); len(v) > 0 {
+			p.CrossBoundaryTransfers = v
+		}
 	}
-	if v := plan.OnedriveSites.ValueString(); v != "" {
-		p.OnedriveSites = v
+	if !config.EndpointOperations.IsNull() {
+		if v := toStringSlice(ctx, plan.EndpointOperations, &resp.Diagnostics); len(v) > 0 {
+			p.EndpointOperations = v
+		}
 	}
-	if v := plan.Policy.ValueString(); v != "" {
-		p.Policy = v
+	if v := config.ExchangeSites.ValueString(); v != "" {
+		p.ExchangeSites = objectParam(v)
 	}
-	if v := plan.PurviewSites.ValueString(); v != "" {
-		p.PurviewSites = v
+	if v := config.Groups.ValueString(); v != "" {
+		p.Groups = objectParam(v)
 	}
-	if v := plan.SharepointSiteOversharingEnabled.ValueString(); v != "" {
-		p.SharepointSiteOversharingEnabled = v
+	if v := config.LastModifiedThresholdInDays.ValueString(); v != "" {
+		p.LastModifiedThresholdInDays = objectParam(v)
 	}
-	if v := plan.SharepointSites.ValueString(); v != "" {
-		p.SharepointSites = v
+	if !config.Locations.IsNull() {
+		p.Locations = plan.Locations.ValueString()
 	}
-	if v := plan.TeamsSites.ValueString(); v != "" {
-		p.TeamsSites = v
+	if !config.Name.IsNull() {
+		p.Name = plan.Name.ValueString()
 	}
-	if v := plan.Users.ValueString(); v != "" {
-		p.Users = v
+	if v := config.OnedriveSites.ValueString(); v != "" {
+		p.OnedriveSites = objectParam(v)
+	}
+	if v := config.Policy.ValueString(); v != "" {
+		p.Policy = objectParam(v)
+	}
+	if !config.PolicySettings.IsNull() {
+		p.PolicySettings = plan.PolicySettings.ValueString()
+	}
+	if !config.PrivacyAccessLevel.IsNull() {
+		if v := toStringSlice(ctx, plan.PrivacyAccessLevel, &resp.Diagnostics); len(v) > 0 {
+			p.PrivacyAccessLevel = v
+		}
+	}
+	if v := config.PurviewSites.ValueString(); v != "" {
+		p.PurviewSites = objectParam(v)
+	}
+	if !config.SettingsVersion.IsNull() {
+		p.SettingsVersion = plan.SettingsVersion.ValueString()
+	}
+	if v := config.SharepointSiteOversharingEnabled.ValueString(); v != "" {
+		p.SharepointSiteOversharingEnabled = objectParam(v)
+	}
+	if v := config.SharepointSites.ValueString(); v != "" {
+		p.SharepointSites = objectParam(v)
+	}
+	if v := config.TeamsSites.ValueString(); v != "" {
+		p.TeamsSites = objectParam(v)
+	}
+	if !config.TenantSettings.IsNull() {
+		p.TenantSettings = plan.TenantSettings.ValueString()
+	}
+	if v := config.Users.ValueString(); v != "" {
+		p.Users = objectParam(v)
 	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	res, err := r.client.SCC.NewPrivacyManagementRule(ctx, p)
+	res, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.NewPrivacyManagementRule, p, isNotFound)
 	if err != nil {
 		resp.Diagnostics.AddError("New-PrivacyManagementRule failed", err.Error())
 		return
@@ -200,66 +233,112 @@ func (r *privacyManagementRuleResource) Update(ctx context.Context, req resource
 	id := r.identityOf(state)
 	sp := purview.SetPrivacyManagementRuleParams{}
 	sp.Identity = id
-	sp.Comment = plan.Comment.ValueString()
-	sp.ContentContainsSensitiveInformation = toStringSlice(ctx, plan.ContentContainsSensitiveInformation, &resp.Diagnostics)
-	sp.CrossBoundaryTransfers = toStringSlice(ctx, plan.CrossBoundaryTransfers, &resp.Diagnostics)
-	sp.Disabled = plan.Disabled.ValueBool()
-	sp.EndpointOperations = toStringSlice(ctx, plan.EndpointOperations, &resp.Diagnostics)
-	if v := plan.ExchangeSites.ValueString(); v != "" {
-		sp.ExchangeSites = v
+	if !plan.Comment.Equal(state.Comment) {
+		sp.Comment = plan.Comment.ValueString()
 	}
-	if v := plan.Groups.ValueString(); v != "" {
-		sp.Groups = v
+	if !plan.ContentContainsSensitiveInformation.Equal(state.ContentContainsSensitiveInformation) {
+		if !plan.ContentContainsSensitiveInformation.IsNull() && !plan.ContentContainsSensitiveInformation.IsUnknown() {
+			sp.ContentContainsSensitiveInformation = append([]string{}, toStringSlice(ctx, plan.ContentContainsSensitiveInformation, &resp.Diagnostics)...)
+		}
 	}
-	if v := plan.LastModifiedThresholdInDays.ValueString(); v != "" {
-		sp.LastModifiedThresholdInDays = v
+	if !plan.CrossBoundaryTransfers.Equal(state.CrossBoundaryTransfers) {
+		if !plan.CrossBoundaryTransfers.IsNull() && !plan.CrossBoundaryTransfers.IsUnknown() {
+			sp.CrossBoundaryTransfers = append([]string{}, toStringSlice(ctx, plan.CrossBoundaryTransfers, &resp.Diagnostics)...)
+		}
 	}
-	sp.Locations = plan.Locations.ValueString()
-	if v := plan.OnedriveSites.ValueString(); v != "" {
-		sp.OnedriveSites = v
+	if !plan.Disabled.Equal(state.Disabled) {
+		if !plan.Disabled.IsUnknown() {
+			sp.Disabled = plan.Disabled.ValueBoolPointer()
+		}
 	}
-	sp.PolicySettings = plan.PolicySettings.ValueString()
-	sp.PrivacyAccessLevel = toStringSlice(ctx, plan.PrivacyAccessLevel, &resp.Diagnostics)
-	if v := plan.PurviewSites.ValueString(); v != "" {
-		sp.PurviewSites = v
+	if !plan.EndpointOperations.Equal(state.EndpointOperations) {
+		if !plan.EndpointOperations.IsNull() && !plan.EndpointOperations.IsUnknown() {
+			sp.EndpointOperations = append([]string{}, toStringSlice(ctx, plan.EndpointOperations, &resp.Diagnostics)...)
+		}
 	}
-	if v := plan.SharepointSiteOversharingEnabled.ValueString(); v != "" {
-		sp.SharepointSiteOversharingEnabled = v
+	if !plan.ExchangeSites.Equal(state.ExchangeSites) {
+		if v := plan.ExchangeSites.ValueString(); v != "" {
+			sp.ExchangeSites = objectParam(v)
+		}
 	}
-	if v := plan.SharepointSites.ValueString(); v != "" {
-		sp.SharepointSites = v
+	if !plan.Groups.Equal(state.Groups) {
+		if v := plan.Groups.ValueString(); v != "" {
+			sp.Groups = objectParam(v)
+		}
 	}
-	if v := plan.TeamsSites.ValueString(); v != "" {
-		sp.TeamsSites = v
+	if !plan.LastModifiedThresholdInDays.Equal(state.LastModifiedThresholdInDays) {
+		if v := plan.LastModifiedThresholdInDays.ValueString(); v != "" {
+			sp.LastModifiedThresholdInDays = objectParam(v)
+		}
 	}
-	sp.TenantSettings = plan.TenantSettings.ValueString()
-	if v := plan.Users.ValueString(); v != "" {
-		sp.Users = v
+	if !plan.Locations.Equal(state.Locations) {
+		sp.Locations = plan.Locations.ValueString()
+	}
+	if !plan.OnedriveSites.Equal(state.OnedriveSites) {
+		if v := plan.OnedriveSites.ValueString(); v != "" {
+			sp.OnedriveSites = objectParam(v)
+		}
+	}
+	if !plan.PolicySettings.Equal(state.PolicySettings) {
+		sp.PolicySettings = plan.PolicySettings.ValueString()
+	}
+	if !plan.PrivacyAccessLevel.Equal(state.PrivacyAccessLevel) {
+		if !plan.PrivacyAccessLevel.IsNull() && !plan.PrivacyAccessLevel.IsUnknown() {
+			sp.PrivacyAccessLevel = append([]string{}, toStringSlice(ctx, plan.PrivacyAccessLevel, &resp.Diagnostics)...)
+		}
+	}
+	if !plan.PurviewSites.Equal(state.PurviewSites) {
+		if v := plan.PurviewSites.ValueString(); v != "" {
+			sp.PurviewSites = objectParam(v)
+		}
+	}
+	if !plan.SharepointSiteOversharingEnabled.Equal(state.SharepointSiteOversharingEnabled) {
+		if v := plan.SharepointSiteOversharingEnabled.ValueString(); v != "" {
+			sp.SharepointSiteOversharingEnabled = objectParam(v)
+		}
+	}
+	if !plan.SharepointSites.Equal(state.SharepointSites) {
+		if v := plan.SharepointSites.ValueString(); v != "" {
+			sp.SharepointSites = objectParam(v)
+		}
+	}
+	if !plan.TeamsSites.Equal(state.TeamsSites) {
+		if v := plan.TeamsSites.ValueString(); v != "" {
+			sp.TeamsSites = objectParam(v)
+		}
+	}
+	if !plan.TenantSettings.Equal(state.TenantSettings) {
+		sp.TenantSettings = plan.TenantSettings.ValueString()
+	}
+	if !plan.Users.Equal(state.Users) {
+		if v := plan.Users.ValueString(); v != "" {
+			sp.Users = objectParam(v)
+		}
 	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	if _, err := r.client.SCC.SetPrivacyManagementRule(ctx, sp); err != nil {
+	if _, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.SetPrivacyManagementRule, sp, isNotFound); err != nil {
 		resp.Diagnostics.AddError("Set-PrivacyManagementRule failed", err.Error())
 		return
 	}
 	cfg := plan
 	reflected := reconcile.ReflectsFields(map[string]types.String{
-		"Comment":                          cfg.Comment,
-		"ExchangeSites":                    cfg.ExchangeSites,
-		"Groups":                           cfg.Groups,
-		"LastModifiedThresholdInDays":      cfg.LastModifiedThresholdInDays,
-		"Locations":                        cfg.Locations,
-		"OnedriveSites":                    cfg.OnedriveSites,
-		"PolicySettings":                   cfg.PolicySettings,
-		"PurviewSites":                     cfg.PurviewSites,
-		"SharepointSiteOversharingEnabled": cfg.SharepointSiteOversharingEnabled,
-		"SharepointSites":                  cfg.SharepointSites,
-		"TeamsSites":                       cfg.TeamsSites,
-		"TenantSettings":                   cfg.TenantSettings,
-		"Users":                            cfg.Users,
+		"Comment":        cfg.Comment,
+		"Locations":      cfg.Locations,
+		"PolicySettings": cfg.PolicySettings,
+		"TenantSettings": cfg.TenantSettings,
 	}, getString)
+	if !cfg.Disabled.IsUnknown() && !cfg.Disabled.IsNull() && !cfg.Disabled.Equal(state.Disabled) {
+		prev, want := reflected, cfg.Disabled.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["Disabled"] == nil || getBool(obj, "Disabled") == want)
+		}
+	}
 	r.refresh(ctx, id, &plan, &resp.Diagnostics, reflected)
+	if !cfg.ID.IsUnknown() && !cfg.ID.IsNull() {
+		plan.ID = cfg.ID
+	}
 	r.reconcileState(&cfg, &plan)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
@@ -324,22 +403,22 @@ func readPrivacyManagementRule(ctx context.Context, obj map[string]any, m *priva
 	m.CrossBoundaryTransfers = stringSetValue(ctx, getStringSlice(obj, "CrossBoundaryTransfers"))
 	m.Disabled = types.BoolValue(getBool(obj, "Disabled"))
 	m.EndpointOperations = stringSetValue(ctx, getStringSlice(obj, "EndpointOperations"))
-	m.ExchangeSites = types.StringValue(getString(obj, "ExchangeSites"))
-	m.Groups = types.StringValue(getString(obj, "Groups"))
-	m.LastModifiedThresholdInDays = types.StringValue(getString(obj, "LastModifiedThresholdInDays"))
+	m.ExchangeSites = types.StringValue(getObjectJSON(obj, "ExchangeSites"))
+	m.Groups = types.StringValue(getObjectJSON(obj, "Groups"))
+	m.LastModifiedThresholdInDays = types.StringValue(getObjectJSON(obj, "LastModifiedThresholdInDays"))
 	m.Locations = types.StringValue(getString(obj, "Locations"))
 	m.Name = types.StringValue(getString(obj, "Name"))
-	m.OnedriveSites = types.StringValue(getString(obj, "OnedriveSites"))
-	m.Policy = types.StringValue(getString(obj, "Policy"))
+	m.OnedriveSites = types.StringValue(getObjectJSON(obj, "OnedriveSites"))
+	m.Policy = types.StringValue(getObjectJSON(obj, "Policy"))
 	m.PolicySettings = types.StringValue(getString(obj, "PolicySettings"))
 	m.PrivacyAccessLevel = stringSetValue(ctx, getStringSlice(obj, "PrivacyAccessLevel"))
-	m.PurviewSites = types.StringValue(getString(obj, "PurviewSites"))
+	m.PurviewSites = types.StringValue(getObjectJSON(obj, "PurviewSites"))
 	m.SettingsVersion = types.StringValue(getString(obj, "SettingsVersion"))
-	m.SharepointSiteOversharingEnabled = types.StringValue(getString(obj, "SharepointSiteOversharingEnabled"))
-	m.SharepointSites = types.StringValue(getString(obj, "SharepointSites"))
-	m.TeamsSites = types.StringValue(getString(obj, "TeamsSites"))
+	m.SharepointSiteOversharingEnabled = types.StringValue(getObjectJSON(obj, "SharepointSiteOversharingEnabled"))
+	m.SharepointSites = types.StringValue(getObjectJSON(obj, "SharepointSites"))
+	m.TeamsSites = types.StringValue(getObjectJSON(obj, "TeamsSites"))
 	m.TenantSettings = types.StringValue(getString(obj, "TenantSettings"))
-	m.Users = types.StringValue(getString(obj, "Users"))
+	m.Users = types.StringValue(getObjectJSON(obj, "Users"))
 	_ = ctx
 }
 

@@ -25,6 +25,7 @@ var (
 	_ resource.Resource                = &recordReviewNotificationTemplateConfigResource{}
 	_ resource.ResourceWithConfigure   = &recordReviewNotificationTemplateConfigResource{}
 	_ resource.ResourceWithImportState = &recordReviewNotificationTemplateConfigResource{}
+	_ resource.ResourceWithModifyPlan  = &recordReviewNotificationTemplateConfigResource{}
 )
 
 type recordReviewNotificationTemplateConfigResource struct{ client *clients.Client }
@@ -52,7 +53,7 @@ func (r *recordReviewNotificationTemplateConfigResource) Schema(_ context.Contex
 		Description: "Manages the RecordReviewNotificationTemplateConfig configuration via Set-RecordReviewNotificationTemplateConfig.",
 		Attributes: map[string]schema.Attribute{
 			"id":                                  schema.StringAttribute{Computed: true, Description: "Object identifier (GUID).", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"identity":                            schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets."},
+			"identity":                            schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"customized_notification_data_string": schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -CustomizedNotificationDataString parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"customized_reminder_data_string":     schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -CustomizedReminderDataString parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"is_customized_notification_template": schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -IsCustomizedNotificationTemplate parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
@@ -74,15 +75,32 @@ func (r *recordReviewNotificationTemplateConfigResource) Create(ctx context.Cont
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	sp := purview.SetRecordReviewNotificationTemplateConfigParams{}
-	sp.CustomizedNotificationDataString = plan.CustomizedNotificationDataString.ValueString()
-	sp.CustomizedReminderDataString = plan.CustomizedReminderDataString.ValueString()
-	sp.IsCustomizedNotificationTemplate = plan.IsCustomizedNotificationTemplate.ValueBool()
-	sp.IsCustomizedReminderTemplate = plan.IsCustomizedReminderTemplate.ValueBool()
+	var config recordReviewNotificationTemplateConfigModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	if _, err := r.client.SCC.SetRecordReviewNotificationTemplateConfig(ctx, sp); err != nil {
+	sp := purview.SetRecordReviewNotificationTemplateConfigParams{}
+	if !config.CustomizedNotificationDataString.IsNull() {
+		sp.CustomizedNotificationDataString = plan.CustomizedNotificationDataString.ValueString()
+	}
+	if !config.CustomizedReminderDataString.IsNull() {
+		sp.CustomizedReminderDataString = plan.CustomizedReminderDataString.ValueString()
+	}
+	if !config.IsCustomizedNotificationTemplate.IsNull() {
+		if !plan.IsCustomizedNotificationTemplate.IsUnknown() {
+			sp.IsCustomizedNotificationTemplate = plan.IsCustomizedNotificationTemplate.ValueBoolPointer()
+		}
+	}
+	if !config.IsCustomizedReminderTemplate.IsNull() {
+		if !plan.IsCustomizedReminderTemplate.IsUnknown() {
+			sp.IsCustomizedReminderTemplate = plan.IsCustomizedReminderTemplate.ValueBoolPointer()
+		}
+	}
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	if _, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.SetRecordReviewNotificationTemplateConfig, sp, isNotFound); err != nil {
 		resp.Diagnostics.AddError("Set-RecordReviewNotificationTemplateConfig failed", err.Error())
 		return
 	}
@@ -117,14 +135,26 @@ func (r *recordReviewNotificationTemplateConfigResource) Update(ctx context.Cont
 	}
 	id := r.identityOf(state)
 	sp := purview.SetRecordReviewNotificationTemplateConfigParams{}
-	sp.CustomizedNotificationDataString = plan.CustomizedNotificationDataString.ValueString()
-	sp.CustomizedReminderDataString = plan.CustomizedReminderDataString.ValueString()
-	sp.IsCustomizedNotificationTemplate = plan.IsCustomizedNotificationTemplate.ValueBool()
-	sp.IsCustomizedReminderTemplate = plan.IsCustomizedReminderTemplate.ValueBool()
+	if !plan.CustomizedNotificationDataString.Equal(state.CustomizedNotificationDataString) {
+		sp.CustomizedNotificationDataString = plan.CustomizedNotificationDataString.ValueString()
+	}
+	if !plan.CustomizedReminderDataString.Equal(state.CustomizedReminderDataString) {
+		sp.CustomizedReminderDataString = plan.CustomizedReminderDataString.ValueString()
+	}
+	if !plan.IsCustomizedNotificationTemplate.Equal(state.IsCustomizedNotificationTemplate) {
+		if !plan.IsCustomizedNotificationTemplate.IsUnknown() {
+			sp.IsCustomizedNotificationTemplate = plan.IsCustomizedNotificationTemplate.ValueBoolPointer()
+		}
+	}
+	if !plan.IsCustomizedReminderTemplate.Equal(state.IsCustomizedReminderTemplate) {
+		if !plan.IsCustomizedReminderTemplate.IsUnknown() {
+			sp.IsCustomizedReminderTemplate = plan.IsCustomizedReminderTemplate.ValueBoolPointer()
+		}
+	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	if _, err := r.client.SCC.SetRecordReviewNotificationTemplateConfig(ctx, sp); err != nil {
+	if _, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.SetRecordReviewNotificationTemplateConfig, sp, isNotFound); err != nil {
 		resp.Diagnostics.AddError("Set-RecordReviewNotificationTemplateConfig failed", err.Error())
 		return
 	}
@@ -133,7 +163,22 @@ func (r *recordReviewNotificationTemplateConfigResource) Update(ctx context.Cont
 		"CustomizedNotificationDataString": cfg.CustomizedNotificationDataString,
 		"CustomizedReminderDataString":     cfg.CustomizedReminderDataString,
 	}, getString)
+	if !cfg.IsCustomizedNotificationTemplate.IsUnknown() && !cfg.IsCustomizedNotificationTemplate.IsNull() && !cfg.IsCustomizedNotificationTemplate.Equal(state.IsCustomizedNotificationTemplate) {
+		prev, want := reflected, cfg.IsCustomizedNotificationTemplate.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["IsCustomizedNotificationTemplate"] == nil || getBool(obj, "IsCustomizedNotificationTemplate") == want)
+		}
+	}
+	if !cfg.IsCustomizedReminderTemplate.IsUnknown() && !cfg.IsCustomizedReminderTemplate.IsNull() && !cfg.IsCustomizedReminderTemplate.Equal(state.IsCustomizedReminderTemplate) {
+		prev, want := reflected, cfg.IsCustomizedReminderTemplate.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["IsCustomizedReminderTemplate"] == nil || getBool(obj, "IsCustomizedReminderTemplate") == want)
+		}
+	}
 	r.refresh(ctx, id, &plan, &resp.Diagnostics, reflected)
+	if !cfg.ID.IsUnknown() && !cfg.ID.IsNull() {
+		plan.ID = cfg.ID
+	}
 	r.reconcileState(&cfg, &plan)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
@@ -145,6 +190,46 @@ func (r *recordReviewNotificationTemplateConfigResource) Delete(_ context.Contex
 func (r *recordReviewNotificationTemplateConfigResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("id"), req.ID)...)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("identity"), req.ID)...)
+}
+
+func (r *recordReviewNotificationTemplateConfigResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
+	if req.Plan.Raw.IsNull() || !req.State.Raw.IsNull() || r.client == nil {
+		return
+	}
+	var plan recordReviewNotificationTemplateConfigModel
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	res, err := r.client.SCC.GetRecordReviewNotificationTemplateConfig(ctx, purview.GetRecordReviewNotificationTemplateConfigParams{})
+	if err != nil {
+		return
+	}
+	obj := firstObject(res.Value)
+	if obj == nil {
+		return
+	}
+	var cur recordReviewNotificationTemplateConfigModel
+	readRecordReviewNotificationTemplateConfig(ctx, obj, &cur)
+	if plan.ID.IsUnknown() {
+		plan.ID = cur.ID
+	}
+	if plan.Identity.IsUnknown() {
+		plan.Identity = cur.Identity
+	}
+	if plan.CustomizedNotificationDataString.IsUnknown() {
+		plan.CustomizedNotificationDataString = cur.CustomizedNotificationDataString
+	}
+	if plan.CustomizedReminderDataString.IsUnknown() {
+		plan.CustomizedReminderDataString = cur.CustomizedReminderDataString
+	}
+	if plan.IsCustomizedNotificationTemplate.IsUnknown() {
+		plan.IsCustomizedNotificationTemplate = cur.IsCustomizedNotificationTemplate
+	}
+	if plan.IsCustomizedReminderTemplate.IsUnknown() {
+		plan.IsCustomizedReminderTemplate = cur.IsCustomizedReminderTemplate
+	}
+	resp.Diagnostics.Append(resp.Plan.Set(ctx, &plan)...)
 }
 
 func (r *recordReviewNotificationTemplateConfigResource) identityOf(m recordReviewNotificationTemplateConfigModel) string {

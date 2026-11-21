@@ -50,12 +50,12 @@ func (r *servicePrincipalResource) Schema(_ context.Context, _ resource.SchemaRe
 		Description: "Manages the ServicePrincipal object via New-ServicePrincipal / Get-ServicePrincipal / Set-ServicePrincipal / Remove-ServicePrincipal.",
 		Attributes: map[string]schema.Attribute{
 			"id":           schema.StringAttribute{Computed: true, Description: "Object identifier (GUID).", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"identity":     schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets."},
+			"identity":     schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"app_id":       schema.StringAttribute{Required: true, Description: "Maps to the -AppId parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
 			"display_name": schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -DisplayName parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"object_id":    schema.StringAttribute{Required: true, Description: "Maps to the -ObjectId parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
 			"organization": schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -Organization parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace(), stringplanmodifier.UseStateForUnknown()}},
-			"service_id":   schema.StringAttribute{Required: true, Description: "Maps to the -ServiceId parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
+			"service_id":   schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ServiceId parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace(), stringplanmodifier.UseStateForUnknown()}},
 		},
 	}
 }
@@ -74,19 +74,32 @@ func (r *servicePrincipalResource) Create(ctx context.Context, req resource.Crea
 		return
 	}
 
-	p := purview.NewServicePrincipalParams{
-		AppId:       plan.AppId.ValueString(),
-		DisplayName: plan.DisplayName.ValueString(),
-		ObjectId:    plan.ObjectId.ValueString(),
-		ServiceId:   plan.ServiceId.ValueString(),
+	var config servicePrincipalModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
+	if resp.Diagnostics.HasError() {
+		return
 	}
-	if v := plan.Organization.ValueString(); v != "" {
-		p.Organization = v
+
+	p := purview.NewServicePrincipalParams{}
+	if !config.AppId.IsNull() {
+		p.AppId = plan.AppId.ValueString()
+	}
+	if !config.DisplayName.IsNull() {
+		p.DisplayName = plan.DisplayName.ValueString()
+	}
+	if !config.ObjectId.IsNull() {
+		p.ObjectId = plan.ObjectId.ValueString()
+	}
+	if v := config.Organization.ValueString(); v != "" {
+		p.Organization = objectParam(v)
+	}
+	if !config.ServiceId.IsNull() {
+		p.ServiceId = plan.ServiceId.ValueString()
 	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	res, err := r.client.SCC.NewServicePrincipal(ctx, p)
+	res, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.NewServicePrincipal, p, isNotFound)
 	if err != nil {
 		resp.Diagnostics.AddError("New-ServicePrincipal failed", err.Error())
 		return
@@ -133,11 +146,13 @@ func (r *servicePrincipalResource) Update(ctx context.Context, req resource.Upda
 	id := r.identityOf(state)
 	sp := purview.SetServicePrincipalParams{}
 	sp.Identity = id
-	sp.DisplayName = plan.DisplayName.ValueString()
+	if !plan.DisplayName.Equal(state.DisplayName) {
+		sp.DisplayName = plan.DisplayName.ValueString()
+	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	if _, err := r.client.SCC.SetServicePrincipal(ctx, sp); err != nil {
+	if _, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.SetServicePrincipal, sp, isNotFound); err != nil {
 		resp.Diagnostics.AddError("Set-ServicePrincipal failed", err.Error())
 		return
 	}
@@ -146,6 +161,9 @@ func (r *servicePrincipalResource) Update(ctx context.Context, req resource.Upda
 		"DisplayName": cfg.DisplayName,
 	}, getString)
 	r.refresh(ctx, id, &plan, &resp.Diagnostics, reflected)
+	if !cfg.ID.IsUnknown() && !cfg.ID.IsNull() {
+		plan.ID = cfg.ID
+	}
 	r.reconcileState(&cfg, &plan)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
@@ -208,7 +226,7 @@ func readServicePrincipal(ctx context.Context, obj map[string]any, m *servicePri
 	m.AppId = types.StringValue(getString(obj, "AppId"))
 	m.DisplayName = types.StringValue(getString(obj, "DisplayName"))
 	m.ObjectId = types.StringValue(getString(obj, "ObjectId"))
-	m.Organization = types.StringValue(getString(obj, "Organization"))
+	m.Organization = types.StringValue(getObjectJSON(obj, "Organization"))
 	m.ServiceId = types.StringValue(getString(obj, "ServiceId"))
 	_ = ctx
 }

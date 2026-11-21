@@ -17,6 +17,7 @@ Manages the DlpSensitiveInformationTypeConfig configuration via Set-DlpSensitive
 
 ### Optional
 
+- `fingerprint_threshold` (Number) Maps to the -FingerprintThreshold parameter.
 - `reg_ex_grammar_limit` (Boolean) Maps to the -RegExGrammarLimit parameter.
 
 ### Read-Only

@@ -49,7 +49,7 @@ func (r *filePlanPropertyDepartmentResource) Schema(_ context.Context, _ resourc
 		Description: "Manages the FilePlanPropertyDepartment object via New-FilePlanPropertyDepartment / Get-FilePlanPropertyDepartment / Set-FilePlanPropertyDepartment / Remove-FilePlanPropertyDepartment.",
 		Attributes: map[string]schema.Attribute{
 			"id":           schema.StringAttribute{Computed: true, Description: "Object identifier (GUID).", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"identity":     schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets."},
+			"identity":     schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"display_name": schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -DisplayName parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"name":         schema.StringAttribute{Required: true, Description: "Maps to the -Name parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
 		},
@@ -70,13 +70,20 @@ func (r *filePlanPropertyDepartmentResource) Create(ctx context.Context, req res
 		return
 	}
 
-	p := purview.NewFilePlanPropertyDepartmentParams{
-		Name: plan.Name.ValueString(),
+	var config filePlanPropertyDepartmentModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	p := purview.NewFilePlanPropertyDepartmentParams{}
+	if !config.Name.IsNull() {
+		p.Name = plan.Name.ValueString()
 	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	res, err := r.client.SCC.NewFilePlanPropertyDepartment(ctx, p)
+	res, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.NewFilePlanPropertyDepartment, p, isNotFound)
 	if err != nil {
 		resp.Diagnostics.AddError("New-FilePlanPropertyDepartment failed", err.Error())
 		return
@@ -123,11 +130,13 @@ func (r *filePlanPropertyDepartmentResource) Update(ctx context.Context, req res
 	id := r.identityOf(state)
 	sp := purview.SetFilePlanPropertyDepartmentParams{}
 	sp.Identity = id
-	sp.DisplayName = plan.DisplayName.ValueString()
+	if !plan.DisplayName.Equal(state.DisplayName) {
+		sp.DisplayName = plan.DisplayName.ValueString()
+	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	if _, err := r.client.SCC.SetFilePlanPropertyDepartment(ctx, sp); err != nil {
+	if _, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.SetFilePlanPropertyDepartment, sp, isNotFound); err != nil {
 		resp.Diagnostics.AddError("Set-FilePlanPropertyDepartment failed", err.Error())
 		return
 	}
@@ -136,6 +145,9 @@ func (r *filePlanPropertyDepartmentResource) Update(ctx context.Context, req res
 		"DisplayName": cfg.DisplayName,
 	}, getString)
 	r.refresh(ctx, id, &plan, &resp.Diagnostics, reflected)
+	if !cfg.ID.IsUnknown() && !cfg.ID.IsNull() {
+		plan.ID = cfg.ID
+	}
 	r.reconcileState(&cfg, &plan)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }

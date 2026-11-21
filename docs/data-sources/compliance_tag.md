@@ -25,14 +25,14 @@ Look up an existing ComplianceTag object. Set identity or name to select it.
 - `archive_enabled` (Boolean) Maps to the -ArchiveEnabled parameter.
 - `archive_trigger_based_on` (String) Maps to the -ArchiveTriggerBasedOn parameter.
 - `archive_trigger_in_days` (String) Maps to the -ArchiveTriggerInDays parameter.
-- `auto_approval_period` (String) Maps to the -AutoApprovalPeriod parameter.
+- `auto_approval_period` (Number) Maps to the -AutoApprovalPeriod parameter.
 - `comment` (String) Maps to the -Comment parameter.
 - `compliance_tag_for_next_stage` (String) Maps to the -ComplianceTagForNextStage parameter.
 - `event_type` (String) Maps to the -EventType parameter.
 - `file_plan_property` (String) Maps to the -FilePlanProperty parameter.
 - `flow_id` (String) Maps to the -FlowId parameter.
 - `id` (String) Object identifier (GUID).
-- `is_record_label` (String) Maps to the -IsRecordLabel parameter.
+- `is_record_label` (Boolean) Maps to the -IsRecordLabel parameter.
 - `is_record_unlocked_as_default` (Boolean) Maps to the -IsRecordUnlockedAsDefault parameter.
 - `multi_stage_review_property` (String) Maps to the -MultiStageReviewProperty parameter.
 - `notes` (String) Maps to the -Notes parameter.

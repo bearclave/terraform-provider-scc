@@ -31,6 +31,6 @@ Read-Only:
 - `moderation_allowed` (Boolean) Maps to the -ModerationAllowed parameter.
 - `name` (String) Maps to the -Name parameter.
 - `segment_allowed_filter` (String) Maps to the -SegmentAllowedFilter parameter.
-- `segments_allowed` (String) Maps to the -SegmentsAllowed parameter.
-- `segments_blocked` (String) Maps to the -SegmentsBlocked parameter.
+- `segments_allowed` (Set of String) Maps to the -SegmentsAllowed parameter.
+- `segments_blocked` (Set of String) Maps to the -SegmentsBlocked parameter.
 - `state` (String) Maps to the -State parameter.

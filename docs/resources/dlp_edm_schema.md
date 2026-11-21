@@ -17,7 +17,7 @@ Manages the DlpEdmSchema object via New-DlpEdmSchema / Get-DlpEdmSchema / Set-Dl
 
 ### Required
 
-- `file_data` (Set of String) Maps to the -FileData parameter.
+- `file_data` (String) Maps to the -FileData parameter.
 
 ### Read-Only
 

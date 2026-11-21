@@ -1,0 +1,23 @@
+{
+  "mcpServers": {
+    "terraform": {
+      "type": "stdio",
+      "command": "docker",
+      "args": ["run", "-i", "--rm", "hashicorp/terraform-mcp-server:1.4.1", "--toolsets=registry"]
+    },
+    "microsoft-learn": {
+      "type": "http",
+      "url": "https://learn.microsoft.com/api/mcp"
+    },
+    "azure": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@azure/mcp@3.0.0", "server", "start", "--read-only"],
+      "env": {
+        "AZURE_TOKEN_CREDENTIALS": "AzureCliCredential",
+        "AZURE_CONFIG_DIR": "${AZURE_CONFIG_DIR:-/nonexistent/set-AZURE_CONFIG_DIR}",
+        "AZURE_MCP_COLLECT_TELEMETRY": "false"
+      }
+    }
+  }
+}

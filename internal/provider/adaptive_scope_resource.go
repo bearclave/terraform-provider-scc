@@ -55,15 +55,15 @@ func (r *adaptiveScopeResource) Schema(_ context.Context, _ resource.SchemaReque
 		Description: "Manages the AdaptiveScope object via New-AdaptiveScope / Get-AdaptiveScope / Set-AdaptiveScope / Remove-AdaptiveScope.",
 		Attributes: map[string]schema.Attribute{
 			"id":                              schema.StringAttribute{Computed: true, Description: "Object identifier (GUID).", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"identity":                        schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets."},
+			"identity":                        schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"administrative_unit":             schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AdministrativeUnit parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"comment":                         schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -Comment parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"enabled_states":                  schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -EnabledStates parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
-			"filter_conditions":               schema.StringAttribute{Required: true, Description: "Maps to the -FilterConditions parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
+			"filter_conditions":               schema.StringAttribute{Required: true, Description: "Maps to the -FilterConditions parameter."},
 			"linked_recipient_enabled_states": schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -LinkedRecipientEnabledStates parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
 			"location_type":                   schema.StringAttribute{Required: true, Description: "Maps to the -LocationType parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
 			"name":                            schema.StringAttribute{Required: true, Description: "Maps to the -Name parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
-			"raw_query":                       schema.StringAttribute{Required: true, Description: "Maps to the -RawQuery parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
+			"raw_query":                       schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -RawQuery parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"use_kql":                         schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -UseKql parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace(), stringplanmodifier.UseStateForUnknown()}},
 		},
 	}
@@ -83,29 +83,48 @@ func (r *adaptiveScopeResource) Create(ctx context.Context, req resource.CreateR
 		return
 	}
 
-	p := purview.NewAdaptiveScopeParams{
-		Comment:                      plan.Comment.ValueString(),
-		EnabledStates:                toStringSlice(ctx, plan.EnabledStates, &resp.Diagnostics),
-		LinkedRecipientEnabledStates: toStringSlice(ctx, plan.LinkedRecipientEnabledStates, &resp.Diagnostics),
-		Name:                         plan.Name.ValueString(),
-		RawQuery:                     plan.RawQuery.ValueString(),
+	var config adaptiveScopeModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
+	if resp.Diagnostics.HasError() {
+		return
 	}
-	if v := plan.AdministrativeUnit.ValueString(); v != "" {
-		p.AdministrativeUnit = v
+
+	p := purview.NewAdaptiveScopeParams{}
+	if !config.AdministrativeUnit.IsNull() {
+		p.AdministrativeUnit = plan.AdministrativeUnit.ValueString()
 	}
-	if v := plan.FilterConditions.ValueString(); v != "" {
-		p.FilterConditions = v
+	if !config.Comment.IsNull() {
+		p.Comment = plan.Comment.ValueString()
 	}
-	if v := plan.LocationType.ValueString(); v != "" {
-		p.LocationType = v
+	if !config.EnabledStates.IsNull() {
+		if v := toStringSlice(ctx, plan.EnabledStates, &resp.Diagnostics); len(v) > 0 {
+			p.EnabledStates = v
+		}
 	}
-	if v := plan.UseKql.ValueString(); v != "" {
-		p.UseKql = v
+	if v := config.FilterConditions.ValueString(); v != "" {
+		p.FilterConditions = objectParam(v)
+	}
+	if !config.LinkedRecipientEnabledStates.IsNull() {
+		if v := toStringSlice(ctx, plan.LinkedRecipientEnabledStates, &resp.Diagnostics); len(v) > 0 {
+			p.LinkedRecipientEnabledStates = v
+		}
+	}
+	if v := config.LocationType.ValueString(); v != "" {
+		p.LocationType = objectParam(v)
+	}
+	if !config.Name.IsNull() {
+		p.Name = plan.Name.ValueString()
+	}
+	if !config.RawQuery.IsNull() {
+		p.RawQuery = plan.RawQuery.ValueString()
+	}
+	if v := config.UseKql.ValueString(); v != "" {
+		p.UseKql = objectParam(v)
 	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	res, err := r.client.SCC.NewAdaptiveScope(ctx, p)
+	res, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.NewAdaptiveScope, p, isNotFound)
 	if err != nil {
 		resp.Diagnostics.AddError("New-AdaptiveScope failed", err.Error())
 		return
@@ -152,16 +171,34 @@ func (r *adaptiveScopeResource) Update(ctx context.Context, req resource.UpdateR
 	id := r.identityOf(state)
 	sp := purview.SetAdaptiveScopeParams{}
 	sp.Identity = id
-	if v := plan.AdministrativeUnit.ValueString(); v != "" {
-		sp.AdministrativeUnit = v
+	if !plan.AdministrativeUnit.Equal(state.AdministrativeUnit) {
+		sp.AdministrativeUnit = plan.AdministrativeUnit.ValueString()
 	}
-	sp.Comment = plan.Comment.ValueString()
-	sp.EnabledStates = toStringSlice(ctx, plan.EnabledStates, &resp.Diagnostics)
-	sp.LinkedRecipientEnabledStates = toStringSlice(ctx, plan.LinkedRecipientEnabledStates, &resp.Diagnostics)
+	if !plan.Comment.Equal(state.Comment) {
+		sp.Comment = plan.Comment.ValueString()
+	}
+	if !plan.EnabledStates.Equal(state.EnabledStates) {
+		if !plan.EnabledStates.IsNull() && !plan.EnabledStates.IsUnknown() {
+			sp.EnabledStates = append([]string{}, toStringSlice(ctx, plan.EnabledStates, &resp.Diagnostics)...)
+		}
+	}
+	if !plan.FilterConditions.Equal(state.FilterConditions) {
+		if v := plan.FilterConditions.ValueString(); v != "" {
+			sp.FilterConditions = objectParam(v)
+		}
+	}
+	if !plan.LinkedRecipientEnabledStates.Equal(state.LinkedRecipientEnabledStates) {
+		if !plan.LinkedRecipientEnabledStates.IsNull() && !plan.LinkedRecipientEnabledStates.IsUnknown() {
+			sp.LinkedRecipientEnabledStates = append([]string{}, toStringSlice(ctx, plan.LinkedRecipientEnabledStates, &resp.Diagnostics)...)
+		}
+	}
+	if !plan.RawQuery.Equal(state.RawQuery) {
+		sp.RawQuery = plan.RawQuery.ValueString()
+	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	if _, err := r.client.SCC.SetAdaptiveScope(ctx, sp); err != nil {
+	if _, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.SetAdaptiveScope, sp, isNotFound); err != nil {
 		resp.Diagnostics.AddError("Set-AdaptiveScope failed", err.Error())
 		return
 	}
@@ -169,8 +206,12 @@ func (r *adaptiveScopeResource) Update(ctx context.Context, req resource.UpdateR
 	reflected := reconcile.ReflectsFields(map[string]types.String{
 		"AdministrativeUnit": cfg.AdministrativeUnit,
 		"Comment":            cfg.Comment,
+		"RawQuery":           cfg.RawQuery,
 	}, getString)
 	r.refresh(ctx, id, &plan, &resp.Diagnostics, reflected)
+	if !cfg.ID.IsUnknown() && !cfg.ID.IsNull() {
+		plan.ID = cfg.ID
+	}
 	r.reconcileState(&cfg, &plan)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
@@ -233,12 +274,12 @@ func readAdaptiveScope(ctx context.Context, obj map[string]any, m *adaptiveScope
 	m.AdministrativeUnit = types.StringValue(getString(obj, "AdministrativeUnit"))
 	m.Comment = types.StringValue(getString(obj, "Comment"))
 	m.EnabledStates = stringSetValue(ctx, getStringSlice(obj, "EnabledStates"))
-	m.FilterConditions = types.StringValue(getString(obj, "FilterConditions"))
+	m.FilterConditions = types.StringValue(getObjectJSON(obj, "FilterConditions"))
 	m.LinkedRecipientEnabledStates = stringSetValue(ctx, getStringSlice(obj, "LinkedRecipientEnabledStates"))
-	m.LocationType = types.StringValue(getString(obj, "LocationType"))
+	m.LocationType = types.StringValue(getObjectJSON(obj, "LocationType"))
 	m.Name = types.StringValue(getString(obj, "Name"))
 	m.RawQuery = types.StringValue(getString(obj, "RawQuery"))
-	m.UseKql = types.StringValue(getString(obj, "UseKql"))
+	m.UseKql = types.StringValue(getObjectJSON(obj, "UseKql"))
 	_ = ctx
 }
 

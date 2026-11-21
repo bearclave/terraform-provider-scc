@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "attribution": {
+    "commit": "",
+    "pr": ""
+  },
+  "permissions": {
+    "deny": [
+      "Bash(git push --force*)",
+      "Bash(git push -f*)",
+      "Bash(git push * --force*)",
+      "Bash(git push * -f*)",
+      "Bash(git push origin +*)",
+      "Bash(git push origin main*)",
+      "Bash(git push origin HEAD:main*)",
+      "Bash(git push origin staging*)",
+      "Bash(git push origin HEAD:staging*)",
+      "Bash(git push origin prod*)",
+      "Bash(git push origin HEAD:prod*)",
+      "Bash(terraform apply*)",
+      "Bash(terraform destroy*)",
+      "Bash(terragrunt apply*)",
+      "Bash(terragrunt destroy*)",
+      "Bash(terragrunt run*apply*)",
+      "Bash(terragrunt run*destroy*)",
+      "Bash(git push --delete*)",
+      "Bash(git push * --delete*)",
+      "Bash(git push -d *)",
+      "Bash(git push * -d *)",
+      "Bash(git push origin :*)",
+      "Bash(git push * :refs/*)",
+      "Bash(git push --tags*)",
+      "Bash(git push * --tags*)",
+      "Bash(git push origin v*)",
+      "Bash(git push origin refs/tags/*)",
+      "Bash(git tag *)",
+      "Bash(gh release create*)",
+      "Bash(gh release edit*)",
+      "Bash(gh release delete*)",
+      "Bash(gh pr review --approve*)",
+      "Bash(gh pr review * --approve*)",
+      "Bash(gh pr review -a*)",
+      "Bash(gh pr review * -a*)",
+      "Bash(gh pr merge --admin*)",
+      "Bash(gh pr merge * --admin*)",
+      "Bash(bot-gh pr review*)",
+      "Bash(bot-gh pr merge --admin*)",
+      "Bash(bot-gh pr merge * --admin*)",
+      "Bash(bot-gh release*)"
+    ]
+  }
+}

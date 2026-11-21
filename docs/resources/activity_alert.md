@@ -17,11 +17,9 @@ Manages the ActivityAlert object via New-ActivityAlert / Get-ActivityAlert / Set
 
 ### Required
 
-- `multiplier` (String) Maps to the -Multiplier parameter.
 - `name` (String) Maps to the -Name parameter.
 - `notify_user` (String) Maps to the -NotifyUser parameter.
 - `operation` (String) Maps to the -Operation parameter.
-- `type` (String) Maps to the -Type parameter.
 
 ### Optional
 
@@ -30,9 +28,13 @@ Manages the ActivityAlert object via New-ActivityAlert / Get-ActivityAlert / Set
 - `description` (String) Maps to the -Description parameter.
 - `disabled` (Boolean) Maps to the -Disabled parameter.
 - `email_culture` (String) Maps to the -EmailCulture parameter.
+- `multiplier` (String) Maps to the -Multiplier parameter.
 - `record_type` (String) Maps to the -RecordType parameter.
 - `scope_level` (String) Maps to the -ScopeLevel parameter.
 - `severity` (String) Maps to the -Severity parameter.
+- `threshold` (Number) Maps to the -Threshold parameter.
+- `time_window` (Number) Maps to the -TimeWindow parameter.
+- `type` (String) Maps to the -Type parameter.
 - `user_id` (String) Maps to the -UserId parameter.
 
 ### Read-Only

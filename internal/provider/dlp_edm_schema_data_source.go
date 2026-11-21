@@ -7,7 +7,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/terraprovider/go-exoscc/purview"
 	"github.com/terraprovider/go-msadmin/consistency"
@@ -35,7 +34,7 @@ func (d *dlpEdmSchemaDataSource) Schema(_ context.Context, _ datasource.SchemaRe
 		Attributes: map[string]schema.Attribute{
 			"id":        schema.StringAttribute{Computed: true, Description: "Object identifier (GUID)."},
 			"identity":  schema.StringAttribute{Optional: true, Computed: true, Description: "Identity used to look up the object."},
-			"file_data": schema.SetAttribute{ElementType: types.StringType, Computed: true, Description: "Maps to the -FileData parameter."},
+			"file_data": schema.StringAttribute{Computed: true, Description: "Maps to the -FileData parameter."},
 		},
 	}
 }

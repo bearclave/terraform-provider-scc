@@ -1,0 +1,37 @@
+# Managed by bearclave/governance (tools/sync.py) - do not edit here.
+name: Security
+description: A weakness or hardening finding in the code or in a tenant it manages.
+type: Security
+assignees:
+  - matej-hrabalek
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Repositories are private, but write no secret, token or exploit detail that would help an attacker. Rotate anything exposed first.
+  - type: textarea
+    id: finding
+    attributes:
+      label: Finding
+      description: What is weak, where (resource, setting, file).
+    validations:
+      required: true
+  - type: dropdown
+    id: exposure
+    attributes:
+      label: Exposure
+      options:
+        - Exposed now (label prio:high)
+        - Exploitable only with other access
+        - Hardening, no direct exposure
+    validations:
+      required: true
+  - type: textarea
+    id: fix
+    attributes:
+      label: Proposed fix
+  - type: textarea
+    id: references
+    attributes:
+      label: References
+      description: Benchmark control, advisory, trivy or Defender finding ID.

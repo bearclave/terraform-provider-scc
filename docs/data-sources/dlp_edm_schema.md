@@ -21,5 +21,5 @@ Look up an existing DlpEdmSchema object. Set identity to select it.
 
 ### Read-Only
 
-- `file_data` (Set of String) Maps to the -FileData parameter.
+- `file_data` (String) Maps to the -FileData parameter.
 - `id` (String) Object identifier (GUID).

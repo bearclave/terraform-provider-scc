@@ -10,7 +10,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
@@ -53,10 +52,10 @@ func (r *protectionComplianceRuleResource) Schema(_ context.Context, _ resource.
 		Description: "Manages the ProtectionComplianceRule object via New-ProtectionComplianceRule / Get-ProtectionComplianceRule / Set-ProtectionComplianceRule / Remove-ProtectionComplianceRule.",
 		Attributes: map[string]schema.Attribute{
 			"id":              schema.StringAttribute{Computed: true, Description: "Object identifier (GUID).", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"identity":        schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets."},
+			"identity":        schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"advanced_rule":   schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AdvancedRule parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"contains_labels": schema.StringAttribute{Required: true, Description: "Maps to the -ContainsLabels parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
-			"label_actions":   schema.SetAttribute{ElementType: types.StringType, Required: true, Description: "Maps to the -LabelActions parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.RequiresReplace()}},
+			"contains_labels": schema.StringAttribute{Required: true, Description: "Maps to the -ContainsLabels parameter."},
+			"label_actions":   schema.SetAttribute{ElementType: types.StringType, Required: true, Description: "Maps to the -LabelActions parameter."},
 			"name":            schema.StringAttribute{Required: true, Description: "Maps to the -Name parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
 			"policy":          schema.StringAttribute{Required: true, Description: "Maps to the -Policy parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
 		},
@@ -77,21 +76,34 @@ func (r *protectionComplianceRuleResource) Create(ctx context.Context, req resou
 		return
 	}
 
-	p := purview.NewProtectionComplianceRuleParams{
-		AdvancedRule: plan.AdvancedRule.ValueString(),
-		LabelActions: toStringSlice(ctx, plan.LabelActions, &resp.Diagnostics),
-		Name:         plan.Name.ValueString(),
+	var config protectionComplianceRuleModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
+	if resp.Diagnostics.HasError() {
+		return
 	}
-	if v := plan.ContainsLabels.ValueString(); v != "" {
-		p.ContainsLabels = v
+
+	p := purview.NewProtectionComplianceRuleParams{}
+	if !config.AdvancedRule.IsNull() {
+		p.AdvancedRule = plan.AdvancedRule.ValueString()
 	}
-	if v := plan.Policy.ValueString(); v != "" {
-		p.Policy = v
+	if v := config.ContainsLabels.ValueString(); v != "" {
+		p.ContainsLabels = objectParam(v)
+	}
+	if !config.LabelActions.IsNull() {
+		if v := toStringSlice(ctx, plan.LabelActions, &resp.Diagnostics); len(v) > 0 {
+			p.LabelActions = v
+		}
+	}
+	if !config.Name.IsNull() {
+		p.Name = plan.Name.ValueString()
+	}
+	if v := config.Policy.ValueString(); v != "" {
+		p.Policy = objectParam(v)
 	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	res, err := r.client.SCC.NewProtectionComplianceRule(ctx, p)
+	res, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.NewProtectionComplianceRule, p, isNotFound)
 	if err != nil {
 		resp.Diagnostics.AddError("New-ProtectionComplianceRule failed", err.Error())
 		return
@@ -138,11 +150,23 @@ func (r *protectionComplianceRuleResource) Update(ctx context.Context, req resou
 	id := r.identityOf(state)
 	sp := purview.SetProtectionComplianceRuleParams{}
 	sp.Identity = id
-	sp.AdvancedRule = plan.AdvancedRule.ValueString()
+	if !plan.AdvancedRule.Equal(state.AdvancedRule) {
+		sp.AdvancedRule = plan.AdvancedRule.ValueString()
+	}
+	if !plan.ContainsLabels.Equal(state.ContainsLabels) {
+		if v := plan.ContainsLabels.ValueString(); v != "" {
+			sp.ContainsLabels = objectParam(v)
+		}
+	}
+	if !plan.LabelActions.Equal(state.LabelActions) {
+		if !plan.LabelActions.IsNull() && !plan.LabelActions.IsUnknown() {
+			sp.LabelActions = append([]string{}, toStringSlice(ctx, plan.LabelActions, &resp.Diagnostics)...)
+		}
+	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	if _, err := r.client.SCC.SetProtectionComplianceRule(ctx, sp); err != nil {
+	if _, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.SetProtectionComplianceRule, sp, isNotFound); err != nil {
 		resp.Diagnostics.AddError("Set-ProtectionComplianceRule failed", err.Error())
 		return
 	}
@@ -151,6 +175,9 @@ func (r *protectionComplianceRuleResource) Update(ctx context.Context, req resou
 		"AdvancedRule": cfg.AdvancedRule,
 	}, getString)
 	r.refresh(ctx, id, &plan, &resp.Diagnostics, reflected)
+	if !cfg.ID.IsUnknown() && !cfg.ID.IsNull() {
+		plan.ID = cfg.ID
+	}
 	r.reconcileState(&cfg, &plan)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
@@ -211,10 +238,10 @@ func readProtectionComplianceRule(ctx context.Context, obj map[string]any, m *pr
 	m.ID = types.StringValue(firstNonEmptyStr(getString(obj, "Guid"), getString(obj, "Id"), getString(obj, "Identity")))
 	m.Identity = types.StringValue(firstNonEmptyStr(getString(obj, "Identity"), getString(obj, "Guid"), getString(obj, "Name")))
 	m.AdvancedRule = types.StringValue(getString(obj, "AdvancedRule"))
-	m.ContainsLabels = types.StringValue(getString(obj, "ContainsLabels"))
+	m.ContainsLabels = types.StringValue(getObjectJSON(obj, "ContainsLabels"))
 	m.LabelActions = stringSetValue(ctx, getStringSlice(obj, "LabelActions"))
 	m.Name = types.StringValue(getString(obj, "Name"))
-	m.Policy = types.StringValue(getString(obj, "Policy"))
+	m.Policy = types.StringValue(getObjectJSON(obj, "Policy"))
 	_ = ctx
 }
 

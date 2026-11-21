@@ -7,6 +7,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/terraprovider/go-exoscc/purview"
 	"github.com/terraprovider/go-msadmin/consistency"
@@ -34,7 +35,7 @@ func (d *auditConfigDataSource) Schema(_ context.Context, _ datasource.SchemaReq
 		Attributes: map[string]schema.Attribute{
 			"id":       schema.StringAttribute{Computed: true, Description: "Object identifier (GUID)."},
 			"identity": schema.StringAttribute{Optional: true, Computed: true, Description: "Identity used to look up the object."},
-			"workload": schema.StringAttribute{Computed: true, Description: "Maps to the -Workload parameter."},
+			"workload": schema.SetAttribute{ElementType: types.StringType, Computed: true, Description: "Maps to the -Workload parameter."},
 		},
 	}
 }
@@ -53,10 +54,6 @@ func (d *auditConfigDataSource) Read(ctx context.Context, req datasource.ReadReq
 		return
 	}
 	identity := firstNonEmptyStr(data.Identity.ValueString(), data.ID.ValueString())
-	if identity == "" {
-		resp.Diagnostics.AddError("Missing lookup key", "set identity to select the object")
-		return
-	}
 	get := func(ctx context.Context) (map[string]any, bool, error) {
 		_ = identity
 		res, gerr := d.client.SCC.GetAuditConfig(ctx, purview.GetAuditConfigParams{})

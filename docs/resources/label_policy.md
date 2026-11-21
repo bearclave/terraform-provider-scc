@@ -3,12 +3,12 @@
 page_title: "scc_label_policy Resource - scc"
 subcategory: ""
 description: |-
-  Manages the LabelPolicy object via New-LabelPolicy / Get-LabelPolicy / Set-LabelPolicy / Remove-LabelPolicy.
+  Manages the LabelPolicy object via New-LabelPolicy / Get-LabelPolicy / Set-LabelPolicy / Remove-LabelPolicy. List attributes that only New-LabelPolicy takes (exchange_location, exchange_location_exception, labels, modern_group_location, modern_group_location_exception, one_drive_location, one_drive_location_exception, public_folder_location, share_point_location, share_point_location_exception, skype_location, skype_location_exception) are updated in place through Set-LabelPolicy -Add/-Remove. next_label_policy, previous_label_policy can only be set by Set-LabelPolicy; on create they are applied right after New-LabelPolicy. A refresh keeps the configured value when the service returns an equivalent one: JSON values compare by content, ignoring formatting, key order and (except advanced_rule) keys the service adds; lists and enumerations case-insensitively, locations by any of their identities.
 ---
 
 # scc_label_policy (Resource)
 
-Manages the LabelPolicy object via New-LabelPolicy / Get-LabelPolicy / Set-LabelPolicy / Remove-LabelPolicy.
+Manages the LabelPolicy object via New-LabelPolicy / Get-LabelPolicy / Set-LabelPolicy / Remove-LabelPolicy. List attributes that only New-LabelPolicy takes (exchange_location, exchange_location_exception, labels, modern_group_location, modern_group_location_exception, one_drive_location, one_drive_location_exception, public_folder_location, share_point_location, share_point_location_exception, skype_location, skype_location_exception) are updated in place through Set-LabelPolicy -Add<X>/-Remove<X>. next_label_policy, previous_label_policy can only be set by Set-LabelPolicy; on create they are applied right after New-LabelPolicy. A refresh keeps the configured value when the service returns an equivalent one: JSON values compare by content, ignoring formatting, key order and (except advanced_rule) keys the service adds; lists and enumerations case-insensitively, locations by any of their identities.
 
 
 
@@ -17,58 +17,33 @@ Manages the LabelPolicy object via New-LabelPolicy / Get-LabelPolicy / Set-Label
 
 ### Required
 
-- `labels` (String) Maps to the -Labels parameter.
+- `labels` (Set of String) Maps to the -Labels parameter.
 - `name` (String) Maps to the -Name parameter.
 
 ### Optional
 
-- `add_exchange_location` (String) Maps to the -AddExchangeLocation parameter.
-- `add_exchange_location_exception` (String) Maps to the -AddExchangeLocationException parameter.
-- `add_labels` (String) Maps to the -AddLabels parameter.
-- `add_modern_group_location` (String) Maps to the -AddModernGroupLocation parameter.
-- `add_modern_group_location_exception` (String) Maps to the -AddModernGroupLocationException parameter.
-- `add_one_drive_location` (String) Maps to the -AddOneDriveLocation parameter.
-- `add_one_drive_location_exception` (String) Maps to the -AddOneDriveLocationException parameter.
-- `add_public_folder_location` (String) Maps to the -AddPublicFolderLocation parameter.
-- `add_share_point_location` (String) Maps to the -AddSharePointLocation parameter.
-- `add_share_point_location_exception` (String) Maps to the -AddSharePointLocationException parameter.
-- `add_skype_location` (String) Maps to the -AddSkypeLocation parameter.
-- `add_skype_location_exception` (String) Maps to the -AddSkypeLocationException parameter.
 - `advanced_settings` (String) Maps to the -AdvancedSettings parameter.
 - `comment` (String) Maps to the -Comment parameter.
-- `exchange_adaptive_scopes` (String) Maps to the -ExchangeAdaptiveScopes parameter.
-- `exchange_adaptive_scopes_exception` (String) Maps to the -ExchangeAdaptiveScopesException parameter.
-- `exchange_location` (String) Maps to the -ExchangeLocation parameter.
-- `exchange_location_exception` (String) Maps to the -ExchangeLocationException parameter.
+- `exchange_adaptive_scopes` (Set of String) Maps to the -ExchangeAdaptiveScopes parameter.
+- `exchange_adaptive_scopes_exception` (Set of String) Maps to the -ExchangeAdaptiveScopesException parameter.
+- `exchange_location` (Set of String) Maps to the -ExchangeLocation parameter.
+- `exchange_location_exception` (Set of String) Maps to the -ExchangeLocationException parameter.
 - `locations` (String) Maps to the -Locations parameter.
 - `migration_id` (String) Maps to the -MigrationId parameter.
-- `modern_group_location` (String) Maps to the -ModernGroupLocation parameter.
-- `modern_group_location_exception` (String) Maps to the -ModernGroupLocationException parameter.
+- `modern_group_location` (Set of String) Maps to the -ModernGroupLocation parameter.
+- `modern_group_location_exception` (Set of String) Maps to the -ModernGroupLocationException parameter.
 - `next_label_policy` (String) Maps to the -NextLabelPolicy parameter.
-- `one_drive_location` (String) Maps to the -OneDriveLocation parameter.
-- `one_drive_location_exception` (String) Maps to the -OneDriveLocationException parameter.
-- `policy_rbac_scopes` (String) Maps to the -PolicyRBACScopes parameter.
+- `one_drive_location` (Set of String) Maps to the -OneDriveLocation parameter.
+- `one_drive_location_exception` (Set of String) Maps to the -OneDriveLocationException parameter.
+- `policy_rbac_scopes` (Set of String) Maps to the -PolicyRBACScopes parameter.
 - `previous_label_policy` (String) Maps to the -PreviousLabelPolicy parameter.
-- `public_folder_location` (String) Maps to the -PublicFolderLocation parameter.
-- `remove_exchange_location` (String) Maps to the -RemoveExchangeLocation parameter.
-- `remove_exchange_location_exception` (String) Maps to the -RemoveExchangeLocationException parameter.
-- `remove_labels` (String) Maps to the -RemoveLabels parameter.
-- `remove_modern_group_location` (String) Maps to the -RemoveModernGroupLocation parameter.
-- `remove_modern_group_location_exception` (String) Maps to the -RemoveModernGroupLocationException parameter.
-- `remove_one_drive_location` (String) Maps to the -RemoveOneDriveLocation parameter.
-- `remove_one_drive_location_exception` (String) Maps to the -RemoveOneDriveLocationException parameter.
-- `remove_public_folder_location` (String) Maps to the -RemovePublicFolderLocation parameter.
-- `remove_share_point_location` (String) Maps to the -RemoveSharePointLocation parameter.
-- `remove_share_point_location_exception` (String) Maps to the -RemoveSharePointLocationException parameter.
-- `remove_skype_location` (String) Maps to the -RemoveSkypeLocation parameter.
-- `remove_skype_location_exception` (String) Maps to the -RemoveSkypeLocationException parameter.
-- `retry_distribution` (Boolean) Maps to the -RetryDistribution parameter.
+- `public_folder_location` (Set of String) Maps to the -PublicFolderLocation parameter.
 - `setting` (String) Maps to the -Setting parameter.
 - `settings` (String) Maps to the -Settings parameter.
-- `share_point_location` (String) Maps to the -SharePointLocation parameter.
-- `share_point_location_exception` (String) Maps to the -SharePointLocationException parameter.
-- `skype_location` (String) Maps to the -SkypeLocation parameter.
-- `skype_location_exception` (String) Maps to the -SkypeLocationException parameter.
+- `share_point_location` (Set of String) Maps to the -SharePointLocation parameter.
+- `share_point_location_exception` (Set of String) Maps to the -SharePointLocationException parameter.
+- `skype_location` (Set of String) Maps to the -SkypeLocation parameter.
+- `skype_location_exception` (Set of String) Maps to the -SkypeLocationException parameter.
 
 ### Read-Only
 

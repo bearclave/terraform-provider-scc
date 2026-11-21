@@ -84,7 +84,7 @@ func (r *complianceSearchResource) Schema(_ context.Context, _ resource.SchemaRe
 		Description: "Manages the ComplianceSearch object via New-ComplianceSearch / Get-ComplianceSearch / Set-ComplianceSearch / Remove-ComplianceSearch.",
 		Attributes: map[string]schema.Attribute{
 			"id":                                         schema.StringAttribute{Computed: true, Description: "Object identifier (GUID).", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"identity":                                   schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets."},
+			"identity":                                   schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"add_exchange_location":                      schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -AddExchangeLocation parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
 			"add_exchange_location_exclusion":            schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -AddExchangeLocationExclusion parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
 			"add_one_drive_location":                     schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -AddOneDriveLocation parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
@@ -140,37 +140,110 @@ func (r *complianceSearchResource) Create(ctx context.Context, req resource.Crea
 		return
 	}
 
-	p := purview.NewComplianceSearchParams{
-		AllowNotFoundExchangeLocationsEnabled: plan.AllowNotFoundExchangeLocationsEnabled.ValueBool(),
-		Case:                                  plan.Case.ValueString(),
-		ContentMatchQuery:                     plan.ContentMatchQuery.ValueString(),
-		Description:                           plan.Description.ValueString(),
-		ExchangeLocation:                      toStringSlice(ctx, plan.ExchangeLocation, &resp.Diagnostics),
-		ExchangeLocationExclusion:             toStringSlice(ctx, plan.ExchangeLocationExclusion, &resp.Diagnostics),
-		HoldNames:                             toStringSlice(ctx, plan.HoldNames, &resp.Diagnostics),
-		IncludeOrgContent:                     plan.IncludeOrgContent.ValueBool(),
-		IncludeUserAppContent:                 plan.IncludeUserAppContent.ValueBool(),
-		Name:                                  plan.Name.ValueString(),
-		OneDriveLocation:                      toStringSlice(ctx, plan.OneDriveLocation, &resp.Diagnostics),
-		OneDriveLocationExclusion:             toStringSlice(ctx, plan.OneDriveLocationExclusion, &resp.Diagnostics),
-		PublicFolderLocation:                  toStringSlice(ctx, plan.PublicFolderLocation, &resp.Diagnostics),
-		PublicFolderLocationExclusion:         toStringSlice(ctx, plan.PublicFolderLocationExclusion, &resp.Diagnostics),
-		RefinerNames:                          toStringSlice(ctx, plan.RefinerNames, &resp.Diagnostics),
-		SearchNames:                           toStringSlice(ctx, plan.SearchNames, &resp.Diagnostics),
-		SharePointLocation:                    toStringSlice(ctx, plan.SharePointLocation, &resp.Diagnostics),
-		SharePointLocationExclusion:           toStringSlice(ctx, plan.SharePointLocationExclusion, &resp.Diagnostics),
-		StatusMailRecipients:                  toStringSlice(ctx, plan.StatusMailRecipients, &resp.Diagnostics),
+	var config complianceSearchModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
+	if resp.Diagnostics.HasError() {
+		return
 	}
-	if v := plan.Language.ValueString(); v != "" {
-		p.Language = v
+
+	p := purview.NewComplianceSearchParams{}
+	if !config.AllowNotFoundExchangeLocationsEnabled.IsNull() {
+		if !plan.AllowNotFoundExchangeLocationsEnabled.IsUnknown() {
+			p.AllowNotFoundExchangeLocationsEnabled = plan.AllowNotFoundExchangeLocationsEnabled.ValueBoolPointer()
+		}
 	}
-	if v := plan.LogLevel.ValueString(); v != "" {
-		p.LogLevel = v
+	if !config.Case.IsNull() {
+		p.Case = plan.Case.ValueString()
+	}
+	if !config.ContentMatchQuery.IsNull() {
+		p.ContentMatchQuery = plan.ContentMatchQuery.ValueString()
+	}
+	if !config.Description.IsNull() {
+		p.Description = plan.Description.ValueString()
+	}
+	if !config.ExchangeLocation.IsNull() {
+		if v := toStringSlice(ctx, plan.ExchangeLocation, &resp.Diagnostics); len(v) > 0 {
+			p.ExchangeLocation = v
+		}
+	}
+	if !config.ExchangeLocationExclusion.IsNull() {
+		if v := toStringSlice(ctx, plan.ExchangeLocationExclusion, &resp.Diagnostics); len(v) > 0 {
+			p.ExchangeLocationExclusion = v
+		}
+	}
+	if !config.HoldNames.IsNull() {
+		if v := toStringSlice(ctx, plan.HoldNames, &resp.Diagnostics); len(v) > 0 {
+			p.HoldNames = v
+		}
+	}
+	if !config.IncludeOrgContent.IsNull() {
+		if !plan.IncludeOrgContent.IsUnknown() {
+			p.IncludeOrgContent = plan.IncludeOrgContent.ValueBoolPointer()
+		}
+	}
+	if !config.IncludeUserAppContent.IsNull() {
+		if !plan.IncludeUserAppContent.IsUnknown() {
+			p.IncludeUserAppContent = plan.IncludeUserAppContent.ValueBoolPointer()
+		}
+	}
+	if v := config.Language.ValueString(); v != "" {
+		p.Language = objectParam(v)
+	}
+	if v := config.LogLevel.ValueString(); v != "" {
+		p.LogLevel = objectParam(v)
+	}
+	if !config.Name.IsNull() {
+		p.Name = plan.Name.ValueString()
+	}
+	if !config.OneDriveLocation.IsNull() {
+		if v := toStringSlice(ctx, plan.OneDriveLocation, &resp.Diagnostics); len(v) > 0 {
+			p.OneDriveLocation = v
+		}
+	}
+	if !config.OneDriveLocationExclusion.IsNull() {
+		if v := toStringSlice(ctx, plan.OneDriveLocationExclusion, &resp.Diagnostics); len(v) > 0 {
+			p.OneDriveLocationExclusion = v
+		}
+	}
+	if !config.PublicFolderLocation.IsNull() {
+		if v := toStringSlice(ctx, plan.PublicFolderLocation, &resp.Diagnostics); len(v) > 0 {
+			p.PublicFolderLocation = v
+		}
+	}
+	if !config.PublicFolderLocationExclusion.IsNull() {
+		if v := toStringSlice(ctx, plan.PublicFolderLocationExclusion, &resp.Diagnostics); len(v) > 0 {
+			p.PublicFolderLocationExclusion = v
+		}
+	}
+	if !config.RefinerNames.IsNull() {
+		if v := toStringSlice(ctx, plan.RefinerNames, &resp.Diagnostics); len(v) > 0 {
+			p.RefinerNames = v
+		}
+	}
+	if !config.SearchNames.IsNull() {
+		if v := toStringSlice(ctx, plan.SearchNames, &resp.Diagnostics); len(v) > 0 {
+			p.SearchNames = v
+		}
+	}
+	if !config.SharePointLocation.IsNull() {
+		if v := toStringSlice(ctx, plan.SharePointLocation, &resp.Diagnostics); len(v) > 0 {
+			p.SharePointLocation = v
+		}
+	}
+	if !config.SharePointLocationExclusion.IsNull() {
+		if v := toStringSlice(ctx, plan.SharePointLocationExclusion, &resp.Diagnostics); len(v) > 0 {
+			p.SharePointLocationExclusion = v
+		}
+	}
+	if !config.StatusMailRecipients.IsNull() {
+		if v := toStringSlice(ctx, plan.StatusMailRecipients, &resp.Diagnostics); len(v) > 0 {
+			p.StatusMailRecipients = v
+		}
 	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	res, err := r.client.SCC.NewComplianceSearch(ctx, p)
+	res, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.NewComplianceSearch, p, isNotFound)
 	if err != nil {
 		resp.Diagnostics.AddError("New-ComplianceSearch failed", err.Error())
 		return
@@ -217,45 +290,171 @@ func (r *complianceSearchResource) Update(ctx context.Context, req resource.Upda
 	id := r.identityOf(state)
 	sp := purview.SetComplianceSearchParams{}
 	sp.Identity = id
-	sp.AddExchangeLocation = toStringSlice(ctx, plan.AddExchangeLocation, &resp.Diagnostics)
-	sp.AddExchangeLocationExclusion = toStringSlice(ctx, plan.AddExchangeLocationExclusion, &resp.Diagnostics)
-	sp.AddOneDriveLocation = toStringSlice(ctx, plan.AddOneDriveLocation, &resp.Diagnostics)
-	sp.AddOneDriveLocationExclusion = toStringSlice(ctx, plan.AddOneDriveLocationExclusion, &resp.Diagnostics)
-	sp.AddPublicFolderLocation = toStringSlice(ctx, plan.AddPublicFolderLocation, &resp.Diagnostics)
-	sp.AddPublicFolderLocationExclusion = toStringSlice(ctx, plan.AddPublicFolderLocationExclusion, &resp.Diagnostics)
-	sp.AddSharePointLocation = toStringSlice(ctx, plan.AddSharePointLocation, &resp.Diagnostics)
-	sp.AddSharePointLocationExclusion = toStringSlice(ctx, plan.AddSharePointLocationExclusion, &resp.Diagnostics)
-	sp.AllowNotFoundExchangeLocationsEnabled = plan.AllowNotFoundExchangeLocationsEnabled.ValueBool()
-	sp.ContentMatchQuery = plan.ContentMatchQuery.ValueString()
-	sp.Description = plan.Description.ValueString()
-	sp.ExchangeLocation = toStringSlice(ctx, plan.ExchangeLocation, &resp.Diagnostics)
-	sp.ExchangeLocationExclusion = toStringSlice(ctx, plan.ExchangeLocationExclusion, &resp.Diagnostics)
-	sp.HoldNames = toStringSlice(ctx, plan.HoldNames, &resp.Diagnostics)
-	sp.IncludeOrgContent = plan.IncludeOrgContent.ValueBool()
-	sp.IncludeUserAppContent = plan.IncludeUserAppContent.ValueBool()
-	if v := plan.Language.ValueString(); v != "" {
-		sp.Language = v
+	if !plan.AddExchangeLocation.Equal(state.AddExchangeLocation) {
+		if !plan.AddExchangeLocation.IsNull() && !plan.AddExchangeLocation.IsUnknown() {
+			sp.AddExchangeLocation = append([]string{}, toStringSlice(ctx, plan.AddExchangeLocation, &resp.Diagnostics)...)
+		}
 	}
-	sp.OneDriveLocation = toStringSlice(ctx, plan.OneDriveLocation, &resp.Diagnostics)
-	sp.OneDriveLocationExclusion = toStringSlice(ctx, plan.OneDriveLocationExclusion, &resp.Diagnostics)
-	sp.PublicFolderLocation = toStringSlice(ctx, plan.PublicFolderLocation, &resp.Diagnostics)
-	sp.PublicFolderLocationExclusion = toStringSlice(ctx, plan.PublicFolderLocationExclusion, &resp.Diagnostics)
-	sp.RefinerNames = toStringSlice(ctx, plan.RefinerNames, &resp.Diagnostics)
-	sp.RemoveExchangeLocation = toStringSlice(ctx, plan.RemoveExchangeLocation, &resp.Diagnostics)
-	sp.RemoveExchangeLocationExclusion = toStringSlice(ctx, plan.RemoveExchangeLocationExclusion, &resp.Diagnostics)
-	sp.RemoveOneDriveLocation = toStringSlice(ctx, plan.RemoveOneDriveLocation, &resp.Diagnostics)
-	sp.RemoveOneDriveLocationExclusion = toStringSlice(ctx, plan.RemoveOneDriveLocationExclusion, &resp.Diagnostics)
-	sp.RemovePublicFolderLocation = toStringSlice(ctx, plan.RemovePublicFolderLocation, &resp.Diagnostics)
-	sp.RemovePublicFolderLocationExclusion = toStringSlice(ctx, plan.RemovePublicFolderLocationExclusion, &resp.Diagnostics)
-	sp.RemoveSharePointLocation = toStringSlice(ctx, plan.RemoveSharePointLocation, &resp.Diagnostics)
-	sp.RemoveSharePointLocationExclusion = toStringSlice(ctx, plan.RemoveSharePointLocationExclusion, &resp.Diagnostics)
-	sp.SearchNames = toStringSlice(ctx, plan.SearchNames, &resp.Diagnostics)
-	sp.SharePointLocation = toStringSlice(ctx, plan.SharePointLocation, &resp.Diagnostics)
-	sp.SharePointLocationExclusion = toStringSlice(ctx, plan.SharePointLocationExclusion, &resp.Diagnostics)
+	if !plan.AddExchangeLocationExclusion.Equal(state.AddExchangeLocationExclusion) {
+		if !plan.AddExchangeLocationExclusion.IsNull() && !plan.AddExchangeLocationExclusion.IsUnknown() {
+			sp.AddExchangeLocationExclusion = append([]string{}, toStringSlice(ctx, plan.AddExchangeLocationExclusion, &resp.Diagnostics)...)
+		}
+	}
+	if !plan.AddOneDriveLocation.Equal(state.AddOneDriveLocation) {
+		if !plan.AddOneDriveLocation.IsNull() && !plan.AddOneDriveLocation.IsUnknown() {
+			sp.AddOneDriveLocation = append([]string{}, toStringSlice(ctx, plan.AddOneDriveLocation, &resp.Diagnostics)...)
+		}
+	}
+	if !plan.AddOneDriveLocationExclusion.Equal(state.AddOneDriveLocationExclusion) {
+		if !plan.AddOneDriveLocationExclusion.IsNull() && !plan.AddOneDriveLocationExclusion.IsUnknown() {
+			sp.AddOneDriveLocationExclusion = append([]string{}, toStringSlice(ctx, plan.AddOneDriveLocationExclusion, &resp.Diagnostics)...)
+		}
+	}
+	if !plan.AddPublicFolderLocation.Equal(state.AddPublicFolderLocation) {
+		if !plan.AddPublicFolderLocation.IsNull() && !plan.AddPublicFolderLocation.IsUnknown() {
+			sp.AddPublicFolderLocation = append([]string{}, toStringSlice(ctx, plan.AddPublicFolderLocation, &resp.Diagnostics)...)
+		}
+	}
+	if !plan.AddPublicFolderLocationExclusion.Equal(state.AddPublicFolderLocationExclusion) {
+		if !plan.AddPublicFolderLocationExclusion.IsNull() && !plan.AddPublicFolderLocationExclusion.IsUnknown() {
+			sp.AddPublicFolderLocationExclusion = append([]string{}, toStringSlice(ctx, plan.AddPublicFolderLocationExclusion, &resp.Diagnostics)...)
+		}
+	}
+	if !plan.AddSharePointLocation.Equal(state.AddSharePointLocation) {
+		if !plan.AddSharePointLocation.IsNull() && !plan.AddSharePointLocation.IsUnknown() {
+			sp.AddSharePointLocation = append([]string{}, toStringSlice(ctx, plan.AddSharePointLocation, &resp.Diagnostics)...)
+		}
+	}
+	if !plan.AddSharePointLocationExclusion.Equal(state.AddSharePointLocationExclusion) {
+		if !plan.AddSharePointLocationExclusion.IsNull() && !plan.AddSharePointLocationExclusion.IsUnknown() {
+			sp.AddSharePointLocationExclusion = append([]string{}, toStringSlice(ctx, plan.AddSharePointLocationExclusion, &resp.Diagnostics)...)
+		}
+	}
+	if !plan.AllowNotFoundExchangeLocationsEnabled.Equal(state.AllowNotFoundExchangeLocationsEnabled) {
+		if !plan.AllowNotFoundExchangeLocationsEnabled.IsUnknown() {
+			sp.AllowNotFoundExchangeLocationsEnabled = plan.AllowNotFoundExchangeLocationsEnabled.ValueBoolPointer()
+		}
+	}
+	if !plan.ContentMatchQuery.Equal(state.ContentMatchQuery) {
+		sp.ContentMatchQuery = plan.ContentMatchQuery.ValueString()
+	}
+	if !plan.Description.Equal(state.Description) {
+		sp.Description = plan.Description.ValueString()
+	}
+	if !plan.ExchangeLocation.Equal(state.ExchangeLocation) {
+		if !plan.ExchangeLocation.IsNull() && !plan.ExchangeLocation.IsUnknown() {
+			sp.ExchangeLocation = append([]string{}, toStringSlice(ctx, plan.ExchangeLocation, &resp.Diagnostics)...)
+		}
+	}
+	if !plan.ExchangeLocationExclusion.Equal(state.ExchangeLocationExclusion) {
+		if !plan.ExchangeLocationExclusion.IsNull() && !plan.ExchangeLocationExclusion.IsUnknown() {
+			sp.ExchangeLocationExclusion = append([]string{}, toStringSlice(ctx, plan.ExchangeLocationExclusion, &resp.Diagnostics)...)
+		}
+	}
+	if !plan.HoldNames.Equal(state.HoldNames) {
+		if !plan.HoldNames.IsNull() && !plan.HoldNames.IsUnknown() {
+			sp.HoldNames = append([]string{}, toStringSlice(ctx, plan.HoldNames, &resp.Diagnostics)...)
+		}
+	}
+	if !plan.IncludeOrgContent.Equal(state.IncludeOrgContent) {
+		if !plan.IncludeOrgContent.IsUnknown() {
+			sp.IncludeOrgContent = plan.IncludeOrgContent.ValueBoolPointer()
+		}
+	}
+	if !plan.IncludeUserAppContent.Equal(state.IncludeUserAppContent) {
+		if !plan.IncludeUserAppContent.IsUnknown() {
+			sp.IncludeUserAppContent = plan.IncludeUserAppContent.ValueBoolPointer()
+		}
+	}
+	if !plan.Language.Equal(state.Language) {
+		if v := plan.Language.ValueString(); v != "" {
+			sp.Language = objectParam(v)
+		}
+	}
+	if !plan.OneDriveLocation.Equal(state.OneDriveLocation) {
+		if !plan.OneDriveLocation.IsNull() && !plan.OneDriveLocation.IsUnknown() {
+			sp.OneDriveLocation = append([]string{}, toStringSlice(ctx, plan.OneDriveLocation, &resp.Diagnostics)...)
+		}
+	}
+	if !plan.OneDriveLocationExclusion.Equal(state.OneDriveLocationExclusion) {
+		if !plan.OneDriveLocationExclusion.IsNull() && !plan.OneDriveLocationExclusion.IsUnknown() {
+			sp.OneDriveLocationExclusion = append([]string{}, toStringSlice(ctx, plan.OneDriveLocationExclusion, &resp.Diagnostics)...)
+		}
+	}
+	if !plan.PublicFolderLocation.Equal(state.PublicFolderLocation) {
+		if !plan.PublicFolderLocation.IsNull() && !plan.PublicFolderLocation.IsUnknown() {
+			sp.PublicFolderLocation = append([]string{}, toStringSlice(ctx, plan.PublicFolderLocation, &resp.Diagnostics)...)
+		}
+	}
+	if !plan.PublicFolderLocationExclusion.Equal(state.PublicFolderLocationExclusion) {
+		if !plan.PublicFolderLocationExclusion.IsNull() && !plan.PublicFolderLocationExclusion.IsUnknown() {
+			sp.PublicFolderLocationExclusion = append([]string{}, toStringSlice(ctx, plan.PublicFolderLocationExclusion, &resp.Diagnostics)...)
+		}
+	}
+	if !plan.RefinerNames.Equal(state.RefinerNames) {
+		if !plan.RefinerNames.IsNull() && !plan.RefinerNames.IsUnknown() {
+			sp.RefinerNames = append([]string{}, toStringSlice(ctx, plan.RefinerNames, &resp.Diagnostics)...)
+		}
+	}
+	if !plan.RemoveExchangeLocation.Equal(state.RemoveExchangeLocation) {
+		if !plan.RemoveExchangeLocation.IsNull() && !plan.RemoveExchangeLocation.IsUnknown() {
+			sp.RemoveExchangeLocation = append([]string{}, toStringSlice(ctx, plan.RemoveExchangeLocation, &resp.Diagnostics)...)
+		}
+	}
+	if !plan.RemoveExchangeLocationExclusion.Equal(state.RemoveExchangeLocationExclusion) {
+		if !plan.RemoveExchangeLocationExclusion.IsNull() && !plan.RemoveExchangeLocationExclusion.IsUnknown() {
+			sp.RemoveExchangeLocationExclusion = append([]string{}, toStringSlice(ctx, plan.RemoveExchangeLocationExclusion, &resp.Diagnostics)...)
+		}
+	}
+	if !plan.RemoveOneDriveLocation.Equal(state.RemoveOneDriveLocation) {
+		if !plan.RemoveOneDriveLocation.IsNull() && !plan.RemoveOneDriveLocation.IsUnknown() {
+			sp.RemoveOneDriveLocation = append([]string{}, toStringSlice(ctx, plan.RemoveOneDriveLocation, &resp.Diagnostics)...)
+		}
+	}
+	if !plan.RemoveOneDriveLocationExclusion.Equal(state.RemoveOneDriveLocationExclusion) {
+		if !plan.RemoveOneDriveLocationExclusion.IsNull() && !plan.RemoveOneDriveLocationExclusion.IsUnknown() {
+			sp.RemoveOneDriveLocationExclusion = append([]string{}, toStringSlice(ctx, plan.RemoveOneDriveLocationExclusion, &resp.Diagnostics)...)
+		}
+	}
+	if !plan.RemovePublicFolderLocation.Equal(state.RemovePublicFolderLocation) {
+		if !plan.RemovePublicFolderLocation.IsNull() && !plan.RemovePublicFolderLocation.IsUnknown() {
+			sp.RemovePublicFolderLocation = append([]string{}, toStringSlice(ctx, plan.RemovePublicFolderLocation, &resp.Diagnostics)...)
+		}
+	}
+	if !plan.RemovePublicFolderLocationExclusion.Equal(state.RemovePublicFolderLocationExclusion) {
+		if !plan.RemovePublicFolderLocationExclusion.IsNull() && !plan.RemovePublicFolderLocationExclusion.IsUnknown() {
+			sp.RemovePublicFolderLocationExclusion = append([]string{}, toStringSlice(ctx, plan.RemovePublicFolderLocationExclusion, &resp.Diagnostics)...)
+		}
+	}
+	if !plan.RemoveSharePointLocation.Equal(state.RemoveSharePointLocation) {
+		if !plan.RemoveSharePointLocation.IsNull() && !plan.RemoveSharePointLocation.IsUnknown() {
+			sp.RemoveSharePointLocation = append([]string{}, toStringSlice(ctx, plan.RemoveSharePointLocation, &resp.Diagnostics)...)
+		}
+	}
+	if !plan.RemoveSharePointLocationExclusion.Equal(state.RemoveSharePointLocationExclusion) {
+		if !plan.RemoveSharePointLocationExclusion.IsNull() && !plan.RemoveSharePointLocationExclusion.IsUnknown() {
+			sp.RemoveSharePointLocationExclusion = append([]string{}, toStringSlice(ctx, plan.RemoveSharePointLocationExclusion, &resp.Diagnostics)...)
+		}
+	}
+	if !plan.SearchNames.Equal(state.SearchNames) {
+		if !plan.SearchNames.IsNull() && !plan.SearchNames.IsUnknown() {
+			sp.SearchNames = append([]string{}, toStringSlice(ctx, plan.SearchNames, &resp.Diagnostics)...)
+		}
+	}
+	if !plan.SharePointLocation.Equal(state.SharePointLocation) {
+		if !plan.SharePointLocation.IsNull() && !plan.SharePointLocation.IsUnknown() {
+			sp.SharePointLocation = append([]string{}, toStringSlice(ctx, plan.SharePointLocation, &resp.Diagnostics)...)
+		}
+	}
+	if !plan.SharePointLocationExclusion.Equal(state.SharePointLocationExclusion) {
+		if !plan.SharePointLocationExclusion.IsNull() && !plan.SharePointLocationExclusion.IsUnknown() {
+			sp.SharePointLocationExclusion = append([]string{}, toStringSlice(ctx, plan.SharePointLocationExclusion, &resp.Diagnostics)...)
+		}
+	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	if _, err := r.client.SCC.SetComplianceSearch(ctx, sp); err != nil {
+	if _, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.SetComplianceSearch, sp, isNotFound); err != nil {
 		resp.Diagnostics.AddError("Set-ComplianceSearch failed", err.Error())
 		return
 	}
@@ -263,9 +462,29 @@ func (r *complianceSearchResource) Update(ctx context.Context, req resource.Upda
 	reflected := reconcile.ReflectsFields(map[string]types.String{
 		"ContentMatchQuery": cfg.ContentMatchQuery,
 		"Description":       cfg.Description,
-		"Language":          cfg.Language,
 	}, getString)
+	if !cfg.AllowNotFoundExchangeLocationsEnabled.IsUnknown() && !cfg.AllowNotFoundExchangeLocationsEnabled.IsNull() && !cfg.AllowNotFoundExchangeLocationsEnabled.Equal(state.AllowNotFoundExchangeLocationsEnabled) {
+		prev, want := reflected, cfg.AllowNotFoundExchangeLocationsEnabled.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["AllowNotFoundExchangeLocationsEnabled"] == nil || getBool(obj, "AllowNotFoundExchangeLocationsEnabled") == want)
+		}
+	}
+	if !cfg.IncludeOrgContent.IsUnknown() && !cfg.IncludeOrgContent.IsNull() && !cfg.IncludeOrgContent.Equal(state.IncludeOrgContent) {
+		prev, want := reflected, cfg.IncludeOrgContent.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["IncludeOrgContent"] == nil || getBool(obj, "IncludeOrgContent") == want)
+		}
+	}
+	if !cfg.IncludeUserAppContent.IsUnknown() && !cfg.IncludeUserAppContent.IsNull() && !cfg.IncludeUserAppContent.Equal(state.IncludeUserAppContent) {
+		prev, want := reflected, cfg.IncludeUserAppContent.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["IncludeUserAppContent"] == nil || getBool(obj, "IncludeUserAppContent") == want)
+		}
+	}
 	r.refresh(ctx, id, &plan, &resp.Diagnostics, reflected)
+	if !cfg.ID.IsUnknown() && !cfg.ID.IsNull() {
+		plan.ID = cfg.ID
+	}
 	r.reconcileState(&cfg, &plan)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
@@ -342,8 +561,8 @@ func readComplianceSearch(ctx context.Context, obj map[string]any, m *compliance
 	m.HoldNames = stringSetValue(ctx, getStringSlice(obj, "HoldNames"))
 	m.IncludeOrgContent = types.BoolValue(getBool(obj, "IncludeOrgContent"))
 	m.IncludeUserAppContent = types.BoolValue(getBool(obj, "IncludeUserAppContent"))
-	m.Language = types.StringValue(getString(obj, "Language"))
-	m.LogLevel = types.StringValue(getString(obj, "LogLevel"))
+	m.Language = types.StringValue(getObjectJSON(obj, "Language"))
+	m.LogLevel = types.StringValue(getObjectJSON(obj, "LogLevel"))
 	m.Name = types.StringValue(getString(obj, "Name"))
 	m.OneDriveLocation = stringSetValue(ctx, getStringSlice(obj, "OneDriveLocation"))
 	m.OneDriveLocationExclusion = stringSetValue(ctx, getStringSlice(obj, "OneDriveLocationExclusion"))

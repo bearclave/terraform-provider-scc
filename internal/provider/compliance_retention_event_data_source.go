@@ -7,6 +7,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/terraprovider/go-exoscc/purview"
 	"github.com/terraprovider/go-msadmin/consistency"
@@ -40,7 +41,7 @@ func (d *complianceRetentionEventDataSource) Schema(_ context.Context, _ datasou
 			"asset_id":                   schema.StringAttribute{Computed: true, Description: "Maps to the -AssetId parameter."},
 			"comment":                    schema.StringAttribute{Computed: true, Description: "Maps to the -Comment parameter."},
 			"event_date_time":            schema.StringAttribute{Computed: true, Description: "Maps to the -EventDateTime parameter."},
-			"event_tags":                 schema.StringAttribute{Computed: true, Description: "Maps to the -EventTags parameter."},
+			"event_tags":                 schema.SetAttribute{ElementType: types.StringType, Computed: true, Description: "Maps to the -EventTags parameter."},
 			"event_type":                 schema.StringAttribute{Computed: true, Description: "Maps to the -EventType parameter."},
 			"exchange_asset_id_query":    schema.StringAttribute{Computed: true, Description: "Maps to the -ExchangeAssetIdQuery parameter."},
 			"name":                       schema.StringAttribute{Computed: true, Optional: true, Description: "Maps to the -Name parameter."},

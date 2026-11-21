@@ -28,7 +28,7 @@ Read-Only:
 - `asset_id` (String) Maps to the -AssetId parameter.
 - `comment` (String) Maps to the -Comment parameter.
 - `event_date_time` (String) Maps to the -EventDateTime parameter.
-- `event_tags` (String) Maps to the -EventTags parameter.
+- `event_tags` (Set of String) Maps to the -EventTags parameter.
 - `event_type` (String) Maps to the -EventType parameter.
 - `exchange_asset_id_query` (String) Maps to the -ExchangeAssetIdQuery parameter.
 - `id` (String) Object identifier (GUID).

@@ -23,6 +23,8 @@ Manages the ComplianceSearchAction object via New-ComplianceSearchAction / Get-C
 - `file_type_exclusions_for_unindexed_items` (Set of String) Maps to the -FileTypeExclusionsForUnindexedItems parameter.
 - `include_credential` (Boolean, Sensitive) Maps to the -IncludeCredential parameter.
 - `include_share_point_document_versions` (Boolean) Maps to the -IncludeSharePointDocumentVersions parameter.
+- `job_options` (Number) Maps to the -JobOptions parameter.
+- `max_unindexed_size` (Number) Maps to the -MaxUnindexedSize parameter.
 - `reference_action_name` (String) Maps to the -ReferenceActionName parameter.
 - `region` (String) Maps to the -Region parameter.
 - `report` (Boolean) Maps to the -Report parameter.

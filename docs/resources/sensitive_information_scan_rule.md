@@ -27,13 +27,13 @@ Manages the SensitiveInformationScanRule object via New-SensitiveInformationScan
 - `content_contains_sensitive_information` (Set of String) Maps to the -ContentContainsSensitiveInformation parameter.
 - `content_created_or_updated_date_from` (String) Maps to the -ContentCreatedOrUpdatedDateFrom parameter.
 - `content_created_or_updated_date_to` (String) Maps to the -ContentCreatedOrUpdatedDateTo parameter.
-- `content_extension_matches_words` (String) Maps to the -ContentExtensionMatchesWords parameter.
+- `content_extension_matches_words` (Set of String) Maps to the -ContentExtensionMatchesWords parameter.
 - `content_is_not_labeled` (Boolean) Maps to the -ContentIsNotLabeled parameter.
-- `content_property_contains_words` (String) Maps to the -ContentPropertyContainsWords parameter.
+- `content_property_contains_words` (Set of String) Maps to the -ContentPropertyContainsWords parameter.
 - `document_size_over` (String) Maps to the -DocumentSizeOver parameter.
 - `except_if_content_contains_sensitive_information` (Set of String) Maps to the -ExceptIfContentContainsSensitiveInformation parameter.
-- `except_if_content_extension_matches_words` (String) Maps to the -ExceptIfContentExtensionMatchesWords parameter.
-- `except_if_content_property_contains_words` (String) Maps to the -ExceptIfContentPropertyContainsWords parameter.
+- `except_if_content_extension_matches_words` (Set of String) Maps to the -ExceptIfContentExtensionMatchesWords parameter.
+- `except_if_content_property_contains_words` (Set of String) Maps to the -ExceptIfContentPropertyContainsWords parameter.
 - `except_if_document_size_over` (String) Maps to the -ExceptIfDocumentSizeOver parameter.
 - `except_if_odc_content_contains_sensitive_information` (Set of String) Maps to the -ExceptIfOdcContentContainsSensitiveInformation parameter.
 - `odc_content_contains_sensitive_information` (Set of String) Maps to the -OdcContentContainsSensitiveInformation parameter.

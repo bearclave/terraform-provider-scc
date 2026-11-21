@@ -52,7 +52,7 @@ func (r *threatResponsePolicyResource) Schema(_ context.Context, _ resource.Sche
 		Description: "Manages the ThreatResponsePolicy object via New-ThreatResponsePolicy / Get-ThreatResponsePolicy / Set-ThreatResponsePolicy / Remove-ThreatResponsePolicy.",
 		Attributes: map[string]schema.Attribute{
 			"id":                 schema.StringAttribute{Computed: true, Description: "Object identifier (GUID).", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"identity":           schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets."},
+			"identity":           schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"comment":            schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -Comment parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"exchange_location":  schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ExchangeLocation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace(), stringplanmodifier.UseStateForUnknown()}},
 			"mode":               schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -Mode parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
@@ -77,20 +77,29 @@ func (r *threatResponsePolicyResource) Create(ctx context.Context, req resource.
 		return
 	}
 
-	p := purview.NewThreatResponsePolicyParams{
-		Comment: plan.Comment.ValueString(),
-		Name:    plan.Name.ValueString(),
+	var config threatResponsePolicyModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
+	if resp.Diagnostics.HasError() {
+		return
 	}
-	if v := plan.ExchangeLocation.ValueString(); v != "" {
-		p.ExchangeLocation = v
+
+	p := purview.NewThreatResponsePolicyParams{}
+	if !config.Comment.IsNull() {
+		p.Comment = plan.Comment.ValueString()
 	}
-	if v := plan.Mode.ValueString(); v != "" {
-		p.Mode = v
+	if v := config.ExchangeLocation.ValueString(); v != "" {
+		p.ExchangeLocation = objectParam(v)
+	}
+	if v := config.Mode.ValueString(); v != "" {
+		p.Mode = objectParam(v)
+	}
+	if !config.Name.IsNull() {
+		p.Name = plan.Name.ValueString()
 	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	res, err := r.client.SCC.NewThreatResponsePolicy(ctx, p)
+	res, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.NewThreatResponsePolicy, p, isNotFound)
 	if err != nil {
 		resp.Diagnostics.AddError("New-ThreatResponsePolicy failed", err.Error())
 		return
@@ -137,26 +146,44 @@ func (r *threatResponsePolicyResource) Update(ctx context.Context, req resource.
 	id := r.identityOf(state)
 	sp := purview.SetThreatResponsePolicyParams{}
 	sp.Identity = id
-	sp.Comment = plan.Comment.ValueString()
-	if v := plan.Mode.ValueString(); v != "" {
-		sp.Mode = v
+	if !plan.Comment.Equal(state.Comment) {
+		sp.Comment = plan.Comment.ValueString()
 	}
-	sp.NewName = plan.NewName.ValueString()
-	sp.RetryDistribution = plan.RetryDistribution.ValueBool()
+	if !plan.Mode.Equal(state.Mode) {
+		if v := plan.Mode.ValueString(); v != "" {
+			sp.Mode = objectParam(v)
+		}
+	}
+	if !plan.NewName.Equal(state.NewName) {
+		sp.NewName = plan.NewName.ValueString()
+	}
+	if !plan.RetryDistribution.Equal(state.RetryDistribution) {
+		if !plan.RetryDistribution.IsUnknown() {
+			sp.RetryDistribution = plan.RetryDistribution.ValueBoolPointer()
+		}
+	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	if _, err := r.client.SCC.SetThreatResponsePolicy(ctx, sp); err != nil {
+	if _, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.SetThreatResponsePolicy, sp, isNotFound); err != nil {
 		resp.Diagnostics.AddError("Set-ThreatResponsePolicy failed", err.Error())
 		return
 	}
 	cfg := plan
 	reflected := reconcile.ReflectsFields(map[string]types.String{
 		"Comment": cfg.Comment,
-		"Mode":    cfg.Mode,
 		"NewName": cfg.NewName,
 	}, getString)
+	if !cfg.RetryDistribution.IsUnknown() && !cfg.RetryDistribution.IsNull() && !cfg.RetryDistribution.Equal(state.RetryDistribution) {
+		prev, want := reflected, cfg.RetryDistribution.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["RetryDistribution"] == nil || getBool(obj, "RetryDistribution") == want)
+		}
+	}
 	r.refresh(ctx, id, &plan, &resp.Diagnostics, reflected)
+	if !cfg.ID.IsUnknown() && !cfg.ID.IsNull() {
+		plan.ID = cfg.ID
+	}
 	r.reconcileState(&cfg, &plan)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
@@ -217,8 +244,8 @@ func readThreatResponsePolicy(ctx context.Context, obj map[string]any, m *threat
 	m.ID = types.StringValue(firstNonEmptyStr(getString(obj, "Guid"), getString(obj, "Id"), getString(obj, "Identity")))
 	m.Identity = types.StringValue(firstNonEmptyStr(getString(obj, "Identity"), getString(obj, "Guid"), getString(obj, "Name")))
 	m.Comment = types.StringValue(getString(obj, "Comment"))
-	m.ExchangeLocation = types.StringValue(getString(obj, "ExchangeLocation"))
-	m.Mode = types.StringValue(getString(obj, "Mode"))
+	m.ExchangeLocation = types.StringValue(getObjectJSON(obj, "ExchangeLocation"))
+	m.Mode = types.StringValue(getObjectJSON(obj, "Mode"))
 	m.Name = types.StringValue(getString(obj, "Name"))
 	m.NewName = types.StringValue(getString(obj, "NewName"))
 	m.RetryDistribution = types.BoolValue(getBool(obj, "RetryDistribution"))

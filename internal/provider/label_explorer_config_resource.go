@@ -55,17 +55,17 @@ func (r *labelExplorerConfigResource) Schema(_ context.Context, _ resource.Schem
 		Description: "Manages the LabelExplorerConfig object via New-LabelExplorerConfig / Get-LabelExplorerConfig / Set-LabelExplorerConfig / Remove-LabelExplorerConfig.",
 		Attributes: map[string]schema.Attribute{
 			"id":            schema.StringAttribute{Computed: true, Description: "Object identifier (GUID).", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"identity":      schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets."},
+			"identity":      schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"actions":       schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -Actions parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"add_labels":    schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AddLabels parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"add_users":     schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AddUsers parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"display_name":  schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -DisplayName parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"filter":        schema.StringAttribute{Required: true, Description: "Maps to the -Filter parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
-			"labels":        schema.StringAttribute{Required: true, Description: "Maps to the -Labels parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
+			"filter":        schema.StringAttribute{Required: true, Description: "Maps to the -Filter parameter."},
+			"labels":        schema.StringAttribute{Required: true, Description: "Maps to the -Labels parameter."},
 			"name":          schema.StringAttribute{Required: true, Description: "Maps to the -Name parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
 			"remove_labels": schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -RemoveLabels parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"remove_users":  schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -RemoveUsers parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"users":         schema.StringAttribute{Required: true, Description: "Maps to the -Users parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
+			"users":         schema.StringAttribute{Required: true, Description: "Maps to the -Users parameter."},
 		},
 	}
 }
@@ -84,24 +84,35 @@ func (r *labelExplorerConfigResource) Create(ctx context.Context, req resource.C
 		return
 	}
 
-	p := purview.NewLabelExplorerConfigParams{
-		DisplayName: plan.DisplayName.ValueString(),
-		Filter:      plan.Filter.ValueString(),
-		Name:        plan.Name.ValueString(),
+	var config labelExplorerConfigModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
+	if resp.Diagnostics.HasError() {
+		return
 	}
-	if v := plan.Actions.ValueString(); v != "" {
-		p.Actions = v
+
+	p := purview.NewLabelExplorerConfigParams{}
+	if v := config.Actions.ValueString(); v != "" {
+		p.Actions = objectParam(v)
 	}
-	if v := plan.Labels.ValueString(); v != "" {
-		p.Labels = v
+	if !config.DisplayName.IsNull() {
+		p.DisplayName = plan.DisplayName.ValueString()
 	}
-	if v := plan.Users.ValueString(); v != "" {
-		p.Users = v
+	if !config.Filter.IsNull() {
+		p.Filter = plan.Filter.ValueString()
+	}
+	if v := config.Labels.ValueString(); v != "" {
+		p.Labels = objectParam(v)
+	}
+	if !config.Name.IsNull() {
+		p.Name = plan.Name.ValueString()
+	}
+	if v := config.Users.ValueString(); v != "" {
+		p.Users = objectParam(v)
 	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	res, err := r.client.SCC.NewLabelExplorerConfig(ctx, p)
+	res, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.NewLabelExplorerConfig, p, isNotFound)
 	if err != nil {
 		resp.Diagnostics.AddError("New-LabelExplorerConfig failed", err.Error())
 		return
@@ -148,39 +159,63 @@ func (r *labelExplorerConfigResource) Update(ctx context.Context, req resource.U
 	id := r.identityOf(state)
 	sp := purview.SetLabelExplorerConfigParams{}
 	sp.Identity = id
-	if v := plan.Actions.ValueString(); v != "" {
-		sp.Actions = v
+	if !plan.Actions.Equal(state.Actions) {
+		if v := plan.Actions.ValueString(); v != "" {
+			sp.Actions = objectParam(v)
+		}
 	}
-	if v := plan.AddLabels.ValueString(); v != "" {
-		sp.AddLabels = v
+	if !plan.AddLabels.Equal(state.AddLabels) {
+		if v := plan.AddLabels.ValueString(); v != "" {
+			sp.AddLabels = objectParam(v)
+		}
 	}
-	if v := plan.AddUsers.ValueString(); v != "" {
-		sp.AddUsers = v
+	if !plan.AddUsers.Equal(state.AddUsers) {
+		if v := plan.AddUsers.ValueString(); v != "" {
+			sp.AddUsers = objectParam(v)
+		}
 	}
-	sp.DisplayName = plan.DisplayName.ValueString()
-	if v := plan.RemoveLabels.ValueString(); v != "" {
-		sp.RemoveLabels = v
+	if !plan.DisplayName.Equal(state.DisplayName) {
+		sp.DisplayName = plan.DisplayName.ValueString()
 	}
-	if v := plan.RemoveUsers.ValueString(); v != "" {
-		sp.RemoveUsers = v
+	if !plan.Filter.Equal(state.Filter) {
+		sp.Filter = plan.Filter.ValueString()
+	}
+	if !plan.Labels.Equal(state.Labels) {
+		if v := plan.Labels.ValueString(); v != "" {
+			sp.Labels = objectParam(v)
+		}
+	}
+	if !plan.RemoveLabels.Equal(state.RemoveLabels) {
+		if v := plan.RemoveLabels.ValueString(); v != "" {
+			sp.RemoveLabels = objectParam(v)
+		}
+	}
+	if !plan.RemoveUsers.Equal(state.RemoveUsers) {
+		if v := plan.RemoveUsers.ValueString(); v != "" {
+			sp.RemoveUsers = objectParam(v)
+		}
+	}
+	if !plan.Users.Equal(state.Users) {
+		if v := plan.Users.ValueString(); v != "" {
+			sp.Users = objectParam(v)
+		}
 	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	if _, err := r.client.SCC.SetLabelExplorerConfig(ctx, sp); err != nil {
+	if _, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.SetLabelExplorerConfig, sp, isNotFound); err != nil {
 		resp.Diagnostics.AddError("Set-LabelExplorerConfig failed", err.Error())
 		return
 	}
 	cfg := plan
 	reflected := reconcile.ReflectsFields(map[string]types.String{
-		"Actions":      cfg.Actions,
-		"AddLabels":    cfg.AddLabels,
-		"AddUsers":     cfg.AddUsers,
-		"DisplayName":  cfg.DisplayName,
-		"RemoveLabels": cfg.RemoveLabels,
-		"RemoveUsers":  cfg.RemoveUsers,
+		"DisplayName": cfg.DisplayName,
+		"Filter":      cfg.Filter,
 	}, getString)
 	r.refresh(ctx, id, &plan, &resp.Diagnostics, reflected)
+	if !cfg.ID.IsUnknown() && !cfg.ID.IsNull() {
+		plan.ID = cfg.ID
+	}
 	r.reconcileState(&cfg, &plan)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
@@ -240,16 +275,16 @@ func (r *labelExplorerConfigResource) refresh(ctx context.Context, identity stri
 func readLabelExplorerConfig(ctx context.Context, obj map[string]any, m *labelExplorerConfigModel) {
 	m.ID = types.StringValue(firstNonEmptyStr(getString(obj, "Guid"), getString(obj, "Id"), getString(obj, "Identity")))
 	m.Identity = types.StringValue(firstNonEmptyStr(getString(obj, "Identity"), getString(obj, "Guid"), getString(obj, "Name")))
-	m.Actions = types.StringValue(getString(obj, "Actions"))
-	m.AddLabels = types.StringValue(getString(obj, "AddLabels"))
-	m.AddUsers = types.StringValue(getString(obj, "AddUsers"))
+	m.Actions = types.StringValue(getObjectJSON(obj, "Actions"))
+	m.AddLabels = types.StringValue(getObjectJSON(obj, "AddLabels"))
+	m.AddUsers = types.StringValue(getObjectJSON(obj, "AddUsers"))
 	m.DisplayName = types.StringValue(getString(obj, "DisplayName"))
 	m.Filter = types.StringValue(getString(obj, "Filter"))
-	m.Labels = types.StringValue(getString(obj, "Labels"))
+	m.Labels = types.StringValue(getObjectJSON(obj, "Labels"))
 	m.Name = types.StringValue(getString(obj, "Name"))
-	m.RemoveLabels = types.StringValue(getString(obj, "RemoveLabels"))
-	m.RemoveUsers = types.StringValue(getString(obj, "RemoveUsers"))
-	m.Users = types.StringValue(getString(obj, "Users"))
+	m.RemoveLabels = types.StringValue(getObjectJSON(obj, "RemoveLabels"))
+	m.RemoveUsers = types.StringValue(getObjectJSON(obj, "RemoveUsers"))
+	m.Users = types.StringValue(getObjectJSON(obj, "Users"))
 	_ = ctx
 }
 

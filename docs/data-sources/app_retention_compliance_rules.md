@@ -26,15 +26,15 @@ Read-Only:
 
 - `apply_compliance_tag` (String) Maps to the -ApplyComplianceTag parameter.
 - `comment` (String) Maps to the -Comment parameter.
-- `content_contains_sensitive_information` (Set of String) Maps to the -ContentContainsSensitiveInformation parameter.
+- `content_contains_sensitive_information` (String) Maps to the -ContentContainsSensitiveInformation parameter.
 - `content_date_from` (String) Maps to the -ContentDateFrom parameter.
 - `content_date_to` (String) Maps to the -ContentDateTo parameter.
 - `content_match_query` (String) Maps to the -ContentMatchQuery parameter.
-- `excluded_item_classes` (String) Maps to the -ExcludedItemClasses parameter.
+- `excluded_item_classes` (Set of String) Maps to the -ExcludedItemClasses parameter.
 - `expiration_date_option` (String) Maps to the -ExpirationDateOption parameter.
 - `id` (String) Object identifier (GUID).
 - `identity` (String) Identity used to target the object.
-- `machine_learning_model_i_ds` (String) Maps to the -MachineLearningModelIDs parameter.
+- `machine_learning_model_i_ds` (Set of String) Maps to the -MachineLearningModelIDs parameter.
 - `name` (String) Maps to the -Name parameter.
 - `policy` (String) Maps to the -Policy parameter.
 - `publish_compliance_tag` (String) Maps to the -PublishComplianceTag parameter.

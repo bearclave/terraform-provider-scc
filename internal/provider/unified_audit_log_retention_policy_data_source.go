@@ -7,6 +7,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/terraprovider/go-exoscc/purview"
 	"github.com/terraprovider/go-msadmin/consistency"
@@ -38,10 +39,11 @@ func (d *unifiedAuditLogRetentionPolicyDataSource) Schema(_ context.Context, _ d
 			"identity":           schema.StringAttribute{Optional: true, Computed: true, Description: "Identity used to look up the object."},
 			"description":        schema.StringAttribute{Computed: true, Description: "Maps to the -Description parameter."},
 			"name":               schema.StringAttribute{Computed: true, Optional: true, Description: "Maps to the -Name parameter."},
-			"operations":         schema.StringAttribute{Computed: true, Description: "Maps to the -Operations parameter."},
-			"record_types":       schema.StringAttribute{Computed: true, Description: "Maps to the -RecordTypes parameter."},
+			"operations":         schema.SetAttribute{ElementType: types.StringType, Computed: true, Description: "Maps to the -Operations parameter."},
+			"priority":           schema.Int64Attribute{Computed: true, Description: "Maps to the -Priority parameter."},
+			"record_types":       schema.SetAttribute{ElementType: types.StringType, Computed: true, Description: "Maps to the -RecordTypes parameter."},
 			"retention_duration": schema.StringAttribute{Computed: true, Description: "Maps to the -RetentionDuration parameter."},
-			"user_ids":           schema.StringAttribute{Computed: true, Description: "Maps to the -UserIds parameter."},
+			"user_ids":           schema.SetAttribute{ElementType: types.StringType, Computed: true, Description: "Maps to the -UserIds parameter."},
 		},
 	}
 }

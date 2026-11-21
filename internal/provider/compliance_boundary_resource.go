@@ -48,7 +48,7 @@ func (r *complianceBoundaryResource) Schema(_ context.Context, _ resource.Schema
 		Description: "Manages the ComplianceBoundary object via New-ComplianceBoundary / Get-ComplianceBoundary / Set-ComplianceBoundary / Remove-ComplianceBoundary.",
 		Attributes: map[string]schema.Attribute{
 			"id":                      schema.StringAttribute{Computed: true, Description: "Object identifier (GUID).", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"identity":                schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets."},
+			"identity":                schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"comment":                 schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -Comment parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"custom_recipient_filter": schema.StringAttribute{Required: true, Description: "Maps to the -CustomRecipientFilter parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
 			"name":                    schema.StringAttribute{Required: true, Description: "Maps to the -Name parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
@@ -70,15 +70,26 @@ func (r *complianceBoundaryResource) Create(ctx context.Context, req resource.Cr
 		return
 	}
 
-	p := purview.NewComplianceBoundaryParams{
-		Comment:               plan.Comment.ValueString(),
-		CustomRecipientFilter: plan.CustomRecipientFilter.ValueString(),
-		Name:                  plan.Name.ValueString(),
+	var config complianceBoundaryModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	p := purview.NewComplianceBoundaryParams{}
+	if !config.Comment.IsNull() {
+		p.Comment = plan.Comment.ValueString()
+	}
+	if !config.CustomRecipientFilter.IsNull() {
+		p.CustomRecipientFilter = plan.CustomRecipientFilter.ValueString()
+	}
+	if !config.Name.IsNull() {
+		p.Name = plan.Name.ValueString()
 	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	res, err := r.client.SCC.NewComplianceBoundary(ctx, p)
+	res, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.NewComplianceBoundary, p, isNotFound)
 	if err != nil {
 		resp.Diagnostics.AddError("New-ComplianceBoundary failed", err.Error())
 		return
@@ -125,11 +136,13 @@ func (r *complianceBoundaryResource) Update(ctx context.Context, req resource.Up
 	id := r.identityOf(state)
 	sp := purview.SetComplianceBoundaryParams{}
 	sp.Identity = id
-	sp.Comment = plan.Comment.ValueString()
+	if !plan.Comment.Equal(state.Comment) {
+		sp.Comment = plan.Comment.ValueString()
+	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	if _, err := r.client.SCC.SetComplianceBoundary(ctx, sp); err != nil {
+	if _, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.SetComplianceBoundary, sp, isNotFound); err != nil {
 		resp.Diagnostics.AddError("Set-ComplianceBoundary failed", err.Error())
 		return
 	}
@@ -138,6 +151,9 @@ func (r *complianceBoundaryResource) Update(ctx context.Context, req resource.Up
 		"Comment": cfg.Comment,
 	}, getString)
 	r.refresh(ctx, id, &plan, &resp.Diagnostics, reflected)
+	if !cfg.ID.IsUnknown() && !cfg.ID.IsNull() {
+		plan.ID = cfg.ID
+	}
 	r.reconcileState(&cfg, &plan)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }

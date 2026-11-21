@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
@@ -35,73 +36,40 @@ func NewRetentionCompliancePolicyResource() resource.Resource {
 }
 
 type retentionCompliancePolicyModel struct {
-	ID                                  types.String `tfsdk:"id"`
-	Identity                            types.String `tfsdk:"identity"`
-	AdaptiveScopeLocation               types.String `tfsdk:"adaptive_scope_location"`
-	AddAdaptiveScopeLocation            types.String `tfsdk:"add_adaptive_scope_location"`
-	AddExchangeLocation                 types.String `tfsdk:"add_exchange_location"`
-	AddExchangeLocationException        types.String `tfsdk:"add_exchange_location_exception"`
-	AddModernGroupLocation              types.String `tfsdk:"add_modern_group_location"`
-	AddModernGroupLocationException     types.String `tfsdk:"add_modern_group_location_exception"`
-	AddOneDriveLocation                 types.String `tfsdk:"add_one_drive_location"`
-	AddOneDriveLocationException        types.String `tfsdk:"add_one_drive_location_exception"`
-	AddPublicFolderLocation             types.String `tfsdk:"add_public_folder_location"`
-	AddSharePointLocation               types.String `tfsdk:"add_share_point_location"`
-	AddSharePointLocationException      types.String `tfsdk:"add_share_point_location_exception"`
-	AddSkypeLocation                    types.String `tfsdk:"add_skype_location"`
-	AddSkypeLocationException           types.String `tfsdk:"add_skype_location_exception"`
-	AddTeamsChannelLocation             types.String `tfsdk:"add_teams_channel_location"`
-	AddTeamsChannelLocationException    types.String `tfsdk:"add_teams_channel_location_exception"`
-	AddTeamsChatLocation                types.String `tfsdk:"add_teams_chat_location"`
-	AddTeamsChatLocationException       types.String `tfsdk:"add_teams_chat_location_exception"`
-	Applications                        types.String `tfsdk:"applications"`
-	Comment                             types.String `tfsdk:"comment"`
-	DeletedResources                    types.String `tfsdk:"deleted_resources"`
-	Enabled                             types.Bool   `tfsdk:"enabled"`
-	EnforceSimulationPolicy             types.Bool   `tfsdk:"enforce_simulation_policy"`
-	ExchangeLocation                    types.String `tfsdk:"exchange_location"`
-	ExchangeLocationException           types.String `tfsdk:"exchange_location_exception"`
-	ExcludeSPE                          types.Bool   `tfsdk:"exclude_spe"`
-	ForceBypassScopeCheck               types.Bool   `tfsdk:"force_bypass_scope_check"`
-	ForceStartSimulation                types.Bool   `tfsdk:"force_start_simulation"`
-	IncludeUserOwnedContainers          types.Bool   `tfsdk:"include_user_owned_containers"`
-	IsSimulation                        types.Bool   `tfsdk:"is_simulation"`
-	ModernGroupLocation                 types.String `tfsdk:"modern_group_location"`
-	ModernGroupLocationException        types.String `tfsdk:"modern_group_location_exception"`
-	Name                                types.String `tfsdk:"name"`
-	OneDriveLocation                    types.String `tfsdk:"one_drive_location"`
-	OneDriveLocationException           types.String `tfsdk:"one_drive_location_exception"`
-	PolicyRBACScopes                    types.String `tfsdk:"policy_rbac_scopes"`
-	PolicyTemplateInfo                  types.String `tfsdk:"policy_template_info"`
-	PublicFolderLocation                types.String `tfsdk:"public_folder_location"`
-	RemoveAdaptiveScopeLocation         types.String `tfsdk:"remove_adaptive_scope_location"`
-	RemoveExchangeLocation              types.String `tfsdk:"remove_exchange_location"`
-	RemoveExchangeLocationException     types.String `tfsdk:"remove_exchange_location_exception"`
-	RemoveModernGroupLocation           types.String `tfsdk:"remove_modern_group_location"`
-	RemoveModernGroupLocationException  types.String `tfsdk:"remove_modern_group_location_exception"`
-	RemoveOneDriveLocation              types.String `tfsdk:"remove_one_drive_location"`
-	RemoveOneDriveLocationException     types.String `tfsdk:"remove_one_drive_location_exception"`
-	RemovePublicFolderLocation          types.String `tfsdk:"remove_public_folder_location"`
-	RemoveSharePointLocation            types.String `tfsdk:"remove_share_point_location"`
-	RemoveSharePointLocationException   types.String `tfsdk:"remove_share_point_location_exception"`
-	RemoveSkypeLocation                 types.String `tfsdk:"remove_skype_location"`
-	RemoveSkypeLocationException        types.String `tfsdk:"remove_skype_location_exception"`
-	RemoveTeamsChannelLocation          types.String `tfsdk:"remove_teams_channel_location"`
-	RemoveTeamsChannelLocationException types.String `tfsdk:"remove_teams_channel_location_exception"`
-	RemoveTeamsChatLocation             types.String `tfsdk:"remove_teams_chat_location"`
-	RemoveTeamsChatLocationException    types.String `tfsdk:"remove_teams_chat_location_exception"`
-	RestrictiveRetention                types.Bool   `tfsdk:"restrictive_retention"`
-	RetainCloudAttachment               types.Bool   `tfsdk:"retain_cloud_attachment"`
-	RetryDistribution                   types.Bool   `tfsdk:"retry_distribution"`
-	SharePointLocation                  types.String `tfsdk:"share_point_location"`
-	SharePointLocationException         types.String `tfsdk:"share_point_location_exception"`
-	SkypeLocation                       types.String `tfsdk:"skype_location"`
-	SkypeLocationException              types.String `tfsdk:"skype_location_exception"`
-	StartSimulation                     types.Bool   `tfsdk:"start_simulation"`
-	TeamsChannelLocation                types.String `tfsdk:"teams_channel_location"`
-	TeamsChannelLocationException       types.String `tfsdk:"teams_channel_location_exception"`
-	TeamsChatLocation                   types.String `tfsdk:"teams_chat_location"`
-	TeamsChatLocationException          types.String `tfsdk:"teams_chat_location_exception"`
+	ID                            types.String `tfsdk:"id"`
+	Identity                      types.String `tfsdk:"identity"`
+	AdaptiveScopeLocation         types.Set    `tfsdk:"adaptive_scope_location"`
+	Applications                  types.Set    `tfsdk:"applications"`
+	Comment                       types.String `tfsdk:"comment"`
+	DeletedResources              types.String `tfsdk:"deleted_resources"`
+	Enabled                       types.Bool   `tfsdk:"enabled"`
+	EnforceSimulationPolicy       types.Bool   `tfsdk:"enforce_simulation_policy"`
+	ExchangeLocation              types.Set    `tfsdk:"exchange_location"`
+	ExchangeLocationException     types.Set    `tfsdk:"exchange_location_exception"`
+	ExcludeSPE                    types.Bool   `tfsdk:"exclude_spe"`
+	ForceBypassScopeCheck         types.Bool   `tfsdk:"force_bypass_scope_check"`
+	ForceStartSimulation          types.Bool   `tfsdk:"force_start_simulation"`
+	IncludeUserOwnedContainers    types.Bool   `tfsdk:"include_user_owned_containers"`
+	IsSimulation                  types.Bool   `tfsdk:"is_simulation"`
+	ModernGroupLocation           types.Set    `tfsdk:"modern_group_location"`
+	ModernGroupLocationException  types.Set    `tfsdk:"modern_group_location_exception"`
+	Name                          types.String `tfsdk:"name"`
+	OneDriveLocation              types.Set    `tfsdk:"one_drive_location"`
+	OneDriveLocationException     types.Set    `tfsdk:"one_drive_location_exception"`
+	PolicyRBACScopes              types.Set    `tfsdk:"policy_rbac_scopes"`
+	PolicyTemplateInfo            types.String `tfsdk:"policy_template_info"`
+	PublicFolderLocation          types.Set    `tfsdk:"public_folder_location"`
+	RestrictiveRetention          types.Bool   `tfsdk:"restrictive_retention"`
+	RetainCloudAttachment         types.Bool   `tfsdk:"retain_cloud_attachment"`
+	SharePointLocation            types.Set    `tfsdk:"share_point_location"`
+	SharePointLocationException   types.Set    `tfsdk:"share_point_location_exception"`
+	SkypeLocation                 types.Set    `tfsdk:"skype_location"`
+	SkypeLocationException        types.Set    `tfsdk:"skype_location_exception"`
+	StartSimulation               types.Bool   `tfsdk:"start_simulation"`
+	TeamsChannelLocation          types.Set    `tfsdk:"teams_channel_location"`
+	TeamsChannelLocationException types.Set    `tfsdk:"teams_channel_location_exception"`
+	TeamsChatLocation             types.Set    `tfsdk:"teams_chat_location"`
+	TeamsChatLocationException    types.Set    `tfsdk:"teams_chat_location_exception"`
 }
 
 func (r *retentionCompliancePolicyResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -112,73 +80,40 @@ func (r *retentionCompliancePolicyResource) Schema(_ context.Context, _ resource
 	resp.Schema = schema.Schema{
 		Description: "Manages the RetentionCompliancePolicy object via New-RetentionCompliancePolicy / Get-RetentionCompliancePolicy / Set-RetentionCompliancePolicy / Remove-RetentionCompliancePolicy.",
 		Attributes: map[string]schema.Attribute{
-			"id":                                      schema.StringAttribute{Computed: true, Description: "Object identifier (GUID).", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"identity":                                schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets."},
-			"adaptive_scope_location":                 schema.StringAttribute{Required: true, Description: "Maps to the -AdaptiveScopeLocation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
-			"add_adaptive_scope_location":             schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AddAdaptiveScopeLocation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"add_exchange_location":                   schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AddExchangeLocation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"add_exchange_location_exception":         schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AddExchangeLocationException parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"add_modern_group_location":               schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AddModernGroupLocation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"add_modern_group_location_exception":     schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AddModernGroupLocationException parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"add_one_drive_location":                  schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AddOneDriveLocation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"add_one_drive_location_exception":        schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AddOneDriveLocationException parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"add_public_folder_location":              schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AddPublicFolderLocation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"add_share_point_location":                schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AddSharePointLocation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"add_share_point_location_exception":      schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AddSharePointLocationException parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"add_skype_location":                      schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AddSkypeLocation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"add_skype_location_exception":            schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AddSkypeLocationException parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"add_teams_channel_location":              schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AddTeamsChannelLocation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"add_teams_channel_location_exception":    schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AddTeamsChannelLocationException parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"add_teams_chat_location":                 schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AddTeamsChatLocation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"add_teams_chat_location_exception":       schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AddTeamsChatLocationException parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"applications":                            schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -Applications parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"comment":                                 schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -Comment parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"deleted_resources":                       schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -DeletedResources parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"enabled":                                 schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -Enabled parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
-			"enforce_simulation_policy":               schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -EnforceSimulationPolicy parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
-			"exchange_location":                       schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ExchangeLocation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace(), stringplanmodifier.UseStateForUnknown()}},
-			"exchange_location_exception":             schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ExchangeLocationException parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace(), stringplanmodifier.UseStateForUnknown()}},
-			"exclude_spe":                             schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -ExcludeSPE parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
-			"force_bypass_scope_check":                schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -ForceBypassScopeCheck parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
-			"force_start_simulation":                  schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -ForceStartSimulation parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
-			"include_user_owned_containers":           schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -IncludeUserOwnedContainers parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
-			"is_simulation":                           schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -IsSimulation parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.RequiresReplace(), boolplanmodifier.UseStateForUnknown()}},
-			"modern_group_location":                   schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ModernGroupLocation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace(), stringplanmodifier.UseStateForUnknown()}},
-			"modern_group_location_exception":         schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ModernGroupLocationException parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace(), stringplanmodifier.UseStateForUnknown()}},
-			"name":                                    schema.StringAttribute{Required: true, Description: "Maps to the -Name parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
-			"one_drive_location":                      schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -OneDriveLocation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace(), stringplanmodifier.UseStateForUnknown()}},
-			"one_drive_location_exception":            schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -OneDriveLocationException parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace(), stringplanmodifier.UseStateForUnknown()}},
-			"policy_rbac_scopes":                      schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -PolicyRBACScopes parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"policy_template_info":                    schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -PolicyTemplateInfo parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"public_folder_location":                  schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -PublicFolderLocation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace(), stringplanmodifier.UseStateForUnknown()}},
-			"remove_adaptive_scope_location":          schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -RemoveAdaptiveScopeLocation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"remove_exchange_location":                schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -RemoveExchangeLocation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"remove_exchange_location_exception":      schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -RemoveExchangeLocationException parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"remove_modern_group_location":            schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -RemoveModernGroupLocation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"remove_modern_group_location_exception":  schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -RemoveModernGroupLocationException parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"remove_one_drive_location":               schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -RemoveOneDriveLocation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"remove_one_drive_location_exception":     schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -RemoveOneDriveLocationException parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"remove_public_folder_location":           schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -RemovePublicFolderLocation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"remove_share_point_location":             schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -RemoveSharePointLocation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"remove_share_point_location_exception":   schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -RemoveSharePointLocationException parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"remove_skype_location":                   schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -RemoveSkypeLocation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"remove_skype_location_exception":         schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -RemoveSkypeLocationException parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"remove_teams_channel_location":           schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -RemoveTeamsChannelLocation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"remove_teams_channel_location_exception": schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -RemoveTeamsChannelLocationException parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"remove_teams_chat_location":              schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -RemoveTeamsChatLocation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"remove_teams_chat_location_exception":    schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -RemoveTeamsChatLocationException parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"restrictive_retention":                   schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -RestrictiveRetention parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
-			"retain_cloud_attachment":                 schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -RetainCloudAttachment parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.RequiresReplace(), boolplanmodifier.UseStateForUnknown()}},
-			"retry_distribution":                      schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -RetryDistribution parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
-			"share_point_location":                    schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -SharePointLocation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace(), stringplanmodifier.UseStateForUnknown()}},
-			"share_point_location_exception":          schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -SharePointLocationException parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace(), stringplanmodifier.UseStateForUnknown()}},
-			"skype_location":                          schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -SkypeLocation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace(), stringplanmodifier.UseStateForUnknown()}},
-			"skype_location_exception":                schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -SkypeLocationException parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace(), stringplanmodifier.UseStateForUnknown()}},
-			"start_simulation":                        schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -StartSimulation parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
-			"teams_channel_location":                  schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -TeamsChannelLocation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace(), stringplanmodifier.UseStateForUnknown()}},
-			"teams_channel_location_exception":        schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -TeamsChannelLocationException parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace(), stringplanmodifier.UseStateForUnknown()}},
-			"teams_chat_location":                     schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -TeamsChatLocation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace(), stringplanmodifier.UseStateForUnknown()}},
-			"teams_chat_location_exception":           schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -TeamsChatLocationException parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace(), stringplanmodifier.UseStateForUnknown()}},
+			"id":                               schema.StringAttribute{Computed: true, Description: "Object identifier (GUID).", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"identity":                         schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"adaptive_scope_location":          schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -AdaptiveScopeLocation parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"applications":                     schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -Applications parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"comment":                          schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -Comment parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"deleted_resources":                schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -DeletedResources parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"enabled":                          schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -Enabled parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
+			"enforce_simulation_policy":        schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -EnforceSimulationPolicy parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
+			"exchange_location":                schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -ExchangeLocation parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"exchange_location_exception":      schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -ExchangeLocationException parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"exclude_spe":                      schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -ExcludeSPE parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
+			"force_bypass_scope_check":         schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -ForceBypassScopeCheck parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
+			"force_start_simulation":           schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -ForceStartSimulation parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
+			"include_user_owned_containers":    schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -IncludeUserOwnedContainers parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
+			"is_simulation":                    schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -IsSimulation parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.RequiresReplace(), boolplanmodifier.UseStateForUnknown()}},
+			"modern_group_location":            schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -ModernGroupLocation parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"modern_group_location_exception":  schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -ModernGroupLocationException parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"name":                             schema.StringAttribute{Required: true, Description: "Maps to the -Name parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
+			"one_drive_location":               schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -OneDriveLocation parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"one_drive_location_exception":     schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -OneDriveLocationException parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"policy_rbac_scopes":               schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -PolicyRBACScopes parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"policy_template_info":             schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -PolicyTemplateInfo parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"public_folder_location":           schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -PublicFolderLocation parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"restrictive_retention":            schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -RestrictiveRetention parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
+			"retain_cloud_attachment":          schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -RetainCloudAttachment parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.RequiresReplace(), boolplanmodifier.UseStateForUnknown()}},
+			"share_point_location":             schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -SharePointLocation parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"share_point_location_exception":   schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -SharePointLocationException parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"skype_location":                   schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -SkypeLocation parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"skype_location_exception":         schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -SkypeLocationException parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"start_simulation":                 schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -StartSimulation parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
+			"teams_channel_location":           schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -TeamsChannelLocation parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"teams_channel_location_exception": schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -TeamsChannelLocationException parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"teams_chat_location":              schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -TeamsChatLocation parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"teams_chat_location_exception":    schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -TeamsChatLocationException parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
 		},
 	}
 }
@@ -197,77 +132,146 @@ func (r *retentionCompliancePolicyResource) Create(ctx context.Context, req reso
 		return
 	}
 
-	p := purview.NewRetentionCompliancePolicyParams{
-		Comment:                    plan.Comment.ValueString(),
-		Enabled:                    plan.Enabled.ValueBool(),
-		ExcludeSPE:                 plan.ExcludeSPE.ValueBool(),
-		IncludeUserOwnedContainers: plan.IncludeUserOwnedContainers.ValueBool(),
-		IsSimulation:               plan.IsSimulation.ValueBool(),
-		Name:                       plan.Name.ValueString(),
-		RestrictiveRetention:       plan.RestrictiveRetention.ValueBool(),
-		RetainCloudAttachment:      plan.RetainCloudAttachment.ValueBool(),
+	var config retentionCompliancePolicyModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
+	if resp.Diagnostics.HasError() {
+		return
 	}
-	if v := plan.AdaptiveScopeLocation.ValueString(); v != "" {
-		p.AdaptiveScopeLocation = v
+
+	p := purview.NewRetentionCompliancePolicyParams{}
+	if !config.AdaptiveScopeLocation.IsNull() {
+		if v := toStringSlice(ctx, plan.AdaptiveScopeLocation, &resp.Diagnostics); len(v) > 0 {
+			p.AdaptiveScopeLocation = v
+		}
 	}
-	if v := plan.Applications.ValueString(); v != "" {
-		p.Applications = v
+	if !config.Applications.IsNull() {
+		if v := toStringSlice(ctx, plan.Applications, &resp.Diagnostics); len(v) > 0 {
+			p.Applications = v
+		}
 	}
-	if v := plan.ExchangeLocation.ValueString(); v != "" {
-		p.ExchangeLocation = v
+	if !config.Comment.IsNull() {
+		p.Comment = plan.Comment.ValueString()
 	}
-	if v := plan.ExchangeLocationException.ValueString(); v != "" {
-		p.ExchangeLocationException = v
+	if !config.Enabled.IsNull() {
+		if !plan.Enabled.IsUnknown() {
+			p.Enabled = plan.Enabled.ValueBoolPointer()
+		}
 	}
-	if v := plan.ModernGroupLocation.ValueString(); v != "" {
-		p.ModernGroupLocation = v
+	if !config.ExchangeLocation.IsNull() {
+		if v := toStringSlice(ctx, plan.ExchangeLocation, &resp.Diagnostics); len(v) > 0 {
+			p.ExchangeLocation = v
+		}
 	}
-	if v := plan.ModernGroupLocationException.ValueString(); v != "" {
-		p.ModernGroupLocationException = v
+	if !config.ExchangeLocationException.IsNull() {
+		if v := toStringSlice(ctx, plan.ExchangeLocationException, &resp.Diagnostics); len(v) > 0 {
+			p.ExchangeLocationException = v
+		}
 	}
-	if v := plan.OneDriveLocation.ValueString(); v != "" {
-		p.OneDriveLocation = v
+	if !config.ExcludeSPE.IsNull() {
+		if !plan.ExcludeSPE.IsUnknown() {
+			p.ExcludeSPE = plan.ExcludeSPE.ValueBoolPointer()
+		}
 	}
-	if v := plan.OneDriveLocationException.ValueString(); v != "" {
-		p.OneDriveLocationException = v
+	if !config.IncludeUserOwnedContainers.IsNull() {
+		if !plan.IncludeUserOwnedContainers.IsUnknown() {
+			p.IncludeUserOwnedContainers = plan.IncludeUserOwnedContainers.ValueBoolPointer()
+		}
 	}
-	if v := plan.PolicyRBACScopes.ValueString(); v != "" {
-		p.PolicyRBACScopes = v
+	if !config.IsSimulation.IsNull() {
+		if !plan.IsSimulation.IsUnknown() {
+			p.IsSimulation = plan.IsSimulation.ValueBoolPointer()
+		}
 	}
-	if v := plan.PolicyTemplateInfo.ValueString(); v != "" {
-		p.PolicyTemplateInfo = v
+	if !config.ModernGroupLocation.IsNull() {
+		if v := toStringSlice(ctx, plan.ModernGroupLocation, &resp.Diagnostics); len(v) > 0 {
+			p.ModernGroupLocation = v
+		}
 	}
-	if v := plan.PublicFolderLocation.ValueString(); v != "" {
-		p.PublicFolderLocation = v
+	if !config.ModernGroupLocationException.IsNull() {
+		if v := toStringSlice(ctx, plan.ModernGroupLocationException, &resp.Diagnostics); len(v) > 0 {
+			p.ModernGroupLocationException = v
+		}
 	}
-	if v := plan.SharePointLocation.ValueString(); v != "" {
-		p.SharePointLocation = v
+	if !config.Name.IsNull() {
+		p.Name = plan.Name.ValueString()
 	}
-	if v := plan.SharePointLocationException.ValueString(); v != "" {
-		p.SharePointLocationException = v
+	if !config.OneDriveLocation.IsNull() {
+		if v := toStringSlice(ctx, plan.OneDriveLocation, &resp.Diagnostics); len(v) > 0 {
+			p.OneDriveLocation = v
+		}
 	}
-	if v := plan.SkypeLocation.ValueString(); v != "" {
-		p.SkypeLocation = v
+	if !config.OneDriveLocationException.IsNull() {
+		if v := toStringSlice(ctx, plan.OneDriveLocationException, &resp.Diagnostics); len(v) > 0 {
+			p.OneDriveLocationException = v
+		}
 	}
-	if v := plan.SkypeLocationException.ValueString(); v != "" {
-		p.SkypeLocationException = v
+	if !config.PolicyRBACScopes.IsNull() {
+		if v := toStringSlice(ctx, plan.PolicyRBACScopes, &resp.Diagnostics); len(v) > 0 {
+			p.PolicyRBACScopes = v
+		}
 	}
-	if v := plan.TeamsChannelLocation.ValueString(); v != "" {
-		p.TeamsChannelLocation = v
+	if v := config.PolicyTemplateInfo.ValueString(); v != "" {
+		p.PolicyTemplateInfo = objectParam(v)
 	}
-	if v := plan.TeamsChannelLocationException.ValueString(); v != "" {
-		p.TeamsChannelLocationException = v
+	if !config.PublicFolderLocation.IsNull() {
+		if v := toStringSlice(ctx, plan.PublicFolderLocation, &resp.Diagnostics); len(v) > 0 {
+			p.PublicFolderLocation = v
+		}
 	}
-	if v := plan.TeamsChatLocation.ValueString(); v != "" {
-		p.TeamsChatLocation = v
+	if !config.RestrictiveRetention.IsNull() {
+		if !plan.RestrictiveRetention.IsUnknown() {
+			p.RestrictiveRetention = plan.RestrictiveRetention.ValueBoolPointer()
+		}
 	}
-	if v := plan.TeamsChatLocationException.ValueString(); v != "" {
-		p.TeamsChatLocationException = v
+	if !config.RetainCloudAttachment.IsNull() {
+		if !plan.RetainCloudAttachment.IsUnknown() {
+			p.RetainCloudAttachment = plan.RetainCloudAttachment.ValueBoolPointer()
+		}
+	}
+	if !config.SharePointLocation.IsNull() {
+		if v := toStringSlice(ctx, plan.SharePointLocation, &resp.Diagnostics); len(v) > 0 {
+			p.SharePointLocation = v
+		}
+	}
+	if !config.SharePointLocationException.IsNull() {
+		if v := toStringSlice(ctx, plan.SharePointLocationException, &resp.Diagnostics); len(v) > 0 {
+			p.SharePointLocationException = v
+		}
+	}
+	if !config.SkypeLocation.IsNull() {
+		if v := toStringSlice(ctx, plan.SkypeLocation, &resp.Diagnostics); len(v) > 0 {
+			p.SkypeLocation = v
+		}
+	}
+	if !config.SkypeLocationException.IsNull() {
+		if v := toStringSlice(ctx, plan.SkypeLocationException, &resp.Diagnostics); len(v) > 0 {
+			p.SkypeLocationException = v
+		}
+	}
+	if !config.TeamsChannelLocation.IsNull() {
+		if v := toStringSlice(ctx, plan.TeamsChannelLocation, &resp.Diagnostics); len(v) > 0 {
+			p.TeamsChannelLocation = v
+		}
+	}
+	if !config.TeamsChannelLocationException.IsNull() {
+		if v := toStringSlice(ctx, plan.TeamsChannelLocationException, &resp.Diagnostics); len(v) > 0 {
+			p.TeamsChannelLocationException = v
+		}
+	}
+	if !config.TeamsChatLocation.IsNull() {
+		if v := toStringSlice(ctx, plan.TeamsChatLocation, &resp.Diagnostics); len(v) > 0 {
+			p.TeamsChatLocation = v
+		}
+	}
+	if !config.TeamsChatLocationException.IsNull() {
+		if v := toStringSlice(ctx, plan.TeamsChatLocationException, &resp.Diagnostics); len(v) > 0 {
+			p.TeamsChatLocationException = v
+		}
 	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	res, err := r.client.SCC.NewRetentionCompliancePolicy(ctx, p)
+	res, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.NewRetentionCompliancePolicy, p, isNotFound)
 	if err != nil {
 		resp.Diagnostics.AddError("New-RetentionCompliancePolicy failed", err.Error())
 		return
@@ -314,170 +318,161 @@ func (r *retentionCompliancePolicyResource) Update(ctx context.Context, req reso
 	id := r.identityOf(state)
 	sp := purview.SetRetentionCompliancePolicyParams{}
 	sp.Identity = id
-	if v := plan.AddAdaptiveScopeLocation.ValueString(); v != "" {
-		sp.AddAdaptiveScopeLocation = v
+	var cur *retentionCompliancePolicyModel
+	curRead := false
+	current := func() *retentionCompliancePolicyModel {
+		if !curRead {
+			curRead = true
+			var m retentionCompliancePolicyModel
+			if r.refresh(ctx, id, &m, &resp.Diagnostics, nil) {
+				cur = &m
+			} else if !resp.Diagnostics.HasError() {
+				resp.Diagnostics.AddError("Get-RetentionCompliancePolicy failed", "the object could not be read to determine the list values to remove; nothing was changed")
+			}
+		}
+		return cur
 	}
-	if v := plan.AddExchangeLocation.ValueString(); v != "" {
-		sp.AddExchangeLocation = v
+	if !plan.Applications.Equal(state.Applications) {
+		if !plan.Applications.IsNull() && !plan.Applications.IsUnknown() {
+			if v := toStringSlice(ctx, plan.Applications, &resp.Diagnostics); len(v) > 0 {
+				sp.Applications = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.Applications, &resp.Diagnostics); len(rm) > 0 {
+						sp.ApplicationsDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
 	}
-	if v := plan.AddExchangeLocationException.ValueString(); v != "" {
-		sp.AddExchangeLocationException = v
+	if !plan.Comment.Equal(state.Comment) {
+		sp.Comment = plan.Comment.ValueString()
 	}
-	if v := plan.AddModernGroupLocation.ValueString(); v != "" {
-		sp.AddModernGroupLocation = v
+	if !plan.DeletedResources.Equal(state.DeletedResources) {
+		sp.DeletedResources = plan.DeletedResources.ValueString()
 	}
-	if v := plan.AddModernGroupLocationException.ValueString(); v != "" {
-		sp.AddModernGroupLocationException = v
+	if !plan.Enabled.Equal(state.Enabled) {
+		if !plan.Enabled.IsUnknown() {
+			sp.Enabled = plan.Enabled.ValueBoolPointer()
+		}
 	}
-	if v := plan.AddOneDriveLocation.ValueString(); v != "" {
-		sp.AddOneDriveLocation = v
+	if !plan.EnforceSimulationPolicy.Equal(state.EnforceSimulationPolicy) {
+		if !plan.EnforceSimulationPolicy.IsUnknown() {
+			sp.EnforceSimulationPolicy = plan.EnforceSimulationPolicy.ValueBoolPointer()
+		}
 	}
-	if v := plan.AddOneDriveLocationException.ValueString(); v != "" {
-		sp.AddOneDriveLocationException = v
+	if !plan.ExcludeSPE.Equal(state.ExcludeSPE) {
+		if !plan.ExcludeSPE.IsUnknown() {
+			sp.ExcludeSPE = plan.ExcludeSPE.ValueBoolPointer()
+		}
 	}
-	if v := plan.AddPublicFolderLocation.ValueString(); v != "" {
-		sp.AddPublicFolderLocation = v
+	if !plan.ForceBypassScopeCheck.Equal(state.ForceBypassScopeCheck) {
+		if !plan.ForceBypassScopeCheck.IsUnknown() {
+			sp.ForceBypassScopeCheck = plan.ForceBypassScopeCheck.ValueBoolPointer()
+		}
 	}
-	if v := plan.AddSharePointLocation.ValueString(); v != "" {
-		sp.AddSharePointLocation = v
+	if !plan.ForceStartSimulation.Equal(state.ForceStartSimulation) {
+		if !plan.ForceStartSimulation.IsUnknown() {
+			sp.ForceStartSimulation = plan.ForceStartSimulation.ValueBoolPointer()
+		}
 	}
-	if v := plan.AddSharePointLocationException.ValueString(); v != "" {
-		sp.AddSharePointLocationException = v
+	if !plan.IncludeUserOwnedContainers.Equal(state.IncludeUserOwnedContainers) {
+		if !plan.IncludeUserOwnedContainers.IsUnknown() {
+			sp.IncludeUserOwnedContainers = plan.IncludeUserOwnedContainers.ValueBoolPointer()
+		}
 	}
-	if v := plan.AddSkypeLocation.ValueString(); v != "" {
-		sp.AddSkypeLocation = v
+	if !plan.PolicyRBACScopes.Equal(state.PolicyRBACScopes) {
+		if !plan.PolicyRBACScopes.IsNull() && !plan.PolicyRBACScopes.IsUnknown() {
+			if v := toStringSlice(ctx, plan.PolicyRBACScopes, &resp.Diagnostics); len(v) > 0 {
+				sp.PolicyRBACScopes = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.PolicyRBACScopes, &resp.Diagnostics); len(rm) > 0 {
+						sp.PolicyRBACScopesDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
 	}
-	if v := plan.AddSkypeLocationException.ValueString(); v != "" {
-		sp.AddSkypeLocationException = v
+	if !plan.PolicyTemplateInfo.Equal(state.PolicyTemplateInfo) {
+		if v := plan.PolicyTemplateInfo.ValueString(); v != "" {
+			sp.PolicyTemplateInfo = objectParam(v)
+		}
 	}
-	if v := plan.AddTeamsChannelLocation.ValueString(); v != "" {
-		sp.AddTeamsChannelLocation = v
+	if !plan.RestrictiveRetention.Equal(state.RestrictiveRetention) {
+		if !plan.RestrictiveRetention.IsUnknown() {
+			sp.RestrictiveRetention = plan.RestrictiveRetention.ValueBoolPointer()
+		}
 	}
-	if v := plan.AddTeamsChannelLocationException.ValueString(); v != "" {
-		sp.AddTeamsChannelLocationException = v
+	if !plan.StartSimulation.Equal(state.StartSimulation) {
+		if !plan.StartSimulation.IsUnknown() {
+			sp.StartSimulation = plan.StartSimulation.ValueBoolPointer()
+		}
 	}
-	if v := plan.AddTeamsChatLocation.ValueString(); v != "" {
-		sp.AddTeamsChatLocation = v
-	}
-	if v := plan.AddTeamsChatLocationException.ValueString(); v != "" {
-		sp.AddTeamsChatLocationException = v
-	}
-	if v := plan.Applications.ValueString(); v != "" {
-		sp.Applications = v
-	}
-	sp.Comment = plan.Comment.ValueString()
-	sp.DeletedResources = plan.DeletedResources.ValueString()
-	sp.Enabled = plan.Enabled.ValueBool()
-	sp.EnforceSimulationPolicy = plan.EnforceSimulationPolicy.ValueBool()
-	sp.ExcludeSPE = plan.ExcludeSPE.ValueBool()
-	sp.ForceBypassScopeCheck = plan.ForceBypassScopeCheck.ValueBool()
-	sp.ForceStartSimulation = plan.ForceStartSimulation.ValueBool()
-	sp.IncludeUserOwnedContainers = plan.IncludeUserOwnedContainers.ValueBool()
-	if v := plan.PolicyRBACScopes.ValueString(); v != "" {
-		sp.PolicyRBACScopes = v
-	}
-	if v := plan.PolicyTemplateInfo.ValueString(); v != "" {
-		sp.PolicyTemplateInfo = v
-	}
-	if v := plan.RemoveAdaptiveScopeLocation.ValueString(); v != "" {
-		sp.RemoveAdaptiveScopeLocation = v
-	}
-	if v := plan.RemoveExchangeLocation.ValueString(); v != "" {
-		sp.RemoveExchangeLocation = v
-	}
-	if v := plan.RemoveExchangeLocationException.ValueString(); v != "" {
-		sp.RemoveExchangeLocationException = v
-	}
-	if v := plan.RemoveModernGroupLocation.ValueString(); v != "" {
-		sp.RemoveModernGroupLocation = v
-	}
-	if v := plan.RemoveModernGroupLocationException.ValueString(); v != "" {
-		sp.RemoveModernGroupLocationException = v
-	}
-	if v := plan.RemoveOneDriveLocation.ValueString(); v != "" {
-		sp.RemoveOneDriveLocation = v
-	}
-	if v := plan.RemoveOneDriveLocationException.ValueString(); v != "" {
-		sp.RemoveOneDriveLocationException = v
-	}
-	if v := plan.RemovePublicFolderLocation.ValueString(); v != "" {
-		sp.RemovePublicFolderLocation = v
-	}
-	if v := plan.RemoveSharePointLocation.ValueString(); v != "" {
-		sp.RemoveSharePointLocation = v
-	}
-	if v := plan.RemoveSharePointLocationException.ValueString(); v != "" {
-		sp.RemoveSharePointLocationException = v
-	}
-	if v := plan.RemoveSkypeLocation.ValueString(); v != "" {
-		sp.RemoveSkypeLocation = v
-	}
-	if v := plan.RemoveSkypeLocationException.ValueString(); v != "" {
-		sp.RemoveSkypeLocationException = v
-	}
-	if v := plan.RemoveTeamsChannelLocation.ValueString(); v != "" {
-		sp.RemoveTeamsChannelLocation = v
-	}
-	if v := plan.RemoveTeamsChannelLocationException.ValueString(); v != "" {
-		sp.RemoveTeamsChannelLocationException = v
-	}
-	if v := plan.RemoveTeamsChatLocation.ValueString(); v != "" {
-		sp.RemoveTeamsChatLocation = v
-	}
-	if v := plan.RemoveTeamsChatLocationException.ValueString(); v != "" {
-		sp.RemoveTeamsChatLocationException = v
-	}
-	sp.RestrictiveRetention = plan.RestrictiveRetention.ValueBool()
-	sp.RetryDistribution = plan.RetryDistribution.ValueBool()
-	sp.StartSimulation = plan.StartSimulation.ValueBool()
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	if _, err := r.client.SCC.SetRetentionCompliancePolicy(ctx, sp); err != nil {
+	if _, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.SetRetentionCompliancePolicy, sp, isNotFound); err != nil {
 		resp.Diagnostics.AddError("Set-RetentionCompliancePolicy failed", err.Error())
 		return
 	}
 	cfg := plan
 	reflected := reconcile.ReflectsFields(map[string]types.String{
-		"AddAdaptiveScopeLocation":            cfg.AddAdaptiveScopeLocation,
-		"AddExchangeLocation":                 cfg.AddExchangeLocation,
-		"AddExchangeLocationException":        cfg.AddExchangeLocationException,
-		"AddModernGroupLocation":              cfg.AddModernGroupLocation,
-		"AddModernGroupLocationException":     cfg.AddModernGroupLocationException,
-		"AddOneDriveLocation":                 cfg.AddOneDriveLocation,
-		"AddOneDriveLocationException":        cfg.AddOneDriveLocationException,
-		"AddPublicFolderLocation":             cfg.AddPublicFolderLocation,
-		"AddSharePointLocation":               cfg.AddSharePointLocation,
-		"AddSharePointLocationException":      cfg.AddSharePointLocationException,
-		"AddSkypeLocation":                    cfg.AddSkypeLocation,
-		"AddSkypeLocationException":           cfg.AddSkypeLocationException,
-		"AddTeamsChannelLocation":             cfg.AddTeamsChannelLocation,
-		"AddTeamsChannelLocationException":    cfg.AddTeamsChannelLocationException,
-		"AddTeamsChatLocation":                cfg.AddTeamsChatLocation,
-		"AddTeamsChatLocationException":       cfg.AddTeamsChatLocationException,
-		"Applications":                        cfg.Applications,
-		"Comment":                             cfg.Comment,
-		"DeletedResources":                    cfg.DeletedResources,
-		"PolicyRBACScopes":                    cfg.PolicyRBACScopes,
-		"PolicyTemplateInfo":                  cfg.PolicyTemplateInfo,
-		"RemoveAdaptiveScopeLocation":         cfg.RemoveAdaptiveScopeLocation,
-		"RemoveExchangeLocation":              cfg.RemoveExchangeLocation,
-		"RemoveExchangeLocationException":     cfg.RemoveExchangeLocationException,
-		"RemoveModernGroupLocation":           cfg.RemoveModernGroupLocation,
-		"RemoveModernGroupLocationException":  cfg.RemoveModernGroupLocationException,
-		"RemoveOneDriveLocation":              cfg.RemoveOneDriveLocation,
-		"RemoveOneDriveLocationException":     cfg.RemoveOneDriveLocationException,
-		"RemovePublicFolderLocation":          cfg.RemovePublicFolderLocation,
-		"RemoveSharePointLocation":            cfg.RemoveSharePointLocation,
-		"RemoveSharePointLocationException":   cfg.RemoveSharePointLocationException,
-		"RemoveSkypeLocation":                 cfg.RemoveSkypeLocation,
-		"RemoveSkypeLocationException":        cfg.RemoveSkypeLocationException,
-		"RemoveTeamsChannelLocation":          cfg.RemoveTeamsChannelLocation,
-		"RemoveTeamsChannelLocationException": cfg.RemoveTeamsChannelLocationException,
-		"RemoveTeamsChatLocation":             cfg.RemoveTeamsChatLocation,
-		"RemoveTeamsChatLocationException":    cfg.RemoveTeamsChatLocationException,
+		"Comment":          cfg.Comment,
+		"DeletedResources": cfg.DeletedResources,
 	}, getString)
+	if !cfg.Enabled.IsUnknown() && !cfg.Enabled.IsNull() && !cfg.Enabled.Equal(state.Enabled) {
+		prev, want := reflected, cfg.Enabled.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["Enabled"] == nil || getBool(obj, "Enabled") == want)
+		}
+	}
+	if !cfg.EnforceSimulationPolicy.IsUnknown() && !cfg.EnforceSimulationPolicy.IsNull() && !cfg.EnforceSimulationPolicy.Equal(state.EnforceSimulationPolicy) {
+		prev, want := reflected, cfg.EnforceSimulationPolicy.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["EnforceSimulationPolicy"] == nil || getBool(obj, "EnforceSimulationPolicy") == want)
+		}
+	}
+	if !cfg.ExcludeSPE.IsUnknown() && !cfg.ExcludeSPE.IsNull() && !cfg.ExcludeSPE.Equal(state.ExcludeSPE) {
+		prev, want := reflected, cfg.ExcludeSPE.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["ExcludeSPE"] == nil || getBool(obj, "ExcludeSPE") == want)
+		}
+	}
+	if !cfg.ForceBypassScopeCheck.IsUnknown() && !cfg.ForceBypassScopeCheck.IsNull() && !cfg.ForceBypassScopeCheck.Equal(state.ForceBypassScopeCheck) {
+		prev, want := reflected, cfg.ForceBypassScopeCheck.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["ForceBypassScopeCheck"] == nil || getBool(obj, "ForceBypassScopeCheck") == want)
+		}
+	}
+	if !cfg.ForceStartSimulation.IsUnknown() && !cfg.ForceStartSimulation.IsNull() && !cfg.ForceStartSimulation.Equal(state.ForceStartSimulation) {
+		prev, want := reflected, cfg.ForceStartSimulation.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["ForceStartSimulation"] == nil || getBool(obj, "ForceStartSimulation") == want)
+		}
+	}
+	if !cfg.IncludeUserOwnedContainers.IsUnknown() && !cfg.IncludeUserOwnedContainers.IsNull() && !cfg.IncludeUserOwnedContainers.Equal(state.IncludeUserOwnedContainers) {
+		prev, want := reflected, cfg.IncludeUserOwnedContainers.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["IncludeUserOwnedContainers"] == nil || getBool(obj, "IncludeUserOwnedContainers") == want)
+		}
+	}
+	if !cfg.RestrictiveRetention.IsUnknown() && !cfg.RestrictiveRetention.IsNull() && !cfg.RestrictiveRetention.Equal(state.RestrictiveRetention) {
+		prev, want := reflected, cfg.RestrictiveRetention.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["RestrictiveRetention"] == nil || getBool(obj, "RestrictiveRetention") == want)
+		}
+	}
+	if !cfg.StartSimulation.IsUnknown() && !cfg.StartSimulation.IsNull() && !cfg.StartSimulation.Equal(state.StartSimulation) {
+		prev, want := reflected, cfg.StartSimulation.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["StartSimulation"] == nil || getBool(obj, "StartSimulation") == want)
+		}
+	}
 	r.refresh(ctx, id, &plan, &resp.Diagnostics, reflected)
+	if !cfg.ID.IsUnknown() && !cfg.ID.IsNull() {
+		plan.ID = cfg.ID
+	}
 	r.reconcileState(&cfg, &plan)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
@@ -537,138 +532,72 @@ func (r *retentionCompliancePolicyResource) refresh(ctx context.Context, identit
 func readRetentionCompliancePolicy(ctx context.Context, obj map[string]any, m *retentionCompliancePolicyModel) {
 	m.ID = types.StringValue(firstNonEmptyStr(getString(obj, "Guid"), getString(obj, "Id"), getString(obj, "Identity")))
 	m.Identity = types.StringValue(firstNonEmptyStr(getString(obj, "Identity"), getString(obj, "Guid"), getString(obj, "Name")))
-	m.AdaptiveScopeLocation = types.StringValue(getString(obj, "AdaptiveScopeLocation"))
-	m.AddAdaptiveScopeLocation = types.StringValue(getString(obj, "AddAdaptiveScopeLocation"))
-	m.AddExchangeLocation = types.StringValue(getString(obj, "AddExchangeLocation"))
-	m.AddExchangeLocationException = types.StringValue(getString(obj, "AddExchangeLocationException"))
-	m.AddModernGroupLocation = types.StringValue(getString(obj, "AddModernGroupLocation"))
-	m.AddModernGroupLocationException = types.StringValue(getString(obj, "AddModernGroupLocationException"))
-	m.AddOneDriveLocation = types.StringValue(getString(obj, "AddOneDriveLocation"))
-	m.AddOneDriveLocationException = types.StringValue(getString(obj, "AddOneDriveLocationException"))
-	m.AddPublicFolderLocation = types.StringValue(getString(obj, "AddPublicFolderLocation"))
-	m.AddSharePointLocation = types.StringValue(getString(obj, "AddSharePointLocation"))
-	m.AddSharePointLocationException = types.StringValue(getString(obj, "AddSharePointLocationException"))
-	m.AddSkypeLocation = types.StringValue(getString(obj, "AddSkypeLocation"))
-	m.AddSkypeLocationException = types.StringValue(getString(obj, "AddSkypeLocationException"))
-	m.AddTeamsChannelLocation = types.StringValue(getString(obj, "AddTeamsChannelLocation"))
-	m.AddTeamsChannelLocationException = types.StringValue(getString(obj, "AddTeamsChannelLocationException"))
-	m.AddTeamsChatLocation = types.StringValue(getString(obj, "AddTeamsChatLocation"))
-	m.AddTeamsChatLocationException = types.StringValue(getString(obj, "AddTeamsChatLocationException"))
-	m.Applications = types.StringValue(getString(obj, "Applications"))
+	m.AdaptiveScopeLocation = stringSetValue(ctx, getStringSlice(obj, "AdaptiveScopeLocation"))
+	m.Applications = stringSetValue(ctx, getStringSlice(obj, "Applications"))
 	m.Comment = types.StringValue(getString(obj, "Comment"))
 	m.DeletedResources = types.StringValue(getString(obj, "DeletedResources"))
 	m.Enabled = types.BoolValue(getBool(obj, "Enabled"))
 	m.EnforceSimulationPolicy = types.BoolValue(getBool(obj, "EnforceSimulationPolicy"))
-	m.ExchangeLocation = types.StringValue(getString(obj, "ExchangeLocation"))
-	m.ExchangeLocationException = types.StringValue(getString(obj, "ExchangeLocationException"))
+	m.ExchangeLocation = stringSetValue(ctx, getStringSlice(obj, "ExchangeLocation"))
+	m.ExchangeLocationException = stringSetValue(ctx, getStringSlice(obj, "ExchangeLocationException"))
 	m.ExcludeSPE = types.BoolValue(getBool(obj, "ExcludeSPE"))
 	m.ForceBypassScopeCheck = types.BoolValue(getBool(obj, "ForceBypassScopeCheck"))
 	m.ForceStartSimulation = types.BoolValue(getBool(obj, "ForceStartSimulation"))
 	m.IncludeUserOwnedContainers = types.BoolValue(getBool(obj, "IncludeUserOwnedContainers"))
 	m.IsSimulation = types.BoolValue(getBool(obj, "IsSimulation"))
-	m.ModernGroupLocation = types.StringValue(getString(obj, "ModernGroupLocation"))
-	m.ModernGroupLocationException = types.StringValue(getString(obj, "ModernGroupLocationException"))
+	m.ModernGroupLocation = stringSetValue(ctx, getStringSlice(obj, "ModernGroupLocation"))
+	m.ModernGroupLocationException = stringSetValue(ctx, getStringSlice(obj, "ModernGroupLocationException"))
 	m.Name = types.StringValue(getString(obj, "Name"))
-	m.OneDriveLocation = types.StringValue(getString(obj, "OneDriveLocation"))
-	m.OneDriveLocationException = types.StringValue(getString(obj, "OneDriveLocationException"))
-	m.PolicyRBACScopes = types.StringValue(getString(obj, "PolicyRBACScopes"))
-	m.PolicyTemplateInfo = types.StringValue(getString(obj, "PolicyTemplateInfo"))
-	m.PublicFolderLocation = types.StringValue(getString(obj, "PublicFolderLocation"))
-	m.RemoveAdaptiveScopeLocation = types.StringValue(getString(obj, "RemoveAdaptiveScopeLocation"))
-	m.RemoveExchangeLocation = types.StringValue(getString(obj, "RemoveExchangeLocation"))
-	m.RemoveExchangeLocationException = types.StringValue(getString(obj, "RemoveExchangeLocationException"))
-	m.RemoveModernGroupLocation = types.StringValue(getString(obj, "RemoveModernGroupLocation"))
-	m.RemoveModernGroupLocationException = types.StringValue(getString(obj, "RemoveModernGroupLocationException"))
-	m.RemoveOneDriveLocation = types.StringValue(getString(obj, "RemoveOneDriveLocation"))
-	m.RemoveOneDriveLocationException = types.StringValue(getString(obj, "RemoveOneDriveLocationException"))
-	m.RemovePublicFolderLocation = types.StringValue(getString(obj, "RemovePublicFolderLocation"))
-	m.RemoveSharePointLocation = types.StringValue(getString(obj, "RemoveSharePointLocation"))
-	m.RemoveSharePointLocationException = types.StringValue(getString(obj, "RemoveSharePointLocationException"))
-	m.RemoveSkypeLocation = types.StringValue(getString(obj, "RemoveSkypeLocation"))
-	m.RemoveSkypeLocationException = types.StringValue(getString(obj, "RemoveSkypeLocationException"))
-	m.RemoveTeamsChannelLocation = types.StringValue(getString(obj, "RemoveTeamsChannelLocation"))
-	m.RemoveTeamsChannelLocationException = types.StringValue(getString(obj, "RemoveTeamsChannelLocationException"))
-	m.RemoveTeamsChatLocation = types.StringValue(getString(obj, "RemoveTeamsChatLocation"))
-	m.RemoveTeamsChatLocationException = types.StringValue(getString(obj, "RemoveTeamsChatLocationException"))
+	m.OneDriveLocation = stringSetValue(ctx, getStringSlice(obj, "OneDriveLocation"))
+	m.OneDriveLocationException = stringSetValue(ctx, getStringSlice(obj, "OneDriveLocationException"))
+	m.PolicyRBACScopes = stringSetValue(ctx, getStringSlice(obj, "PolicyRBACScopes"))
+	m.PolicyTemplateInfo = types.StringValue(getObjectJSON(obj, "PolicyTemplateInfo"))
+	m.PublicFolderLocation = stringSetValue(ctx, getStringSlice(obj, "PublicFolderLocation"))
 	m.RestrictiveRetention = types.BoolValue(getBool(obj, "RestrictiveRetention"))
 	m.RetainCloudAttachment = types.BoolValue(getBool(obj, "RetainCloudAttachment"))
-	m.RetryDistribution = types.BoolValue(getBool(obj, "RetryDistribution"))
-	m.SharePointLocation = types.StringValue(getString(obj, "SharePointLocation"))
-	m.SharePointLocationException = types.StringValue(getString(obj, "SharePointLocationException"))
-	m.SkypeLocation = types.StringValue(getString(obj, "SkypeLocation"))
-	m.SkypeLocationException = types.StringValue(getString(obj, "SkypeLocationException"))
+	m.SharePointLocation = stringSetValue(ctx, getStringSlice(obj, "SharePointLocation"))
+	m.SharePointLocationException = stringSetValue(ctx, getStringSlice(obj, "SharePointLocationException"))
+	m.SkypeLocation = stringSetValue(ctx, getStringSlice(obj, "SkypeLocation"))
+	m.SkypeLocationException = stringSetValue(ctx, getStringSlice(obj, "SkypeLocationException"))
 	m.StartSimulation = types.BoolValue(getBool(obj, "StartSimulation"))
-	m.TeamsChannelLocation = types.StringValue(getString(obj, "TeamsChannelLocation"))
-	m.TeamsChannelLocationException = types.StringValue(getString(obj, "TeamsChannelLocationException"))
-	m.TeamsChatLocation = types.StringValue(getString(obj, "TeamsChatLocation"))
-	m.TeamsChatLocationException = types.StringValue(getString(obj, "TeamsChatLocationException"))
+	m.TeamsChannelLocation = stringSetValue(ctx, getStringSlice(obj, "TeamsChannelLocation"))
+	m.TeamsChannelLocationException = stringSetValue(ctx, getStringSlice(obj, "TeamsChannelLocationException"))
+	m.TeamsChatLocation = stringSetValue(ctx, getStringSlice(obj, "TeamsChatLocation"))
+	m.TeamsChatLocationException = stringSetValue(ctx, getStringSlice(obj, "TeamsChatLocationException"))
 	_ = ctx
 }
 
 func (r *retentionCompliancePolicyResource) reconcileState(cfg, read *retentionCompliancePolicyModel) {
-	read.AdaptiveScopeLocation = reconcile.KeepStr(cfg.AdaptiveScopeLocation, read.AdaptiveScopeLocation)
-	read.AddAdaptiveScopeLocation = reconcile.KeepStr(cfg.AddAdaptiveScopeLocation, read.AddAdaptiveScopeLocation)
-	read.AddExchangeLocation = reconcile.KeepStr(cfg.AddExchangeLocation, read.AddExchangeLocation)
-	read.AddExchangeLocationException = reconcile.KeepStr(cfg.AddExchangeLocationException, read.AddExchangeLocationException)
-	read.AddModernGroupLocation = reconcile.KeepStr(cfg.AddModernGroupLocation, read.AddModernGroupLocation)
-	read.AddModernGroupLocationException = reconcile.KeepStr(cfg.AddModernGroupLocationException, read.AddModernGroupLocationException)
-	read.AddOneDriveLocation = reconcile.KeepStr(cfg.AddOneDriveLocation, read.AddOneDriveLocation)
-	read.AddOneDriveLocationException = reconcile.KeepStr(cfg.AddOneDriveLocationException, read.AddOneDriveLocationException)
-	read.AddPublicFolderLocation = reconcile.KeepStr(cfg.AddPublicFolderLocation, read.AddPublicFolderLocation)
-	read.AddSharePointLocation = reconcile.KeepStr(cfg.AddSharePointLocation, read.AddSharePointLocation)
-	read.AddSharePointLocationException = reconcile.KeepStr(cfg.AddSharePointLocationException, read.AddSharePointLocationException)
-	read.AddSkypeLocation = reconcile.KeepStr(cfg.AddSkypeLocation, read.AddSkypeLocation)
-	read.AddSkypeLocationException = reconcile.KeepStr(cfg.AddSkypeLocationException, read.AddSkypeLocationException)
-	read.AddTeamsChannelLocation = reconcile.KeepStr(cfg.AddTeamsChannelLocation, read.AddTeamsChannelLocation)
-	read.AddTeamsChannelLocationException = reconcile.KeepStr(cfg.AddTeamsChannelLocationException, read.AddTeamsChannelLocationException)
-	read.AddTeamsChatLocation = reconcile.KeepStr(cfg.AddTeamsChatLocation, read.AddTeamsChatLocation)
-	read.AddTeamsChatLocationException = reconcile.KeepStr(cfg.AddTeamsChatLocationException, read.AddTeamsChatLocationException)
-	read.Applications = reconcile.KeepStr(cfg.Applications, read.Applications)
+	read.AdaptiveScopeLocation = reconcile.KeepSet(cfg.AdaptiveScopeLocation, read.AdaptiveScopeLocation)
+	read.Applications = reconcile.KeepSet(cfg.Applications, read.Applications)
 	read.Comment = reconcile.KeepStr(cfg.Comment, read.Comment)
 	read.DeletedResources = reconcile.KeepStr(cfg.DeletedResources, read.DeletedResources)
 	read.Enabled = reconcile.KeepBool(cfg.Enabled, read.Enabled)
 	read.EnforceSimulationPolicy = reconcile.KeepBool(cfg.EnforceSimulationPolicy, read.EnforceSimulationPolicy)
-	read.ExchangeLocation = reconcile.KeepStr(cfg.ExchangeLocation, read.ExchangeLocation)
-	read.ExchangeLocationException = reconcile.KeepStr(cfg.ExchangeLocationException, read.ExchangeLocationException)
+	read.ExchangeLocation = reconcile.KeepSet(cfg.ExchangeLocation, read.ExchangeLocation)
+	read.ExchangeLocationException = reconcile.KeepSet(cfg.ExchangeLocationException, read.ExchangeLocationException)
 	read.ExcludeSPE = reconcile.KeepBool(cfg.ExcludeSPE, read.ExcludeSPE)
 	read.ForceBypassScopeCheck = reconcile.KeepBool(cfg.ForceBypassScopeCheck, read.ForceBypassScopeCheck)
 	read.ForceStartSimulation = reconcile.KeepBool(cfg.ForceStartSimulation, read.ForceStartSimulation)
 	read.IncludeUserOwnedContainers = reconcile.KeepBool(cfg.IncludeUserOwnedContainers, read.IncludeUserOwnedContainers)
 	read.IsSimulation = reconcile.KeepBool(cfg.IsSimulation, read.IsSimulation)
-	read.ModernGroupLocation = reconcile.KeepStr(cfg.ModernGroupLocation, read.ModernGroupLocation)
-	read.ModernGroupLocationException = reconcile.KeepStr(cfg.ModernGroupLocationException, read.ModernGroupLocationException)
+	read.ModernGroupLocation = reconcile.KeepSet(cfg.ModernGroupLocation, read.ModernGroupLocation)
+	read.ModernGroupLocationException = reconcile.KeepSet(cfg.ModernGroupLocationException, read.ModernGroupLocationException)
 	read.Name = reconcile.KeepStr(cfg.Name, read.Name)
-	read.OneDriveLocation = reconcile.KeepStr(cfg.OneDriveLocation, read.OneDriveLocation)
-	read.OneDriveLocationException = reconcile.KeepStr(cfg.OneDriveLocationException, read.OneDriveLocationException)
-	read.PolicyRBACScopes = reconcile.KeepStr(cfg.PolicyRBACScopes, read.PolicyRBACScopes)
+	read.OneDriveLocation = reconcile.KeepSet(cfg.OneDriveLocation, read.OneDriveLocation)
+	read.OneDriveLocationException = reconcile.KeepSet(cfg.OneDriveLocationException, read.OneDriveLocationException)
+	read.PolicyRBACScopes = reconcile.KeepSet(cfg.PolicyRBACScopes, read.PolicyRBACScopes)
 	read.PolicyTemplateInfo = reconcile.KeepStr(cfg.PolicyTemplateInfo, read.PolicyTemplateInfo)
-	read.PublicFolderLocation = reconcile.KeepStr(cfg.PublicFolderLocation, read.PublicFolderLocation)
-	read.RemoveAdaptiveScopeLocation = reconcile.KeepStr(cfg.RemoveAdaptiveScopeLocation, read.RemoveAdaptiveScopeLocation)
-	read.RemoveExchangeLocation = reconcile.KeepStr(cfg.RemoveExchangeLocation, read.RemoveExchangeLocation)
-	read.RemoveExchangeLocationException = reconcile.KeepStr(cfg.RemoveExchangeLocationException, read.RemoveExchangeLocationException)
-	read.RemoveModernGroupLocation = reconcile.KeepStr(cfg.RemoveModernGroupLocation, read.RemoveModernGroupLocation)
-	read.RemoveModernGroupLocationException = reconcile.KeepStr(cfg.RemoveModernGroupLocationException, read.RemoveModernGroupLocationException)
-	read.RemoveOneDriveLocation = reconcile.KeepStr(cfg.RemoveOneDriveLocation, read.RemoveOneDriveLocation)
-	read.RemoveOneDriveLocationException = reconcile.KeepStr(cfg.RemoveOneDriveLocationException, read.RemoveOneDriveLocationException)
-	read.RemovePublicFolderLocation = reconcile.KeepStr(cfg.RemovePublicFolderLocation, read.RemovePublicFolderLocation)
-	read.RemoveSharePointLocation = reconcile.KeepStr(cfg.RemoveSharePointLocation, read.RemoveSharePointLocation)
-	read.RemoveSharePointLocationException = reconcile.KeepStr(cfg.RemoveSharePointLocationException, read.RemoveSharePointLocationException)
-	read.RemoveSkypeLocation = reconcile.KeepStr(cfg.RemoveSkypeLocation, read.RemoveSkypeLocation)
-	read.RemoveSkypeLocationException = reconcile.KeepStr(cfg.RemoveSkypeLocationException, read.RemoveSkypeLocationException)
-	read.RemoveTeamsChannelLocation = reconcile.KeepStr(cfg.RemoveTeamsChannelLocation, read.RemoveTeamsChannelLocation)
-	read.RemoveTeamsChannelLocationException = reconcile.KeepStr(cfg.RemoveTeamsChannelLocationException, read.RemoveTeamsChannelLocationException)
-	read.RemoveTeamsChatLocation = reconcile.KeepStr(cfg.RemoveTeamsChatLocation, read.RemoveTeamsChatLocation)
-	read.RemoveTeamsChatLocationException = reconcile.KeepStr(cfg.RemoveTeamsChatLocationException, read.RemoveTeamsChatLocationException)
+	read.PublicFolderLocation = reconcile.KeepSet(cfg.PublicFolderLocation, read.PublicFolderLocation)
 	read.RestrictiveRetention = reconcile.KeepBool(cfg.RestrictiveRetention, read.RestrictiveRetention)
 	read.RetainCloudAttachment = reconcile.KeepBool(cfg.RetainCloudAttachment, read.RetainCloudAttachment)
-	read.RetryDistribution = reconcile.KeepBool(cfg.RetryDistribution, read.RetryDistribution)
-	read.SharePointLocation = reconcile.KeepStr(cfg.SharePointLocation, read.SharePointLocation)
-	read.SharePointLocationException = reconcile.KeepStr(cfg.SharePointLocationException, read.SharePointLocationException)
-	read.SkypeLocation = reconcile.KeepStr(cfg.SkypeLocation, read.SkypeLocation)
-	read.SkypeLocationException = reconcile.KeepStr(cfg.SkypeLocationException, read.SkypeLocationException)
+	read.SharePointLocation = reconcile.KeepSet(cfg.SharePointLocation, read.SharePointLocation)
+	read.SharePointLocationException = reconcile.KeepSet(cfg.SharePointLocationException, read.SharePointLocationException)
+	read.SkypeLocation = reconcile.KeepSet(cfg.SkypeLocation, read.SkypeLocation)
+	read.SkypeLocationException = reconcile.KeepSet(cfg.SkypeLocationException, read.SkypeLocationException)
 	read.StartSimulation = reconcile.KeepBool(cfg.StartSimulation, read.StartSimulation)
-	read.TeamsChannelLocation = reconcile.KeepStr(cfg.TeamsChannelLocation, read.TeamsChannelLocation)
-	read.TeamsChannelLocationException = reconcile.KeepStr(cfg.TeamsChannelLocationException, read.TeamsChannelLocationException)
-	read.TeamsChatLocation = reconcile.KeepStr(cfg.TeamsChatLocation, read.TeamsChatLocation)
-	read.TeamsChatLocationException = reconcile.KeepStr(cfg.TeamsChatLocationException, read.TeamsChatLocationException)
+	read.TeamsChannelLocation = reconcile.KeepSet(cfg.TeamsChannelLocation, read.TeamsChannelLocation)
+	read.TeamsChannelLocationException = reconcile.KeepSet(cfg.TeamsChannelLocationException, read.TeamsChannelLocationException)
+	read.TeamsChatLocation = reconcile.KeepSet(cfg.TeamsChatLocation, read.TeamsChatLocation)
+	read.TeamsChatLocationException = reconcile.KeepSet(cfg.TeamsChatLocationException, read.TeamsChatLocationException)
 }

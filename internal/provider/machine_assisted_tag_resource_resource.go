@@ -60,7 +60,7 @@ func (r *machineAssistedTagResourceResource) Schema(_ context.Context, _ resourc
 		Description: "Manages the MachineAssistedTagResource object via New-MachineAssistedTagResource / Get-MachineAssistedTagResource / Set-MachineAssistedTagResource / Remove-MachineAssistedTagResource.",
 		Attributes: map[string]schema.Attribute{
 			"id":               schema.StringAttribute{Computed: true, Description: "Object identifier (GUID).", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"identity":         schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets."},
+			"identity":         schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"description":      schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -Description parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace(), stringplanmodifier.UseStateForUnknown()}},
 			"discard_model":    schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -DiscardModel parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"feedbacks":        schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -Feedbacks parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
@@ -68,7 +68,7 @@ func (r *machineAssistedTagResourceResource) Schema(_ context.Context, _ resourc
 			"model_ids":        schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ModelIds parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace(), stringplanmodifier.UseStateForUnknown()}},
 			"model_name":       schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ModelName parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"name":             schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -Name parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace(), stringplanmodifier.UseStateForUnknown()}},
-			"resource":         schema.StringAttribute{Required: true, Description: "Maps to the -Resource parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
+			"resource":         schema.StringAttribute{Required: true, Description: "Maps to the -Resource parameter."},
 			"review_completed": schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ReviewCompleted parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"task_id":          schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -TaskId parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"task_type":        schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -TaskType parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace(), stringplanmodifier.UseStateForUnknown()}},
@@ -92,30 +92,41 @@ func (r *machineAssistedTagResourceResource) Create(ctx context.Context, req res
 		return
 	}
 
-	p := purview.NewMachineAssistedTagResourceParams{
-		Description:  plan.Description.ValueString(),
-		Name:         plan.Name.ValueString(),
-		TrainingSite: plan.TrainingSite.ValueString(),
+	var config machineAssistedTagResourceModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
+	if resp.Diagnostics.HasError() {
+		return
 	}
-	if v := plan.ModelIds.ValueString(); v != "" {
-		p.ModelIds = v
+
+	p := purview.NewMachineAssistedTagResourceParams{}
+	if !config.Description.IsNull() {
+		p.Description = plan.Description.ValueString()
 	}
-	if v := plan.Resource.ValueString(); v != "" {
-		p.Resource = v
+	if v := config.ModelIds.ValueString(); v != "" {
+		p.ModelIds = objectParam(v)
 	}
-	if v := plan.TaskId.ValueString(); v != "" {
-		p.TaskId = v
+	if !config.Name.IsNull() {
+		p.Name = plan.Name.ValueString()
 	}
-	if v := plan.TaskType.ValueString(); v != "" {
-		p.TaskType = v
+	if v := config.Resource.ValueString(); v != "" {
+		p.Resource = objectParam(v)
 	}
-	if v := plan.TrainingId.ValueString(); v != "" {
-		p.TrainingId = v
+	if !config.TaskId.IsNull() {
+		p.TaskId = plan.TaskId.ValueString()
+	}
+	if v := config.TaskType.ValueString(); v != "" {
+		p.TaskType = objectParam(v)
+	}
+	if !config.TrainingId.IsNull() {
+		p.TrainingId = plan.TrainingId.ValueString()
+	}
+	if !config.TrainingSite.IsNull() {
+		p.TrainingSite = plan.TrainingSite.ValueString()
 	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	res, err := r.client.SCC.NewMachineAssistedTagResource(ctx, p)
+	res, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.NewMachineAssistedTagResource, p, isNotFound)
 	if err != nil {
 		resp.Diagnostics.AddError("New-MachineAssistedTagResource failed", err.Error())
 		return
@@ -162,23 +173,36 @@ func (r *machineAssistedTagResourceResource) Update(ctx context.Context, req res
 	id := r.identityOf(state)
 	sp := purview.SetMachineAssistedTagResourceParams{}
 	sp.Identity = id
-	sp.DiscardModel = plan.DiscardModel.ValueString()
-	sp.Feedbacks = plan.Feedbacks.ValueString()
-	if v := plan.ModelId.ValueString(); v != "" {
-		sp.ModelId = v
+	if !plan.DiscardModel.Equal(state.DiscardModel) {
+		sp.DiscardModel = plan.DiscardModel.ValueString()
 	}
-	sp.ModelName = plan.ModelName.ValueString()
-	sp.ReviewCompleted = plan.ReviewCompleted.ValueString()
-	if v := plan.TaskId.ValueString(); v != "" {
-		sp.TaskId = v
+	if !plan.Feedbacks.Equal(state.Feedbacks) {
+		sp.Feedbacks = plan.Feedbacks.ValueString()
 	}
-	if v := plan.TrainingId.ValueString(); v != "" {
-		sp.TrainingId = v
+	if !plan.ModelId.Equal(state.ModelId) {
+		sp.ModelId = plan.ModelId.ValueString()
+	}
+	if !plan.ModelName.Equal(state.ModelName) {
+		sp.ModelName = plan.ModelName.ValueString()
+	}
+	if !plan.Resource.Equal(state.Resource) {
+		if v := plan.Resource.ValueString(); v != "" {
+			sp.Resource = objectParam(v)
+		}
+	}
+	if !plan.ReviewCompleted.Equal(state.ReviewCompleted) {
+		sp.ReviewCompleted = plan.ReviewCompleted.ValueString()
+	}
+	if !plan.TaskId.Equal(state.TaskId) {
+		sp.TaskId = plan.TaskId.ValueString()
+	}
+	if !plan.TrainingId.Equal(state.TrainingId) {
+		sp.TrainingId = plan.TrainingId.ValueString()
 	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	if _, err := r.client.SCC.SetMachineAssistedTagResource(ctx, sp); err != nil {
+	if _, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.SetMachineAssistedTagResource, sp, isNotFound); err != nil {
 		resp.Diagnostics.AddError("Set-MachineAssistedTagResource failed", err.Error())
 		return
 	}
@@ -193,6 +217,9 @@ func (r *machineAssistedTagResourceResource) Update(ctx context.Context, req res
 		"TrainingId":      cfg.TrainingId,
 	}, getString)
 	r.refresh(ctx, id, &plan, &resp.Diagnostics, reflected)
+	if !cfg.ID.IsUnknown() && !cfg.ID.IsNull() {
+		plan.ID = cfg.ID
+	}
 	r.reconcileState(&cfg, &plan)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
@@ -256,13 +283,13 @@ func readMachineAssistedTagResource(ctx context.Context, obj map[string]any, m *
 	m.DiscardModel = types.StringValue(getString(obj, "DiscardModel"))
 	m.Feedbacks = types.StringValue(getString(obj, "Feedbacks"))
 	m.ModelId = types.StringValue(getString(obj, "ModelId"))
-	m.ModelIds = types.StringValue(getString(obj, "ModelIds"))
+	m.ModelIds = types.StringValue(getObjectJSON(obj, "ModelIds"))
 	m.ModelName = types.StringValue(getString(obj, "ModelName"))
 	m.Name = types.StringValue(getString(obj, "Name"))
-	m.Resource = types.StringValue(getString(obj, "Resource"))
+	m.Resource = types.StringValue(getObjectJSON(obj, "Resource"))
 	m.ReviewCompleted = types.StringValue(getString(obj, "ReviewCompleted"))
 	m.TaskId = types.StringValue(getString(obj, "TaskId"))
-	m.TaskType = types.StringValue(getString(obj, "TaskType"))
+	m.TaskType = types.StringValue(getObjectJSON(obj, "TaskType"))
 	m.TrainingId = types.StringValue(getString(obj, "TrainingId"))
 	m.TrainingSite = types.StringValue(getString(obj, "TrainingSite"))
 	_ = ctx

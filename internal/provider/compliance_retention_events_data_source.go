@@ -44,7 +44,7 @@ func (d *complianceRetentionEventListDataSource) Schema(_ context.Context, _ dat
 				"asset_id":                   schema.StringAttribute{Computed: true, Description: "Maps to the -AssetId parameter."},
 				"comment":                    schema.StringAttribute{Computed: true, Description: "Maps to the -Comment parameter."},
 				"event_date_time":            schema.StringAttribute{Computed: true, Description: "Maps to the -EventDateTime parameter."},
-				"event_tags":                 schema.StringAttribute{Computed: true, Description: "Maps to the -EventTags parameter."},
+				"event_tags":                 schema.SetAttribute{ElementType: types.StringType, Computed: true, Description: "Maps to the -EventTags parameter."},
 				"event_type":                 schema.StringAttribute{Computed: true, Description: "Maps to the -EventType parameter."},
 				"exchange_asset_id_query":    schema.StringAttribute{Computed: true, Description: "Maps to the -ExchangeAssetIdQuery parameter."},
 				"name":                       schema.StringAttribute{Computed: true, Description: "Maps to the -Name parameter."},
