@@ -1,0 +1,49 @@
+# Managed by bearclave/governance (tools/sync.py) - do not edit here.
+name: Bug
+description: The code or the deployed state does something it should not, or drifts.
+type: Bug
+assignees:
+  - matej-hrabalek
+body:
+  - type: textarea
+    id: what-happens
+    attributes:
+      label: What happens
+      description: The observed behaviour, as precisely as possible.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What should happen
+    validations:
+      required: true
+  - type: input
+    id: where
+    attributes:
+      label: Where
+      description: Path, unit, module, workflow or URL.
+      placeholder: mg-corp/.../rg-security/microsoft-sentinel
+    validations:
+      required: true
+  - type: dropdown
+    id: impact
+    attributes:
+      label: Impact
+      options:
+        - Production is affected
+        - Production is at risk
+        - No production impact
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: How to reproduce
+      description: Steps, or the run that shows it.
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence
+      description: Run link, log excerpt, plan output. No secrets.
+      render: text

@@ -1,7 +1,22 @@
 # terraform-provider-scc
 
-[![Test](https://github.com/terraprovider/terraform-provider-scc/actions/workflows/test.yml/badge.svg)](https://github.com/terraprovider/terraform-provider-scc/actions/workflows/test.yml)
-[![Build](https://github.com/terraprovider/terraform-provider-scc/actions/workflows/build.yml/badge.svg)](https://github.com/terraprovider/terraform-provider-scc/actions/workflows/build.yml)
+Fork of [terraprovider/terraform-provider-scc](https://github.com/terraprovider/terraform-provider-scc),
+published as `bearclave/scc` on the Terraform Registry for `bearclave/iac-purview`:
+regenerated on tf-msadmin v0.9.5 and fixed so that sensitivity labels, label
+policies, DLP and retention are managed in place
+([upstream #11](https://github.com/terraprovider/terraform-provider-scc/issues/11)).
+Changes go back upstream; once upstream releases them, the fork is archived.
+
+| Trigger | What runs | Identity |
+|---|---|---|
+| Pull request, push to `main` | `ci.yml`: `security.yml` and `checks.yml` of `bearclave/ci` (`go vet`, `go test`) | none |
+| Release | `tools/release.sh` on the owner's Mac: tag, goreleaser, signed with the key from `kv-tech-sec-weu-001` | the owner |
+
+> Branch protection, required checks, merge settings and labels are
+> defined in [`bearclave/iac-github`](https://github.com/bearclave/iac-github)
+> (`infrastructure/repositories/terraform-provider-scc`). Engineering standards:
+> [`bearclave/governance`](https://github.com/bearclave/governance/tree/main/standards).
+
 
 A Terraform / OpenTofu provider for **Microsoft Purview / Security & Compliance**,
 driven by the same Admin API the `ExchangeOnlineManagement` module's

@@ -15,7 +15,7 @@ Manage Microsoft Purview / Security & Compliance via the Admin API. Authenticati
 terraform {
   required_providers {
     scc = {
-      source = "terraprovider/scc"
+      source = "bearclave/scc"
     }
   }
 }

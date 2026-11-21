@@ -1,0 +1,22 @@
+# Managed by bearclave/governance (tools/sync.py) - edit only below the marker.
+# Line endings: LF everywhere, Git decides what is text.
+* text=auto eol=lf
+
+# Binary formats: never converted, never diffed as text.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+*.pdf binary
+*.docx binary
+*.xlsx binary
+*.pptx binary
+*.dotx binary
+*.zip binary
+*.vsix binary
+
+# --- Repository-specific (kept by sync.py) ---

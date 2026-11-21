@@ -1,0 +1,16 @@
+# Managed by bearclave/governance (tools/sync.py) - do not edit here.
+# Release notes grouped by the type labels the pr check sets.
+changelog:
+  categories:
+    - title: Breaking changes
+      labels: [breaking]
+    - title: Features
+      labels: [type:feat]
+    - title: Fixes
+      labels: [type:fix, type:revert]
+    - title: Performance
+      labels: [type:perf]
+    - title: Dependencies
+      labels: [type:deps]
+    - title: Other
+      labels: ["*"]
