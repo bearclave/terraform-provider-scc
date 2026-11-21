@@ -2,9 +2,7 @@
 # Push to main            -> the same
 # Releases are cut by the owner on his Mac (tools/release.sh), not here.
 #
-# security.yml and checks.yml are local copies of bearclave/ci: a public
-# repository cannot call the private one. Actions minutes of a public
-# repository are free.
+# Actions minutes of a public repository are free.
 name: ci
 
 on:
@@ -23,12 +21,12 @@ concurrency:
 
 jobs:
   security:
-    uses: ./.github/workflows/security.yml
+    uses: bearclave/ci/.github/workflows/security.yml@v2
     permissions:
       contents: read
 
   pipeline:
-    uses: ./.github/workflows/checks.yml
+    uses: bearclave/ci/.github/workflows/checks.yml@v2
     permissions:
       contents: read
     with:
