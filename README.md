@@ -47,7 +47,29 @@ cd tools && go generate ./...        # regenerate docs (tfplugindocs)
 ```
 
 Resource files under `internal/provider/*_resource.go` are generated
-(`DO NOT EDIT`); change the generator, not the output. Local development against
+(`DO NOT EDIT`); change the generator, not the output.
+
+### Overrides
+
+Where the cmdlets do not fit the generic New/Get/Set/Remove mapping, the
+generated resource is wrapped instead of edited:
+
+- `cmd/gen-tf/overrides.go` lists the overridden nouns (labels, label
+  policies, DLP and retention policies and rules). The generator detects lists
+  that only `New-*` takes and `Set-*` changes through `-Add<X>`/`-Remove<X>`
+  (labels, every `*_location`), makes them updatable in place, drops the
+  `add_*`/`remove_*` companions and emits `zz_generated_overrides.go`.
+- `internal/provider/overrides*.go` applies those list deltas on update,
+  applies `Set-*`-only parameters (`Set-Label -Priority`) right after create,
+  and on refresh keeps the configured value when the read-back is equivalent
+  (`semantic.go`: JSON by content, case-insensitive enums and lists, locations
+  by any identity).
+- `internal/provider/readback.go` rewrites `Get-Label` / `Get-LabelPolicy`
+  responses: `LabelActions` JSON and `Settings` "[key, value]" strings become
+  the `ApplyContentMarking*`, `ApplyWaterMarking*`, `Encryption*` and
+  `AdvancedSettings` properties the write parameters use.
+- Every resource has schema version 1; state from 0.2.x (version 0) is
+  converted by shape (`versioned.go`). Local development against
 sibling module checkouts uses the git-ignored `go.work`.
 
 ## License

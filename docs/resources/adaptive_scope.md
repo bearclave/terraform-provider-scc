@@ -20,7 +20,6 @@ Manages the AdaptiveScope object via New-AdaptiveScope / Get-AdaptiveScope / Set
 - `filter_conditions` (String) Maps to the -FilterConditions parameter.
 - `location_type` (String) Maps to the -LocationType parameter.
 - `name` (String) Maps to the -Name parameter.
-- `raw_query` (String) Maps to the -RawQuery parameter.
 
 ### Optional
 
@@ -28,6 +27,7 @@ Manages the AdaptiveScope object via New-AdaptiveScope / Get-AdaptiveScope / Set
 - `comment` (String) Maps to the -Comment parameter.
 - `enabled_states` (Set of String) Maps to the -EnabledStates parameter.
 - `linked_recipient_enabled_states` (Set of String) Maps to the -LinkedRecipientEnabledStates parameter.
+- `raw_query` (String) Maps to the -RawQuery parameter.
 - `use_kql` (String) Maps to the -UseKql parameter.
 
 ### Read-Only

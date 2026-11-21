@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
@@ -41,65 +42,65 @@ type autoSensitivityLabelRuleModel struct {
 	AccessScope                                  types.String `tfsdk:"access_scope"`
 	ActivationDate                               types.String `tfsdk:"activation_date"`
 	AdvancedRule                                 types.String `tfsdk:"advanced_rule"`
-	AnyOfRecipientAddressContainsWords           types.String `tfsdk:"any_of_recipient_address_contains_words"`
-	AnyOfRecipientAddressMatchesPatterns         types.String `tfsdk:"any_of_recipient_address_matches_patterns"`
+	AnyOfRecipientAddressContainsWords           types.Set    `tfsdk:"any_of_recipient_address_contains_words"`
+	AnyOfRecipientAddressMatchesPatterns         types.Set    `tfsdk:"any_of_recipient_address_matches_patterns"`
 	Comment                                      types.String `tfsdk:"comment"`
-	ContentContainsSensitiveInformation          types.Set    `tfsdk:"content_contains_sensitive_information"`
-	ContentExtensionMatchesWords                 types.String `tfsdk:"content_extension_matches_words"`
+	ContentContainsSensitiveInformation          types.String `tfsdk:"content_contains_sensitive_information"`
+	ContentExtensionMatchesWords                 types.Set    `tfsdk:"content_extension_matches_words"`
 	ContentIsNotLabeled                          types.Bool   `tfsdk:"content_is_not_labeled"`
-	ContentPropertyContainsWords                 types.String `tfsdk:"content_property_contains_words"`
+	ContentPropertyContainsWords                 types.Set    `tfsdk:"content_property_contains_words"`
 	DefaultSpoDocLibraryHasLabel                 types.Bool   `tfsdk:"default_spo_doc_library_has_label"`
 	Disabled                                     types.Bool   `tfsdk:"disabled"`
-	DocumentCreatedBy                            types.String `tfsdk:"document_created_by"`
+	DocumentCreatedBy                            types.Set    `tfsdk:"document_created_by"`
 	DocumentIsPasswordProtected                  types.Bool   `tfsdk:"document_is_password_protected"`
 	DocumentIsUnsupported                        types.Bool   `tfsdk:"document_is_unsupported"`
-	DocumentNameMatchesWords                     types.String `tfsdk:"document_name_matches_words"`
+	DocumentNameMatchesWords                     types.Set    `tfsdk:"document_name_matches_words"`
 	DocumentSizeOver                             types.String `tfsdk:"document_size_over"`
 	ExceptIfAccessScope                          types.String `tfsdk:"except_if_access_scope"`
-	ExceptIfAnyOfRecipientAddressContainsWords   types.String `tfsdk:"except_if_any_of_recipient_address_contains_words"`
-	ExceptIfAnyOfRecipientAddressMatchesPatterns types.String `tfsdk:"except_if_any_of_recipient_address_matches_patterns"`
-	ExceptIfContentContainsSensitiveInformation  types.Set    `tfsdk:"except_if_content_contains_sensitive_information"`
-	ExceptIfContentExtensionMatchesWords         types.String `tfsdk:"except_if_content_extension_matches_words"`
-	ExceptIfContentPropertyContainsWords         types.String `tfsdk:"except_if_content_property_contains_words"`
-	ExceptIfDocumentCreatedBy                    types.String `tfsdk:"except_if_document_created_by"`
+	ExceptIfAnyOfRecipientAddressContainsWords   types.Set    `tfsdk:"except_if_any_of_recipient_address_contains_words"`
+	ExceptIfAnyOfRecipientAddressMatchesPatterns types.Set    `tfsdk:"except_if_any_of_recipient_address_matches_patterns"`
+	ExceptIfContentContainsSensitiveInformation  types.String `tfsdk:"except_if_content_contains_sensitive_information"`
+	ExceptIfContentExtensionMatchesWords         types.Set    `tfsdk:"except_if_content_extension_matches_words"`
+	ExceptIfContentPropertyContainsWords         types.Set    `tfsdk:"except_if_content_property_contains_words"`
+	ExceptIfDocumentCreatedBy                    types.Set    `tfsdk:"except_if_document_created_by"`
 	ExceptIfDocumentIsPasswordProtected          types.Bool   `tfsdk:"except_if_document_is_password_protected"`
 	ExceptIfDocumentIsUnsupported                types.Bool   `tfsdk:"except_if_document_is_unsupported"`
-	ExceptIfDocumentNameMatchesWords             types.String `tfsdk:"except_if_document_name_matches_words"`
+	ExceptIfDocumentNameMatchesWords             types.Set    `tfsdk:"except_if_document_name_matches_words"`
 	ExceptIfDocumentSizeOver                     types.String `tfsdk:"except_if_document_size_over"`
 	ExceptIfFrom                                 types.Set    `tfsdk:"except_if_from"`
-	ExceptIfFromAddressContainsWords             types.String `tfsdk:"except_if_from_address_contains_words"`
-	ExceptIfFromAddressMatchesPatterns           types.String `tfsdk:"except_if_from_address_matches_patterns"`
+	ExceptIfFromAddressContainsWords             types.Set    `tfsdk:"except_if_from_address_contains_words"`
+	ExceptIfFromAddressMatchesPatterns           types.Set    `tfsdk:"except_if_from_address_matches_patterns"`
 	ExceptIfFromMemberOf                         types.Set    `tfsdk:"except_if_from_member_of"`
 	ExceptIfHeaderMatchesPatterns                types.String `tfsdk:"except_if_header_matches_patterns"`
 	ExceptIfProcessingLimitExceeded              types.Bool   `tfsdk:"except_if_processing_limit_exceeded"`
-	ExceptIfRecipientDomainIs                    types.String `tfsdk:"except_if_recipient_domain_is"`
-	ExceptIfSenderDomainIs                       types.String `tfsdk:"except_if_sender_domain_is"`
-	ExceptIfSenderIPRanges                       types.String `tfsdk:"except_if_sender_ip_ranges"`
-	ExceptIfSentTo                               types.String `tfsdk:"except_if_sent_to"`
+	ExceptIfRecipientDomainIs                    types.Set    `tfsdk:"except_if_recipient_domain_is"`
+	ExceptIfSenderDomainIs                       types.Set    `tfsdk:"except_if_sender_domain_is"`
+	ExceptIfSenderIPRanges                       types.Set    `tfsdk:"except_if_sender_ip_ranges"`
+	ExceptIfSentTo                               types.Set    `tfsdk:"except_if_sent_to"`
 	ExceptIfSentToMemberOf                       types.Set    `tfsdk:"except_if_sent_to_member_of"`
 	ExceptIfSharedWithDomain                     types.String `tfsdk:"except_if_shared_with_domain"`
-	ExceptIfSubjectMatchesPatterns               types.String `tfsdk:"except_if_subject_matches_patterns"`
+	ExceptIfSubjectMatchesPatterns               types.Set    `tfsdk:"except_if_subject_matches_patterns"`
 	ExpiryDate                                   types.String `tfsdk:"expiry_date"`
 	From                                         types.Set    `tfsdk:"from"`
-	FromAddressContainsWords                     types.String `tfsdk:"from_address_contains_words"`
-	FromAddressMatchesPatterns                   types.String `tfsdk:"from_address_matches_patterns"`
+	FromAddressContainsWords                     types.Set    `tfsdk:"from_address_contains_words"`
+	FromAddressMatchesPatterns                   types.Set    `tfsdk:"from_address_matches_patterns"`
 	FromMemberOf                                 types.Set    `tfsdk:"from_member_of"`
 	HeaderMatchesPatterns                        types.String `tfsdk:"header_matches_patterns"`
 	ImmutableId                                  types.String `tfsdk:"immutable_id"`
 	Name                                         types.String `tfsdk:"name"`
 	Policy                                       types.String `tfsdk:"policy"`
-	Priority                                     types.String `tfsdk:"priority"`
+	Priority                                     types.Int64  `tfsdk:"priority"`
 	ProcessingLimitExceeded                      types.Bool   `tfsdk:"processing_limit_exceeded"`
-	RecipientDomainIs                            types.String `tfsdk:"recipient_domain_is"`
+	RecipientDomainIs                            types.Set    `tfsdk:"recipient_domain_is"`
 	ReportSeverityLevel                          types.String `tfsdk:"report_severity_level"`
 	RuleErrorAction                              types.String `tfsdk:"rule_error_action"`
-	SenderDomainIs                               types.String `tfsdk:"sender_domain_is"`
-	SenderIPRanges                               types.String `tfsdk:"sender_ip_ranges"`
-	SentTo                                       types.String `tfsdk:"sent_to"`
+	SenderDomainIs                               types.Set    `tfsdk:"sender_domain_is"`
+	SenderIPRanges                               types.Set    `tfsdk:"sender_ip_ranges"`
+	SentTo                                       types.Set    `tfsdk:"sent_to"`
 	SentToMemberOf                               types.Set    `tfsdk:"sent_to_member_of"`
 	SharedWithDomain                             types.String `tfsdk:"shared_with_domain"`
 	SourceType                                   types.String `tfsdk:"source_type"`
-	SubjectMatchesPatterns                       types.String `tfsdk:"subject_matches_patterns"`
+	SubjectMatchesPatterns                       types.Set    `tfsdk:"subject_matches_patterns"`
 	Workload                                     types.String `tfsdk:"workload"`
 }
 
@@ -112,70 +113,70 @@ func (r *autoSensitivityLabelRuleResource) Schema(_ context.Context, _ resource.
 		Description: "Manages the AutoSensitivityLabelRule object via New-AutoSensitivityLabelRule / Get-AutoSensitivityLabelRule / Set-AutoSensitivityLabelRule / Remove-AutoSensitivityLabelRule.",
 		Attributes: map[string]schema.Attribute{
 			"id":              schema.StringAttribute{Computed: true, Description: "Object identifier (GUID).", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"identity":        schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets."},
+			"identity":        schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"access_scope":    schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AccessScope parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"activation_date": schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ActivationDate parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"advanced_rule":   schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AdvancedRule parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"any_of_recipient_address_contains_words":   schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AnyOfRecipientAddressContainsWords parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"any_of_recipient_address_matches_patterns": schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AnyOfRecipientAddressMatchesPatterns parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"any_of_recipient_address_contains_words":   schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -AnyOfRecipientAddressContainsWords parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"any_of_recipient_address_matches_patterns": schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -AnyOfRecipientAddressMatchesPatterns parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
 			"comment":                                             schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -Comment parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"content_contains_sensitive_information":              schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -ContentContainsSensitiveInformation parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
-			"content_extension_matches_words":                     schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ContentExtensionMatchesWords parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"content_contains_sensitive_information":              schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ContentContainsSensitiveInformation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"content_extension_matches_words":                     schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -ContentExtensionMatchesWords parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
 			"content_is_not_labeled":                              schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -ContentIsNotLabeled parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
-			"content_property_contains_words":                     schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ContentPropertyContainsWords parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"content_property_contains_words":                     schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -ContentPropertyContainsWords parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
 			"default_spo_doc_library_has_label":                   schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -DefaultSpoDocLibraryHasLabel parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
 			"disabled":                                            schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -Disabled parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
-			"document_created_by":                                 schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -DocumentCreatedBy parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"document_created_by":                                 schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -DocumentCreatedBy parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
 			"document_is_password_protected":                      schema.BoolAttribute{Optional: true, Computed: true, Sensitive: true, Description: "Maps to the -DocumentIsPasswordProtected parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
 			"document_is_unsupported":                             schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -DocumentIsUnsupported parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
-			"document_name_matches_words":                         schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -DocumentNameMatchesWords parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"document_name_matches_words":                         schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -DocumentNameMatchesWords parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
 			"document_size_over":                                  schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -DocumentSizeOver parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"except_if_access_scope":                              schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ExceptIfAccessScope parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"except_if_any_of_recipient_address_contains_words":   schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ExceptIfAnyOfRecipientAddressContainsWords parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"except_if_any_of_recipient_address_matches_patterns": schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ExceptIfAnyOfRecipientAddressMatchesPatterns parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"except_if_content_contains_sensitive_information":    schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -ExceptIfContentContainsSensitiveInformation parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
-			"except_if_content_extension_matches_words":           schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ExceptIfContentExtensionMatchesWords parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"except_if_content_property_contains_words":           schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ExceptIfContentPropertyContainsWords parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"except_if_document_created_by":                       schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ExceptIfDocumentCreatedBy parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"except_if_any_of_recipient_address_contains_words":   schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -ExceptIfAnyOfRecipientAddressContainsWords parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"except_if_any_of_recipient_address_matches_patterns": schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -ExceptIfAnyOfRecipientAddressMatchesPatterns parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"except_if_content_contains_sensitive_information":    schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ExceptIfContentContainsSensitiveInformation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"except_if_content_extension_matches_words":           schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -ExceptIfContentExtensionMatchesWords parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"except_if_content_property_contains_words":           schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -ExceptIfContentPropertyContainsWords parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"except_if_document_created_by":                       schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -ExceptIfDocumentCreatedBy parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
 			"except_if_document_is_password_protected":            schema.BoolAttribute{Optional: true, Computed: true, Sensitive: true, Description: "Maps to the -ExceptIfDocumentIsPasswordProtected parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
 			"except_if_document_is_unsupported":                   schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -ExceptIfDocumentIsUnsupported parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
-			"except_if_document_name_matches_words":               schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ExceptIfDocumentNameMatchesWords parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"except_if_document_name_matches_words":               schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -ExceptIfDocumentNameMatchesWords parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
 			"except_if_document_size_over":                        schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ExceptIfDocumentSizeOver parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"except_if_from":                                      schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -ExceptIfFrom parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
-			"except_if_from_address_contains_words":               schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ExceptIfFromAddressContainsWords parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"except_if_from_address_matches_patterns":             schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ExceptIfFromAddressMatchesPatterns parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"except_if_from_address_contains_words":               schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -ExceptIfFromAddressContainsWords parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"except_if_from_address_matches_patterns":             schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -ExceptIfFromAddressMatchesPatterns parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
 			"except_if_from_member_of":                            schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -ExceptIfFromMemberOf parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
 			"except_if_header_matches_patterns":                   schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ExceptIfHeaderMatchesPatterns parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"except_if_processing_limit_exceeded":                 schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -ExceptIfProcessingLimitExceeded parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
-			"except_if_recipient_domain_is":                       schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ExceptIfRecipientDomainIs parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"except_if_sender_domain_is":                          schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ExceptIfSenderDomainIs parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"except_if_sender_ip_ranges":                          schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ExceptIfSenderIPRanges parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"except_if_sent_to":                                   schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ExceptIfSentTo parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"except_if_recipient_domain_is":                       schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -ExceptIfRecipientDomainIs parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"except_if_sender_domain_is":                          schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -ExceptIfSenderDomainIs parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"except_if_sender_ip_ranges":                          schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -ExceptIfSenderIPRanges parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"except_if_sent_to":                                   schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -ExceptIfSentTo parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
 			"except_if_sent_to_member_of":                         schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -ExceptIfSentToMemberOf parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
 			"except_if_shared_with_domain":                        schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ExceptIfSharedWithDomain parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"except_if_subject_matches_patterns":                  schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ExceptIfSubjectMatchesPatterns parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"except_if_subject_matches_patterns":                  schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -ExceptIfSubjectMatchesPatterns parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
 			"expiry_date":                                         schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ExpiryDate parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"from":                                                schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -From parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
-			"from_address_contains_words":                         schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -FromAddressContainsWords parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"from_address_matches_patterns":                       schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -FromAddressMatchesPatterns parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"from_address_contains_words":                         schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -FromAddressContainsWords parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"from_address_matches_patterns":                       schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -FromAddressMatchesPatterns parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
 			"from_member_of":                                      schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -FromMemberOf parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
 			"header_matches_patterns":                             schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -HeaderMatchesPatterns parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"immutable_id":                                        schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ImmutableId parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace(), stringplanmodifier.UseStateForUnknown()}},
 			"name":                                                schema.StringAttribute{Required: true, Description: "Maps to the -Name parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
 			"policy":                                              schema.StringAttribute{Required: true, Description: "Maps to the -Policy parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
-			"priority":                                            schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -Priority parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"priority":                                            schema.Int64Attribute{Optional: true, Computed: true, Description: "Maps to the -Priority parameter.", PlanModifiers: []planmodifier.Int64{int64planmodifier.UseStateForUnknown()}},
 			"processing_limit_exceeded":                           schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -ProcessingLimitExceeded parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
-			"recipient_domain_is":                                 schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -RecipientDomainIs parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"recipient_domain_is":                                 schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -RecipientDomainIs parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
 			"report_severity_level":                               schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ReportSeverityLevel parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"rule_error_action":                                   schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -RuleErrorAction parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"sender_domain_is":                                    schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -SenderDomainIs parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"sender_ip_ranges":                                    schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -SenderIPRanges parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"sent_to":                                             schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -SentTo parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"sender_domain_is":                                    schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -SenderDomainIs parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"sender_ip_ranges":                                    schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -SenderIPRanges parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"sent_to":                                             schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -SentTo parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
 			"sent_to_member_of":                                   schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -SentToMemberOf parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
 			"shared_with_domain":                                  schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -SharedWithDomain parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"source_type":                                         schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -SourceType parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"subject_matches_patterns":                            schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -SubjectMatchesPatterns parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"workload":                                            schema.StringAttribute{Required: true, Description: "Maps to the -Workload parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
+			"subject_matches_patterns":                            schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -SubjectMatchesPatterns parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"workload":                                            schema.StringAttribute{Required: true, Description: "Maps to the -Workload parameter."},
 		},
 	}
 }
@@ -194,159 +195,290 @@ func (r *autoSensitivityLabelRuleResource) Create(ctx context.Context, req resou
 		return
 	}
 
-	p := purview.NewAutoSensitivityLabelRuleParams{
-		AdvancedRule:                        plan.AdvancedRule.ValueString(),
-		Comment:                             plan.Comment.ValueString(),
-		ContentContainsSensitiveInformation: toStringSlice(ctx, plan.ContentContainsSensitiveInformation, &resp.Diagnostics),
-		ContentIsNotLabeled:                 plan.ContentIsNotLabeled.ValueBool(),
-		DefaultSpoDocLibraryHasLabel:        plan.DefaultSpoDocLibraryHasLabel.ValueBool(),
-		Disabled:                            plan.Disabled.ValueBool(),
-		DocumentIsPasswordProtected:         plan.DocumentIsPasswordProtected.ValueBool(),
-		DocumentIsUnsupported:               plan.DocumentIsUnsupported.ValueBool(),
-		ExceptIfContentContainsSensitiveInformation: toStringSlice(ctx, plan.ExceptIfContentContainsSensitiveInformation, &resp.Diagnostics),
-		ExceptIfDocumentIsPasswordProtected:         plan.ExceptIfDocumentIsPasswordProtected.ValueBool(),
-		ExceptIfDocumentIsUnsupported:               plan.ExceptIfDocumentIsUnsupported.ValueBool(),
-		ExceptIfFrom:                                toStringSlice(ctx, plan.ExceptIfFrom, &resp.Diagnostics),
-		ExceptIfFromMemberOf:                        toStringSlice(ctx, plan.ExceptIfFromMemberOf, &resp.Diagnostics),
-		ExceptIfProcessingLimitExceeded:             plan.ExceptIfProcessingLimitExceeded.ValueBool(),
-		ExceptIfSentToMemberOf:                      toStringSlice(ctx, plan.ExceptIfSentToMemberOf, &resp.Diagnostics),
-		From:                                        toStringSlice(ctx, plan.From, &resp.Diagnostics),
-		FromMemberOf:                                toStringSlice(ctx, plan.FromMemberOf, &resp.Diagnostics),
-		Name:                                        plan.Name.ValueString(),
-		ProcessingLimitExceeded:                     plan.ProcessingLimitExceeded.ValueBool(),
-		SentToMemberOf:                              toStringSlice(ctx, plan.SentToMemberOf, &resp.Diagnostics),
-		SourceType:                                  plan.SourceType.ValueString(),
+	var config autoSensitivityLabelRuleModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
+	if resp.Diagnostics.HasError() {
+		return
 	}
-	if v := plan.AccessScope.ValueString(); v != "" {
-		p.AccessScope = v
+
+	p := purview.NewAutoSensitivityLabelRuleParams{}
+	if v := config.AccessScope.ValueString(); v != "" {
+		p.AccessScope = objectParam(v)
 	}
-	if v := plan.ActivationDate.ValueString(); v != "" {
-		p.ActivationDate = v
+	if v := config.ActivationDate.ValueString(); v != "" {
+		p.ActivationDate = objectParam(v)
 	}
-	if v := plan.AnyOfRecipientAddressContainsWords.ValueString(); v != "" {
-		p.AnyOfRecipientAddressContainsWords = v
+	if !config.AdvancedRule.IsNull() {
+		p.AdvancedRule = plan.AdvancedRule.ValueString()
 	}
-	if v := plan.AnyOfRecipientAddressMatchesPatterns.ValueString(); v != "" {
-		p.AnyOfRecipientAddressMatchesPatterns = v
+	if !config.AnyOfRecipientAddressContainsWords.IsNull() {
+		if v := toStringSlice(ctx, plan.AnyOfRecipientAddressContainsWords, &resp.Diagnostics); len(v) > 0 {
+			p.AnyOfRecipientAddressContainsWords = v
+		}
 	}
-	if v := plan.ContentExtensionMatchesWords.ValueString(); v != "" {
-		p.ContentExtensionMatchesWords = v
+	if !config.AnyOfRecipientAddressMatchesPatterns.IsNull() {
+		if v := toStringSlice(ctx, plan.AnyOfRecipientAddressMatchesPatterns, &resp.Diagnostics); len(v) > 0 {
+			p.AnyOfRecipientAddressMatchesPatterns = v
+		}
 	}
-	if v := plan.ContentPropertyContainsWords.ValueString(); v != "" {
-		p.ContentPropertyContainsWords = v
+	if !config.Comment.IsNull() {
+		p.Comment = plan.Comment.ValueString()
 	}
-	if v := plan.DocumentCreatedBy.ValueString(); v != "" {
-		p.DocumentCreatedBy = v
+	if v := config.ContentContainsSensitiveInformation.ValueString(); v != "" {
+		p.ContentContainsSensitiveInformation = objectParam(v)
 	}
-	if v := plan.DocumentNameMatchesWords.ValueString(); v != "" {
-		p.DocumentNameMatchesWords = v
+	if !config.ContentExtensionMatchesWords.IsNull() {
+		if v := toStringSlice(ctx, plan.ContentExtensionMatchesWords, &resp.Diagnostics); len(v) > 0 {
+			p.ContentExtensionMatchesWords = v
+		}
 	}
-	if v := plan.DocumentSizeOver.ValueString(); v != "" {
-		p.DocumentSizeOver = v
+	if !config.ContentIsNotLabeled.IsNull() {
+		if !plan.ContentIsNotLabeled.IsUnknown() {
+			p.ContentIsNotLabeled = plan.ContentIsNotLabeled.ValueBoolPointer()
+		}
 	}
-	if v := plan.ExceptIfAccessScope.ValueString(); v != "" {
-		p.ExceptIfAccessScope = v
+	if !config.ContentPropertyContainsWords.IsNull() {
+		if v := toStringSlice(ctx, plan.ContentPropertyContainsWords, &resp.Diagnostics); len(v) > 0 {
+			p.ContentPropertyContainsWords = v
+		}
 	}
-	if v := plan.ExceptIfAnyOfRecipientAddressContainsWords.ValueString(); v != "" {
-		p.ExceptIfAnyOfRecipientAddressContainsWords = v
+	if !config.DefaultSpoDocLibraryHasLabel.IsNull() {
+		if !plan.DefaultSpoDocLibraryHasLabel.IsUnknown() {
+			p.DefaultSpoDocLibraryHasLabel = plan.DefaultSpoDocLibraryHasLabel.ValueBoolPointer()
+		}
 	}
-	if v := plan.ExceptIfAnyOfRecipientAddressMatchesPatterns.ValueString(); v != "" {
-		p.ExceptIfAnyOfRecipientAddressMatchesPatterns = v
+	if !config.Disabled.IsNull() {
+		if !plan.Disabled.IsUnknown() {
+			p.Disabled = plan.Disabled.ValueBoolPointer()
+		}
 	}
-	if v := plan.ExceptIfContentExtensionMatchesWords.ValueString(); v != "" {
-		p.ExceptIfContentExtensionMatchesWords = v
+	if !config.DocumentCreatedBy.IsNull() {
+		if v := toStringSlice(ctx, plan.DocumentCreatedBy, &resp.Diagnostics); len(v) > 0 {
+			p.DocumentCreatedBy = v
+		}
 	}
-	if v := plan.ExceptIfContentPropertyContainsWords.ValueString(); v != "" {
-		p.ExceptIfContentPropertyContainsWords = v
+	if !config.DocumentIsPasswordProtected.IsNull() {
+		if !plan.DocumentIsPasswordProtected.IsUnknown() {
+			p.DocumentIsPasswordProtected = plan.DocumentIsPasswordProtected.ValueBoolPointer()
+		}
 	}
-	if v := plan.ExceptIfDocumentCreatedBy.ValueString(); v != "" {
-		p.ExceptIfDocumentCreatedBy = v
+	if !config.DocumentIsUnsupported.IsNull() {
+		if !plan.DocumentIsUnsupported.IsUnknown() {
+			p.DocumentIsUnsupported = plan.DocumentIsUnsupported.ValueBoolPointer()
+		}
 	}
-	if v := plan.ExceptIfDocumentNameMatchesWords.ValueString(); v != "" {
-		p.ExceptIfDocumentNameMatchesWords = v
+	if !config.DocumentNameMatchesWords.IsNull() {
+		if v := toStringSlice(ctx, plan.DocumentNameMatchesWords, &resp.Diagnostics); len(v) > 0 {
+			p.DocumentNameMatchesWords = v
+		}
 	}
-	if v := plan.ExceptIfDocumentSizeOver.ValueString(); v != "" {
-		p.ExceptIfDocumentSizeOver = v
+	if v := config.DocumentSizeOver.ValueString(); v != "" {
+		p.DocumentSizeOver = objectParam(v)
 	}
-	if v := plan.ExceptIfFromAddressContainsWords.ValueString(); v != "" {
-		p.ExceptIfFromAddressContainsWords = v
+	if v := config.ExceptIfAccessScope.ValueString(); v != "" {
+		p.ExceptIfAccessScope = objectParam(v)
 	}
-	if v := plan.ExceptIfFromAddressMatchesPatterns.ValueString(); v != "" {
-		p.ExceptIfFromAddressMatchesPatterns = v
+	if !config.ExceptIfAnyOfRecipientAddressContainsWords.IsNull() {
+		if v := toStringSlice(ctx, plan.ExceptIfAnyOfRecipientAddressContainsWords, &resp.Diagnostics); len(v) > 0 {
+			p.ExceptIfAnyOfRecipientAddressContainsWords = v
+		}
 	}
-	if v := plan.ExceptIfHeaderMatchesPatterns.ValueString(); v != "" {
-		p.ExceptIfHeaderMatchesPatterns = v
+	if !config.ExceptIfAnyOfRecipientAddressMatchesPatterns.IsNull() {
+		if v := toStringSlice(ctx, plan.ExceptIfAnyOfRecipientAddressMatchesPatterns, &resp.Diagnostics); len(v) > 0 {
+			p.ExceptIfAnyOfRecipientAddressMatchesPatterns = v
+		}
 	}
-	if v := plan.ExceptIfRecipientDomainIs.ValueString(); v != "" {
-		p.ExceptIfRecipientDomainIs = v
+	if v := config.ExceptIfContentContainsSensitiveInformation.ValueString(); v != "" {
+		p.ExceptIfContentContainsSensitiveInformation = objectParam(v)
 	}
-	if v := plan.ExceptIfSenderDomainIs.ValueString(); v != "" {
-		p.ExceptIfSenderDomainIs = v
+	if !config.ExceptIfContentExtensionMatchesWords.IsNull() {
+		if v := toStringSlice(ctx, plan.ExceptIfContentExtensionMatchesWords, &resp.Diagnostics); len(v) > 0 {
+			p.ExceptIfContentExtensionMatchesWords = v
+		}
 	}
-	if v := plan.ExceptIfSenderIPRanges.ValueString(); v != "" {
-		p.ExceptIfSenderIPRanges = v
+	if !config.ExceptIfContentPropertyContainsWords.IsNull() {
+		if v := toStringSlice(ctx, plan.ExceptIfContentPropertyContainsWords, &resp.Diagnostics); len(v) > 0 {
+			p.ExceptIfContentPropertyContainsWords = v
+		}
 	}
-	if v := plan.ExceptIfSentTo.ValueString(); v != "" {
-		p.ExceptIfSentTo = v
+	if !config.ExceptIfDocumentCreatedBy.IsNull() {
+		if v := toStringSlice(ctx, plan.ExceptIfDocumentCreatedBy, &resp.Diagnostics); len(v) > 0 {
+			p.ExceptIfDocumentCreatedBy = v
+		}
 	}
-	if v := plan.ExceptIfSharedWithDomain.ValueString(); v != "" {
-		p.ExceptIfSharedWithDomain = v
+	if !config.ExceptIfDocumentIsPasswordProtected.IsNull() {
+		if !plan.ExceptIfDocumentIsPasswordProtected.IsUnknown() {
+			p.ExceptIfDocumentIsPasswordProtected = plan.ExceptIfDocumentIsPasswordProtected.ValueBoolPointer()
+		}
 	}
-	if v := plan.ExceptIfSubjectMatchesPatterns.ValueString(); v != "" {
-		p.ExceptIfSubjectMatchesPatterns = v
+	if !config.ExceptIfDocumentIsUnsupported.IsNull() {
+		if !plan.ExceptIfDocumentIsUnsupported.IsUnknown() {
+			p.ExceptIfDocumentIsUnsupported = plan.ExceptIfDocumentIsUnsupported.ValueBoolPointer()
+		}
 	}
-	if v := plan.ExpiryDate.ValueString(); v != "" {
-		p.ExpiryDate = v
+	if !config.ExceptIfDocumentNameMatchesWords.IsNull() {
+		if v := toStringSlice(ctx, plan.ExceptIfDocumentNameMatchesWords, &resp.Diagnostics); len(v) > 0 {
+			p.ExceptIfDocumentNameMatchesWords = v
+		}
 	}
-	if v := plan.FromAddressContainsWords.ValueString(); v != "" {
-		p.FromAddressContainsWords = v
+	if v := config.ExceptIfDocumentSizeOver.ValueString(); v != "" {
+		p.ExceptIfDocumentSizeOver = objectParam(v)
 	}
-	if v := plan.FromAddressMatchesPatterns.ValueString(); v != "" {
-		p.FromAddressMatchesPatterns = v
+	if !config.ExceptIfFrom.IsNull() {
+		if v := toStringSlice(ctx, plan.ExceptIfFrom, &resp.Diagnostics); len(v) > 0 {
+			p.ExceptIfFrom = v
+		}
 	}
-	if v := plan.HeaderMatchesPatterns.ValueString(); v != "" {
-		p.HeaderMatchesPatterns = v
+	if !config.ExceptIfFromAddressContainsWords.IsNull() {
+		if v := toStringSlice(ctx, plan.ExceptIfFromAddressContainsWords, &resp.Diagnostics); len(v) > 0 {
+			p.ExceptIfFromAddressContainsWords = v
+		}
 	}
-	if v := plan.ImmutableId.ValueString(); v != "" {
-		p.ImmutableId = v
+	if !config.ExceptIfFromAddressMatchesPatterns.IsNull() {
+		if v := toStringSlice(ctx, plan.ExceptIfFromAddressMatchesPatterns, &resp.Diagnostics); len(v) > 0 {
+			p.ExceptIfFromAddressMatchesPatterns = v
+		}
 	}
-	if v := plan.Policy.ValueString(); v != "" {
-		p.Policy = v
+	if !config.ExceptIfFromMemberOf.IsNull() {
+		if v := toStringSlice(ctx, plan.ExceptIfFromMemberOf, &resp.Diagnostics); len(v) > 0 {
+			p.ExceptIfFromMemberOf = v
+		}
 	}
-	if v := plan.Priority.ValueString(); v != "" {
-		p.Priority = v
+	if v := config.ExceptIfHeaderMatchesPatterns.ValueString(); v != "" {
+		p.ExceptIfHeaderMatchesPatterns = objectParam(v)
 	}
-	if v := plan.RecipientDomainIs.ValueString(); v != "" {
-		p.RecipientDomainIs = v
+	if !config.ExceptIfProcessingLimitExceeded.IsNull() {
+		if !plan.ExceptIfProcessingLimitExceeded.IsUnknown() {
+			p.ExceptIfProcessingLimitExceeded = plan.ExceptIfProcessingLimitExceeded.ValueBoolPointer()
+		}
 	}
-	if v := plan.ReportSeverityLevel.ValueString(); v != "" {
-		p.ReportSeverityLevel = v
+	if !config.ExceptIfRecipientDomainIs.IsNull() {
+		if v := toStringSlice(ctx, plan.ExceptIfRecipientDomainIs, &resp.Diagnostics); len(v) > 0 {
+			p.ExceptIfRecipientDomainIs = v
+		}
 	}
-	if v := plan.RuleErrorAction.ValueString(); v != "" {
-		p.RuleErrorAction = v
+	if !config.ExceptIfSenderDomainIs.IsNull() {
+		if v := toStringSlice(ctx, plan.ExceptIfSenderDomainIs, &resp.Diagnostics); len(v) > 0 {
+			p.ExceptIfSenderDomainIs = v
+		}
 	}
-	if v := plan.SenderDomainIs.ValueString(); v != "" {
-		p.SenderDomainIs = v
+	if !config.ExceptIfSenderIPRanges.IsNull() {
+		if v := toStringSlice(ctx, plan.ExceptIfSenderIPRanges, &resp.Diagnostics); len(v) > 0 {
+			p.ExceptIfSenderIPRanges = v
+		}
 	}
-	if v := plan.SenderIPRanges.ValueString(); v != "" {
-		p.SenderIPRanges = v
+	if !config.ExceptIfSentTo.IsNull() {
+		if v := toStringSlice(ctx, plan.ExceptIfSentTo, &resp.Diagnostics); len(v) > 0 {
+			p.ExceptIfSentTo = v
+		}
 	}
-	if v := plan.SentTo.ValueString(); v != "" {
-		p.SentTo = v
+	if !config.ExceptIfSentToMemberOf.IsNull() {
+		if v := toStringSlice(ctx, plan.ExceptIfSentToMemberOf, &resp.Diagnostics); len(v) > 0 {
+			p.ExceptIfSentToMemberOf = v
+		}
 	}
-	if v := plan.SharedWithDomain.ValueString(); v != "" {
-		p.SharedWithDomain = v
+	if v := config.ExceptIfSharedWithDomain.ValueString(); v != "" {
+		p.ExceptIfSharedWithDomain = objectParam(v)
 	}
-	if v := plan.SubjectMatchesPatterns.ValueString(); v != "" {
-		p.SubjectMatchesPatterns = v
+	if !config.ExceptIfSubjectMatchesPatterns.IsNull() {
+		if v := toStringSlice(ctx, plan.ExceptIfSubjectMatchesPatterns, &resp.Diagnostics); len(v) > 0 {
+			p.ExceptIfSubjectMatchesPatterns = v
+		}
 	}
-	if v := plan.Workload.ValueString(); v != "" {
-		p.Workload = v
+	if v := config.ExpiryDate.ValueString(); v != "" {
+		p.ExpiryDate = objectParam(v)
+	}
+	if !config.From.IsNull() {
+		if v := toStringSlice(ctx, plan.From, &resp.Diagnostics); len(v) > 0 {
+			p.From = v
+		}
+	}
+	if !config.FromAddressContainsWords.IsNull() {
+		if v := toStringSlice(ctx, plan.FromAddressContainsWords, &resp.Diagnostics); len(v) > 0 {
+			p.FromAddressContainsWords = v
+		}
+	}
+	if !config.FromAddressMatchesPatterns.IsNull() {
+		if v := toStringSlice(ctx, plan.FromAddressMatchesPatterns, &resp.Diagnostics); len(v) > 0 {
+			p.FromAddressMatchesPatterns = v
+		}
+	}
+	if !config.FromMemberOf.IsNull() {
+		if v := toStringSlice(ctx, plan.FromMemberOf, &resp.Diagnostics); len(v) > 0 {
+			p.FromMemberOf = v
+		}
+	}
+	if v := config.HeaderMatchesPatterns.ValueString(); v != "" {
+		p.HeaderMatchesPatterns = objectParam(v)
+	}
+	if v := config.ImmutableId.ValueString(); v != "" {
+		p.ImmutableId = objectParam(v)
+	}
+	if !config.Name.IsNull() {
+		p.Name = plan.Name.ValueString()
+	}
+	if v := config.Policy.ValueString(); v != "" {
+		p.Policy = objectParam(v)
+	}
+	if !config.Priority.IsNull() {
+		if !plan.Priority.IsUnknown() {
+			p.Priority = plan.Priority.ValueInt64Pointer()
+		}
+	}
+	if !config.ProcessingLimitExceeded.IsNull() {
+		if !plan.ProcessingLimitExceeded.IsUnknown() {
+			p.ProcessingLimitExceeded = plan.ProcessingLimitExceeded.ValueBoolPointer()
+		}
+	}
+	if !config.RecipientDomainIs.IsNull() {
+		if v := toStringSlice(ctx, plan.RecipientDomainIs, &resp.Diagnostics); len(v) > 0 {
+			p.RecipientDomainIs = v
+		}
+	}
+	if v := config.ReportSeverityLevel.ValueString(); v != "" {
+		p.ReportSeverityLevel = objectParam(v)
+	}
+	if v := config.RuleErrorAction.ValueString(); v != "" {
+		p.RuleErrorAction = objectParam(v)
+	}
+	if !config.SenderDomainIs.IsNull() {
+		if v := toStringSlice(ctx, plan.SenderDomainIs, &resp.Diagnostics); len(v) > 0 {
+			p.SenderDomainIs = v
+		}
+	}
+	if !config.SenderIPRanges.IsNull() {
+		if v := toStringSlice(ctx, plan.SenderIPRanges, &resp.Diagnostics); len(v) > 0 {
+			p.SenderIPRanges = v
+		}
+	}
+	if !config.SentTo.IsNull() {
+		if v := toStringSlice(ctx, plan.SentTo, &resp.Diagnostics); len(v) > 0 {
+			p.SentTo = v
+		}
+	}
+	if !config.SentToMemberOf.IsNull() {
+		if v := toStringSlice(ctx, plan.SentToMemberOf, &resp.Diagnostics); len(v) > 0 {
+			p.SentToMemberOf = v
+		}
+	}
+	if v := config.SharedWithDomain.ValueString(); v != "" {
+		p.SharedWithDomain = objectParam(v)
+	}
+	if !config.SourceType.IsNull() {
+		p.SourceType = plan.SourceType.ValueString()
+	}
+	if !config.SubjectMatchesPatterns.IsNull() {
+		if v := toStringSlice(ctx, plan.SubjectMatchesPatterns, &resp.Diagnostics); len(v) > 0 {
+			p.SubjectMatchesPatterns = v
+		}
+	}
+	if v := config.Workload.ValueString(); v != "" {
+		p.Workload = objectParam(v)
 	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	res, err := r.client.SCC.NewAutoSensitivityLabelRule(ctx, p)
+	res, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.NewAutoSensitivityLabelRule, p, isNotFound)
 	if err != nil {
 		resp.Diagnostics.AddError("New-AutoSensitivityLabelRule failed", err.Error())
 		return
@@ -393,196 +525,599 @@ func (r *autoSensitivityLabelRuleResource) Update(ctx context.Context, req resou
 	id := r.identityOf(state)
 	sp := purview.SetAutoSensitivityLabelRuleParams{}
 	sp.Identity = id
-	if v := plan.AccessScope.ValueString(); v != "" {
-		sp.AccessScope = v
+	var cur *autoSensitivityLabelRuleModel
+	curRead := false
+	current := func() *autoSensitivityLabelRuleModel {
+		if !curRead {
+			curRead = true
+			var m autoSensitivityLabelRuleModel
+			if r.refresh(ctx, id, &m, &resp.Diagnostics, nil) {
+				cur = &m
+			} else if !resp.Diagnostics.HasError() {
+				resp.Diagnostics.AddError("Get-AutoSensitivityLabelRule failed", "the object could not be read to determine the list values to remove; nothing was changed")
+			}
+		}
+		return cur
 	}
-	if v := plan.ActivationDate.ValueString(); v != "" {
-		sp.ActivationDate = v
+	if !plan.AccessScope.Equal(state.AccessScope) {
+		if v := plan.AccessScope.ValueString(); v != "" {
+			sp.AccessScope = objectParam(v)
+		}
 	}
-	sp.AdvancedRule = plan.AdvancedRule.ValueString()
-	if v := plan.AnyOfRecipientAddressContainsWords.ValueString(); v != "" {
-		sp.AnyOfRecipientAddressContainsWords = v
+	if !plan.ActivationDate.Equal(state.ActivationDate) {
+		if v := plan.ActivationDate.ValueString(); v != "" {
+			sp.ActivationDate = objectParam(v)
+		}
 	}
-	if v := plan.AnyOfRecipientAddressMatchesPatterns.ValueString(); v != "" {
-		sp.AnyOfRecipientAddressMatchesPatterns = v
+	if !plan.AdvancedRule.Equal(state.AdvancedRule) {
+		sp.AdvancedRule = plan.AdvancedRule.ValueString()
 	}
-	sp.Comment = plan.Comment.ValueString()
-	sp.ContentContainsSensitiveInformation = toStringSlice(ctx, plan.ContentContainsSensitiveInformation, &resp.Diagnostics)
-	if v := plan.ContentExtensionMatchesWords.ValueString(); v != "" {
-		sp.ContentExtensionMatchesWords = v
+	if !plan.AnyOfRecipientAddressContainsWords.Equal(state.AnyOfRecipientAddressContainsWords) {
+		if !plan.AnyOfRecipientAddressContainsWords.IsNull() && !plan.AnyOfRecipientAddressContainsWords.IsUnknown() {
+			if v := toStringSlice(ctx, plan.AnyOfRecipientAddressContainsWords, &resp.Diagnostics); len(v) > 0 {
+				sp.AnyOfRecipientAddressContainsWords = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.AnyOfRecipientAddressContainsWords, &resp.Diagnostics); len(rm) > 0 {
+						sp.AnyOfRecipientAddressContainsWordsDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
 	}
-	sp.ContentIsNotLabeled = plan.ContentIsNotLabeled.ValueBool()
-	if v := plan.ContentPropertyContainsWords.ValueString(); v != "" {
-		sp.ContentPropertyContainsWords = v
+	if !plan.AnyOfRecipientAddressMatchesPatterns.Equal(state.AnyOfRecipientAddressMatchesPatterns) {
+		if !plan.AnyOfRecipientAddressMatchesPatterns.IsNull() && !plan.AnyOfRecipientAddressMatchesPatterns.IsUnknown() {
+			if v := toStringSlice(ctx, plan.AnyOfRecipientAddressMatchesPatterns, &resp.Diagnostics); len(v) > 0 {
+				sp.AnyOfRecipientAddressMatchesPatterns = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.AnyOfRecipientAddressMatchesPatterns, &resp.Diagnostics); len(rm) > 0 {
+						sp.AnyOfRecipientAddressMatchesPatternsDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
 	}
-	sp.DefaultSpoDocLibraryHasLabel = plan.DefaultSpoDocLibraryHasLabel.ValueBool()
-	sp.Disabled = plan.Disabled.ValueBool()
-	if v := plan.DocumentCreatedBy.ValueString(); v != "" {
-		sp.DocumentCreatedBy = v
+	if !plan.Comment.Equal(state.Comment) {
+		sp.Comment = plan.Comment.ValueString()
 	}
-	sp.DocumentIsPasswordProtected = plan.DocumentIsPasswordProtected.ValueBool()
-	sp.DocumentIsUnsupported = plan.DocumentIsUnsupported.ValueBool()
-	if v := plan.DocumentNameMatchesWords.ValueString(); v != "" {
-		sp.DocumentNameMatchesWords = v
+	if !plan.ContentContainsSensitiveInformation.Equal(state.ContentContainsSensitiveInformation) {
+		if v := plan.ContentContainsSensitiveInformation.ValueString(); v != "" {
+			sp.ContentContainsSensitiveInformation = objectParam(v)
+		}
 	}
-	if v := plan.DocumentSizeOver.ValueString(); v != "" {
-		sp.DocumentSizeOver = v
+	if !plan.ContentExtensionMatchesWords.Equal(state.ContentExtensionMatchesWords) {
+		if !plan.ContentExtensionMatchesWords.IsNull() && !plan.ContentExtensionMatchesWords.IsUnknown() {
+			if v := toStringSlice(ctx, plan.ContentExtensionMatchesWords, &resp.Diagnostics); len(v) > 0 {
+				sp.ContentExtensionMatchesWords = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.ContentExtensionMatchesWords, &resp.Diagnostics); len(rm) > 0 {
+						sp.ContentExtensionMatchesWordsDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
 	}
-	if v := plan.ExceptIfAccessScope.ValueString(); v != "" {
-		sp.ExceptIfAccessScope = v
+	if !plan.ContentIsNotLabeled.Equal(state.ContentIsNotLabeled) {
+		if !plan.ContentIsNotLabeled.IsUnknown() {
+			sp.ContentIsNotLabeled = plan.ContentIsNotLabeled.ValueBoolPointer()
+		}
 	}
-	if v := plan.ExceptIfAnyOfRecipientAddressContainsWords.ValueString(); v != "" {
-		sp.ExceptIfAnyOfRecipientAddressContainsWords = v
+	if !plan.ContentPropertyContainsWords.Equal(state.ContentPropertyContainsWords) {
+		if !plan.ContentPropertyContainsWords.IsNull() && !plan.ContentPropertyContainsWords.IsUnknown() {
+			if v := toStringSlice(ctx, plan.ContentPropertyContainsWords, &resp.Diagnostics); len(v) > 0 {
+				sp.ContentPropertyContainsWords = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.ContentPropertyContainsWords, &resp.Diagnostics); len(rm) > 0 {
+						sp.ContentPropertyContainsWordsDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
 	}
-	if v := plan.ExceptIfAnyOfRecipientAddressMatchesPatterns.ValueString(); v != "" {
-		sp.ExceptIfAnyOfRecipientAddressMatchesPatterns = v
+	if !plan.DefaultSpoDocLibraryHasLabel.Equal(state.DefaultSpoDocLibraryHasLabel) {
+		if !plan.DefaultSpoDocLibraryHasLabel.IsUnknown() {
+			sp.DefaultSpoDocLibraryHasLabel = plan.DefaultSpoDocLibraryHasLabel.ValueBoolPointer()
+		}
 	}
-	sp.ExceptIfContentContainsSensitiveInformation = toStringSlice(ctx, plan.ExceptIfContentContainsSensitiveInformation, &resp.Diagnostics)
-	if v := plan.ExceptIfContentExtensionMatchesWords.ValueString(); v != "" {
-		sp.ExceptIfContentExtensionMatchesWords = v
+	if !plan.Disabled.Equal(state.Disabled) {
+		if !plan.Disabled.IsUnknown() {
+			sp.Disabled = plan.Disabled.ValueBoolPointer()
+		}
 	}
-	if v := plan.ExceptIfContentPropertyContainsWords.ValueString(); v != "" {
-		sp.ExceptIfContentPropertyContainsWords = v
+	if !plan.DocumentCreatedBy.Equal(state.DocumentCreatedBy) {
+		if !plan.DocumentCreatedBy.IsNull() && !plan.DocumentCreatedBy.IsUnknown() {
+			if v := toStringSlice(ctx, plan.DocumentCreatedBy, &resp.Diagnostics); len(v) > 0 {
+				sp.DocumentCreatedBy = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.DocumentCreatedBy, &resp.Diagnostics); len(rm) > 0 {
+						sp.DocumentCreatedByDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
 	}
-	if v := plan.ExceptIfDocumentCreatedBy.ValueString(); v != "" {
-		sp.ExceptIfDocumentCreatedBy = v
+	if !plan.DocumentIsPasswordProtected.Equal(state.DocumentIsPasswordProtected) {
+		if !plan.DocumentIsPasswordProtected.IsUnknown() {
+			sp.DocumentIsPasswordProtected = plan.DocumentIsPasswordProtected.ValueBoolPointer()
+		}
 	}
-	sp.ExceptIfDocumentIsPasswordProtected = plan.ExceptIfDocumentIsPasswordProtected.ValueBool()
-	sp.ExceptIfDocumentIsUnsupported = plan.ExceptIfDocumentIsUnsupported.ValueBool()
-	if v := plan.ExceptIfDocumentNameMatchesWords.ValueString(); v != "" {
-		sp.ExceptIfDocumentNameMatchesWords = v
+	if !plan.DocumentIsUnsupported.Equal(state.DocumentIsUnsupported) {
+		if !plan.DocumentIsUnsupported.IsUnknown() {
+			sp.DocumentIsUnsupported = plan.DocumentIsUnsupported.ValueBoolPointer()
+		}
 	}
-	if v := plan.ExceptIfDocumentSizeOver.ValueString(); v != "" {
-		sp.ExceptIfDocumentSizeOver = v
+	if !plan.DocumentNameMatchesWords.Equal(state.DocumentNameMatchesWords) {
+		if !plan.DocumentNameMatchesWords.IsNull() && !plan.DocumentNameMatchesWords.IsUnknown() {
+			if v := toStringSlice(ctx, plan.DocumentNameMatchesWords, &resp.Diagnostics); len(v) > 0 {
+				sp.DocumentNameMatchesWords = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.DocumentNameMatchesWords, &resp.Diagnostics); len(rm) > 0 {
+						sp.DocumentNameMatchesWordsDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
 	}
-	sp.ExceptIfFrom = toStringSlice(ctx, plan.ExceptIfFrom, &resp.Diagnostics)
-	if v := plan.ExceptIfFromAddressContainsWords.ValueString(); v != "" {
-		sp.ExceptIfFromAddressContainsWords = v
+	if !plan.DocumentSizeOver.Equal(state.DocumentSizeOver) {
+		if v := plan.DocumentSizeOver.ValueString(); v != "" {
+			sp.DocumentSizeOver = objectParam(v)
+		}
 	}
-	if v := plan.ExceptIfFromAddressMatchesPatterns.ValueString(); v != "" {
-		sp.ExceptIfFromAddressMatchesPatterns = v
+	if !plan.ExceptIfAccessScope.Equal(state.ExceptIfAccessScope) {
+		if v := plan.ExceptIfAccessScope.ValueString(); v != "" {
+			sp.ExceptIfAccessScope = objectParam(v)
+		}
 	}
-	sp.ExceptIfFromMemberOf = toStringSlice(ctx, plan.ExceptIfFromMemberOf, &resp.Diagnostics)
-	if v := plan.ExceptIfHeaderMatchesPatterns.ValueString(); v != "" {
-		sp.ExceptIfHeaderMatchesPatterns = v
+	if !plan.ExceptIfAnyOfRecipientAddressContainsWords.Equal(state.ExceptIfAnyOfRecipientAddressContainsWords) {
+		if !plan.ExceptIfAnyOfRecipientAddressContainsWords.IsNull() && !plan.ExceptIfAnyOfRecipientAddressContainsWords.IsUnknown() {
+			if v := toStringSlice(ctx, plan.ExceptIfAnyOfRecipientAddressContainsWords, &resp.Diagnostics); len(v) > 0 {
+				sp.ExceptIfAnyOfRecipientAddressContainsWords = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.ExceptIfAnyOfRecipientAddressContainsWords, &resp.Diagnostics); len(rm) > 0 {
+						sp.ExceptIfAnyOfRecipientAddressContainsWordsDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
 	}
-	sp.ExceptIfProcessingLimitExceeded = plan.ExceptIfProcessingLimitExceeded.ValueBool()
-	if v := plan.ExceptIfRecipientDomainIs.ValueString(); v != "" {
-		sp.ExceptIfRecipientDomainIs = v
+	if !plan.ExceptIfAnyOfRecipientAddressMatchesPatterns.Equal(state.ExceptIfAnyOfRecipientAddressMatchesPatterns) {
+		if !plan.ExceptIfAnyOfRecipientAddressMatchesPatterns.IsNull() && !plan.ExceptIfAnyOfRecipientAddressMatchesPatterns.IsUnknown() {
+			if v := toStringSlice(ctx, plan.ExceptIfAnyOfRecipientAddressMatchesPatterns, &resp.Diagnostics); len(v) > 0 {
+				sp.ExceptIfAnyOfRecipientAddressMatchesPatterns = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.ExceptIfAnyOfRecipientAddressMatchesPatterns, &resp.Diagnostics); len(rm) > 0 {
+						sp.ExceptIfAnyOfRecipientAddressMatchesPatternsDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
 	}
-	if v := plan.ExceptIfSenderDomainIs.ValueString(); v != "" {
-		sp.ExceptIfSenderDomainIs = v
+	if !plan.ExceptIfContentContainsSensitiveInformation.Equal(state.ExceptIfContentContainsSensitiveInformation) {
+		if v := plan.ExceptIfContentContainsSensitiveInformation.ValueString(); v != "" {
+			sp.ExceptIfContentContainsSensitiveInformation = objectParam(v)
+		}
 	}
-	if v := plan.ExceptIfSenderIPRanges.ValueString(); v != "" {
-		sp.ExceptIfSenderIPRanges = v
+	if !plan.ExceptIfContentExtensionMatchesWords.Equal(state.ExceptIfContentExtensionMatchesWords) {
+		if !plan.ExceptIfContentExtensionMatchesWords.IsNull() && !plan.ExceptIfContentExtensionMatchesWords.IsUnknown() {
+			if v := toStringSlice(ctx, plan.ExceptIfContentExtensionMatchesWords, &resp.Diagnostics); len(v) > 0 {
+				sp.ExceptIfContentExtensionMatchesWords = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.ExceptIfContentExtensionMatchesWords, &resp.Diagnostics); len(rm) > 0 {
+						sp.ExceptIfContentExtensionMatchesWordsDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
 	}
-	if v := plan.ExceptIfSentTo.ValueString(); v != "" {
-		sp.ExceptIfSentTo = v
+	if !plan.ExceptIfContentPropertyContainsWords.Equal(state.ExceptIfContentPropertyContainsWords) {
+		if !plan.ExceptIfContentPropertyContainsWords.IsNull() && !plan.ExceptIfContentPropertyContainsWords.IsUnknown() {
+			if v := toStringSlice(ctx, plan.ExceptIfContentPropertyContainsWords, &resp.Diagnostics); len(v) > 0 {
+				sp.ExceptIfContentPropertyContainsWords = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.ExceptIfContentPropertyContainsWords, &resp.Diagnostics); len(rm) > 0 {
+						sp.ExceptIfContentPropertyContainsWordsDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
 	}
-	sp.ExceptIfSentToMemberOf = toStringSlice(ctx, plan.ExceptIfSentToMemberOf, &resp.Diagnostics)
-	if v := plan.ExceptIfSharedWithDomain.ValueString(); v != "" {
-		sp.ExceptIfSharedWithDomain = v
+	if !plan.ExceptIfDocumentCreatedBy.Equal(state.ExceptIfDocumentCreatedBy) {
+		if !plan.ExceptIfDocumentCreatedBy.IsNull() && !plan.ExceptIfDocumentCreatedBy.IsUnknown() {
+			if v := toStringSlice(ctx, plan.ExceptIfDocumentCreatedBy, &resp.Diagnostics); len(v) > 0 {
+				sp.ExceptIfDocumentCreatedBy = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.ExceptIfDocumentCreatedBy, &resp.Diagnostics); len(rm) > 0 {
+						sp.ExceptIfDocumentCreatedByDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
 	}
-	if v := plan.ExceptIfSubjectMatchesPatterns.ValueString(); v != "" {
-		sp.ExceptIfSubjectMatchesPatterns = v
+	if !plan.ExceptIfDocumentIsPasswordProtected.Equal(state.ExceptIfDocumentIsPasswordProtected) {
+		if !plan.ExceptIfDocumentIsPasswordProtected.IsUnknown() {
+			sp.ExceptIfDocumentIsPasswordProtected = plan.ExceptIfDocumentIsPasswordProtected.ValueBoolPointer()
+		}
 	}
-	if v := plan.ExpiryDate.ValueString(); v != "" {
-		sp.ExpiryDate = v
+	if !plan.ExceptIfDocumentIsUnsupported.Equal(state.ExceptIfDocumentIsUnsupported) {
+		if !plan.ExceptIfDocumentIsUnsupported.IsUnknown() {
+			sp.ExceptIfDocumentIsUnsupported = plan.ExceptIfDocumentIsUnsupported.ValueBoolPointer()
+		}
 	}
-	sp.From = toStringSlice(ctx, plan.From, &resp.Diagnostics)
-	if v := plan.FromAddressContainsWords.ValueString(); v != "" {
-		sp.FromAddressContainsWords = v
+	if !plan.ExceptIfDocumentNameMatchesWords.Equal(state.ExceptIfDocumentNameMatchesWords) {
+		if !plan.ExceptIfDocumentNameMatchesWords.IsNull() && !plan.ExceptIfDocumentNameMatchesWords.IsUnknown() {
+			if v := toStringSlice(ctx, plan.ExceptIfDocumentNameMatchesWords, &resp.Diagnostics); len(v) > 0 {
+				sp.ExceptIfDocumentNameMatchesWords = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.ExceptIfDocumentNameMatchesWords, &resp.Diagnostics); len(rm) > 0 {
+						sp.ExceptIfDocumentNameMatchesWordsDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
 	}
-	if v := plan.FromAddressMatchesPatterns.ValueString(); v != "" {
-		sp.FromAddressMatchesPatterns = v
+	if !plan.ExceptIfDocumentSizeOver.Equal(state.ExceptIfDocumentSizeOver) {
+		if v := plan.ExceptIfDocumentSizeOver.ValueString(); v != "" {
+			sp.ExceptIfDocumentSizeOver = objectParam(v)
+		}
 	}
-	sp.FromMemberOf = toStringSlice(ctx, plan.FromMemberOf, &resp.Diagnostics)
-	if v := plan.HeaderMatchesPatterns.ValueString(); v != "" {
-		sp.HeaderMatchesPatterns = v
+	if !plan.ExceptIfFrom.Equal(state.ExceptIfFrom) {
+		if !plan.ExceptIfFrom.IsNull() && !plan.ExceptIfFrom.IsUnknown() {
+			sp.ExceptIfFrom = append([]string{}, toStringSlice(ctx, plan.ExceptIfFrom, &resp.Diagnostics)...)
+		}
 	}
-	if v := plan.Priority.ValueString(); v != "" {
-		sp.Priority = v
+	if !plan.ExceptIfFromAddressContainsWords.Equal(state.ExceptIfFromAddressContainsWords) {
+		if !plan.ExceptIfFromAddressContainsWords.IsNull() && !plan.ExceptIfFromAddressContainsWords.IsUnknown() {
+			if v := toStringSlice(ctx, plan.ExceptIfFromAddressContainsWords, &resp.Diagnostics); len(v) > 0 {
+				sp.ExceptIfFromAddressContainsWords = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.ExceptIfFromAddressContainsWords, &resp.Diagnostics); len(rm) > 0 {
+						sp.ExceptIfFromAddressContainsWordsDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
 	}
-	sp.ProcessingLimitExceeded = plan.ProcessingLimitExceeded.ValueBool()
-	if v := plan.RecipientDomainIs.ValueString(); v != "" {
-		sp.RecipientDomainIs = v
+	if !plan.ExceptIfFromAddressMatchesPatterns.Equal(state.ExceptIfFromAddressMatchesPatterns) {
+		if !plan.ExceptIfFromAddressMatchesPatterns.IsNull() && !plan.ExceptIfFromAddressMatchesPatterns.IsUnknown() {
+			if v := toStringSlice(ctx, plan.ExceptIfFromAddressMatchesPatterns, &resp.Diagnostics); len(v) > 0 {
+				sp.ExceptIfFromAddressMatchesPatterns = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.ExceptIfFromAddressMatchesPatterns, &resp.Diagnostics); len(rm) > 0 {
+						sp.ExceptIfFromAddressMatchesPatternsDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
 	}
-	if v := plan.ReportSeverityLevel.ValueString(); v != "" {
-		sp.ReportSeverityLevel = v
+	if !plan.ExceptIfFromMemberOf.Equal(state.ExceptIfFromMemberOf) {
+		if !plan.ExceptIfFromMemberOf.IsNull() && !plan.ExceptIfFromMemberOf.IsUnknown() {
+			sp.ExceptIfFromMemberOf = append([]string{}, toStringSlice(ctx, plan.ExceptIfFromMemberOf, &resp.Diagnostics)...)
+		}
 	}
-	if v := plan.RuleErrorAction.ValueString(); v != "" {
-		sp.RuleErrorAction = v
+	if !plan.ExceptIfHeaderMatchesPatterns.Equal(state.ExceptIfHeaderMatchesPatterns) {
+		if v := plan.ExceptIfHeaderMatchesPatterns.ValueString(); v != "" {
+			sp.ExceptIfHeaderMatchesPatterns = objectParam(v)
+		}
 	}
-	if v := plan.SenderDomainIs.ValueString(); v != "" {
-		sp.SenderDomainIs = v
+	if !plan.ExceptIfProcessingLimitExceeded.Equal(state.ExceptIfProcessingLimitExceeded) {
+		if !plan.ExceptIfProcessingLimitExceeded.IsUnknown() {
+			sp.ExceptIfProcessingLimitExceeded = plan.ExceptIfProcessingLimitExceeded.ValueBoolPointer()
+		}
 	}
-	if v := plan.SenderIPRanges.ValueString(); v != "" {
-		sp.SenderIPRanges = v
+	if !plan.ExceptIfRecipientDomainIs.Equal(state.ExceptIfRecipientDomainIs) {
+		if !plan.ExceptIfRecipientDomainIs.IsNull() && !plan.ExceptIfRecipientDomainIs.IsUnknown() {
+			if v := toStringSlice(ctx, plan.ExceptIfRecipientDomainIs, &resp.Diagnostics); len(v) > 0 {
+				sp.ExceptIfRecipientDomainIs = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.ExceptIfRecipientDomainIs, &resp.Diagnostics); len(rm) > 0 {
+						sp.ExceptIfRecipientDomainIsDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
 	}
-	if v := plan.SentTo.ValueString(); v != "" {
-		sp.SentTo = v
+	if !plan.ExceptIfSenderDomainIs.Equal(state.ExceptIfSenderDomainIs) {
+		if !plan.ExceptIfSenderDomainIs.IsNull() && !plan.ExceptIfSenderDomainIs.IsUnknown() {
+			if v := toStringSlice(ctx, plan.ExceptIfSenderDomainIs, &resp.Diagnostics); len(v) > 0 {
+				sp.ExceptIfSenderDomainIs = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.ExceptIfSenderDomainIs, &resp.Diagnostics); len(rm) > 0 {
+						sp.ExceptIfSenderDomainIsDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
 	}
-	sp.SentToMemberOf = toStringSlice(ctx, plan.SentToMemberOf, &resp.Diagnostics)
-	if v := plan.SharedWithDomain.ValueString(); v != "" {
-		sp.SharedWithDomain = v
+	if !plan.ExceptIfSenderIPRanges.Equal(state.ExceptIfSenderIPRanges) {
+		if !plan.ExceptIfSenderIPRanges.IsNull() && !plan.ExceptIfSenderIPRanges.IsUnknown() {
+			if v := toStringSlice(ctx, plan.ExceptIfSenderIPRanges, &resp.Diagnostics); len(v) > 0 {
+				sp.ExceptIfSenderIPRanges = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.ExceptIfSenderIPRanges, &resp.Diagnostics); len(rm) > 0 {
+						sp.ExceptIfSenderIPRangesDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
 	}
-	sp.SourceType = plan.SourceType.ValueString()
-	if v := plan.SubjectMatchesPatterns.ValueString(); v != "" {
-		sp.SubjectMatchesPatterns = v
+	if !plan.ExceptIfSentTo.Equal(state.ExceptIfSentTo) {
+		if !plan.ExceptIfSentTo.IsNull() && !plan.ExceptIfSentTo.IsUnknown() {
+			if v := toStringSlice(ctx, plan.ExceptIfSentTo, &resp.Diagnostics); len(v) > 0 {
+				sp.ExceptIfSentTo = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.ExceptIfSentTo, &resp.Diagnostics); len(rm) > 0 {
+						sp.ExceptIfSentToDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
+	}
+	if !plan.ExceptIfSentToMemberOf.Equal(state.ExceptIfSentToMemberOf) {
+		if !plan.ExceptIfSentToMemberOf.IsNull() && !plan.ExceptIfSentToMemberOf.IsUnknown() {
+			sp.ExceptIfSentToMemberOf = append([]string{}, toStringSlice(ctx, plan.ExceptIfSentToMemberOf, &resp.Diagnostics)...)
+		}
+	}
+	if !plan.ExceptIfSharedWithDomain.Equal(state.ExceptIfSharedWithDomain) {
+		if v := plan.ExceptIfSharedWithDomain.ValueString(); v != "" {
+			sp.ExceptIfSharedWithDomain = objectParam(v)
+		}
+	}
+	if !plan.ExceptIfSubjectMatchesPatterns.Equal(state.ExceptIfSubjectMatchesPatterns) {
+		if !plan.ExceptIfSubjectMatchesPatterns.IsNull() && !plan.ExceptIfSubjectMatchesPatterns.IsUnknown() {
+			if v := toStringSlice(ctx, plan.ExceptIfSubjectMatchesPatterns, &resp.Diagnostics); len(v) > 0 {
+				sp.ExceptIfSubjectMatchesPatterns = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.ExceptIfSubjectMatchesPatterns, &resp.Diagnostics); len(rm) > 0 {
+						sp.ExceptIfSubjectMatchesPatternsDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
+	}
+	if !plan.ExpiryDate.Equal(state.ExpiryDate) {
+		if v := plan.ExpiryDate.ValueString(); v != "" {
+			sp.ExpiryDate = objectParam(v)
+		}
+	}
+	if !plan.From.Equal(state.From) {
+		if !plan.From.IsNull() && !plan.From.IsUnknown() {
+			sp.From = append([]string{}, toStringSlice(ctx, plan.From, &resp.Diagnostics)...)
+		}
+	}
+	if !plan.FromAddressContainsWords.Equal(state.FromAddressContainsWords) {
+		if !plan.FromAddressContainsWords.IsNull() && !plan.FromAddressContainsWords.IsUnknown() {
+			if v := toStringSlice(ctx, plan.FromAddressContainsWords, &resp.Diagnostics); len(v) > 0 {
+				sp.FromAddressContainsWords = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.FromAddressContainsWords, &resp.Diagnostics); len(rm) > 0 {
+						sp.FromAddressContainsWordsDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
+	}
+	if !plan.FromAddressMatchesPatterns.Equal(state.FromAddressMatchesPatterns) {
+		if !plan.FromAddressMatchesPatterns.IsNull() && !plan.FromAddressMatchesPatterns.IsUnknown() {
+			if v := toStringSlice(ctx, plan.FromAddressMatchesPatterns, &resp.Diagnostics); len(v) > 0 {
+				sp.FromAddressMatchesPatterns = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.FromAddressMatchesPatterns, &resp.Diagnostics); len(rm) > 0 {
+						sp.FromAddressMatchesPatternsDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
+	}
+	if !plan.FromMemberOf.Equal(state.FromMemberOf) {
+		if !plan.FromMemberOf.IsNull() && !plan.FromMemberOf.IsUnknown() {
+			sp.FromMemberOf = append([]string{}, toStringSlice(ctx, plan.FromMemberOf, &resp.Diagnostics)...)
+		}
+	}
+	if !plan.HeaderMatchesPatterns.Equal(state.HeaderMatchesPatterns) {
+		if v := plan.HeaderMatchesPatterns.ValueString(); v != "" {
+			sp.HeaderMatchesPatterns = objectParam(v)
+		}
+	}
+	if !plan.Priority.Equal(state.Priority) {
+		if !plan.Priority.IsUnknown() {
+			sp.Priority = plan.Priority.ValueInt64Pointer()
+		}
+	}
+	if !plan.ProcessingLimitExceeded.Equal(state.ProcessingLimitExceeded) {
+		if !plan.ProcessingLimitExceeded.IsUnknown() {
+			sp.ProcessingLimitExceeded = plan.ProcessingLimitExceeded.ValueBoolPointer()
+		}
+	}
+	if !plan.RecipientDomainIs.Equal(state.RecipientDomainIs) {
+		if !plan.RecipientDomainIs.IsNull() && !plan.RecipientDomainIs.IsUnknown() {
+			if v := toStringSlice(ctx, plan.RecipientDomainIs, &resp.Diagnostics); len(v) > 0 {
+				sp.RecipientDomainIs = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.RecipientDomainIs, &resp.Diagnostics); len(rm) > 0 {
+						sp.RecipientDomainIsDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
+	}
+	if !plan.ReportSeverityLevel.Equal(state.ReportSeverityLevel) {
+		if v := plan.ReportSeverityLevel.ValueString(); v != "" {
+			sp.ReportSeverityLevel = objectParam(v)
+		}
+	}
+	if !plan.RuleErrorAction.Equal(state.RuleErrorAction) {
+		if v := plan.RuleErrorAction.ValueString(); v != "" {
+			sp.RuleErrorAction = objectParam(v)
+		}
+	}
+	if !plan.SenderDomainIs.Equal(state.SenderDomainIs) {
+		if !plan.SenderDomainIs.IsNull() && !plan.SenderDomainIs.IsUnknown() {
+			if v := toStringSlice(ctx, plan.SenderDomainIs, &resp.Diagnostics); len(v) > 0 {
+				sp.SenderDomainIs = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.SenderDomainIs, &resp.Diagnostics); len(rm) > 0 {
+						sp.SenderDomainIsDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
+	}
+	if !plan.SenderIPRanges.Equal(state.SenderIPRanges) {
+		if !plan.SenderIPRanges.IsNull() && !plan.SenderIPRanges.IsUnknown() {
+			if v := toStringSlice(ctx, plan.SenderIPRanges, &resp.Diagnostics); len(v) > 0 {
+				sp.SenderIPRanges = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.SenderIPRanges, &resp.Diagnostics); len(rm) > 0 {
+						sp.SenderIPRangesDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
+	}
+	if !plan.SentTo.Equal(state.SentTo) {
+		if !plan.SentTo.IsNull() && !plan.SentTo.IsUnknown() {
+			if v := toStringSlice(ctx, plan.SentTo, &resp.Diagnostics); len(v) > 0 {
+				sp.SentTo = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.SentTo, &resp.Diagnostics); len(rm) > 0 {
+						sp.SentToDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
+	}
+	if !plan.SentToMemberOf.Equal(state.SentToMemberOf) {
+		if !plan.SentToMemberOf.IsNull() && !plan.SentToMemberOf.IsUnknown() {
+			sp.SentToMemberOf = append([]string{}, toStringSlice(ctx, plan.SentToMemberOf, &resp.Diagnostics)...)
+		}
+	}
+	if !plan.SharedWithDomain.Equal(state.SharedWithDomain) {
+		if v := plan.SharedWithDomain.ValueString(); v != "" {
+			sp.SharedWithDomain = objectParam(v)
+		}
+	}
+	if !plan.SourceType.Equal(state.SourceType) {
+		sp.SourceType = plan.SourceType.ValueString()
+	}
+	if !plan.SubjectMatchesPatterns.Equal(state.SubjectMatchesPatterns) {
+		if !plan.SubjectMatchesPatterns.IsNull() && !plan.SubjectMatchesPatterns.IsUnknown() {
+			if v := toStringSlice(ctx, plan.SubjectMatchesPatterns, &resp.Diagnostics); len(v) > 0 {
+				sp.SubjectMatchesPatterns = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.SubjectMatchesPatterns, &resp.Diagnostics); len(rm) > 0 {
+						sp.SubjectMatchesPatternsDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
+	}
+	if !plan.Workload.Equal(state.Workload) {
+		if v := plan.Workload.ValueString(); v != "" {
+			sp.Workload = objectParam(v)
+		}
 	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	if _, err := r.client.SCC.SetAutoSensitivityLabelRule(ctx, sp); err != nil {
+	if _, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.SetAutoSensitivityLabelRule, sp, isNotFound); err != nil {
 		resp.Diagnostics.AddError("Set-AutoSensitivityLabelRule failed", err.Error())
 		return
 	}
 	cfg := plan
 	reflected := reconcile.ReflectsFields(map[string]types.String{
-		"AccessScope":                                  cfg.AccessScope,
-		"ActivationDate":                               cfg.ActivationDate,
-		"AdvancedRule":                                 cfg.AdvancedRule,
-		"AnyOfRecipientAddressContainsWords":           cfg.AnyOfRecipientAddressContainsWords,
-		"AnyOfRecipientAddressMatchesPatterns":         cfg.AnyOfRecipientAddressMatchesPatterns,
-		"Comment":                                      cfg.Comment,
-		"ContentExtensionMatchesWords":                 cfg.ContentExtensionMatchesWords,
-		"ContentPropertyContainsWords":                 cfg.ContentPropertyContainsWords,
-		"DocumentCreatedBy":                            cfg.DocumentCreatedBy,
-		"DocumentNameMatchesWords":                     cfg.DocumentNameMatchesWords,
-		"DocumentSizeOver":                             cfg.DocumentSizeOver,
-		"ExceptIfAccessScope":                          cfg.ExceptIfAccessScope,
-		"ExceptIfAnyOfRecipientAddressContainsWords":   cfg.ExceptIfAnyOfRecipientAddressContainsWords,
-		"ExceptIfAnyOfRecipientAddressMatchesPatterns": cfg.ExceptIfAnyOfRecipientAddressMatchesPatterns,
-		"ExceptIfContentExtensionMatchesWords":         cfg.ExceptIfContentExtensionMatchesWords,
-		"ExceptIfContentPropertyContainsWords":         cfg.ExceptIfContentPropertyContainsWords,
-		"ExceptIfDocumentCreatedBy":                    cfg.ExceptIfDocumentCreatedBy,
-		"ExceptIfDocumentNameMatchesWords":             cfg.ExceptIfDocumentNameMatchesWords,
-		"ExceptIfDocumentSizeOver":                     cfg.ExceptIfDocumentSizeOver,
-		"ExceptIfFromAddressContainsWords":             cfg.ExceptIfFromAddressContainsWords,
-		"ExceptIfFromAddressMatchesPatterns":           cfg.ExceptIfFromAddressMatchesPatterns,
-		"ExceptIfHeaderMatchesPatterns":                cfg.ExceptIfHeaderMatchesPatterns,
-		"ExceptIfRecipientDomainIs":                    cfg.ExceptIfRecipientDomainIs,
-		"ExceptIfSenderDomainIs":                       cfg.ExceptIfSenderDomainIs,
-		"ExceptIfSenderIPRanges":                       cfg.ExceptIfSenderIPRanges,
-		"ExceptIfSentTo":                               cfg.ExceptIfSentTo,
-		"ExceptIfSharedWithDomain":                     cfg.ExceptIfSharedWithDomain,
-		"ExceptIfSubjectMatchesPatterns":               cfg.ExceptIfSubjectMatchesPatterns,
-		"ExpiryDate":                                   cfg.ExpiryDate,
-		"FromAddressContainsWords":                     cfg.FromAddressContainsWords,
-		"FromAddressMatchesPatterns":                   cfg.FromAddressMatchesPatterns,
-		"HeaderMatchesPatterns":                        cfg.HeaderMatchesPatterns,
-		"Priority":                                     cfg.Priority,
-		"RecipientDomainIs":                            cfg.RecipientDomainIs,
-		"ReportSeverityLevel":                          cfg.ReportSeverityLevel,
-		"RuleErrorAction":                              cfg.RuleErrorAction,
-		"SenderDomainIs":                               cfg.SenderDomainIs,
-		"SenderIPRanges":                               cfg.SenderIPRanges,
-		"SentTo":                                       cfg.SentTo,
-		"SharedWithDomain":                             cfg.SharedWithDomain,
-		"SourceType":                                   cfg.SourceType,
-		"SubjectMatchesPatterns":                       cfg.SubjectMatchesPatterns,
+		"AdvancedRule": cfg.AdvancedRule,
+		"Comment":      cfg.Comment,
+		"SourceType":   cfg.SourceType,
 	}, getString)
+	if !cfg.ContentIsNotLabeled.IsUnknown() && !cfg.ContentIsNotLabeled.IsNull() && !cfg.ContentIsNotLabeled.Equal(state.ContentIsNotLabeled) {
+		prev, want := reflected, cfg.ContentIsNotLabeled.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["ContentIsNotLabeled"] == nil || getBool(obj, "ContentIsNotLabeled") == want)
+		}
+	}
+	if !cfg.DefaultSpoDocLibraryHasLabel.IsUnknown() && !cfg.DefaultSpoDocLibraryHasLabel.IsNull() && !cfg.DefaultSpoDocLibraryHasLabel.Equal(state.DefaultSpoDocLibraryHasLabel) {
+		prev, want := reflected, cfg.DefaultSpoDocLibraryHasLabel.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["DefaultSpoDocLibraryHasLabel"] == nil || getBool(obj, "DefaultSpoDocLibraryHasLabel") == want)
+		}
+	}
+	if !cfg.Disabled.IsUnknown() && !cfg.Disabled.IsNull() && !cfg.Disabled.Equal(state.Disabled) {
+		prev, want := reflected, cfg.Disabled.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["Disabled"] == nil || getBool(obj, "Disabled") == want)
+		}
+	}
+	if !cfg.DocumentIsPasswordProtected.IsUnknown() && !cfg.DocumentIsPasswordProtected.IsNull() && !cfg.DocumentIsPasswordProtected.Equal(state.DocumentIsPasswordProtected) {
+		prev, want := reflected, cfg.DocumentIsPasswordProtected.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["DocumentIsPasswordProtected"] == nil || getBool(obj, "DocumentIsPasswordProtected") == want)
+		}
+	}
+	if !cfg.DocumentIsUnsupported.IsUnknown() && !cfg.DocumentIsUnsupported.IsNull() && !cfg.DocumentIsUnsupported.Equal(state.DocumentIsUnsupported) {
+		prev, want := reflected, cfg.DocumentIsUnsupported.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["DocumentIsUnsupported"] == nil || getBool(obj, "DocumentIsUnsupported") == want)
+		}
+	}
+	if !cfg.ExceptIfDocumentIsPasswordProtected.IsUnknown() && !cfg.ExceptIfDocumentIsPasswordProtected.IsNull() && !cfg.ExceptIfDocumentIsPasswordProtected.Equal(state.ExceptIfDocumentIsPasswordProtected) {
+		prev, want := reflected, cfg.ExceptIfDocumentIsPasswordProtected.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["ExceptIfDocumentIsPasswordProtected"] == nil || getBool(obj, "ExceptIfDocumentIsPasswordProtected") == want)
+		}
+	}
+	if !cfg.ExceptIfDocumentIsUnsupported.IsUnknown() && !cfg.ExceptIfDocumentIsUnsupported.IsNull() && !cfg.ExceptIfDocumentIsUnsupported.Equal(state.ExceptIfDocumentIsUnsupported) {
+		prev, want := reflected, cfg.ExceptIfDocumentIsUnsupported.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["ExceptIfDocumentIsUnsupported"] == nil || getBool(obj, "ExceptIfDocumentIsUnsupported") == want)
+		}
+	}
+	if !cfg.ExceptIfProcessingLimitExceeded.IsUnknown() && !cfg.ExceptIfProcessingLimitExceeded.IsNull() && !cfg.ExceptIfProcessingLimitExceeded.Equal(state.ExceptIfProcessingLimitExceeded) {
+		prev, want := reflected, cfg.ExceptIfProcessingLimitExceeded.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["ExceptIfProcessingLimitExceeded"] == nil || getBool(obj, "ExceptIfProcessingLimitExceeded") == want)
+		}
+	}
+	if !cfg.Priority.IsUnknown() && !cfg.Priority.IsNull() && !cfg.Priority.Equal(state.Priority) {
+		prev, want := reflected, cfg.Priority.ValueInt64()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["Priority"] == nil || getInt(obj, "Priority") == want)
+		}
+	}
+	if !cfg.ProcessingLimitExceeded.IsUnknown() && !cfg.ProcessingLimitExceeded.IsNull() && !cfg.ProcessingLimitExceeded.Equal(state.ProcessingLimitExceeded) {
+		prev, want := reflected, cfg.ProcessingLimitExceeded.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["ProcessingLimitExceeded"] == nil || getBool(obj, "ProcessingLimitExceeded") == want)
+		}
+	}
 	r.refresh(ctx, id, &plan, &resp.Diagnostics, reflected)
+	if !cfg.ID.IsUnknown() && !cfg.ID.IsNull() {
+		plan.ID = cfg.ID
+	}
 	r.reconcileState(&cfg, &plan)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
@@ -642,69 +1177,69 @@ func (r *autoSensitivityLabelRuleResource) refresh(ctx context.Context, identity
 func readAutoSensitivityLabelRule(ctx context.Context, obj map[string]any, m *autoSensitivityLabelRuleModel) {
 	m.ID = types.StringValue(firstNonEmptyStr(getString(obj, "Guid"), getString(obj, "Id"), getString(obj, "Identity")))
 	m.Identity = types.StringValue(firstNonEmptyStr(getString(obj, "Identity"), getString(obj, "Guid"), getString(obj, "Name")))
-	m.AccessScope = types.StringValue(getString(obj, "AccessScope"))
-	m.ActivationDate = types.StringValue(getString(obj, "ActivationDate"))
+	m.AccessScope = types.StringValue(getObjectJSON(obj, "AccessScope"))
+	m.ActivationDate = types.StringValue(getObjectJSON(obj, "ActivationDate"))
 	m.AdvancedRule = types.StringValue(getString(obj, "AdvancedRule"))
-	m.AnyOfRecipientAddressContainsWords = types.StringValue(getString(obj, "AnyOfRecipientAddressContainsWords"))
-	m.AnyOfRecipientAddressMatchesPatterns = types.StringValue(getString(obj, "AnyOfRecipientAddressMatchesPatterns"))
+	m.AnyOfRecipientAddressContainsWords = stringSetValue(ctx, getStringSlice(obj, "AnyOfRecipientAddressContainsWords"))
+	m.AnyOfRecipientAddressMatchesPatterns = stringSetValue(ctx, getStringSlice(obj, "AnyOfRecipientAddressMatchesPatterns"))
 	m.Comment = types.StringValue(getString(obj, "Comment"))
-	m.ContentContainsSensitiveInformation = stringSetValue(ctx, getStringSlice(obj, "ContentContainsSensitiveInformation"))
-	m.ContentExtensionMatchesWords = types.StringValue(getString(obj, "ContentExtensionMatchesWords"))
+	m.ContentContainsSensitiveInformation = types.StringValue(getObjectJSON(obj, "ContentContainsSensitiveInformation"))
+	m.ContentExtensionMatchesWords = stringSetValue(ctx, getStringSlice(obj, "ContentExtensionMatchesWords"))
 	m.ContentIsNotLabeled = types.BoolValue(getBool(obj, "ContentIsNotLabeled"))
-	m.ContentPropertyContainsWords = types.StringValue(getString(obj, "ContentPropertyContainsWords"))
+	m.ContentPropertyContainsWords = stringSetValue(ctx, getStringSlice(obj, "ContentPropertyContainsWords"))
 	m.DefaultSpoDocLibraryHasLabel = types.BoolValue(getBool(obj, "DefaultSpoDocLibraryHasLabel"))
 	m.Disabled = types.BoolValue(getBool(obj, "Disabled"))
-	m.DocumentCreatedBy = types.StringValue(getString(obj, "DocumentCreatedBy"))
+	m.DocumentCreatedBy = stringSetValue(ctx, getStringSlice(obj, "DocumentCreatedBy"))
 	m.DocumentIsPasswordProtected = types.BoolValue(getBool(obj, "DocumentIsPasswordProtected"))
 	m.DocumentIsUnsupported = types.BoolValue(getBool(obj, "DocumentIsUnsupported"))
-	m.DocumentNameMatchesWords = types.StringValue(getString(obj, "DocumentNameMatchesWords"))
-	m.DocumentSizeOver = types.StringValue(getString(obj, "DocumentSizeOver"))
-	m.ExceptIfAccessScope = types.StringValue(getString(obj, "ExceptIfAccessScope"))
-	m.ExceptIfAnyOfRecipientAddressContainsWords = types.StringValue(getString(obj, "ExceptIfAnyOfRecipientAddressContainsWords"))
-	m.ExceptIfAnyOfRecipientAddressMatchesPatterns = types.StringValue(getString(obj, "ExceptIfAnyOfRecipientAddressMatchesPatterns"))
-	m.ExceptIfContentContainsSensitiveInformation = stringSetValue(ctx, getStringSlice(obj, "ExceptIfContentContainsSensitiveInformation"))
-	m.ExceptIfContentExtensionMatchesWords = types.StringValue(getString(obj, "ExceptIfContentExtensionMatchesWords"))
-	m.ExceptIfContentPropertyContainsWords = types.StringValue(getString(obj, "ExceptIfContentPropertyContainsWords"))
-	m.ExceptIfDocumentCreatedBy = types.StringValue(getString(obj, "ExceptIfDocumentCreatedBy"))
+	m.DocumentNameMatchesWords = stringSetValue(ctx, getStringSlice(obj, "DocumentNameMatchesWords"))
+	m.DocumentSizeOver = types.StringValue(getObjectJSON(obj, "DocumentSizeOver"))
+	m.ExceptIfAccessScope = types.StringValue(getObjectJSON(obj, "ExceptIfAccessScope"))
+	m.ExceptIfAnyOfRecipientAddressContainsWords = stringSetValue(ctx, getStringSlice(obj, "ExceptIfAnyOfRecipientAddressContainsWords"))
+	m.ExceptIfAnyOfRecipientAddressMatchesPatterns = stringSetValue(ctx, getStringSlice(obj, "ExceptIfAnyOfRecipientAddressMatchesPatterns"))
+	m.ExceptIfContentContainsSensitiveInformation = types.StringValue(getObjectJSON(obj, "ExceptIfContentContainsSensitiveInformation"))
+	m.ExceptIfContentExtensionMatchesWords = stringSetValue(ctx, getStringSlice(obj, "ExceptIfContentExtensionMatchesWords"))
+	m.ExceptIfContentPropertyContainsWords = stringSetValue(ctx, getStringSlice(obj, "ExceptIfContentPropertyContainsWords"))
+	m.ExceptIfDocumentCreatedBy = stringSetValue(ctx, getStringSlice(obj, "ExceptIfDocumentCreatedBy"))
 	m.ExceptIfDocumentIsPasswordProtected = types.BoolValue(getBool(obj, "ExceptIfDocumentIsPasswordProtected"))
 	m.ExceptIfDocumentIsUnsupported = types.BoolValue(getBool(obj, "ExceptIfDocumentIsUnsupported"))
-	m.ExceptIfDocumentNameMatchesWords = types.StringValue(getString(obj, "ExceptIfDocumentNameMatchesWords"))
-	m.ExceptIfDocumentSizeOver = types.StringValue(getString(obj, "ExceptIfDocumentSizeOver"))
+	m.ExceptIfDocumentNameMatchesWords = stringSetValue(ctx, getStringSlice(obj, "ExceptIfDocumentNameMatchesWords"))
+	m.ExceptIfDocumentSizeOver = types.StringValue(getObjectJSON(obj, "ExceptIfDocumentSizeOver"))
 	m.ExceptIfFrom = stringSetValue(ctx, getStringSlice(obj, "ExceptIfFrom"))
-	m.ExceptIfFromAddressContainsWords = types.StringValue(getString(obj, "ExceptIfFromAddressContainsWords"))
-	m.ExceptIfFromAddressMatchesPatterns = types.StringValue(getString(obj, "ExceptIfFromAddressMatchesPatterns"))
+	m.ExceptIfFromAddressContainsWords = stringSetValue(ctx, getStringSlice(obj, "ExceptIfFromAddressContainsWords"))
+	m.ExceptIfFromAddressMatchesPatterns = stringSetValue(ctx, getStringSlice(obj, "ExceptIfFromAddressMatchesPatterns"))
 	m.ExceptIfFromMemberOf = stringSetValue(ctx, getStringSlice(obj, "ExceptIfFromMemberOf"))
-	m.ExceptIfHeaderMatchesPatterns = types.StringValue(getString(obj, "ExceptIfHeaderMatchesPatterns"))
+	m.ExceptIfHeaderMatchesPatterns = types.StringValue(getObjectJSON(obj, "ExceptIfHeaderMatchesPatterns"))
 	m.ExceptIfProcessingLimitExceeded = types.BoolValue(getBool(obj, "ExceptIfProcessingLimitExceeded"))
-	m.ExceptIfRecipientDomainIs = types.StringValue(getString(obj, "ExceptIfRecipientDomainIs"))
-	m.ExceptIfSenderDomainIs = types.StringValue(getString(obj, "ExceptIfSenderDomainIs"))
-	m.ExceptIfSenderIPRanges = types.StringValue(getString(obj, "ExceptIfSenderIPRanges"))
-	m.ExceptIfSentTo = types.StringValue(getString(obj, "ExceptIfSentTo"))
+	m.ExceptIfRecipientDomainIs = stringSetValue(ctx, getStringSlice(obj, "ExceptIfRecipientDomainIs"))
+	m.ExceptIfSenderDomainIs = stringSetValue(ctx, getStringSlice(obj, "ExceptIfSenderDomainIs"))
+	m.ExceptIfSenderIPRanges = stringSetValue(ctx, getStringSlice(obj, "ExceptIfSenderIPRanges"))
+	m.ExceptIfSentTo = stringSetValue(ctx, getStringSlice(obj, "ExceptIfSentTo"))
 	m.ExceptIfSentToMemberOf = stringSetValue(ctx, getStringSlice(obj, "ExceptIfSentToMemberOf"))
-	m.ExceptIfSharedWithDomain = types.StringValue(getString(obj, "ExceptIfSharedWithDomain"))
-	m.ExceptIfSubjectMatchesPatterns = types.StringValue(getString(obj, "ExceptIfSubjectMatchesPatterns"))
-	m.ExpiryDate = types.StringValue(getString(obj, "ExpiryDate"))
+	m.ExceptIfSharedWithDomain = types.StringValue(getObjectJSON(obj, "ExceptIfSharedWithDomain"))
+	m.ExceptIfSubjectMatchesPatterns = stringSetValue(ctx, getStringSlice(obj, "ExceptIfSubjectMatchesPatterns"))
+	m.ExpiryDate = types.StringValue(getObjectJSON(obj, "ExpiryDate"))
 	m.From = stringSetValue(ctx, getStringSlice(obj, "From"))
-	m.FromAddressContainsWords = types.StringValue(getString(obj, "FromAddressContainsWords"))
-	m.FromAddressMatchesPatterns = types.StringValue(getString(obj, "FromAddressMatchesPatterns"))
+	m.FromAddressContainsWords = stringSetValue(ctx, getStringSlice(obj, "FromAddressContainsWords"))
+	m.FromAddressMatchesPatterns = stringSetValue(ctx, getStringSlice(obj, "FromAddressMatchesPatterns"))
 	m.FromMemberOf = stringSetValue(ctx, getStringSlice(obj, "FromMemberOf"))
-	m.HeaderMatchesPatterns = types.StringValue(getString(obj, "HeaderMatchesPatterns"))
-	m.ImmutableId = types.StringValue(getString(obj, "ImmutableId"))
+	m.HeaderMatchesPatterns = types.StringValue(getObjectJSON(obj, "HeaderMatchesPatterns"))
+	m.ImmutableId = types.StringValue(getObjectJSON(obj, "ImmutableId"))
 	m.Name = types.StringValue(getString(obj, "Name"))
-	m.Policy = types.StringValue(getString(obj, "Policy"))
-	m.Priority = types.StringValue(getString(obj, "Priority"))
+	m.Policy = types.StringValue(getObjectJSON(obj, "Policy"))
+	m.Priority = types.Int64Value(getInt(obj, "Priority"))
 	m.ProcessingLimitExceeded = types.BoolValue(getBool(obj, "ProcessingLimitExceeded"))
-	m.RecipientDomainIs = types.StringValue(getString(obj, "RecipientDomainIs"))
-	m.ReportSeverityLevel = types.StringValue(getString(obj, "ReportSeverityLevel"))
-	m.RuleErrorAction = types.StringValue(getString(obj, "RuleErrorAction"))
-	m.SenderDomainIs = types.StringValue(getString(obj, "SenderDomainIs"))
-	m.SenderIPRanges = types.StringValue(getString(obj, "SenderIPRanges"))
-	m.SentTo = types.StringValue(getString(obj, "SentTo"))
+	m.RecipientDomainIs = stringSetValue(ctx, getStringSlice(obj, "RecipientDomainIs"))
+	m.ReportSeverityLevel = types.StringValue(getObjectJSON(obj, "ReportSeverityLevel"))
+	m.RuleErrorAction = types.StringValue(getObjectJSON(obj, "RuleErrorAction"))
+	m.SenderDomainIs = stringSetValue(ctx, getStringSlice(obj, "SenderDomainIs"))
+	m.SenderIPRanges = stringSetValue(ctx, getStringSlice(obj, "SenderIPRanges"))
+	m.SentTo = stringSetValue(ctx, getStringSlice(obj, "SentTo"))
 	m.SentToMemberOf = stringSetValue(ctx, getStringSlice(obj, "SentToMemberOf"))
-	m.SharedWithDomain = types.StringValue(getString(obj, "SharedWithDomain"))
+	m.SharedWithDomain = types.StringValue(getObjectJSON(obj, "SharedWithDomain"))
 	m.SourceType = types.StringValue(getString(obj, "SourceType"))
-	m.SubjectMatchesPatterns = types.StringValue(getString(obj, "SubjectMatchesPatterns"))
-	m.Workload = types.StringValue(getString(obj, "Workload"))
+	m.SubjectMatchesPatterns = stringSetValue(ctx, getStringSlice(obj, "SubjectMatchesPatterns"))
+	m.Workload = types.StringValue(getObjectJSON(obj, "Workload"))
 	_ = ctx
 }
 
@@ -712,64 +1247,64 @@ func (r *autoSensitivityLabelRuleResource) reconcileState(cfg, read *autoSensiti
 	read.AccessScope = reconcile.KeepStr(cfg.AccessScope, read.AccessScope)
 	read.ActivationDate = reconcile.KeepStr(cfg.ActivationDate, read.ActivationDate)
 	read.AdvancedRule = reconcile.KeepStr(cfg.AdvancedRule, read.AdvancedRule)
-	read.AnyOfRecipientAddressContainsWords = reconcile.KeepStr(cfg.AnyOfRecipientAddressContainsWords, read.AnyOfRecipientAddressContainsWords)
-	read.AnyOfRecipientAddressMatchesPatterns = reconcile.KeepStr(cfg.AnyOfRecipientAddressMatchesPatterns, read.AnyOfRecipientAddressMatchesPatterns)
+	read.AnyOfRecipientAddressContainsWords = reconcile.KeepSet(cfg.AnyOfRecipientAddressContainsWords, read.AnyOfRecipientAddressContainsWords)
+	read.AnyOfRecipientAddressMatchesPatterns = reconcile.KeepSet(cfg.AnyOfRecipientAddressMatchesPatterns, read.AnyOfRecipientAddressMatchesPatterns)
 	read.Comment = reconcile.KeepStr(cfg.Comment, read.Comment)
-	read.ContentContainsSensitiveInformation = reconcile.KeepSet(cfg.ContentContainsSensitiveInformation, read.ContentContainsSensitiveInformation)
-	read.ContentExtensionMatchesWords = reconcile.KeepStr(cfg.ContentExtensionMatchesWords, read.ContentExtensionMatchesWords)
+	read.ContentContainsSensitiveInformation = reconcile.KeepStr(cfg.ContentContainsSensitiveInformation, read.ContentContainsSensitiveInformation)
+	read.ContentExtensionMatchesWords = reconcile.KeepSet(cfg.ContentExtensionMatchesWords, read.ContentExtensionMatchesWords)
 	read.ContentIsNotLabeled = reconcile.KeepBool(cfg.ContentIsNotLabeled, read.ContentIsNotLabeled)
-	read.ContentPropertyContainsWords = reconcile.KeepStr(cfg.ContentPropertyContainsWords, read.ContentPropertyContainsWords)
+	read.ContentPropertyContainsWords = reconcile.KeepSet(cfg.ContentPropertyContainsWords, read.ContentPropertyContainsWords)
 	read.DefaultSpoDocLibraryHasLabel = reconcile.KeepBool(cfg.DefaultSpoDocLibraryHasLabel, read.DefaultSpoDocLibraryHasLabel)
 	read.Disabled = reconcile.KeepBool(cfg.Disabled, read.Disabled)
-	read.DocumentCreatedBy = reconcile.KeepStr(cfg.DocumentCreatedBy, read.DocumentCreatedBy)
+	read.DocumentCreatedBy = reconcile.KeepSet(cfg.DocumentCreatedBy, read.DocumentCreatedBy)
 	read.DocumentIsPasswordProtected = reconcile.KeepBool(cfg.DocumentIsPasswordProtected, read.DocumentIsPasswordProtected)
 	read.DocumentIsUnsupported = reconcile.KeepBool(cfg.DocumentIsUnsupported, read.DocumentIsUnsupported)
-	read.DocumentNameMatchesWords = reconcile.KeepStr(cfg.DocumentNameMatchesWords, read.DocumentNameMatchesWords)
+	read.DocumentNameMatchesWords = reconcile.KeepSet(cfg.DocumentNameMatchesWords, read.DocumentNameMatchesWords)
 	read.DocumentSizeOver = reconcile.KeepStr(cfg.DocumentSizeOver, read.DocumentSizeOver)
 	read.ExceptIfAccessScope = reconcile.KeepStr(cfg.ExceptIfAccessScope, read.ExceptIfAccessScope)
-	read.ExceptIfAnyOfRecipientAddressContainsWords = reconcile.KeepStr(cfg.ExceptIfAnyOfRecipientAddressContainsWords, read.ExceptIfAnyOfRecipientAddressContainsWords)
-	read.ExceptIfAnyOfRecipientAddressMatchesPatterns = reconcile.KeepStr(cfg.ExceptIfAnyOfRecipientAddressMatchesPatterns, read.ExceptIfAnyOfRecipientAddressMatchesPatterns)
-	read.ExceptIfContentContainsSensitiveInformation = reconcile.KeepSet(cfg.ExceptIfContentContainsSensitiveInformation, read.ExceptIfContentContainsSensitiveInformation)
-	read.ExceptIfContentExtensionMatchesWords = reconcile.KeepStr(cfg.ExceptIfContentExtensionMatchesWords, read.ExceptIfContentExtensionMatchesWords)
-	read.ExceptIfContentPropertyContainsWords = reconcile.KeepStr(cfg.ExceptIfContentPropertyContainsWords, read.ExceptIfContentPropertyContainsWords)
-	read.ExceptIfDocumentCreatedBy = reconcile.KeepStr(cfg.ExceptIfDocumentCreatedBy, read.ExceptIfDocumentCreatedBy)
+	read.ExceptIfAnyOfRecipientAddressContainsWords = reconcile.KeepSet(cfg.ExceptIfAnyOfRecipientAddressContainsWords, read.ExceptIfAnyOfRecipientAddressContainsWords)
+	read.ExceptIfAnyOfRecipientAddressMatchesPatterns = reconcile.KeepSet(cfg.ExceptIfAnyOfRecipientAddressMatchesPatterns, read.ExceptIfAnyOfRecipientAddressMatchesPatterns)
+	read.ExceptIfContentContainsSensitiveInformation = reconcile.KeepStr(cfg.ExceptIfContentContainsSensitiveInformation, read.ExceptIfContentContainsSensitiveInformation)
+	read.ExceptIfContentExtensionMatchesWords = reconcile.KeepSet(cfg.ExceptIfContentExtensionMatchesWords, read.ExceptIfContentExtensionMatchesWords)
+	read.ExceptIfContentPropertyContainsWords = reconcile.KeepSet(cfg.ExceptIfContentPropertyContainsWords, read.ExceptIfContentPropertyContainsWords)
+	read.ExceptIfDocumentCreatedBy = reconcile.KeepSet(cfg.ExceptIfDocumentCreatedBy, read.ExceptIfDocumentCreatedBy)
 	read.ExceptIfDocumentIsPasswordProtected = reconcile.KeepBool(cfg.ExceptIfDocumentIsPasswordProtected, read.ExceptIfDocumentIsPasswordProtected)
 	read.ExceptIfDocumentIsUnsupported = reconcile.KeepBool(cfg.ExceptIfDocumentIsUnsupported, read.ExceptIfDocumentIsUnsupported)
-	read.ExceptIfDocumentNameMatchesWords = reconcile.KeepStr(cfg.ExceptIfDocumentNameMatchesWords, read.ExceptIfDocumentNameMatchesWords)
+	read.ExceptIfDocumentNameMatchesWords = reconcile.KeepSet(cfg.ExceptIfDocumentNameMatchesWords, read.ExceptIfDocumentNameMatchesWords)
 	read.ExceptIfDocumentSizeOver = reconcile.KeepStr(cfg.ExceptIfDocumentSizeOver, read.ExceptIfDocumentSizeOver)
 	read.ExceptIfFrom = reconcile.KeepSet(cfg.ExceptIfFrom, read.ExceptIfFrom)
-	read.ExceptIfFromAddressContainsWords = reconcile.KeepStr(cfg.ExceptIfFromAddressContainsWords, read.ExceptIfFromAddressContainsWords)
-	read.ExceptIfFromAddressMatchesPatterns = reconcile.KeepStr(cfg.ExceptIfFromAddressMatchesPatterns, read.ExceptIfFromAddressMatchesPatterns)
+	read.ExceptIfFromAddressContainsWords = reconcile.KeepSet(cfg.ExceptIfFromAddressContainsWords, read.ExceptIfFromAddressContainsWords)
+	read.ExceptIfFromAddressMatchesPatterns = reconcile.KeepSet(cfg.ExceptIfFromAddressMatchesPatterns, read.ExceptIfFromAddressMatchesPatterns)
 	read.ExceptIfFromMemberOf = reconcile.KeepSet(cfg.ExceptIfFromMemberOf, read.ExceptIfFromMemberOf)
 	read.ExceptIfHeaderMatchesPatterns = reconcile.KeepStr(cfg.ExceptIfHeaderMatchesPatterns, read.ExceptIfHeaderMatchesPatterns)
 	read.ExceptIfProcessingLimitExceeded = reconcile.KeepBool(cfg.ExceptIfProcessingLimitExceeded, read.ExceptIfProcessingLimitExceeded)
-	read.ExceptIfRecipientDomainIs = reconcile.KeepStr(cfg.ExceptIfRecipientDomainIs, read.ExceptIfRecipientDomainIs)
-	read.ExceptIfSenderDomainIs = reconcile.KeepStr(cfg.ExceptIfSenderDomainIs, read.ExceptIfSenderDomainIs)
-	read.ExceptIfSenderIPRanges = reconcile.KeepStr(cfg.ExceptIfSenderIPRanges, read.ExceptIfSenderIPRanges)
-	read.ExceptIfSentTo = reconcile.KeepStr(cfg.ExceptIfSentTo, read.ExceptIfSentTo)
+	read.ExceptIfRecipientDomainIs = reconcile.KeepSet(cfg.ExceptIfRecipientDomainIs, read.ExceptIfRecipientDomainIs)
+	read.ExceptIfSenderDomainIs = reconcile.KeepSet(cfg.ExceptIfSenderDomainIs, read.ExceptIfSenderDomainIs)
+	read.ExceptIfSenderIPRanges = reconcile.KeepSet(cfg.ExceptIfSenderIPRanges, read.ExceptIfSenderIPRanges)
+	read.ExceptIfSentTo = reconcile.KeepSet(cfg.ExceptIfSentTo, read.ExceptIfSentTo)
 	read.ExceptIfSentToMemberOf = reconcile.KeepSet(cfg.ExceptIfSentToMemberOf, read.ExceptIfSentToMemberOf)
 	read.ExceptIfSharedWithDomain = reconcile.KeepStr(cfg.ExceptIfSharedWithDomain, read.ExceptIfSharedWithDomain)
-	read.ExceptIfSubjectMatchesPatterns = reconcile.KeepStr(cfg.ExceptIfSubjectMatchesPatterns, read.ExceptIfSubjectMatchesPatterns)
+	read.ExceptIfSubjectMatchesPatterns = reconcile.KeepSet(cfg.ExceptIfSubjectMatchesPatterns, read.ExceptIfSubjectMatchesPatterns)
 	read.ExpiryDate = reconcile.KeepStr(cfg.ExpiryDate, read.ExpiryDate)
 	read.From = reconcile.KeepSet(cfg.From, read.From)
-	read.FromAddressContainsWords = reconcile.KeepStr(cfg.FromAddressContainsWords, read.FromAddressContainsWords)
-	read.FromAddressMatchesPatterns = reconcile.KeepStr(cfg.FromAddressMatchesPatterns, read.FromAddressMatchesPatterns)
+	read.FromAddressContainsWords = reconcile.KeepSet(cfg.FromAddressContainsWords, read.FromAddressContainsWords)
+	read.FromAddressMatchesPatterns = reconcile.KeepSet(cfg.FromAddressMatchesPatterns, read.FromAddressMatchesPatterns)
 	read.FromMemberOf = reconcile.KeepSet(cfg.FromMemberOf, read.FromMemberOf)
 	read.HeaderMatchesPatterns = reconcile.KeepStr(cfg.HeaderMatchesPatterns, read.HeaderMatchesPatterns)
 	read.ImmutableId = reconcile.KeepStr(cfg.ImmutableId, read.ImmutableId)
 	read.Name = reconcile.KeepStr(cfg.Name, read.Name)
 	read.Policy = reconcile.KeepStr(cfg.Policy, read.Policy)
-	read.Priority = reconcile.KeepStr(cfg.Priority, read.Priority)
+	read.Priority = reconcile.KeepInt64(cfg.Priority, read.Priority)
 	read.ProcessingLimitExceeded = reconcile.KeepBool(cfg.ProcessingLimitExceeded, read.ProcessingLimitExceeded)
-	read.RecipientDomainIs = reconcile.KeepStr(cfg.RecipientDomainIs, read.RecipientDomainIs)
+	read.RecipientDomainIs = reconcile.KeepSet(cfg.RecipientDomainIs, read.RecipientDomainIs)
 	read.ReportSeverityLevel = reconcile.KeepStr(cfg.ReportSeverityLevel, read.ReportSeverityLevel)
 	read.RuleErrorAction = reconcile.KeepStr(cfg.RuleErrorAction, read.RuleErrorAction)
-	read.SenderDomainIs = reconcile.KeepStr(cfg.SenderDomainIs, read.SenderDomainIs)
-	read.SenderIPRanges = reconcile.KeepStr(cfg.SenderIPRanges, read.SenderIPRanges)
-	read.SentTo = reconcile.KeepStr(cfg.SentTo, read.SentTo)
+	read.SenderDomainIs = reconcile.KeepSet(cfg.SenderDomainIs, read.SenderDomainIs)
+	read.SenderIPRanges = reconcile.KeepSet(cfg.SenderIPRanges, read.SenderIPRanges)
+	read.SentTo = reconcile.KeepSet(cfg.SentTo, read.SentTo)
 	read.SentToMemberOf = reconcile.KeepSet(cfg.SentToMemberOf, read.SentToMemberOf)
 	read.SharedWithDomain = reconcile.KeepStr(cfg.SharedWithDomain, read.SharedWithDomain)
 	read.SourceType = reconcile.KeepStr(cfg.SourceType, read.SourceType)
-	read.SubjectMatchesPatterns = reconcile.KeepStr(cfg.SubjectMatchesPatterns, read.SubjectMatchesPatterns)
+	read.SubjectMatchesPatterns = reconcile.KeepSet(cfg.SubjectMatchesPatterns, read.SubjectMatchesPatterns)
 	read.Workload = reconcile.KeepStr(cfg.Workload, read.Workload)
 }

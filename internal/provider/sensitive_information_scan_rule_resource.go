@@ -42,13 +42,13 @@ type sensitiveInformationScanRuleModel struct {
 	ContentContainsSensitiveInformation            types.Set    `tfsdk:"content_contains_sensitive_information"`
 	ContentCreatedOrUpdatedDateFrom                types.String `tfsdk:"content_created_or_updated_date_from"`
 	ContentCreatedOrUpdatedDateTo                  types.String `tfsdk:"content_created_or_updated_date_to"`
-	ContentExtensionMatchesWords                   types.String `tfsdk:"content_extension_matches_words"`
+	ContentExtensionMatchesWords                   types.Set    `tfsdk:"content_extension_matches_words"`
 	ContentIsNotLabeled                            types.Bool   `tfsdk:"content_is_not_labeled"`
-	ContentPropertyContainsWords                   types.String `tfsdk:"content_property_contains_words"`
+	ContentPropertyContainsWords                   types.Set    `tfsdk:"content_property_contains_words"`
 	DocumentSizeOver                               types.String `tfsdk:"document_size_over"`
 	ExceptIfContentContainsSensitiveInformation    types.Set    `tfsdk:"except_if_content_contains_sensitive_information"`
-	ExceptIfContentExtensionMatchesWords           types.String `tfsdk:"except_if_content_extension_matches_words"`
-	ExceptIfContentPropertyContainsWords           types.String `tfsdk:"except_if_content_property_contains_words"`
+	ExceptIfContentExtensionMatchesWords           types.Set    `tfsdk:"except_if_content_extension_matches_words"`
+	ExceptIfContentPropertyContainsWords           types.Set    `tfsdk:"except_if_content_property_contains_words"`
 	ExceptIfDocumentSizeOver                       types.String `tfsdk:"except_if_document_size_over"`
 	ExceptIfOdcContentContainsSensitiveInformation types.Set    `tfsdk:"except_if_odc_content_contains_sensitive_information"`
 	Name                                           types.String `tfsdk:"name"`
@@ -67,25 +67,25 @@ func (r *sensitiveInformationScanRuleResource) Schema(_ context.Context, _ resou
 		Description: "Manages the SensitiveInformationScanRule object via New-SensitiveInformationScanRule / Get-SensitiveInformationScanRule / Set-SensitiveInformationScanRule / Remove-SensitiveInformationScanRule.",
 		Attributes: map[string]schema.Attribute{
 			"id":                                                   schema.StringAttribute{Computed: true, Description: "Object identifier (GUID).", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"identity":                                             schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets."},
+			"identity":                                             schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"comment":                                              schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -Comment parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"content_contains_sensitive_information":               schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -ContentContainsSensitiveInformation parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
 			"content_created_or_updated_date_from":                 schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ContentCreatedOrUpdatedDateFrom parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"content_created_or_updated_date_to":                   schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ContentCreatedOrUpdatedDateTo parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"content_extension_matches_words":                      schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ContentExtensionMatchesWords parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"content_extension_matches_words":                      schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -ContentExtensionMatchesWords parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
 			"content_is_not_labeled":                               schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -ContentIsNotLabeled parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
-			"content_property_contains_words":                      schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ContentPropertyContainsWords parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"content_property_contains_words":                      schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -ContentPropertyContainsWords parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
 			"document_size_over":                                   schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -DocumentSizeOver parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"except_if_content_contains_sensitive_information":     schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -ExceptIfContentContainsSensitiveInformation parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
-			"except_if_content_extension_matches_words":            schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ExceptIfContentExtensionMatchesWords parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"except_if_content_property_contains_words":            schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ExceptIfContentPropertyContainsWords parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"except_if_content_extension_matches_words":            schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -ExceptIfContentExtensionMatchesWords parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"except_if_content_property_contains_words":            schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -ExceptIfContentPropertyContainsWords parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
 			"except_if_document_size_over":                         schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ExceptIfDocumentSizeOver parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"except_if_odc_content_contains_sensitive_information": schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -ExceptIfOdcContentContainsSensitiveInformation parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
 			"name": schema.StringAttribute{Required: true, Description: "Maps to the -Name parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
 			"odc_content_contains_sensitive_information": schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -OdcContentContainsSensitiveInformation parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
 			"policy":                  schema.StringAttribute{Required: true, Description: "Maps to the -Policy parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
 			"start_impact_assessment": schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -StartImpactAssessment parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
-			"workload":                schema.StringAttribute{Required: true, Description: "Maps to the -Workload parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
+			"workload":                schema.StringAttribute{Required: true, Description: "Maps to the -Workload parameter."},
 		},
 	}
 }
@@ -104,50 +104,91 @@ func (r *sensitiveInformationScanRuleResource) Create(ctx context.Context, req r
 		return
 	}
 
-	p := purview.NewSensitiveInformationScanRuleParams{
-		Comment:                             plan.Comment.ValueString(),
-		ContentContainsSensitiveInformation: toStringSlice(ctx, plan.ContentContainsSensitiveInformation, &resp.Diagnostics),
-		ContentIsNotLabeled:                 plan.ContentIsNotLabeled.ValueBool(),
-		ExceptIfContentContainsSensitiveInformation:    toStringSlice(ctx, plan.ExceptIfContentContainsSensitiveInformation, &resp.Diagnostics),
-		ExceptIfOdcContentContainsSensitiveInformation: toStringSlice(ctx, plan.ExceptIfOdcContentContainsSensitiveInformation, &resp.Diagnostics),
-		Name:                                   plan.Name.ValueString(),
-		OdcContentContainsSensitiveInformation: toStringSlice(ctx, plan.OdcContentContainsSensitiveInformation, &resp.Diagnostics),
-		StartImpactAssessment:                  plan.StartImpactAssessment.ValueBool(),
+	var config sensitiveInformationScanRuleModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
+	if resp.Diagnostics.HasError() {
+		return
 	}
-	if v := plan.ContentCreatedOrUpdatedDateFrom.ValueString(); v != "" {
-		p.ContentCreatedOrUpdatedDateFrom = v
+
+	p := purview.NewSensitiveInformationScanRuleParams{}
+	if !config.Comment.IsNull() {
+		p.Comment = plan.Comment.ValueString()
 	}
-	if v := plan.ContentCreatedOrUpdatedDateTo.ValueString(); v != "" {
-		p.ContentCreatedOrUpdatedDateTo = v
+	if !config.ContentContainsSensitiveInformation.IsNull() {
+		if v := toStringSlice(ctx, plan.ContentContainsSensitiveInformation, &resp.Diagnostics); len(v) > 0 {
+			p.ContentContainsSensitiveInformation = v
+		}
 	}
-	if v := plan.ContentExtensionMatchesWords.ValueString(); v != "" {
-		p.ContentExtensionMatchesWords = v
+	if v := config.ContentCreatedOrUpdatedDateFrom.ValueString(); v != "" {
+		p.ContentCreatedOrUpdatedDateFrom = objectParam(v)
 	}
-	if v := plan.ContentPropertyContainsWords.ValueString(); v != "" {
-		p.ContentPropertyContainsWords = v
+	if v := config.ContentCreatedOrUpdatedDateTo.ValueString(); v != "" {
+		p.ContentCreatedOrUpdatedDateTo = objectParam(v)
 	}
-	if v := plan.DocumentSizeOver.ValueString(); v != "" {
-		p.DocumentSizeOver = v
+	if !config.ContentExtensionMatchesWords.IsNull() {
+		if v := toStringSlice(ctx, plan.ContentExtensionMatchesWords, &resp.Diagnostics); len(v) > 0 {
+			p.ContentExtensionMatchesWords = v
+		}
 	}
-	if v := plan.ExceptIfContentExtensionMatchesWords.ValueString(); v != "" {
-		p.ExceptIfContentExtensionMatchesWords = v
+	if !config.ContentIsNotLabeled.IsNull() {
+		if !plan.ContentIsNotLabeled.IsUnknown() {
+			p.ContentIsNotLabeled = plan.ContentIsNotLabeled.ValueBoolPointer()
+		}
 	}
-	if v := plan.ExceptIfContentPropertyContainsWords.ValueString(); v != "" {
-		p.ExceptIfContentPropertyContainsWords = v
+	if !config.ContentPropertyContainsWords.IsNull() {
+		if v := toStringSlice(ctx, plan.ContentPropertyContainsWords, &resp.Diagnostics); len(v) > 0 {
+			p.ContentPropertyContainsWords = v
+		}
 	}
-	if v := plan.ExceptIfDocumentSizeOver.ValueString(); v != "" {
-		p.ExceptIfDocumentSizeOver = v
+	if v := config.DocumentSizeOver.ValueString(); v != "" {
+		p.DocumentSizeOver = objectParam(v)
 	}
-	if v := plan.Policy.ValueString(); v != "" {
-		p.Policy = v
+	if !config.ExceptIfContentContainsSensitiveInformation.IsNull() {
+		if v := toStringSlice(ctx, plan.ExceptIfContentContainsSensitiveInformation, &resp.Diagnostics); len(v) > 0 {
+			p.ExceptIfContentContainsSensitiveInformation = v
+		}
 	}
-	if v := plan.Workload.ValueString(); v != "" {
-		p.Workload = v
+	if !config.ExceptIfContentExtensionMatchesWords.IsNull() {
+		if v := toStringSlice(ctx, plan.ExceptIfContentExtensionMatchesWords, &resp.Diagnostics); len(v) > 0 {
+			p.ExceptIfContentExtensionMatchesWords = v
+		}
+	}
+	if !config.ExceptIfContentPropertyContainsWords.IsNull() {
+		if v := toStringSlice(ctx, plan.ExceptIfContentPropertyContainsWords, &resp.Diagnostics); len(v) > 0 {
+			p.ExceptIfContentPropertyContainsWords = v
+		}
+	}
+	if v := config.ExceptIfDocumentSizeOver.ValueString(); v != "" {
+		p.ExceptIfDocumentSizeOver = objectParam(v)
+	}
+	if !config.ExceptIfOdcContentContainsSensitiveInformation.IsNull() {
+		if v := toStringSlice(ctx, plan.ExceptIfOdcContentContainsSensitiveInformation, &resp.Diagnostics); len(v) > 0 {
+			p.ExceptIfOdcContentContainsSensitiveInformation = v
+		}
+	}
+	if !config.Name.IsNull() {
+		p.Name = plan.Name.ValueString()
+	}
+	if !config.OdcContentContainsSensitiveInformation.IsNull() {
+		if v := toStringSlice(ctx, plan.OdcContentContainsSensitiveInformation, &resp.Diagnostics); len(v) > 0 {
+			p.OdcContentContainsSensitiveInformation = v
+		}
+	}
+	if v := config.Policy.ValueString(); v != "" {
+		p.Policy = objectParam(v)
+	}
+	if !config.StartImpactAssessment.IsNull() {
+		if !plan.StartImpactAssessment.IsUnknown() {
+			p.StartImpactAssessment = plan.StartImpactAssessment.ValueBoolPointer()
+		}
+	}
+	if v := config.Workload.ValueString(); v != "" {
+		p.Workload = objectParam(v)
 	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	res, err := r.client.SCC.NewSensitiveInformationScanRule(ctx, p)
+	res, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.NewSensitiveInformationScanRule, p, isNotFound)
 	if err != nil {
 		resp.Diagnostics.AddError("New-SensitiveInformationScanRule failed", err.Error())
 		return
@@ -194,57 +235,157 @@ func (r *sensitiveInformationScanRuleResource) Update(ctx context.Context, req r
 	id := r.identityOf(state)
 	sp := purview.SetSensitiveInformationScanRuleParams{}
 	sp.Identity = id
-	sp.Comment = plan.Comment.ValueString()
-	sp.ContentContainsSensitiveInformation = toStringSlice(ctx, plan.ContentContainsSensitiveInformation, &resp.Diagnostics)
-	if v := plan.ContentCreatedOrUpdatedDateFrom.ValueString(); v != "" {
-		sp.ContentCreatedOrUpdatedDateFrom = v
+	var cur *sensitiveInformationScanRuleModel
+	curRead := false
+	current := func() *sensitiveInformationScanRuleModel {
+		if !curRead {
+			curRead = true
+			var m sensitiveInformationScanRuleModel
+			if r.refresh(ctx, id, &m, &resp.Diagnostics, nil) {
+				cur = &m
+			} else if !resp.Diagnostics.HasError() {
+				resp.Diagnostics.AddError("Get-SensitiveInformationScanRule failed", "the object could not be read to determine the list values to remove; nothing was changed")
+			}
+		}
+		return cur
 	}
-	if v := plan.ContentCreatedOrUpdatedDateTo.ValueString(); v != "" {
-		sp.ContentCreatedOrUpdatedDateTo = v
+	if !plan.Comment.Equal(state.Comment) {
+		sp.Comment = plan.Comment.ValueString()
 	}
-	if v := plan.ContentExtensionMatchesWords.ValueString(); v != "" {
-		sp.ContentExtensionMatchesWords = v
+	if !plan.ContentContainsSensitiveInformation.Equal(state.ContentContainsSensitiveInformation) {
+		if !plan.ContentContainsSensitiveInformation.IsNull() && !plan.ContentContainsSensitiveInformation.IsUnknown() {
+			sp.ContentContainsSensitiveInformation = append([]string{}, toStringSlice(ctx, plan.ContentContainsSensitiveInformation, &resp.Diagnostics)...)
+		}
 	}
-	sp.ContentIsNotLabeled = plan.ContentIsNotLabeled.ValueBool()
-	if v := plan.ContentPropertyContainsWords.ValueString(); v != "" {
-		sp.ContentPropertyContainsWords = v
+	if !plan.ContentCreatedOrUpdatedDateFrom.Equal(state.ContentCreatedOrUpdatedDateFrom) {
+		if v := plan.ContentCreatedOrUpdatedDateFrom.ValueString(); v != "" {
+			sp.ContentCreatedOrUpdatedDateFrom = objectParam(v)
+		}
 	}
-	if v := plan.DocumentSizeOver.ValueString(); v != "" {
-		sp.DocumentSizeOver = v
+	if !plan.ContentCreatedOrUpdatedDateTo.Equal(state.ContentCreatedOrUpdatedDateTo) {
+		if v := plan.ContentCreatedOrUpdatedDateTo.ValueString(); v != "" {
+			sp.ContentCreatedOrUpdatedDateTo = objectParam(v)
+		}
 	}
-	sp.ExceptIfContentContainsSensitiveInformation = toStringSlice(ctx, plan.ExceptIfContentContainsSensitiveInformation, &resp.Diagnostics)
-	if v := plan.ExceptIfContentExtensionMatchesWords.ValueString(); v != "" {
-		sp.ExceptIfContentExtensionMatchesWords = v
+	if !plan.ContentExtensionMatchesWords.Equal(state.ContentExtensionMatchesWords) {
+		if !plan.ContentExtensionMatchesWords.IsNull() && !plan.ContentExtensionMatchesWords.IsUnknown() {
+			if v := toStringSlice(ctx, plan.ContentExtensionMatchesWords, &resp.Diagnostics); len(v) > 0 {
+				sp.ContentExtensionMatchesWords = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.ContentExtensionMatchesWords, &resp.Diagnostics); len(rm) > 0 {
+						sp.ContentExtensionMatchesWordsDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
 	}
-	if v := plan.ExceptIfContentPropertyContainsWords.ValueString(); v != "" {
-		sp.ExceptIfContentPropertyContainsWords = v
+	if !plan.ContentIsNotLabeled.Equal(state.ContentIsNotLabeled) {
+		if !plan.ContentIsNotLabeled.IsUnknown() {
+			sp.ContentIsNotLabeled = plan.ContentIsNotLabeled.ValueBoolPointer()
+		}
 	}
-	if v := plan.ExceptIfDocumentSizeOver.ValueString(); v != "" {
-		sp.ExceptIfDocumentSizeOver = v
+	if !plan.ContentPropertyContainsWords.Equal(state.ContentPropertyContainsWords) {
+		if !plan.ContentPropertyContainsWords.IsNull() && !plan.ContentPropertyContainsWords.IsUnknown() {
+			if v := toStringSlice(ctx, plan.ContentPropertyContainsWords, &resp.Diagnostics); len(v) > 0 {
+				sp.ContentPropertyContainsWords = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.ContentPropertyContainsWords, &resp.Diagnostics); len(rm) > 0 {
+						sp.ContentPropertyContainsWordsDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
 	}
-	sp.ExceptIfOdcContentContainsSensitiveInformation = toStringSlice(ctx, plan.ExceptIfOdcContentContainsSensitiveInformation, &resp.Diagnostics)
-	sp.OdcContentContainsSensitiveInformation = toStringSlice(ctx, plan.OdcContentContainsSensitiveInformation, &resp.Diagnostics)
-	sp.StartImpactAssessment = plan.StartImpactAssessment.ValueBool()
+	if !plan.DocumentSizeOver.Equal(state.DocumentSizeOver) {
+		if v := plan.DocumentSizeOver.ValueString(); v != "" {
+			sp.DocumentSizeOver = objectParam(v)
+		}
+	}
+	if !plan.ExceptIfContentContainsSensitiveInformation.Equal(state.ExceptIfContentContainsSensitiveInformation) {
+		if !plan.ExceptIfContentContainsSensitiveInformation.IsNull() && !plan.ExceptIfContentContainsSensitiveInformation.IsUnknown() {
+			sp.ExceptIfContentContainsSensitiveInformation = append([]string{}, toStringSlice(ctx, plan.ExceptIfContentContainsSensitiveInformation, &resp.Diagnostics)...)
+		}
+	}
+	if !plan.ExceptIfContentExtensionMatchesWords.Equal(state.ExceptIfContentExtensionMatchesWords) {
+		if !plan.ExceptIfContentExtensionMatchesWords.IsNull() && !plan.ExceptIfContentExtensionMatchesWords.IsUnknown() {
+			if v := toStringSlice(ctx, plan.ExceptIfContentExtensionMatchesWords, &resp.Diagnostics); len(v) > 0 {
+				sp.ExceptIfContentExtensionMatchesWords = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.ExceptIfContentExtensionMatchesWords, &resp.Diagnostics); len(rm) > 0 {
+						sp.ExceptIfContentExtensionMatchesWordsDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
+	}
+	if !plan.ExceptIfContentPropertyContainsWords.Equal(state.ExceptIfContentPropertyContainsWords) {
+		if !plan.ExceptIfContentPropertyContainsWords.IsNull() && !plan.ExceptIfContentPropertyContainsWords.IsUnknown() {
+			if v := toStringSlice(ctx, plan.ExceptIfContentPropertyContainsWords, &resp.Diagnostics); len(v) > 0 {
+				sp.ExceptIfContentPropertyContainsWords = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.ExceptIfContentPropertyContainsWords, &resp.Diagnostics); len(rm) > 0 {
+						sp.ExceptIfContentPropertyContainsWordsDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
+	}
+	if !plan.ExceptIfDocumentSizeOver.Equal(state.ExceptIfDocumentSizeOver) {
+		if v := plan.ExceptIfDocumentSizeOver.ValueString(); v != "" {
+			sp.ExceptIfDocumentSizeOver = objectParam(v)
+		}
+	}
+	if !plan.ExceptIfOdcContentContainsSensitiveInformation.Equal(state.ExceptIfOdcContentContainsSensitiveInformation) {
+		if !plan.ExceptIfOdcContentContainsSensitiveInformation.IsNull() && !plan.ExceptIfOdcContentContainsSensitiveInformation.IsUnknown() {
+			sp.ExceptIfOdcContentContainsSensitiveInformation = append([]string{}, toStringSlice(ctx, plan.ExceptIfOdcContentContainsSensitiveInformation, &resp.Diagnostics)...)
+		}
+	}
+	if !plan.OdcContentContainsSensitiveInformation.Equal(state.OdcContentContainsSensitiveInformation) {
+		if !plan.OdcContentContainsSensitiveInformation.IsNull() && !plan.OdcContentContainsSensitiveInformation.IsUnknown() {
+			sp.OdcContentContainsSensitiveInformation = append([]string{}, toStringSlice(ctx, plan.OdcContentContainsSensitiveInformation, &resp.Diagnostics)...)
+		}
+	}
+	if !plan.StartImpactAssessment.Equal(state.StartImpactAssessment) {
+		if !plan.StartImpactAssessment.IsUnknown() {
+			sp.StartImpactAssessment = plan.StartImpactAssessment.ValueBoolPointer()
+		}
+	}
+	if !plan.Workload.Equal(state.Workload) {
+		if v := plan.Workload.ValueString(); v != "" {
+			sp.Workload = objectParam(v)
+		}
+	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	if _, err := r.client.SCC.SetSensitiveInformationScanRule(ctx, sp); err != nil {
+	if _, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.SetSensitiveInformationScanRule, sp, isNotFound); err != nil {
 		resp.Diagnostics.AddError("Set-SensitiveInformationScanRule failed", err.Error())
 		return
 	}
 	cfg := plan
 	reflected := reconcile.ReflectsFields(map[string]types.String{
-		"Comment":                              cfg.Comment,
-		"ContentCreatedOrUpdatedDateFrom":      cfg.ContentCreatedOrUpdatedDateFrom,
-		"ContentCreatedOrUpdatedDateTo":        cfg.ContentCreatedOrUpdatedDateTo,
-		"ContentExtensionMatchesWords":         cfg.ContentExtensionMatchesWords,
-		"ContentPropertyContainsWords":         cfg.ContentPropertyContainsWords,
-		"DocumentSizeOver":                     cfg.DocumentSizeOver,
-		"ExceptIfContentExtensionMatchesWords": cfg.ExceptIfContentExtensionMatchesWords,
-		"ExceptIfContentPropertyContainsWords": cfg.ExceptIfContentPropertyContainsWords,
-		"ExceptIfDocumentSizeOver":             cfg.ExceptIfDocumentSizeOver,
+		"Comment": cfg.Comment,
 	}, getString)
+	if !cfg.ContentIsNotLabeled.IsUnknown() && !cfg.ContentIsNotLabeled.IsNull() && !cfg.ContentIsNotLabeled.Equal(state.ContentIsNotLabeled) {
+		prev, want := reflected, cfg.ContentIsNotLabeled.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["ContentIsNotLabeled"] == nil || getBool(obj, "ContentIsNotLabeled") == want)
+		}
+	}
+	if !cfg.StartImpactAssessment.IsUnknown() && !cfg.StartImpactAssessment.IsNull() && !cfg.StartImpactAssessment.Equal(state.StartImpactAssessment) {
+		prev, want := reflected, cfg.StartImpactAssessment.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["StartImpactAssessment"] == nil || getBool(obj, "StartImpactAssessment") == want)
+		}
+	}
 	r.refresh(ctx, id, &plan, &resp.Diagnostics, reflected)
+	if !cfg.ID.IsUnknown() && !cfg.ID.IsNull() {
+		plan.ID = cfg.ID
+	}
 	r.reconcileState(&cfg, &plan)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
@@ -306,22 +447,22 @@ func readSensitiveInformationScanRule(ctx context.Context, obj map[string]any, m
 	m.Identity = types.StringValue(firstNonEmptyStr(getString(obj, "Identity"), getString(obj, "Guid"), getString(obj, "Name")))
 	m.Comment = types.StringValue(getString(obj, "Comment"))
 	m.ContentContainsSensitiveInformation = stringSetValue(ctx, getStringSlice(obj, "ContentContainsSensitiveInformation"))
-	m.ContentCreatedOrUpdatedDateFrom = types.StringValue(getString(obj, "ContentCreatedOrUpdatedDateFrom"))
-	m.ContentCreatedOrUpdatedDateTo = types.StringValue(getString(obj, "ContentCreatedOrUpdatedDateTo"))
-	m.ContentExtensionMatchesWords = types.StringValue(getString(obj, "ContentExtensionMatchesWords"))
+	m.ContentCreatedOrUpdatedDateFrom = types.StringValue(getObjectJSON(obj, "ContentCreatedOrUpdatedDateFrom"))
+	m.ContentCreatedOrUpdatedDateTo = types.StringValue(getObjectJSON(obj, "ContentCreatedOrUpdatedDateTo"))
+	m.ContentExtensionMatchesWords = stringSetValue(ctx, getStringSlice(obj, "ContentExtensionMatchesWords"))
 	m.ContentIsNotLabeled = types.BoolValue(getBool(obj, "ContentIsNotLabeled"))
-	m.ContentPropertyContainsWords = types.StringValue(getString(obj, "ContentPropertyContainsWords"))
-	m.DocumentSizeOver = types.StringValue(getString(obj, "DocumentSizeOver"))
+	m.ContentPropertyContainsWords = stringSetValue(ctx, getStringSlice(obj, "ContentPropertyContainsWords"))
+	m.DocumentSizeOver = types.StringValue(getObjectJSON(obj, "DocumentSizeOver"))
 	m.ExceptIfContentContainsSensitiveInformation = stringSetValue(ctx, getStringSlice(obj, "ExceptIfContentContainsSensitiveInformation"))
-	m.ExceptIfContentExtensionMatchesWords = types.StringValue(getString(obj, "ExceptIfContentExtensionMatchesWords"))
-	m.ExceptIfContentPropertyContainsWords = types.StringValue(getString(obj, "ExceptIfContentPropertyContainsWords"))
-	m.ExceptIfDocumentSizeOver = types.StringValue(getString(obj, "ExceptIfDocumentSizeOver"))
+	m.ExceptIfContentExtensionMatchesWords = stringSetValue(ctx, getStringSlice(obj, "ExceptIfContentExtensionMatchesWords"))
+	m.ExceptIfContentPropertyContainsWords = stringSetValue(ctx, getStringSlice(obj, "ExceptIfContentPropertyContainsWords"))
+	m.ExceptIfDocumentSizeOver = types.StringValue(getObjectJSON(obj, "ExceptIfDocumentSizeOver"))
 	m.ExceptIfOdcContentContainsSensitiveInformation = stringSetValue(ctx, getStringSlice(obj, "ExceptIfOdcContentContainsSensitiveInformation"))
 	m.Name = types.StringValue(getString(obj, "Name"))
 	m.OdcContentContainsSensitiveInformation = stringSetValue(ctx, getStringSlice(obj, "OdcContentContainsSensitiveInformation"))
-	m.Policy = types.StringValue(getString(obj, "Policy"))
+	m.Policy = types.StringValue(getObjectJSON(obj, "Policy"))
 	m.StartImpactAssessment = types.BoolValue(getBool(obj, "StartImpactAssessment"))
-	m.Workload = types.StringValue(getString(obj, "Workload"))
+	m.Workload = types.StringValue(getObjectJSON(obj, "Workload"))
 	_ = ctx
 }
 
@@ -330,13 +471,13 @@ func (r *sensitiveInformationScanRuleResource) reconcileState(cfg, read *sensiti
 	read.ContentContainsSensitiveInformation = reconcile.KeepSet(cfg.ContentContainsSensitiveInformation, read.ContentContainsSensitiveInformation)
 	read.ContentCreatedOrUpdatedDateFrom = reconcile.KeepStr(cfg.ContentCreatedOrUpdatedDateFrom, read.ContentCreatedOrUpdatedDateFrom)
 	read.ContentCreatedOrUpdatedDateTo = reconcile.KeepStr(cfg.ContentCreatedOrUpdatedDateTo, read.ContentCreatedOrUpdatedDateTo)
-	read.ContentExtensionMatchesWords = reconcile.KeepStr(cfg.ContentExtensionMatchesWords, read.ContentExtensionMatchesWords)
+	read.ContentExtensionMatchesWords = reconcile.KeepSet(cfg.ContentExtensionMatchesWords, read.ContentExtensionMatchesWords)
 	read.ContentIsNotLabeled = reconcile.KeepBool(cfg.ContentIsNotLabeled, read.ContentIsNotLabeled)
-	read.ContentPropertyContainsWords = reconcile.KeepStr(cfg.ContentPropertyContainsWords, read.ContentPropertyContainsWords)
+	read.ContentPropertyContainsWords = reconcile.KeepSet(cfg.ContentPropertyContainsWords, read.ContentPropertyContainsWords)
 	read.DocumentSizeOver = reconcile.KeepStr(cfg.DocumentSizeOver, read.DocumentSizeOver)
 	read.ExceptIfContentContainsSensitiveInformation = reconcile.KeepSet(cfg.ExceptIfContentContainsSensitiveInformation, read.ExceptIfContentContainsSensitiveInformation)
-	read.ExceptIfContentExtensionMatchesWords = reconcile.KeepStr(cfg.ExceptIfContentExtensionMatchesWords, read.ExceptIfContentExtensionMatchesWords)
-	read.ExceptIfContentPropertyContainsWords = reconcile.KeepStr(cfg.ExceptIfContentPropertyContainsWords, read.ExceptIfContentPropertyContainsWords)
+	read.ExceptIfContentExtensionMatchesWords = reconcile.KeepSet(cfg.ExceptIfContentExtensionMatchesWords, read.ExceptIfContentExtensionMatchesWords)
+	read.ExceptIfContentPropertyContainsWords = reconcile.KeepSet(cfg.ExceptIfContentPropertyContainsWords, read.ExceptIfContentPropertyContainsWords)
 	read.ExceptIfDocumentSizeOver = reconcile.KeepStr(cfg.ExceptIfDocumentSizeOver, read.ExceptIfDocumentSizeOver)
 	read.ExceptIfOdcContentContainsSensitiveInformation = reconcile.KeepSet(cfg.ExceptIfOdcContentContainsSensitiveInformation, read.ExceptIfOdcContentContainsSensitiveInformation)
 	read.Name = reconcile.KeepStr(cfg.Name, read.Name)

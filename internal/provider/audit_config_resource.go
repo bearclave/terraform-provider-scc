@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
@@ -24,6 +25,7 @@ var (
 	_ resource.Resource                = &auditConfigResource{}
 	_ resource.ResourceWithConfigure   = &auditConfigResource{}
 	_ resource.ResourceWithImportState = &auditConfigResource{}
+	_ resource.ResourceWithModifyPlan  = &auditConfigResource{}
 )
 
 type auditConfigResource struct{ client *clients.Client }
@@ -34,7 +36,7 @@ func NewAuditConfigResource() resource.Resource { return &auditConfigResource{} 
 type auditConfigModel struct {
 	ID       types.String `tfsdk:"id"`
 	Identity types.String `tfsdk:"identity"`
-	Workload types.String `tfsdk:"workload"`
+	Workload types.Set    `tfsdk:"workload"`
 }
 
 func (r *auditConfigResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -46,8 +48,8 @@ func (r *auditConfigResource) Schema(_ context.Context, _ resource.SchemaRequest
 		Description: "Manages the AuditConfig configuration via Set-AuditConfig.",
 		Attributes: map[string]schema.Attribute{
 			"id":       schema.StringAttribute{Computed: true, Description: "Object identifier (GUID).", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"identity": schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets."},
-			"workload": schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -Workload parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"identity": schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"workload": schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -Workload parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
 		},
 	}
 }
@@ -65,14 +67,43 @@ func (r *auditConfigResource) Create(ctx context.Context, req resource.CreateReq
 	if resp.Diagnostics.HasError() {
 		return
 	}
+	var config auditConfigModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 	sp := purview.SetAuditConfigParams{}
-	if v := plan.Workload.ValueString(); v != "" {
-		sp.Workload = v
+	var cur *auditConfigModel
+	curRead := false
+	current := func() *auditConfigModel {
+		if !curRead {
+			curRead = true
+			var m auditConfigModel
+			if r.refresh(ctx, "", &m, &resp.Diagnostics, nil) {
+				cur = &m
+			} else if !resp.Diagnostics.HasError() {
+				resp.Diagnostics.AddError("Get-AuditConfig failed", "the object could not be read to determine the list values to remove; nothing was changed")
+			}
+		}
+		return cur
+	}
+	if !config.Workload.IsNull() {
+		if !plan.Workload.IsNull() && !plan.Workload.IsUnknown() {
+			if v := toStringSlice(ctx, plan.Workload, &resp.Diagnostics); len(v) > 0 {
+				sp.Workload = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.Workload, &resp.Diagnostics); len(rm) > 0 {
+						sp.WorkloadDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
 	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	if _, err := r.client.SCC.SetAuditConfig(ctx, sp); err != nil {
+	if _, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.SetAuditConfig, sp, isNotFound); err != nil {
 		resp.Diagnostics.AddError("Set-AuditConfig failed", err.Error())
 		return
 	}
@@ -107,21 +138,46 @@ func (r *auditConfigResource) Update(ctx context.Context, req resource.UpdateReq
 	}
 	id := r.identityOf(state)
 	sp := purview.SetAuditConfigParams{}
-	if v := plan.Workload.ValueString(); v != "" {
-		sp.Workload = v
+	var cur *auditConfigModel
+	curRead := false
+	current := func() *auditConfigModel {
+		if !curRead {
+			curRead = true
+			var m auditConfigModel
+			if r.refresh(ctx, id, &m, &resp.Diagnostics, nil) {
+				cur = &m
+			} else if !resp.Diagnostics.HasError() {
+				resp.Diagnostics.AddError("Get-AuditConfig failed", "the object could not be read to determine the list values to remove; nothing was changed")
+			}
+		}
+		return cur
+	}
+	if !plan.Workload.Equal(state.Workload) {
+		if !plan.Workload.IsNull() && !plan.Workload.IsUnknown() {
+			if v := toStringSlice(ctx, plan.Workload, &resp.Diagnostics); len(v) > 0 {
+				sp.Workload = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.Workload, &resp.Diagnostics); len(rm) > 0 {
+						sp.WorkloadDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
 	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	if _, err := r.client.SCC.SetAuditConfig(ctx, sp); err != nil {
+	if _, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.SetAuditConfig, sp, isNotFound); err != nil {
 		resp.Diagnostics.AddError("Set-AuditConfig failed", err.Error())
 		return
 	}
 	cfg := plan
-	reflected := reconcile.ReflectsFields(map[string]types.String{
-		"Workload": cfg.Workload,
-	}, getString)
+	reflected := reconcile.ReflectsFields(map[string]types.String{}, getString)
 	r.refresh(ctx, id, &plan, &resp.Diagnostics, reflected)
+	if !cfg.ID.IsUnknown() && !cfg.ID.IsNull() {
+		plan.ID = cfg.ID
+	}
 	r.reconcileState(&cfg, &plan)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
@@ -133,6 +189,37 @@ func (r *auditConfigResource) Delete(_ context.Context, _ resource.DeleteRequest
 func (r *auditConfigResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("id"), req.ID)...)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("identity"), req.ID)...)
+}
+
+func (r *auditConfigResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
+	if req.Plan.Raw.IsNull() || !req.State.Raw.IsNull() || r.client == nil {
+		return
+	}
+	var plan auditConfigModel
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	res, err := r.client.SCC.GetAuditConfig(ctx, purview.GetAuditConfigParams{})
+	if err != nil {
+		return
+	}
+	obj := firstObject(res.Value)
+	if obj == nil {
+		return
+	}
+	var cur auditConfigModel
+	readAuditConfig(ctx, obj, &cur)
+	if plan.ID.IsUnknown() {
+		plan.ID = cur.ID
+	}
+	if plan.Identity.IsUnknown() {
+		plan.Identity = cur.Identity
+	}
+	if plan.Workload.IsUnknown() {
+		plan.Workload = cur.Workload
+	}
+	resp.Diagnostics.Append(resp.Plan.Set(ctx, &plan)...)
 }
 
 func (r *auditConfigResource) identityOf(m auditConfigModel) string {
@@ -173,10 +260,10 @@ func (r *auditConfigResource) refresh(ctx context.Context, identity string, m *a
 func readAuditConfig(ctx context.Context, obj map[string]any, m *auditConfigModel) {
 	m.ID = types.StringValue(firstNonEmptyStr(getString(obj, "Guid"), getString(obj, "Id"), getString(obj, "Identity")))
 	m.Identity = types.StringValue(firstNonEmptyStr(getString(obj, "Identity"), getString(obj, "Guid"), getString(obj, "Name")))
-	m.Workload = types.StringValue(getString(obj, "Workload"))
+	m.Workload = stringSetValue(ctx, getStringSlice(obj, "Workload"))
 	_ = ctx
 }
 
 func (r *auditConfigResource) reconcileState(cfg, read *auditConfigModel) {
-	read.Workload = reconcile.KeepStr(cfg.Workload, read.Workload)
+	read.Workload = reconcile.KeepSet(cfg.Workload, read.Workload)
 }

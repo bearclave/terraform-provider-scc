@@ -10,7 +10,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
@@ -35,7 +34,7 @@ func NewDlpEdmSchemaResource() resource.Resource { return &dlpEdmSchemaResource{
 type dlpEdmSchemaModel struct {
 	ID       types.String `tfsdk:"id"`
 	Identity types.String `tfsdk:"identity"`
-	FileData types.Set    `tfsdk:"file_data"`
+	FileData types.String `tfsdk:"file_data"`
 }
 
 func (r *dlpEdmSchemaResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -47,8 +46,8 @@ func (r *dlpEdmSchemaResource) Schema(_ context.Context, _ resource.SchemaReques
 		Description: "Manages the DlpEdmSchema object via New-DlpEdmSchema / Get-DlpEdmSchema / Set-DlpEdmSchema / Remove-DlpEdmSchema.",
 		Attributes: map[string]schema.Attribute{
 			"id":        schema.StringAttribute{Computed: true, Description: "Object identifier (GUID).", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"identity":  schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets."},
-			"file_data": schema.SetAttribute{ElementType: types.StringType, Required: true, Description: "Maps to the -FileData parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.RequiresReplace()}},
+			"identity":  schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"file_data": schema.StringAttribute{Required: true, Description: "Maps to the -FileData parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
 		},
 	}
 }
@@ -67,13 +66,20 @@ func (r *dlpEdmSchemaResource) Create(ctx context.Context, req resource.CreateRe
 		return
 	}
 
-	p := purview.NewDlpEdmSchemaParams{
-		FileData: toStringSlice(ctx, plan.FileData, &resp.Diagnostics),
+	var config dlpEdmSchemaModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	p := purview.NewDlpEdmSchemaParams{}
+	if v := config.FileData.ValueString(); v != "" {
+		p.FileData = objectParam(v)
 	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	res, err := r.client.SCC.NewDlpEdmSchema(ctx, p)
+	res, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.NewDlpEdmSchema, p, isNotFound)
 	if err != nil {
 		resp.Diagnostics.AddError("New-DlpEdmSchema failed", err.Error())
 		return
@@ -122,13 +128,16 @@ func (r *dlpEdmSchemaResource) Update(ctx context.Context, req resource.UpdateRe
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	if _, err := r.client.SCC.SetDlpEdmSchema(ctx, sp); err != nil {
+	if _, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.SetDlpEdmSchema, sp, isNotFound); err != nil {
 		resp.Diagnostics.AddError("Set-DlpEdmSchema failed", err.Error())
 		return
 	}
 	cfg := plan
 	reflected := reconcile.ReflectsFields(map[string]types.String{}, getString)
 	r.refresh(ctx, id, &plan, &resp.Diagnostics, reflected)
+	if !cfg.ID.IsUnknown() && !cfg.ID.IsNull() {
+		plan.ID = cfg.ID
+	}
 	r.reconcileState(&cfg, &plan)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
@@ -188,10 +197,10 @@ func (r *dlpEdmSchemaResource) refresh(ctx context.Context, identity string, m *
 func readDlpEdmSchema(ctx context.Context, obj map[string]any, m *dlpEdmSchemaModel) {
 	m.ID = types.StringValue(firstNonEmptyStr(getString(obj, "Guid"), getString(obj, "Id"), getString(obj, "Identity")))
 	m.Identity = types.StringValue(firstNonEmptyStr(getString(obj, "Identity"), getString(obj, "Guid"), getString(obj, "Name")))
-	m.FileData = stringSetValue(ctx, getStringSlice(obj, "FileData"))
+	m.FileData = types.StringValue(getObjectJSON(obj, "FileData"))
 	_ = ctx
 }
 
 func (r *dlpEdmSchemaResource) reconcileState(cfg, read *dlpEdmSchemaModel) {
-	read.FileData = reconcile.KeepSet(cfg.FileData, read.FileData)
+	read.FileData = reconcile.KeepStr(cfg.FileData, read.FileData)
 }

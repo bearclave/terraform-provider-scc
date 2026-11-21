@@ -25,7 +25,7 @@ List every DeviceTenantRule object (Get-DeviceTenantRule).
 Read-Only:
 
 - `apply_policy_to` (String) Maps to the -ApplyPolicyTo parameter.
-- `block_unsupported_devices` (String) Maps to the -BlockUnsupportedDevices parameter.
-- `exclusion_list` (String) Maps to the -ExclusionList parameter.
+- `block_unsupported_devices` (Boolean) Maps to the -BlockUnsupportedDevices parameter.
+- `exclusion_list` (Set of String) Maps to the -ExclusionList parameter.
 - `id` (String) Object identifier (GUID).
 - `identity` (String) Identity used to target the object.

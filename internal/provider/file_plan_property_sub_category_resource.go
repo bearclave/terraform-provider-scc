@@ -50,7 +50,7 @@ func (r *filePlanPropertySubCategoryResource) Schema(_ context.Context, _ resour
 		Description: "Manages the FilePlanPropertySubCategory object via New-FilePlanPropertySubCategory / Get-FilePlanPropertySubCategory / Set-FilePlanPropertySubCategory / Remove-FilePlanPropertySubCategory.",
 		Attributes: map[string]schema.Attribute{
 			"id":           schema.StringAttribute{Computed: true, Description: "Object identifier (GUID).", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"identity":     schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets."},
+			"identity":     schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"display_name": schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -DisplayName parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"name":         schema.StringAttribute{Required: true, Description: "Maps to the -Name parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
 			"parent_id":    schema.StringAttribute{Required: true, Description: "Maps to the -ParentId parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
@@ -72,16 +72,23 @@ func (r *filePlanPropertySubCategoryResource) Create(ctx context.Context, req re
 		return
 	}
 
-	p := purview.NewFilePlanPropertySubCategoryParams{
-		Name: plan.Name.ValueString(),
+	var config filePlanPropertySubCategoryModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
+	if resp.Diagnostics.HasError() {
+		return
 	}
-	if v := plan.ParentId.ValueString(); v != "" {
-		p.ParentId = v
+
+	p := purview.NewFilePlanPropertySubCategoryParams{}
+	if !config.Name.IsNull() {
+		p.Name = plan.Name.ValueString()
+	}
+	if v := config.ParentId.ValueString(); v != "" {
+		p.ParentId = objectParam(v)
 	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	res, err := r.client.SCC.NewFilePlanPropertySubCategory(ctx, p)
+	res, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.NewFilePlanPropertySubCategory, p, isNotFound)
 	if err != nil {
 		resp.Diagnostics.AddError("New-FilePlanPropertySubCategory failed", err.Error())
 		return
@@ -128,11 +135,13 @@ func (r *filePlanPropertySubCategoryResource) Update(ctx context.Context, req re
 	id := r.identityOf(state)
 	sp := purview.SetFilePlanPropertySubCategoryParams{}
 	sp.Identity = id
-	sp.DisplayName = plan.DisplayName.ValueString()
+	if !plan.DisplayName.Equal(state.DisplayName) {
+		sp.DisplayName = plan.DisplayName.ValueString()
+	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	if _, err := r.client.SCC.SetFilePlanPropertySubCategory(ctx, sp); err != nil {
+	if _, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.SetFilePlanPropertySubCategory, sp, isNotFound); err != nil {
 		resp.Diagnostics.AddError("Set-FilePlanPropertySubCategory failed", err.Error())
 		return
 	}
@@ -141,6 +150,9 @@ func (r *filePlanPropertySubCategoryResource) Update(ctx context.Context, req re
 		"DisplayName": cfg.DisplayName,
 	}, getString)
 	r.refresh(ctx, id, &plan, &resp.Diagnostics, reflected)
+	if !cfg.ID.IsUnknown() && !cfg.ID.IsNull() {
+		plan.ID = cfg.ID
+	}
 	r.reconcileState(&cfg, &plan)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
@@ -202,7 +214,7 @@ func readFilePlanPropertySubCategory(ctx context.Context, obj map[string]any, m 
 	m.Identity = types.StringValue(firstNonEmptyStr(getString(obj, "Identity"), getString(obj, "Guid"), getString(obj, "Name")))
 	m.DisplayName = types.StringValue(getString(obj, "DisplayName"))
 	m.Name = types.StringValue(getString(obj, "Name"))
-	m.ParentId = types.StringValue(getString(obj, "ParentId"))
+	m.ParentId = types.StringValue(getObjectJSON(obj, "ParentId"))
 	_ = ctx
 }
 

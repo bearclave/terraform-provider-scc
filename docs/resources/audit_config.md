@@ -17,7 +17,7 @@ Manages the AuditConfig configuration via Set-AuditConfig.
 
 ### Optional
 
-- `workload` (String) Maps to the -Workload parameter.
+- `workload` (Set of String) Maps to the -Workload parameter.
 
 ### Read-Only
 

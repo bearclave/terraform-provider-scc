@@ -25,6 +25,7 @@ var (
 	_ resource.Resource                = &regulatoryComplianceUIResource{}
 	_ resource.ResourceWithConfigure   = &regulatoryComplianceUIResource{}
 	_ resource.ResourceWithImportState = &regulatoryComplianceUIResource{}
+	_ resource.ResourceWithModifyPlan  = &regulatoryComplianceUIResource{}
 )
 
 type regulatoryComplianceUIResource struct{ client *clients.Client }
@@ -47,7 +48,7 @@ func (r *regulatoryComplianceUIResource) Schema(_ context.Context, _ resource.Sc
 		Description: "Manages the RegulatoryComplianceUI configuration via Set-RegulatoryComplianceUI.",
 		Attributes: map[string]schema.Attribute{
 			"id":       schema.StringAttribute{Computed: true, Description: "Object identifier (GUID).", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"identity": schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets."},
+			"identity": schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"enabled":  schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -Enabled parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
 		},
 	}
@@ -66,12 +67,21 @@ func (r *regulatoryComplianceUIResource) Create(ctx context.Context, req resourc
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	sp := purview.SetRegulatoryComplianceUIParams{}
-	sp.Enabled = plan.Enabled.ValueBool()
+	var config regulatoryComplianceUIModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	if _, err := r.client.SCC.SetRegulatoryComplianceUI(ctx, sp); err != nil {
+	sp := purview.SetRegulatoryComplianceUIParams{}
+	if !config.Enabled.IsNull() {
+		if !plan.Enabled.IsUnknown() {
+			sp.Enabled = plan.Enabled.ValueBoolPointer()
+		}
+	}
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	if _, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.SetRegulatoryComplianceUI, sp, isNotFound); err != nil {
 		resp.Diagnostics.AddError("Set-RegulatoryComplianceUI failed", err.Error())
 		return
 	}
@@ -106,17 +116,30 @@ func (r *regulatoryComplianceUIResource) Update(ctx context.Context, req resourc
 	}
 	id := r.identityOf(state)
 	sp := purview.SetRegulatoryComplianceUIParams{}
-	sp.Enabled = plan.Enabled.ValueBool()
+	if !plan.Enabled.Equal(state.Enabled) {
+		if !plan.Enabled.IsUnknown() {
+			sp.Enabled = plan.Enabled.ValueBoolPointer()
+		}
+	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	if _, err := r.client.SCC.SetRegulatoryComplianceUI(ctx, sp); err != nil {
+	if _, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.SetRegulatoryComplianceUI, sp, isNotFound); err != nil {
 		resp.Diagnostics.AddError("Set-RegulatoryComplianceUI failed", err.Error())
 		return
 	}
 	cfg := plan
 	reflected := reconcile.ReflectsFields(map[string]types.String{}, getString)
+	if !cfg.Enabled.IsUnknown() && !cfg.Enabled.IsNull() && !cfg.Enabled.Equal(state.Enabled) {
+		prev, want := reflected, cfg.Enabled.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["Enabled"] == nil || getBool(obj, "Enabled") == want)
+		}
+	}
 	r.refresh(ctx, id, &plan, &resp.Diagnostics, reflected)
+	if !cfg.ID.IsUnknown() && !cfg.ID.IsNull() {
+		plan.ID = cfg.ID
+	}
 	r.reconcileState(&cfg, &plan)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
@@ -128,6 +151,37 @@ func (r *regulatoryComplianceUIResource) Delete(_ context.Context, _ resource.De
 func (r *regulatoryComplianceUIResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("id"), req.ID)...)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("identity"), req.ID)...)
+}
+
+func (r *regulatoryComplianceUIResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
+	if req.Plan.Raw.IsNull() || !req.State.Raw.IsNull() || r.client == nil {
+		return
+	}
+	var plan regulatoryComplianceUIModel
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	res, err := r.client.SCC.GetRegulatoryComplianceUI(ctx, purview.GetRegulatoryComplianceUIParams{})
+	if err != nil {
+		return
+	}
+	obj := firstObject(res.Value)
+	if obj == nil {
+		return
+	}
+	var cur regulatoryComplianceUIModel
+	readRegulatoryComplianceUI(ctx, obj, &cur)
+	if plan.ID.IsUnknown() {
+		plan.ID = cur.ID
+	}
+	if plan.Identity.IsUnknown() {
+		plan.Identity = cur.Identity
+	}
+	if plan.Enabled.IsUnknown() {
+		plan.Enabled = cur.Enabled
+	}
+	resp.Diagnostics.Append(resp.Plan.Set(ctx, &plan)...)
 }
 
 func (r *regulatoryComplianceUIResource) identityOf(m regulatoryComplianceUIModel) string {

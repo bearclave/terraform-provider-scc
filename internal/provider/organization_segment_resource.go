@@ -47,9 +47,9 @@ func (r *organizationSegmentResource) Schema(_ context.Context, _ resource.Schem
 		Description: "Manages the OrganizationSegment object via New-OrganizationSegment / Get-OrganizationSegment / Set-OrganizationSegment / Remove-OrganizationSegment.",
 		Attributes: map[string]schema.Attribute{
 			"id":                schema.StringAttribute{Computed: true, Description: "Object identifier (GUID).", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"identity":          schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets."},
+			"identity":          schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"name":              schema.StringAttribute{Required: true, Description: "Maps to the -Name parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
-			"user_group_filter": schema.StringAttribute{Required: true, Description: "Maps to the -UserGroupFilter parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
+			"user_group_filter": schema.StringAttribute{Required: true, Description: "Maps to the -UserGroupFilter parameter."},
 		},
 	}
 }
@@ -68,14 +68,23 @@ func (r *organizationSegmentResource) Create(ctx context.Context, req resource.C
 		return
 	}
 
-	p := purview.NewOrganizationSegmentParams{
-		Name:            plan.Name.ValueString(),
-		UserGroupFilter: plan.UserGroupFilter.ValueString(),
+	var config organizationSegmentModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	p := purview.NewOrganizationSegmentParams{}
+	if !config.Name.IsNull() {
+		p.Name = plan.Name.ValueString()
+	}
+	if !config.UserGroupFilter.IsNull() {
+		p.UserGroupFilter = plan.UserGroupFilter.ValueString()
 	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	res, err := r.client.SCC.NewOrganizationSegment(ctx, p)
+	res, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.NewOrganizationSegment, p, isNotFound)
 	if err != nil {
 		resp.Diagnostics.AddError("New-OrganizationSegment failed", err.Error())
 		return
@@ -122,16 +131,24 @@ func (r *organizationSegmentResource) Update(ctx context.Context, req resource.U
 	id := r.identityOf(state)
 	sp := purview.SetOrganizationSegmentParams{}
 	sp.Identity = id
+	if !plan.UserGroupFilter.Equal(state.UserGroupFilter) {
+		sp.UserGroupFilter = plan.UserGroupFilter.ValueString()
+	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	if _, err := r.client.SCC.SetOrganizationSegment(ctx, sp); err != nil {
+	if _, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.SetOrganizationSegment, sp, isNotFound); err != nil {
 		resp.Diagnostics.AddError("Set-OrganizationSegment failed", err.Error())
 		return
 	}
 	cfg := plan
-	reflected := reconcile.ReflectsFields(map[string]types.String{}, getString)
+	reflected := reconcile.ReflectsFields(map[string]types.String{
+		"UserGroupFilter": cfg.UserGroupFilter,
+	}, getString)
 	r.refresh(ctx, id, &plan, &resp.Diagnostics, reflected)
+	if !cfg.ID.IsUnknown() && !cfg.ID.IsNull() {
+		plan.ID = cfg.ID
+	}
 	r.reconcileState(&cfg, &plan)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }

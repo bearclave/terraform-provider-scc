@@ -25,8 +25,8 @@ List every ProtectionAlert object (Get-ProtectionAlert).
 Read-Only:
 
 - `aggregation_type` (String) Maps to the -AggregationType parameter.
-- `alert_by` (String) Maps to the -AlertBy parameter.
-- `alert_for` (String) Maps to the -AlertFor parameter.
+- `alert_by` (Set of String) Maps to the -AlertBy parameter.
+- `alert_for` (Set of String) Maps to the -AlertFor parameter.
 - `category` (String) Maps to the -Category parameter.
 - `comment` (String) Maps to the -Comment parameter.
 - `correlation_policy_id` (String) Maps to the -CorrelationPolicyId parameter.
@@ -41,19 +41,19 @@ Read-Only:
 - `name` (String) Maps to the -Name parameter.
 - `notification_culture` (String) Maps to the -NotificationCulture parameter.
 - `notification_enabled` (Boolean) Maps to the -NotificationEnabled parameter.
-- `notify_user` (String) Maps to the -NotifyUser parameter.
+- `notify_user` (Set of String) Maps to the -NotifyUser parameter.
 - `notify_user_on_filter_match` (Boolean) Maps to the -NotifyUserOnFilterMatch parameter.
 - `notify_user_suppression_expiry_date` (String) Maps to the -NotifyUserSuppressionExpiryDate parameter.
-- `notify_user_throttle_threshold` (String) Maps to the -NotifyUserThrottleThreshold parameter.
-- `notify_user_throttle_window` (String) Maps to the -NotifyUserThrottleWindow parameter.
-- `operation` (String) Maps to the -Operation parameter.
-- `privacy_management_scoped_sensitive_information_types` (String) Maps to the -PrivacyManagementScopedSensitiveInformationTypes parameter.
-- `privacy_management_scoped_sensitive_information_types_for_counting` (String) Maps to the -PrivacyManagementScopedSensitiveInformationTypesForCounting parameter.
-- `privacy_management_scoped_sensitive_information_types_threshold` (String) Maps to the -PrivacyManagementScopedSensitiveInformationTypesThreshold parameter.
+- `notify_user_throttle_threshold` (Number) Maps to the -NotifyUserThrottleThreshold parameter.
+- `notify_user_throttle_window` (Number) Maps to the -NotifyUserThrottleWindow parameter.
+- `operation` (Set of String) Maps to the -Operation parameter.
+- `privacy_management_scoped_sensitive_information_types` (Set of String) Maps to the -PrivacyManagementScopedSensitiveInformationTypes parameter.
+- `privacy_management_scoped_sensitive_information_types_for_counting` (Set of String) Maps to the -PrivacyManagementScopedSensitiveInformationTypesForCounting parameter.
+- `privacy_management_scoped_sensitive_information_types_threshold` (Number) Maps to the -PrivacyManagementScopedSensitiveInformationTypesThreshold parameter.
 - `severity` (String) Maps to the -Severity parameter.
 - `stream_type` (String) Maps to the -StreamType parameter.
 - `threat_type` (String) Maps to the -ThreatType parameter.
-- `threshold` (String) Maps to the -Threshold parameter.
-- `time_window` (String) Maps to the -TimeWindow parameter.
-- `use_created_date_time` (String) Maps to the -UseCreatedDateTime parameter.
-- `volume_threshold` (String) Maps to the -VolumeThreshold parameter.
+- `threshold` (Number) Maps to the -Threshold parameter.
+- `time_window` (Number) Maps to the -TimeWindow parameter.
+- `use_created_date_time` (Boolean) Maps to the -UseCreatedDateTime parameter.
+- `volume_threshold` (Number) Maps to the -VolumeThreshold parameter.

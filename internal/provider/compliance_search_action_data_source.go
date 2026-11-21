@@ -43,6 +43,8 @@ func (d *complianceSearchActionDataSource) Schema(_ context.Context, _ datasourc
 			"file_type_exclusions_for_unindexed_items": schema.SetAttribute{ElementType: types.StringType, Computed: true, Description: "Maps to the -FileTypeExclusionsForUnindexedItems parameter."},
 			"include_credential":                       schema.BoolAttribute{Computed: true, Sensitive: true, Description: "Maps to the -IncludeCredential parameter."},
 			"include_share_point_document_versions":    schema.BoolAttribute{Computed: true, Description: "Maps to the -IncludeSharePointDocumentVersions parameter."},
+			"job_options":                              schema.Int64Attribute{Computed: true, Description: "Maps to the -JobOptions parameter."},
+			"max_unindexed_size":                       schema.Int64Attribute{Computed: true, Description: "Maps to the -MaxUnindexedSize parameter."},
 			"reference_action_name":                    schema.StringAttribute{Computed: true, Description: "Maps to the -ReferenceActionName parameter."},
 			"region":                                   schema.StringAttribute{Computed: true, Description: "Maps to the -Region parameter."},
 			"report":                                   schema.BoolAttribute{Computed: true, Description: "Maps to the -Report parameter."},

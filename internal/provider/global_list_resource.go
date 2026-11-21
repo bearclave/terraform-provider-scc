@@ -52,11 +52,11 @@ func (r *globalListResource) Schema(_ context.Context, _ resource.SchemaRequest,
 		Description: "Manages the GlobalList object via New-GlobalList / Get-GlobalList / Set-GlobalList / Remove-GlobalList.",
 		Attributes: map[string]schema.Attribute{
 			"id":                schema.StringAttribute{Computed: true, Description: "Object identifier (GUID).", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"identity":          schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets."},
+			"identity":          schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"add_items":         schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AddItems parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"comment":           schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -Comment parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"global_list_type":  schema.StringAttribute{Required: true, Description: "Maps to the -GlobalListType parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
-			"global_list_value": schema.StringAttribute{Required: true, Description: "Maps to the -GlobalListValue parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
+			"global_list_value": schema.StringAttribute{Required: true, Description: "Maps to the -GlobalListValue parameter."},
 			"name":              schema.StringAttribute{Required: true, Description: "Maps to the -Name parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
 			"organization":      schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -Organization parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace(), stringplanmodifier.UseStateForUnknown()}},
 			"remove_items":      schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -RemoveItems parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
@@ -78,23 +78,32 @@ func (r *globalListResource) Create(ctx context.Context, req resource.CreateRequ
 		return
 	}
 
-	p := purview.NewGlobalListParams{
-		Comment: plan.Comment.ValueString(),
-		Name:    plan.Name.ValueString(),
+	var config globalListModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
+	if resp.Diagnostics.HasError() {
+		return
 	}
-	if v := plan.GlobalListType.ValueString(); v != "" {
-		p.GlobalListType = v
+
+	p := purview.NewGlobalListParams{}
+	if !config.Comment.IsNull() {
+		p.Comment = plan.Comment.ValueString()
 	}
-	if v := plan.GlobalListValue.ValueString(); v != "" {
-		p.GlobalListValue = v
+	if v := config.GlobalListType.ValueString(); v != "" {
+		p.GlobalListType = objectParam(v)
 	}
-	if v := plan.Organization.ValueString(); v != "" {
-		p.Organization = v
+	if v := config.GlobalListValue.ValueString(); v != "" {
+		p.GlobalListValue = objectParam(v)
+	}
+	if !config.Name.IsNull() {
+		p.Name = plan.Name.ValueString()
+	}
+	if v := config.Organization.ValueString(); v != "" {
+		p.Organization = objectParam(v)
 	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	res, err := r.client.SCC.NewGlobalList(ctx, p)
+	res, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.NewGlobalList, p, isNotFound)
 	if err != nil {
 		resp.Diagnostics.AddError("New-GlobalList failed", err.Error())
 		return
@@ -141,27 +150,39 @@ func (r *globalListResource) Update(ctx context.Context, req resource.UpdateRequ
 	id := r.identityOf(state)
 	sp := purview.SetGlobalListParams{}
 	sp.Identity = id
-	if v := plan.AddItems.ValueString(); v != "" {
-		sp.AddItems = v
+	if !plan.AddItems.Equal(state.AddItems) {
+		if v := plan.AddItems.ValueString(); v != "" {
+			sp.AddItems = objectParam(v)
+		}
 	}
-	sp.Comment = plan.Comment.ValueString()
-	if v := plan.RemoveItems.ValueString(); v != "" {
-		sp.RemoveItems = v
+	if !plan.Comment.Equal(state.Comment) {
+		sp.Comment = plan.Comment.ValueString()
+	}
+	if !plan.GlobalListValue.Equal(state.GlobalListValue) {
+		if v := plan.GlobalListValue.ValueString(); v != "" {
+			sp.GlobalListValue = objectParam(v)
+		}
+	}
+	if !plan.RemoveItems.Equal(state.RemoveItems) {
+		if v := plan.RemoveItems.ValueString(); v != "" {
+			sp.RemoveItems = objectParam(v)
+		}
 	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	if _, err := r.client.SCC.SetGlobalList(ctx, sp); err != nil {
+	if _, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.SetGlobalList, sp, isNotFound); err != nil {
 		resp.Diagnostics.AddError("Set-GlobalList failed", err.Error())
 		return
 	}
 	cfg := plan
 	reflected := reconcile.ReflectsFields(map[string]types.String{
-		"AddItems":    cfg.AddItems,
-		"Comment":     cfg.Comment,
-		"RemoveItems": cfg.RemoveItems,
+		"Comment": cfg.Comment,
 	}, getString)
 	r.refresh(ctx, id, &plan, &resp.Diagnostics, reflected)
+	if !cfg.ID.IsUnknown() && !cfg.ID.IsNull() {
+		plan.ID = cfg.ID
+	}
 	r.reconcileState(&cfg, &plan)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
@@ -221,13 +242,13 @@ func (r *globalListResource) refresh(ctx context.Context, identity string, m *gl
 func readGlobalList(ctx context.Context, obj map[string]any, m *globalListModel) {
 	m.ID = types.StringValue(firstNonEmptyStr(getString(obj, "Guid"), getString(obj, "Id"), getString(obj, "Identity")))
 	m.Identity = types.StringValue(firstNonEmptyStr(getString(obj, "Identity"), getString(obj, "Guid"), getString(obj, "Name")))
-	m.AddItems = types.StringValue(getString(obj, "AddItems"))
+	m.AddItems = types.StringValue(getObjectJSON(obj, "AddItems"))
 	m.Comment = types.StringValue(getString(obj, "Comment"))
-	m.GlobalListType = types.StringValue(getString(obj, "GlobalListType"))
-	m.GlobalListValue = types.StringValue(getString(obj, "GlobalListValue"))
+	m.GlobalListType = types.StringValue(getObjectJSON(obj, "GlobalListType"))
+	m.GlobalListValue = types.StringValue(getObjectJSON(obj, "GlobalListValue"))
 	m.Name = types.StringValue(getString(obj, "Name"))
-	m.Organization = types.StringValue(getString(obj, "Organization"))
-	m.RemoveItems = types.StringValue(getString(obj, "RemoveItems"))
+	m.Organization = types.StringValue(getObjectJSON(obj, "Organization"))
+	m.RemoveItems = types.StringValue(getObjectJSON(obj, "RemoveItems"))
 	_ = ctx
 }
 

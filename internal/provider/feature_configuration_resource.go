@@ -52,14 +52,14 @@ func (r *featureConfigurationResource) Schema(_ context.Context, _ resource.Sche
 		Description: "Manages the FeatureConfiguration object via New-FeatureConfiguration / Get-FeatureConfiguration / Set-FeatureConfiguration / Remove-FeatureConfiguration.",
 		Attributes: map[string]schema.Attribute{
 			"id":                 schema.StringAttribute{Computed: true, Description: "Object identifier (GUID).", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"identity":           schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets."},
+			"identity":           schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"comment":            schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -Comment parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"feature_scenario":   schema.StringAttribute{Required: true, Description: "Maps to the -FeatureScenario parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
 			"locations":          schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -Locations parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"mode":               schema.StringAttribute{Required: true, Description: "Maps to the -Mode parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
+			"mode":               schema.StringAttribute{Required: true, Description: "Maps to the -Mode parameter."},
 			"name":               schema.StringAttribute{Required: true, Description: "Maps to the -Name parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
 			"policy_rbac_scopes": schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -PolicyRBACScopes parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"scenario_config":    schema.StringAttribute{Required: true, Description: "Maps to the -ScenarioConfig parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
+			"scenario_config":    schema.StringAttribute{Required: true, Description: "Maps to the -ScenarioConfig parameter."},
 		},
 	}
 }
@@ -78,25 +78,38 @@ func (r *featureConfigurationResource) Create(ctx context.Context, req resource.
 		return
 	}
 
-	p := purview.NewFeatureConfigurationParams{
-		Comment:        plan.Comment.ValueString(),
-		Locations:      plan.Locations.ValueString(),
-		Name:           plan.Name.ValueString(),
-		ScenarioConfig: plan.ScenarioConfig.ValueString(),
+	var config featureConfigurationModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
+	if resp.Diagnostics.HasError() {
+		return
 	}
-	if v := plan.FeatureScenario.ValueString(); v != "" {
-		p.FeatureScenario = v
+
+	p := purview.NewFeatureConfigurationParams{}
+	if !config.Comment.IsNull() {
+		p.Comment = plan.Comment.ValueString()
 	}
-	if v := plan.Mode.ValueString(); v != "" {
-		p.Mode = v
+	if v := config.FeatureScenario.ValueString(); v != "" {
+		p.FeatureScenario = objectParam(v)
 	}
-	if v := plan.PolicyRBACScopes.ValueString(); v != "" {
-		p.PolicyRBACScopes = v
+	if !config.Locations.IsNull() {
+		p.Locations = plan.Locations.ValueString()
+	}
+	if v := config.Mode.ValueString(); v != "" {
+		p.Mode = objectParam(v)
+	}
+	if !config.Name.IsNull() {
+		p.Name = plan.Name.ValueString()
+	}
+	if v := config.PolicyRBACScopes.ValueString(); v != "" {
+		p.PolicyRBACScopes = objectParam(v)
+	}
+	if !config.ScenarioConfig.IsNull() {
+		p.ScenarioConfig = plan.ScenarioConfig.ValueString()
 	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	res, err := r.client.SCC.NewFeatureConfiguration(ctx, p)
+	res, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.NewFeatureConfiguration, p, isNotFound)
 	if err != nil {
 		resp.Diagnostics.AddError("New-FeatureConfiguration failed", err.Error())
 		return
@@ -143,25 +156,42 @@ func (r *featureConfigurationResource) Update(ctx context.Context, req resource.
 	id := r.identityOf(state)
 	sp := purview.SetFeatureConfigurationParams{}
 	sp.Identity = id
-	sp.Comment = plan.Comment.ValueString()
-	sp.Locations = plan.Locations.ValueString()
-	if v := plan.PolicyRBACScopes.ValueString(); v != "" {
-		sp.PolicyRBACScopes = v
+	if !plan.Comment.Equal(state.Comment) {
+		sp.Comment = plan.Comment.ValueString()
+	}
+	if !plan.Locations.Equal(state.Locations) {
+		sp.Locations = plan.Locations.ValueString()
+	}
+	if !plan.Mode.Equal(state.Mode) {
+		if v := plan.Mode.ValueString(); v != "" {
+			sp.Mode = objectParam(v)
+		}
+	}
+	if !plan.PolicyRBACScopes.Equal(state.PolicyRBACScopes) {
+		if v := plan.PolicyRBACScopes.ValueString(); v != "" {
+			sp.PolicyRBACScopes = objectParam(v)
+		}
+	}
+	if !plan.ScenarioConfig.Equal(state.ScenarioConfig) {
+		sp.ScenarioConfig = plan.ScenarioConfig.ValueString()
 	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	if _, err := r.client.SCC.SetFeatureConfiguration(ctx, sp); err != nil {
+	if _, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.SetFeatureConfiguration, sp, isNotFound); err != nil {
 		resp.Diagnostics.AddError("Set-FeatureConfiguration failed", err.Error())
 		return
 	}
 	cfg := plan
 	reflected := reconcile.ReflectsFields(map[string]types.String{
-		"Comment":          cfg.Comment,
-		"Locations":        cfg.Locations,
-		"PolicyRBACScopes": cfg.PolicyRBACScopes,
+		"Comment":        cfg.Comment,
+		"Locations":      cfg.Locations,
+		"ScenarioConfig": cfg.ScenarioConfig,
 	}, getString)
 	r.refresh(ctx, id, &plan, &resp.Diagnostics, reflected)
+	if !cfg.ID.IsUnknown() && !cfg.ID.IsNull() {
+		plan.ID = cfg.ID
+	}
 	r.reconcileState(&cfg, &plan)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
@@ -222,11 +252,11 @@ func readFeatureConfiguration(ctx context.Context, obj map[string]any, m *featur
 	m.ID = types.StringValue(firstNonEmptyStr(getString(obj, "Guid"), getString(obj, "Id"), getString(obj, "Identity")))
 	m.Identity = types.StringValue(firstNonEmptyStr(getString(obj, "Identity"), getString(obj, "Guid"), getString(obj, "Name")))
 	m.Comment = types.StringValue(getString(obj, "Comment"))
-	m.FeatureScenario = types.StringValue(getString(obj, "FeatureScenario"))
+	m.FeatureScenario = types.StringValue(getObjectJSON(obj, "FeatureScenario"))
 	m.Locations = types.StringValue(getString(obj, "Locations"))
-	m.Mode = types.StringValue(getString(obj, "Mode"))
+	m.Mode = types.StringValue(getObjectJSON(obj, "Mode"))
 	m.Name = types.StringValue(getString(obj, "Name"))
-	m.PolicyRBACScopes = types.StringValue(getString(obj, "PolicyRBACScopes"))
+	m.PolicyRBACScopes = types.StringValue(getObjectJSON(obj, "PolicyRBACScopes"))
 	m.ScenarioConfig = types.StringValue(getString(obj, "ScenarioConfig"))
 	_ = ctx
 }

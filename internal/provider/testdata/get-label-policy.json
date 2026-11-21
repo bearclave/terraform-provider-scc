@@ -1,0 +1,43 @@
+{
+ "value": [
+  {
+   "Identity": "Global sensitivity label policy",
+   "Guid": "0b1e2c4d-1111-2222-3333-444455556666",
+   "Name": "Global sensitivity label policy",
+   "Comment": "",
+   "Labels": [
+    "Public",
+    "General",
+    "Confidential"
+   ],
+   "ExchangeLocation": [
+    {
+     "DisplayName": "All",
+     "Name": "All",
+     "ImmutableIdentity": "All",
+     "Guid": "00000000-0000-0000-0000-000000000000",
+     "Type": {
+      "value": 1,
+      "Value": "Tenant"
+     },
+     "Workload": {
+      "value": 1,
+      "Value": "Exchange"
+     }
+    }
+   ],
+   "ModernGroupLocation": [],
+   "SharePointLocation": [],
+   "OneDriveLocation": [],
+   "Settings": [
+    "[requiredowngradejustification, true]",
+    "[mandatory, false]",
+    "[outlookdefaultlabel, None]",
+    "[siteandgroupmandatory, false]"
+   ],
+   "Mode": "Enforce",
+   "Enabled": true,
+   "DistributionStatus": "Success"
+  }
+ ]
+}

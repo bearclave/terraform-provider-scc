@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
@@ -35,19 +36,19 @@ func NewHoldCompliancePolicyResource() resource.Resource { return &holdComplianc
 type holdCompliancePolicyModel struct {
 	ID                         types.String `tfsdk:"id"`
 	Identity                   types.String `tfsdk:"identity"`
-	AddExchangeLocation        types.String `tfsdk:"add_exchange_location"`
-	AddPublicFolderLocation    types.String `tfsdk:"add_public_folder_location"`
-	AddSharePointLocation      types.String `tfsdk:"add_share_point_location"`
+	AddExchangeLocation        types.Set    `tfsdk:"add_exchange_location"`
+	AddPublicFolderLocation    types.Set    `tfsdk:"add_public_folder_location"`
+	AddSharePointLocation      types.Set    `tfsdk:"add_share_point_location"`
 	Comment                    types.String `tfsdk:"comment"`
 	Enabled                    types.Bool   `tfsdk:"enabled"`
-	ExchangeLocation           types.String `tfsdk:"exchange_location"`
+	ExchangeLocation           types.Set    `tfsdk:"exchange_location"`
 	Name                       types.String `tfsdk:"name"`
-	PublicFolderLocation       types.String `tfsdk:"public_folder_location"`
-	RemoveExchangeLocation     types.String `tfsdk:"remove_exchange_location"`
-	RemovePublicFolderLocation types.String `tfsdk:"remove_public_folder_location"`
-	RemoveSharePointLocation   types.String `tfsdk:"remove_share_point_location"`
+	PublicFolderLocation       types.Set    `tfsdk:"public_folder_location"`
+	RemoveExchangeLocation     types.Set    `tfsdk:"remove_exchange_location"`
+	RemovePublicFolderLocation types.Set    `tfsdk:"remove_public_folder_location"`
+	RemoveSharePointLocation   types.Set    `tfsdk:"remove_share_point_location"`
 	RetryDistribution          types.Bool   `tfsdk:"retry_distribution"`
-	SharePointLocation         types.String `tfsdk:"share_point_location"`
+	SharePointLocation         types.Set    `tfsdk:"share_point_location"`
 }
 
 func (r *holdCompliancePolicyResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -59,20 +60,20 @@ func (r *holdCompliancePolicyResource) Schema(_ context.Context, _ resource.Sche
 		Description: "Manages the HoldCompliancePolicy object via New-HoldCompliancePolicy / Get-HoldCompliancePolicy / Set-HoldCompliancePolicy / Remove-HoldCompliancePolicy.",
 		Attributes: map[string]schema.Attribute{
 			"id":                            schema.StringAttribute{Computed: true, Description: "Object identifier (GUID).", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"identity":                      schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets."},
-			"add_exchange_location":         schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AddExchangeLocation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"add_public_folder_location":    schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AddPublicFolderLocation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"add_share_point_location":      schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AddSharePointLocation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"identity":                      schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"add_exchange_location":         schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -AddExchangeLocation parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"add_public_folder_location":    schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -AddPublicFolderLocation parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"add_share_point_location":      schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -AddSharePointLocation parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
 			"comment":                       schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -Comment parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"enabled":                       schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -Enabled parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
-			"exchange_location":             schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ExchangeLocation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace(), stringplanmodifier.UseStateForUnknown()}},
+			"exchange_location":             schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -ExchangeLocation parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.RequiresReplace(), setplanmodifier.UseStateForUnknown()}},
 			"name":                          schema.StringAttribute{Required: true, Description: "Maps to the -Name parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
-			"public_folder_location":        schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -PublicFolderLocation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace(), stringplanmodifier.UseStateForUnknown()}},
-			"remove_exchange_location":      schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -RemoveExchangeLocation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"remove_public_folder_location": schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -RemovePublicFolderLocation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"remove_share_point_location":   schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -RemoveSharePointLocation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"public_folder_location":        schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -PublicFolderLocation parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.RequiresReplace(), setplanmodifier.UseStateForUnknown()}},
+			"remove_exchange_location":      schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -RemoveExchangeLocation parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"remove_public_folder_location": schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -RemovePublicFolderLocation parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"remove_share_point_location":   schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -RemoveSharePointLocation parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
 			"retry_distribution":            schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -RetryDistribution parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
-			"share_point_location":          schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -SharePointLocation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace(), stringplanmodifier.UseStateForUnknown()}},
+			"share_point_location":          schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -SharePointLocation parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.RequiresReplace(), setplanmodifier.UseStateForUnknown()}},
 		},
 	}
 }
@@ -91,24 +92,43 @@ func (r *holdCompliancePolicyResource) Create(ctx context.Context, req resource.
 		return
 	}
 
-	p := purview.NewHoldCompliancePolicyParams{
-		Comment: plan.Comment.ValueString(),
-		Enabled: plan.Enabled.ValueBool(),
-		Name:    plan.Name.ValueString(),
+	var config holdCompliancePolicyModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
+	if resp.Diagnostics.HasError() {
+		return
 	}
-	if v := plan.ExchangeLocation.ValueString(); v != "" {
-		p.ExchangeLocation = v
+
+	p := purview.NewHoldCompliancePolicyParams{}
+	if !config.Comment.IsNull() {
+		p.Comment = plan.Comment.ValueString()
 	}
-	if v := plan.PublicFolderLocation.ValueString(); v != "" {
-		p.PublicFolderLocation = v
+	if !config.Enabled.IsNull() {
+		if !plan.Enabled.IsUnknown() {
+			p.Enabled = plan.Enabled.ValueBoolPointer()
+		}
 	}
-	if v := plan.SharePointLocation.ValueString(); v != "" {
-		p.SharePointLocation = v
+	if !config.ExchangeLocation.IsNull() {
+		if v := toStringSlice(ctx, plan.ExchangeLocation, &resp.Diagnostics); len(v) > 0 {
+			p.ExchangeLocation = v
+		}
+	}
+	if !config.Name.IsNull() {
+		p.Name = plan.Name.ValueString()
+	}
+	if !config.PublicFolderLocation.IsNull() {
+		if v := toStringSlice(ctx, plan.PublicFolderLocation, &resp.Diagnostics); len(v) > 0 {
+			p.PublicFolderLocation = v
+		}
+	}
+	if !config.SharePointLocation.IsNull() {
+		if v := toStringSlice(ctx, plan.SharePointLocation, &resp.Diagnostics); len(v) > 0 {
+			p.SharePointLocation = v
+		}
 	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	res, err := r.client.SCC.NewHoldCompliancePolicy(ctx, p)
+	res, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.NewHoldCompliancePolicy, p, isNotFound)
 	if err != nil {
 		resp.Diagnostics.AddError("New-HoldCompliancePolicy failed", err.Error())
 		return
@@ -155,45 +175,138 @@ func (r *holdCompliancePolicyResource) Update(ctx context.Context, req resource.
 	id := r.identityOf(state)
 	sp := purview.SetHoldCompliancePolicyParams{}
 	sp.Identity = id
-	if v := plan.AddExchangeLocation.ValueString(); v != "" {
-		sp.AddExchangeLocation = v
+	var cur *holdCompliancePolicyModel
+	curRead := false
+	current := func() *holdCompliancePolicyModel {
+		if !curRead {
+			curRead = true
+			var m holdCompliancePolicyModel
+			if r.refresh(ctx, id, &m, &resp.Diagnostics, nil) {
+				cur = &m
+			} else if !resp.Diagnostics.HasError() {
+				resp.Diagnostics.AddError("Get-HoldCompliancePolicy failed", "the object could not be read to determine the list values to remove; nothing was changed")
+			}
+		}
+		return cur
 	}
-	if v := plan.AddPublicFolderLocation.ValueString(); v != "" {
-		sp.AddPublicFolderLocation = v
+	if !plan.AddExchangeLocation.Equal(state.AddExchangeLocation) {
+		if !plan.AddExchangeLocation.IsNull() && !plan.AddExchangeLocation.IsUnknown() {
+			if v := toStringSlice(ctx, plan.AddExchangeLocation, &resp.Diagnostics); len(v) > 0 {
+				sp.AddExchangeLocation = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.AddExchangeLocation, &resp.Diagnostics); len(rm) > 0 {
+						sp.AddExchangeLocationDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
 	}
-	if v := plan.AddSharePointLocation.ValueString(); v != "" {
-		sp.AddSharePointLocation = v
+	if !plan.AddPublicFolderLocation.Equal(state.AddPublicFolderLocation) {
+		if !plan.AddPublicFolderLocation.IsNull() && !plan.AddPublicFolderLocation.IsUnknown() {
+			if v := toStringSlice(ctx, plan.AddPublicFolderLocation, &resp.Diagnostics); len(v) > 0 {
+				sp.AddPublicFolderLocation = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.AddPublicFolderLocation, &resp.Diagnostics); len(rm) > 0 {
+						sp.AddPublicFolderLocationDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
 	}
-	sp.Comment = plan.Comment.ValueString()
-	sp.Enabled = plan.Enabled.ValueBool()
-	if v := plan.RemoveExchangeLocation.ValueString(); v != "" {
-		sp.RemoveExchangeLocation = v
+	if !plan.AddSharePointLocation.Equal(state.AddSharePointLocation) {
+		if !plan.AddSharePointLocation.IsNull() && !plan.AddSharePointLocation.IsUnknown() {
+			if v := toStringSlice(ctx, plan.AddSharePointLocation, &resp.Diagnostics); len(v) > 0 {
+				sp.AddSharePointLocation = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.AddSharePointLocation, &resp.Diagnostics); len(rm) > 0 {
+						sp.AddSharePointLocationDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
 	}
-	if v := plan.RemovePublicFolderLocation.ValueString(); v != "" {
-		sp.RemovePublicFolderLocation = v
+	if !plan.Comment.Equal(state.Comment) {
+		sp.Comment = plan.Comment.ValueString()
 	}
-	if v := plan.RemoveSharePointLocation.ValueString(); v != "" {
-		sp.RemoveSharePointLocation = v
+	if !plan.Enabled.Equal(state.Enabled) {
+		if !plan.Enabled.IsUnknown() {
+			sp.Enabled = plan.Enabled.ValueBoolPointer()
+		}
 	}
-	sp.RetryDistribution = plan.RetryDistribution.ValueBool()
+	if !plan.RemoveExchangeLocation.Equal(state.RemoveExchangeLocation) {
+		if !plan.RemoveExchangeLocation.IsNull() && !plan.RemoveExchangeLocation.IsUnknown() {
+			if v := toStringSlice(ctx, plan.RemoveExchangeLocation, &resp.Diagnostics); len(v) > 0 {
+				sp.RemoveExchangeLocation = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.RemoveExchangeLocation, &resp.Diagnostics); len(rm) > 0 {
+						sp.RemoveExchangeLocationDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
+	}
+	if !plan.RemovePublicFolderLocation.Equal(state.RemovePublicFolderLocation) {
+		if !plan.RemovePublicFolderLocation.IsNull() && !plan.RemovePublicFolderLocation.IsUnknown() {
+			if v := toStringSlice(ctx, plan.RemovePublicFolderLocation, &resp.Diagnostics); len(v) > 0 {
+				sp.RemovePublicFolderLocation = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.RemovePublicFolderLocation, &resp.Diagnostics); len(rm) > 0 {
+						sp.RemovePublicFolderLocationDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
+	}
+	if !plan.RemoveSharePointLocation.Equal(state.RemoveSharePointLocation) {
+		if !plan.RemoveSharePointLocation.IsNull() && !plan.RemoveSharePointLocation.IsUnknown() {
+			if v := toStringSlice(ctx, plan.RemoveSharePointLocation, &resp.Diagnostics); len(v) > 0 {
+				sp.RemoveSharePointLocation = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.RemoveSharePointLocation, &resp.Diagnostics); len(rm) > 0 {
+						sp.RemoveSharePointLocationDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
+	}
+	if !plan.RetryDistribution.Equal(state.RetryDistribution) {
+		if !plan.RetryDistribution.IsUnknown() {
+			sp.RetryDistribution = plan.RetryDistribution.ValueBoolPointer()
+		}
+	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	if _, err := r.client.SCC.SetHoldCompliancePolicy(ctx, sp); err != nil {
+	if _, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.SetHoldCompliancePolicy, sp, isNotFound); err != nil {
 		resp.Diagnostics.AddError("Set-HoldCompliancePolicy failed", err.Error())
 		return
 	}
 	cfg := plan
 	reflected := reconcile.ReflectsFields(map[string]types.String{
-		"AddExchangeLocation":        cfg.AddExchangeLocation,
-		"AddPublicFolderLocation":    cfg.AddPublicFolderLocation,
-		"AddSharePointLocation":      cfg.AddSharePointLocation,
-		"Comment":                    cfg.Comment,
-		"RemoveExchangeLocation":     cfg.RemoveExchangeLocation,
-		"RemovePublicFolderLocation": cfg.RemovePublicFolderLocation,
-		"RemoveSharePointLocation":   cfg.RemoveSharePointLocation,
+		"Comment": cfg.Comment,
 	}, getString)
+	if !cfg.Enabled.IsUnknown() && !cfg.Enabled.IsNull() && !cfg.Enabled.Equal(state.Enabled) {
+		prev, want := reflected, cfg.Enabled.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["Enabled"] == nil || getBool(obj, "Enabled") == want)
+		}
+	}
+	if !cfg.RetryDistribution.IsUnknown() && !cfg.RetryDistribution.IsNull() && !cfg.RetryDistribution.Equal(state.RetryDistribution) {
+		prev, want := reflected, cfg.RetryDistribution.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["RetryDistribution"] == nil || getBool(obj, "RetryDistribution") == want)
+		}
+	}
 	r.refresh(ctx, id, &plan, &resp.Diagnostics, reflected)
+	if !cfg.ID.IsUnknown() && !cfg.ID.IsNull() {
+		plan.ID = cfg.ID
+	}
 	r.reconcileState(&cfg, &plan)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
@@ -253,34 +366,34 @@ func (r *holdCompliancePolicyResource) refresh(ctx context.Context, identity str
 func readHoldCompliancePolicy(ctx context.Context, obj map[string]any, m *holdCompliancePolicyModel) {
 	m.ID = types.StringValue(firstNonEmptyStr(getString(obj, "Guid"), getString(obj, "Id"), getString(obj, "Identity")))
 	m.Identity = types.StringValue(firstNonEmptyStr(getString(obj, "Identity"), getString(obj, "Guid"), getString(obj, "Name")))
-	m.AddExchangeLocation = types.StringValue(getString(obj, "AddExchangeLocation"))
-	m.AddPublicFolderLocation = types.StringValue(getString(obj, "AddPublicFolderLocation"))
-	m.AddSharePointLocation = types.StringValue(getString(obj, "AddSharePointLocation"))
+	m.AddExchangeLocation = stringSetValue(ctx, getStringSlice(obj, "AddExchangeLocation"))
+	m.AddPublicFolderLocation = stringSetValue(ctx, getStringSlice(obj, "AddPublicFolderLocation"))
+	m.AddSharePointLocation = stringSetValue(ctx, getStringSlice(obj, "AddSharePointLocation"))
 	m.Comment = types.StringValue(getString(obj, "Comment"))
 	m.Enabled = types.BoolValue(getBool(obj, "Enabled"))
-	m.ExchangeLocation = types.StringValue(getString(obj, "ExchangeLocation"))
+	m.ExchangeLocation = stringSetValue(ctx, getStringSlice(obj, "ExchangeLocation"))
 	m.Name = types.StringValue(getString(obj, "Name"))
-	m.PublicFolderLocation = types.StringValue(getString(obj, "PublicFolderLocation"))
-	m.RemoveExchangeLocation = types.StringValue(getString(obj, "RemoveExchangeLocation"))
-	m.RemovePublicFolderLocation = types.StringValue(getString(obj, "RemovePublicFolderLocation"))
-	m.RemoveSharePointLocation = types.StringValue(getString(obj, "RemoveSharePointLocation"))
+	m.PublicFolderLocation = stringSetValue(ctx, getStringSlice(obj, "PublicFolderLocation"))
+	m.RemoveExchangeLocation = stringSetValue(ctx, getStringSlice(obj, "RemoveExchangeLocation"))
+	m.RemovePublicFolderLocation = stringSetValue(ctx, getStringSlice(obj, "RemovePublicFolderLocation"))
+	m.RemoveSharePointLocation = stringSetValue(ctx, getStringSlice(obj, "RemoveSharePointLocation"))
 	m.RetryDistribution = types.BoolValue(getBool(obj, "RetryDistribution"))
-	m.SharePointLocation = types.StringValue(getString(obj, "SharePointLocation"))
+	m.SharePointLocation = stringSetValue(ctx, getStringSlice(obj, "SharePointLocation"))
 	_ = ctx
 }
 
 func (r *holdCompliancePolicyResource) reconcileState(cfg, read *holdCompliancePolicyModel) {
-	read.AddExchangeLocation = reconcile.KeepStr(cfg.AddExchangeLocation, read.AddExchangeLocation)
-	read.AddPublicFolderLocation = reconcile.KeepStr(cfg.AddPublicFolderLocation, read.AddPublicFolderLocation)
-	read.AddSharePointLocation = reconcile.KeepStr(cfg.AddSharePointLocation, read.AddSharePointLocation)
+	read.AddExchangeLocation = reconcile.KeepSet(cfg.AddExchangeLocation, read.AddExchangeLocation)
+	read.AddPublicFolderLocation = reconcile.KeepSet(cfg.AddPublicFolderLocation, read.AddPublicFolderLocation)
+	read.AddSharePointLocation = reconcile.KeepSet(cfg.AddSharePointLocation, read.AddSharePointLocation)
 	read.Comment = reconcile.KeepStr(cfg.Comment, read.Comment)
 	read.Enabled = reconcile.KeepBool(cfg.Enabled, read.Enabled)
-	read.ExchangeLocation = reconcile.KeepStr(cfg.ExchangeLocation, read.ExchangeLocation)
+	read.ExchangeLocation = reconcile.KeepSet(cfg.ExchangeLocation, read.ExchangeLocation)
 	read.Name = reconcile.KeepStr(cfg.Name, read.Name)
-	read.PublicFolderLocation = reconcile.KeepStr(cfg.PublicFolderLocation, read.PublicFolderLocation)
-	read.RemoveExchangeLocation = reconcile.KeepStr(cfg.RemoveExchangeLocation, read.RemoveExchangeLocation)
-	read.RemovePublicFolderLocation = reconcile.KeepStr(cfg.RemovePublicFolderLocation, read.RemovePublicFolderLocation)
-	read.RemoveSharePointLocation = reconcile.KeepStr(cfg.RemoveSharePointLocation, read.RemoveSharePointLocation)
+	read.PublicFolderLocation = reconcile.KeepSet(cfg.PublicFolderLocation, read.PublicFolderLocation)
+	read.RemoveExchangeLocation = reconcile.KeepSet(cfg.RemoveExchangeLocation, read.RemoveExchangeLocation)
+	read.RemovePublicFolderLocation = reconcile.KeepSet(cfg.RemovePublicFolderLocation, read.RemovePublicFolderLocation)
+	read.RemoveSharePointLocation = reconcile.KeepSet(cfg.RemoveSharePointLocation, read.RemoveSharePointLocation)
 	read.RetryDistribution = reconcile.KeepBool(cfg.RetryDistribution, read.RetryDistribution)
-	read.SharePointLocation = reconcile.KeepStr(cfg.SharePointLocation, read.SharePointLocation)
+	read.SharePointLocation = reconcile.KeepSet(cfg.SharePointLocation, read.SharePointLocation)
 }

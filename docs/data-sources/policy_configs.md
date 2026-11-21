@@ -24,13 +24,14 @@ List every PolicyConfig object (Get-PolicyConfig).
 
 Read-Only:
 
-- `aggregation_time_window_for_dlp_alerts` (String) Maps to the -AggregationTimeWindowForDlpAlerts parameter.
+- `aggregation_time_window_for_dlp_alerts` (Number) Maps to the -AggregationTimeWindowForDlpAlerts parameter.
+- `case_hold_policy_limit` (Number) Maps to the -CaseHoldPolicyLimit parameter.
 - `classification_scheme` (String) Maps to the -ClassificationScheme parameter.
 - `compliance_url` (String) Maps to the -ComplianceUrl parameter.
 - `dlp_alert_folding_configuration` (String) Maps to the -DlpAlertFoldingConfiguration parameter.
 - `dlp_alert_sla_config` (String) Maps to the -DlpAlertSlaConfig parameter.
-- `dlp_app_groups` (Set of String) Maps to the -DlpAppGroups parameter.
-- `dlp_app_groups_psws` (Set of String) Maps to the -DlpAppGroupsPsws parameter.
+- `dlp_app_groups` (String) Maps to the -DlpAppGroups parameter.
+- `dlp_app_groups_psws` (String) Maps to the -DlpAppGroupsPsws parameter.
 - `dlp_error_handling_config` (String) Maps to the -DlpErrorHandlingConfig parameter.
 - `dlp_extension_groups` (String) Maps to the -DlpExtensionGroups parameter.
 - `dlp_network_share_groups` (String) Maps to the -DlpNetworkShareGroups parameter.
@@ -42,8 +43,8 @@ Read-Only:
 - `enable_label_coauth` (Boolean) Maps to the -EnableLabelCoauth parameter.
 - `enable_sensitivity_labeling_for_pdf` (Boolean) Maps to the -EnableSensitivityLabelingForPdf parameter.
 - `enable_spo_aip_migration` (Boolean) Maps to the -EnableSpoAipMigration parameter.
-- `endpoint_dlp_global_settings` (Set of String) Maps to the -EndpointDlpGlobalSettings parameter.
-- `endpoint_dlp_global_settings_psws` (Set of String) Maps to the -EndpointDlpGlobalSettingsPsws parameter.
+- `endpoint_dlp_global_settings` (String) Maps to the -EndpointDlpGlobalSettings parameter.
+- `endpoint_dlp_global_settings_psws` (String) Maps to the -EndpointDlpGlobalSettingsPsws parameter.
 - `extend_teams_dlp_policies_to_share_point_one_drive` (Boolean) Maps to the -ExtendTeamsDlpPoliciesToSharePointOneDrive parameter.
 - `id` (String) Object identifier (GUID).
 - `identity` (String) Identity used to target the object.
@@ -64,8 +65,8 @@ Read-Only:
 - `retention_forward_crawl` (Boolean) Maps to the -RetentionForwardCrawl parameter.
 - `rule_error_action` (String) Maps to the -RuleErrorAction parameter.
 - `sender_address_location` (String) Maps to the -SenderAddressLocation parameter.
-- `site_groups` (Set of String) Maps to the -SiteGroups parameter.
-- `site_groups_psws` (Set of String) Maps to the -SiteGroupsPsws parameter.
+- `site_groups` (String) Maps to the -SiteGroups parameter.
+- `site_groups_psws` (String) Maps to the -SiteGroupsPsws parameter.
 - `spo_quarantine_location` (String) Maps to the -SpoQuarantineLocation parameter.
 - `spo_quarantine_text` (String) Maps to the -SpoQuarantineText parameter.
 - `text_extraction_config` (String) Maps to the -TextExtractionConfig parameter.

@@ -19,14 +19,14 @@ Manages the InformationBarrierPolicy object via New-InformationBarrierPolicy / G
 
 - `assigned_segment` (String) Maps to the -AssignedSegment parameter.
 - `name` (String) Maps to the -Name parameter.
-- `segment_allowed_filter` (String) Maps to the -SegmentAllowedFilter parameter.
-- `segments_allowed` (String) Maps to the -SegmentsAllowed parameter.
-- `segments_blocked` (String) Maps to the -SegmentsBlocked parameter.
 
 ### Optional
 
 - `comment` (String) Maps to the -Comment parameter.
 - `moderation_allowed` (Boolean) Maps to the -ModerationAllowed parameter.
+- `segment_allowed_filter` (String) Maps to the -SegmentAllowedFilter parameter.
+- `segments_allowed` (Set of String) Maps to the -SegmentsAllowed parameter.
+- `segments_blocked` (Set of String) Maps to the -SegmentsBlocked parameter.
 - `state` (String) Maps to the -State parameter.
 
 ### Read-Only

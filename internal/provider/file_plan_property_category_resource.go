@@ -49,7 +49,7 @@ func (r *filePlanPropertyCategoryResource) Schema(_ context.Context, _ resource.
 		Description: "Manages the FilePlanPropertyCategory object via New-FilePlanPropertyCategory / Get-FilePlanPropertyCategory / Set-FilePlanPropertyCategory / Remove-FilePlanPropertyCategory.",
 		Attributes: map[string]schema.Attribute{
 			"id":           schema.StringAttribute{Computed: true, Description: "Object identifier (GUID).", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"identity":     schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets."},
+			"identity":     schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"display_name": schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -DisplayName parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"name":         schema.StringAttribute{Required: true, Description: "Maps to the -Name parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
 		},
@@ -70,13 +70,20 @@ func (r *filePlanPropertyCategoryResource) Create(ctx context.Context, req resou
 		return
 	}
 
-	p := purview.NewFilePlanPropertyCategoryParams{
-		Name: plan.Name.ValueString(),
+	var config filePlanPropertyCategoryModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	p := purview.NewFilePlanPropertyCategoryParams{}
+	if !config.Name.IsNull() {
+		p.Name = plan.Name.ValueString()
 	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	res, err := r.client.SCC.NewFilePlanPropertyCategory(ctx, p)
+	res, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.NewFilePlanPropertyCategory, p, isNotFound)
 	if err != nil {
 		resp.Diagnostics.AddError("New-FilePlanPropertyCategory failed", err.Error())
 		return
@@ -123,11 +130,13 @@ func (r *filePlanPropertyCategoryResource) Update(ctx context.Context, req resou
 	id := r.identityOf(state)
 	sp := purview.SetFilePlanPropertyCategoryParams{}
 	sp.Identity = id
-	sp.DisplayName = plan.DisplayName.ValueString()
+	if !plan.DisplayName.Equal(state.DisplayName) {
+		sp.DisplayName = plan.DisplayName.ValueString()
+	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	if _, err := r.client.SCC.SetFilePlanPropertyCategory(ctx, sp); err != nil {
+	if _, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.SetFilePlanPropertyCategory, sp, isNotFound); err != nil {
 		resp.Diagnostics.AddError("Set-FilePlanPropertyCategory failed", err.Error())
 		return
 	}
@@ -136,6 +145,9 @@ func (r *filePlanPropertyCategoryResource) Update(ctx context.Context, req resou
 		"DisplayName": cfg.DisplayName,
 	}, getString)
 	r.refresh(ctx, id, &plan, &resp.Diagnostics, reflected)
+	if !cfg.ID.IsUnknown() && !cfg.ID.IsNull() {
+		plan.ID = cfg.ID
+	}
 	r.reconcileState(&cfg, &plan)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }

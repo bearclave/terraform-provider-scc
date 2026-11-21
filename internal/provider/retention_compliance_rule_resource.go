@@ -43,14 +43,14 @@ type retentionComplianceRuleModel struct {
 	ArchiveTriggerBasedOn               types.String `tfsdk:"archive_trigger_based_on"`
 	ArchiveTriggerInDays                types.String `tfsdk:"archive_trigger_in_days"`
 	Comment                             types.String `tfsdk:"comment"`
-	ContentContainsSensitiveInformation types.Set    `tfsdk:"content_contains_sensitive_information"`
+	ContentContainsSensitiveInformation types.String `tfsdk:"content_contains_sensitive_information"`
 	ContentDateFrom                     types.String `tfsdk:"content_date_from"`
 	ContentDateTo                       types.String `tfsdk:"content_date_to"`
 	ContentMatchQuery                   types.String `tfsdk:"content_match_query"`
-	ExcludedItemClasses                 types.String `tfsdk:"excluded_item_classes"`
+	ExcludedItemClasses                 types.Set    `tfsdk:"excluded_item_classes"`
 	ExpirationDateOption                types.String `tfsdk:"expiration_date_option"`
 	IRMRiskyUserProfiles                types.String `tfsdk:"irm_risky_user_profiles"`
-	MachineLearningModelIDs             types.String `tfsdk:"machine_learning_model_i_ds"`
+	MachineLearningModelIDs             types.Set    `tfsdk:"machine_learning_model_i_ds"`
 	Name                                types.String `tfsdk:"name"`
 	Policy                              types.String `tfsdk:"policy"`
 	PublishComplianceTag                types.String `tfsdk:"publish_compliance_tag"`
@@ -68,23 +68,23 @@ func (r *retentionComplianceRuleResource) Schema(_ context.Context, _ resource.S
 		Description: "Manages the RetentionComplianceRule object via New-RetentionComplianceRule / Get-RetentionComplianceRule / Set-RetentionComplianceRule / Remove-RetentionComplianceRule.",
 		Attributes: map[string]schema.Attribute{
 			"id":                                     schema.StringAttribute{Computed: true, Description: "Object identifier (GUID).", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"identity":                               schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets."},
-			"apply_compliance_tag":                   schema.StringAttribute{Required: true, Description: "Maps to the -ApplyComplianceTag parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
+			"identity":                               schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"apply_compliance_tag":                   schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ApplyComplianceTag parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"archive_enabled":                        schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -ArchiveEnabled parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
 			"archive_trigger_based_on":               schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ArchiveTriggerBasedOn parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"archive_trigger_in_days":                schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ArchiveTriggerInDays parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"comment":                                schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -Comment parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"content_contains_sensitive_information": schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -ContentContainsSensitiveInformation parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"content_contains_sensitive_information": schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ContentContainsSensitiveInformation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"content_date_from":                      schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ContentDateFrom parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"content_date_to":                        schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ContentDateTo parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"content_match_query":                    schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ContentMatchQuery parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"excluded_item_classes":                  schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ExcludedItemClasses parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"excluded_item_classes":                  schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -ExcludedItemClasses parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
 			"expiration_date_option":                 schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ExpirationDateOption parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"irm_risky_user_profiles":                schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -IRMRiskyUserProfiles parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"machine_learning_model_i_ds":            schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -MachineLearningModelIDs parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace(), stringplanmodifier.UseStateForUnknown()}},
+			"machine_learning_model_i_ds":            schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -MachineLearningModelIDs parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.RequiresReplace(), setplanmodifier.UseStateForUnknown()}},
 			"name":                                   schema.StringAttribute{Required: true, Description: "Maps to the -Name parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
 			"policy":                                 schema.StringAttribute{Required: true, Description: "Maps to the -Policy parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
-			"publish_compliance_tag":                 schema.StringAttribute{Required: true, Description: "Maps to the -PublishComplianceTag parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
+			"publish_compliance_tag":                 schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -PublishComplianceTag parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace(), stringplanmodifier.UseStateForUnknown()}},
 			"retention_compliance_action":            schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -RetentionComplianceAction parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"retention_duration":                     schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -RetentionDuration parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"retention_duration_display_hint":        schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -RetentionDurationDisplayHint parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
@@ -106,43 +106,74 @@ func (r *retentionComplianceRuleResource) Create(ctx context.Context, req resour
 		return
 	}
 
-	p := purview.NewRetentionComplianceRuleParams{
-		ApplyComplianceTag:                  plan.ApplyComplianceTag.ValueString(),
-		ArchiveEnabled:                      plan.ArchiveEnabled.ValueBool(),
-		ArchiveTriggerBasedOn:               plan.ArchiveTriggerBasedOn.ValueString(),
-		Comment:                             plan.Comment.ValueString(),
-		ContentContainsSensitiveInformation: toStringSlice(ctx, plan.ContentContainsSensitiveInformation, &resp.Diagnostics),
-		ContentMatchQuery:                   plan.ContentMatchQuery.ValueString(),
-		ExpirationDateOption:                plan.ExpirationDateOption.ValueString(),
-		Name:                                plan.Name.ValueString(),
-		PublishComplianceTag:                plan.PublishComplianceTag.ValueString(),
-		RetentionComplianceAction:           plan.RetentionComplianceAction.ValueString(),
+	var config retentionComplianceRuleModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
+	if resp.Diagnostics.HasError() {
+		return
 	}
-	if v := plan.ArchiveTriggerInDays.ValueString(); v != "" {
-		p.ArchiveTriggerInDays = v
+
+	p := purview.NewRetentionComplianceRuleParams{}
+	if !config.ApplyComplianceTag.IsNull() {
+		p.ApplyComplianceTag = plan.ApplyComplianceTag.ValueString()
 	}
-	if v := plan.ExcludedItemClasses.ValueString(); v != "" {
-		p.ExcludedItemClasses = v
+	if !config.ArchiveEnabled.IsNull() {
+		if !plan.ArchiveEnabled.IsUnknown() {
+			p.ArchiveEnabled = plan.ArchiveEnabled.ValueBoolPointer()
+		}
 	}
-	if v := plan.IRMRiskyUserProfiles.ValueString(); v != "" {
-		p.IRMRiskyUserProfiles = v
+	if !config.ArchiveTriggerBasedOn.IsNull() {
+		p.ArchiveTriggerBasedOn = plan.ArchiveTriggerBasedOn.ValueString()
 	}
-	if v := plan.MachineLearningModelIDs.ValueString(); v != "" {
-		p.MachineLearningModelIDs = v
+	if v := config.ArchiveTriggerInDays.ValueString(); v != "" {
+		p.ArchiveTriggerInDays = objectParam(v)
 	}
-	if v := plan.Policy.ValueString(); v != "" {
-		p.Policy = v
+	if !config.Comment.IsNull() {
+		p.Comment = plan.Comment.ValueString()
 	}
-	if v := plan.RetentionDuration.ValueString(); v != "" {
-		p.RetentionDuration = v
+	if v := config.ContentContainsSensitiveInformation.ValueString(); v != "" {
+		p.ContentContainsSensitiveInformation = objectParam(v)
 	}
-	if v := plan.RetentionDurationDisplayHint.ValueString(); v != "" {
-		p.RetentionDurationDisplayHint = v
+	if !config.ContentMatchQuery.IsNull() {
+		p.ContentMatchQuery = plan.ContentMatchQuery.ValueString()
+	}
+	if !config.ExcludedItemClasses.IsNull() {
+		if v := toStringSlice(ctx, plan.ExcludedItemClasses, &resp.Diagnostics); len(v) > 0 {
+			p.ExcludedItemClasses = v
+		}
+	}
+	if !config.ExpirationDateOption.IsNull() {
+		p.ExpirationDateOption = plan.ExpirationDateOption.ValueString()
+	}
+	if v := config.IRMRiskyUserProfiles.ValueString(); v != "" {
+		p.IRMRiskyUserProfiles = objectParam(v)
+	}
+	if !config.MachineLearningModelIDs.IsNull() {
+		if v := toStringSlice(ctx, plan.MachineLearningModelIDs, &resp.Diagnostics); len(v) > 0 {
+			p.MachineLearningModelIDs = v
+		}
+	}
+	if !config.Name.IsNull() {
+		p.Name = plan.Name.ValueString()
+	}
+	if v := config.Policy.ValueString(); v != "" {
+		p.Policy = objectParam(v)
+	}
+	if !config.PublishComplianceTag.IsNull() {
+		p.PublishComplianceTag = plan.PublishComplianceTag.ValueString()
+	}
+	if !config.RetentionComplianceAction.IsNull() {
+		p.RetentionComplianceAction = plan.RetentionComplianceAction.ValueString()
+	}
+	if v := config.RetentionDuration.ValueString(); v != "" {
+		p.RetentionDuration = objectParam(v)
+	}
+	if v := config.RetentionDurationDisplayHint.ValueString(); v != "" {
+		p.RetentionDurationDisplayHint = objectParam(v)
 	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	res, err := r.client.SCC.NewRetentionComplianceRule(ctx, p)
+	res, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.NewRetentionComplianceRule, p, isNotFound)
 	if err != nil {
 		resp.Diagnostics.AddError("New-RetentionComplianceRule failed", err.Error())
 		return
@@ -189,57 +220,117 @@ func (r *retentionComplianceRuleResource) Update(ctx context.Context, req resour
 	id := r.identityOf(state)
 	sp := purview.SetRetentionComplianceRuleParams{}
 	sp.Identity = id
-	sp.ArchiveEnabled = plan.ArchiveEnabled.ValueBool()
-	sp.ArchiveTriggerBasedOn = plan.ArchiveTriggerBasedOn.ValueString()
-	if v := plan.ArchiveTriggerInDays.ValueString(); v != "" {
-		sp.ArchiveTriggerInDays = v
+	var cur *retentionComplianceRuleModel
+	curRead := false
+	current := func() *retentionComplianceRuleModel {
+		if !curRead {
+			curRead = true
+			var m retentionComplianceRuleModel
+			if r.refresh(ctx, id, &m, &resp.Diagnostics, nil) {
+				cur = &m
+			} else if !resp.Diagnostics.HasError() {
+				resp.Diagnostics.AddError("Get-RetentionComplianceRule failed", "the object could not be read to determine the list values to remove; nothing was changed")
+			}
+		}
+		return cur
 	}
-	sp.Comment = plan.Comment.ValueString()
-	sp.ContentContainsSensitiveInformation = toStringSlice(ctx, plan.ContentContainsSensitiveInformation, &resp.Diagnostics)
-	if v := plan.ContentDateFrom.ValueString(); v != "" {
-		sp.ContentDateFrom = v
+	if !plan.ApplyComplianceTag.Equal(state.ApplyComplianceTag) {
+		sp.ApplyComplianceTag = plan.ApplyComplianceTag.ValueString()
 	}
-	if v := plan.ContentDateTo.ValueString(); v != "" {
-		sp.ContentDateTo = v
+	if !plan.ArchiveEnabled.Equal(state.ArchiveEnabled) {
+		if !plan.ArchiveEnabled.IsUnknown() {
+			sp.ArchiveEnabled = plan.ArchiveEnabled.ValueBoolPointer()
+		}
 	}
-	sp.ContentMatchQuery = plan.ContentMatchQuery.ValueString()
-	if v := plan.ExcludedItemClasses.ValueString(); v != "" {
-		sp.ExcludedItemClasses = v
+	if !plan.ArchiveTriggerBasedOn.Equal(state.ArchiveTriggerBasedOn) {
+		sp.ArchiveTriggerBasedOn = plan.ArchiveTriggerBasedOn.ValueString()
 	}
-	sp.ExpirationDateOption = plan.ExpirationDateOption.ValueString()
-	if v := plan.IRMRiskyUserProfiles.ValueString(); v != "" {
-		sp.IRMRiskyUserProfiles = v
+	if !plan.ArchiveTriggerInDays.Equal(state.ArchiveTriggerInDays) {
+		if v := plan.ArchiveTriggerInDays.ValueString(); v != "" {
+			sp.ArchiveTriggerInDays = objectParam(v)
+		}
 	}
-	sp.RetentionComplianceAction = plan.RetentionComplianceAction.ValueString()
-	if v := plan.RetentionDuration.ValueString(); v != "" {
-		sp.RetentionDuration = v
+	if !plan.Comment.Equal(state.Comment) {
+		sp.Comment = plan.Comment.ValueString()
 	}
-	if v := plan.RetentionDurationDisplayHint.ValueString(); v != "" {
-		sp.RetentionDurationDisplayHint = v
+	if !plan.ContentContainsSensitiveInformation.Equal(state.ContentContainsSensitiveInformation) {
+		if v := plan.ContentContainsSensitiveInformation.ValueString(); v != "" {
+			sp.ContentContainsSensitiveInformation = objectParam(v)
+		}
+	}
+	if !plan.ContentDateFrom.Equal(state.ContentDateFrom) {
+		if v := plan.ContentDateFrom.ValueString(); v != "" {
+			sp.ContentDateFrom = objectParam(v)
+		}
+	}
+	if !plan.ContentDateTo.Equal(state.ContentDateTo) {
+		if v := plan.ContentDateTo.ValueString(); v != "" {
+			sp.ContentDateTo = objectParam(v)
+		}
+	}
+	if !plan.ContentMatchQuery.Equal(state.ContentMatchQuery) {
+		sp.ContentMatchQuery = plan.ContentMatchQuery.ValueString()
+	}
+	if !plan.ExcludedItemClasses.Equal(state.ExcludedItemClasses) {
+		if !plan.ExcludedItemClasses.IsNull() && !plan.ExcludedItemClasses.IsUnknown() {
+			if v := toStringSlice(ctx, plan.ExcludedItemClasses, &resp.Diagnostics); len(v) > 0 {
+				sp.ExcludedItemClasses = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.ExcludedItemClasses, &resp.Diagnostics); len(rm) > 0 {
+						sp.ExcludedItemClassesDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
+	}
+	if !plan.ExpirationDateOption.Equal(state.ExpirationDateOption) {
+		sp.ExpirationDateOption = plan.ExpirationDateOption.ValueString()
+	}
+	if !plan.IRMRiskyUserProfiles.Equal(state.IRMRiskyUserProfiles) {
+		if v := plan.IRMRiskyUserProfiles.ValueString(); v != "" {
+			sp.IRMRiskyUserProfiles = objectParam(v)
+		}
+	}
+	if !plan.RetentionComplianceAction.Equal(state.RetentionComplianceAction) {
+		sp.RetentionComplianceAction = plan.RetentionComplianceAction.ValueString()
+	}
+	if !plan.RetentionDuration.Equal(state.RetentionDuration) {
+		if v := plan.RetentionDuration.ValueString(); v != "" {
+			sp.RetentionDuration = objectParam(v)
+		}
+	}
+	if !plan.RetentionDurationDisplayHint.Equal(state.RetentionDurationDisplayHint) {
+		if v := plan.RetentionDurationDisplayHint.ValueString(); v != "" {
+			sp.RetentionDurationDisplayHint = objectParam(v)
+		}
 	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	if _, err := r.client.SCC.SetRetentionComplianceRule(ctx, sp); err != nil {
+	if _, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.SetRetentionComplianceRule, sp, isNotFound); err != nil {
 		resp.Diagnostics.AddError("Set-RetentionComplianceRule failed", err.Error())
 		return
 	}
 	cfg := plan
 	reflected := reconcile.ReflectsFields(map[string]types.String{
-		"ArchiveTriggerBasedOn":        cfg.ArchiveTriggerBasedOn,
-		"ArchiveTriggerInDays":         cfg.ArchiveTriggerInDays,
-		"Comment":                      cfg.Comment,
-		"ContentDateFrom":              cfg.ContentDateFrom,
-		"ContentDateTo":                cfg.ContentDateTo,
-		"ContentMatchQuery":            cfg.ContentMatchQuery,
-		"ExcludedItemClasses":          cfg.ExcludedItemClasses,
-		"ExpirationDateOption":         cfg.ExpirationDateOption,
-		"IRMRiskyUserProfiles":         cfg.IRMRiskyUserProfiles,
-		"RetentionComplianceAction":    cfg.RetentionComplianceAction,
-		"RetentionDuration":            cfg.RetentionDuration,
-		"RetentionDurationDisplayHint": cfg.RetentionDurationDisplayHint,
+		"ApplyComplianceTag":        cfg.ApplyComplianceTag,
+		"ArchiveTriggerBasedOn":     cfg.ArchiveTriggerBasedOn,
+		"Comment":                   cfg.Comment,
+		"ContentMatchQuery":         cfg.ContentMatchQuery,
+		"ExpirationDateOption":      cfg.ExpirationDateOption,
+		"RetentionComplianceAction": cfg.RetentionComplianceAction,
 	}, getString)
+	if !cfg.ArchiveEnabled.IsUnknown() && !cfg.ArchiveEnabled.IsNull() && !cfg.ArchiveEnabled.Equal(state.ArchiveEnabled) {
+		prev, want := reflected, cfg.ArchiveEnabled.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["ArchiveEnabled"] == nil || getBool(obj, "ArchiveEnabled") == want)
+		}
+	}
 	r.refresh(ctx, id, &plan, &resp.Diagnostics, reflected)
+	if !cfg.ID.IsUnknown() && !cfg.ID.IsNull() {
+		plan.ID = cfg.ID
+	}
 	r.reconcileState(&cfg, &plan)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
@@ -302,22 +393,22 @@ func readRetentionComplianceRule(ctx context.Context, obj map[string]any, m *ret
 	m.ApplyComplianceTag = types.StringValue(getString(obj, "ApplyComplianceTag"))
 	m.ArchiveEnabled = types.BoolValue(getBool(obj, "ArchiveEnabled"))
 	m.ArchiveTriggerBasedOn = types.StringValue(getString(obj, "ArchiveTriggerBasedOn"))
-	m.ArchiveTriggerInDays = types.StringValue(getString(obj, "ArchiveTriggerInDays"))
+	m.ArchiveTriggerInDays = types.StringValue(getObjectJSON(obj, "ArchiveTriggerInDays"))
 	m.Comment = types.StringValue(getString(obj, "Comment"))
-	m.ContentContainsSensitiveInformation = stringSetValue(ctx, getStringSlice(obj, "ContentContainsSensitiveInformation"))
-	m.ContentDateFrom = types.StringValue(getString(obj, "ContentDateFrom"))
-	m.ContentDateTo = types.StringValue(getString(obj, "ContentDateTo"))
+	m.ContentContainsSensitiveInformation = types.StringValue(getObjectJSON(obj, "ContentContainsSensitiveInformation"))
+	m.ContentDateFrom = types.StringValue(getObjectJSON(obj, "ContentDateFrom"))
+	m.ContentDateTo = types.StringValue(getObjectJSON(obj, "ContentDateTo"))
 	m.ContentMatchQuery = types.StringValue(getString(obj, "ContentMatchQuery"))
-	m.ExcludedItemClasses = types.StringValue(getString(obj, "ExcludedItemClasses"))
+	m.ExcludedItemClasses = stringSetValue(ctx, getStringSlice(obj, "ExcludedItemClasses"))
 	m.ExpirationDateOption = types.StringValue(getString(obj, "ExpirationDateOption"))
-	m.IRMRiskyUserProfiles = types.StringValue(getString(obj, "IRMRiskyUserProfiles"))
-	m.MachineLearningModelIDs = types.StringValue(getString(obj, "MachineLearningModelIDs"))
+	m.IRMRiskyUserProfiles = types.StringValue(getObjectJSON(obj, "IRMRiskyUserProfiles"))
+	m.MachineLearningModelIDs = stringSetValue(ctx, getStringSlice(obj, "MachineLearningModelIDs"))
 	m.Name = types.StringValue(getString(obj, "Name"))
-	m.Policy = types.StringValue(getString(obj, "Policy"))
+	m.Policy = types.StringValue(getObjectJSON(obj, "Policy"))
 	m.PublishComplianceTag = types.StringValue(getString(obj, "PublishComplianceTag"))
 	m.RetentionComplianceAction = types.StringValue(getString(obj, "RetentionComplianceAction"))
-	m.RetentionDuration = types.StringValue(getString(obj, "RetentionDuration"))
-	m.RetentionDurationDisplayHint = types.StringValue(getString(obj, "RetentionDurationDisplayHint"))
+	m.RetentionDuration = types.StringValue(getObjectJSON(obj, "RetentionDuration"))
+	m.RetentionDurationDisplayHint = types.StringValue(getObjectJSON(obj, "RetentionDurationDisplayHint"))
 	_ = ctx
 }
 
@@ -327,14 +418,14 @@ func (r *retentionComplianceRuleResource) reconcileState(cfg, read *retentionCom
 	read.ArchiveTriggerBasedOn = reconcile.KeepStr(cfg.ArchiveTriggerBasedOn, read.ArchiveTriggerBasedOn)
 	read.ArchiveTriggerInDays = reconcile.KeepStr(cfg.ArchiveTriggerInDays, read.ArchiveTriggerInDays)
 	read.Comment = reconcile.KeepStr(cfg.Comment, read.Comment)
-	read.ContentContainsSensitiveInformation = reconcile.KeepSet(cfg.ContentContainsSensitiveInformation, read.ContentContainsSensitiveInformation)
+	read.ContentContainsSensitiveInformation = reconcile.KeepStr(cfg.ContentContainsSensitiveInformation, read.ContentContainsSensitiveInformation)
 	read.ContentDateFrom = reconcile.KeepStr(cfg.ContentDateFrom, read.ContentDateFrom)
 	read.ContentDateTo = reconcile.KeepStr(cfg.ContentDateTo, read.ContentDateTo)
 	read.ContentMatchQuery = reconcile.KeepStr(cfg.ContentMatchQuery, read.ContentMatchQuery)
-	read.ExcludedItemClasses = reconcile.KeepStr(cfg.ExcludedItemClasses, read.ExcludedItemClasses)
+	read.ExcludedItemClasses = reconcile.KeepSet(cfg.ExcludedItemClasses, read.ExcludedItemClasses)
 	read.ExpirationDateOption = reconcile.KeepStr(cfg.ExpirationDateOption, read.ExpirationDateOption)
 	read.IRMRiskyUserProfiles = reconcile.KeepStr(cfg.IRMRiskyUserProfiles, read.IRMRiskyUserProfiles)
-	read.MachineLearningModelIDs = reconcile.KeepStr(cfg.MachineLearningModelIDs, read.MachineLearningModelIDs)
+	read.MachineLearningModelIDs = reconcile.KeepSet(cfg.MachineLearningModelIDs, read.MachineLearningModelIDs)
 	read.Name = reconcile.KeepStr(cfg.Name, read.Name)
 	read.Policy = reconcile.KeepStr(cfg.Policy, read.Policy)
 	read.PublishComplianceTag = reconcile.KeepStr(cfg.PublishComplianceTag, read.PublishComplianceTag)

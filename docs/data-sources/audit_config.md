@@ -22,4 +22,4 @@ Look up an existing AuditConfig object. Set identity to select it.
 ### Read-Only
 
 - `id` (String) Object identifier (GUID).
-- `workload` (String) Maps to the -Workload parameter.
+- `workload` (Set of String) Maps to the -Workload parameter.

@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
@@ -39,13 +40,13 @@ type complianceTagModel struct {
 	ArchiveEnabled            types.Bool   `tfsdk:"archive_enabled"`
 	ArchiveTriggerBasedOn     types.String `tfsdk:"archive_trigger_based_on"`
 	ArchiveTriggerInDays      types.String `tfsdk:"archive_trigger_in_days"`
-	AutoApprovalPeriod        types.String `tfsdk:"auto_approval_period"`
+	AutoApprovalPeriod        types.Int64  `tfsdk:"auto_approval_period"`
 	Comment                   types.String `tfsdk:"comment"`
 	ComplianceTagForNextStage types.String `tfsdk:"compliance_tag_for_next_stage"`
 	EventType                 types.String `tfsdk:"event_type"`
 	FilePlanProperty          types.String `tfsdk:"file_plan_property"`
 	FlowId                    types.String `tfsdk:"flow_id"`
-	IsRecordLabel             types.String `tfsdk:"is_record_label"`
+	IsRecordLabel             types.Bool   `tfsdk:"is_record_label"`
 	IsRecordUnlockedAsDefault types.Bool   `tfsdk:"is_record_unlocked_as_default"`
 	MultiStageReviewProperty  types.String `tfsdk:"multi_stage_review_property"`
 	Name                      types.String `tfsdk:"name"`
@@ -67,25 +68,25 @@ func (r *complianceTagResource) Schema(_ context.Context, _ resource.SchemaReque
 		Description: "Manages the ComplianceTag object via New-ComplianceTag / Get-ComplianceTag / Set-ComplianceTag / Remove-ComplianceTag.",
 		Attributes: map[string]schema.Attribute{
 			"id":                            schema.StringAttribute{Computed: true, Description: "Object identifier (GUID).", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"identity":                      schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets."},
+			"identity":                      schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"archive_enabled":               schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -ArchiveEnabled parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
 			"archive_trigger_based_on":      schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ArchiveTriggerBasedOn parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"archive_trigger_in_days":       schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ArchiveTriggerInDays parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"auto_approval_period":          schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AutoApprovalPeriod parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"auto_approval_period":          schema.Int64Attribute{Optional: true, Computed: true, Description: "Maps to the -AutoApprovalPeriod parameter.", PlanModifiers: []planmodifier.Int64{int64planmodifier.UseStateForUnknown()}},
 			"comment":                       schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -Comment parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"compliance_tag_for_next_stage": schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ComplianceTagForNextStage parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"event_type":                    schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -EventType parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"file_plan_property":            schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -FilePlanProperty parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"flow_id":                       schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -FlowId parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"is_record_label":               schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -IsRecordLabel parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace(), stringplanmodifier.UseStateForUnknown()}},
+			"is_record_label":               schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -IsRecordLabel parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.RequiresReplace(), boolplanmodifier.UseStateForUnknown()}},
 			"is_record_unlocked_as_default": schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -IsRecordUnlockedAsDefault parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.RequiresReplace(), boolplanmodifier.UseStateForUnknown()}},
-			"multi_stage_review_property":   schema.StringAttribute{Required: true, Description: "Maps to the -MultiStageReviewProperty parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
+			"multi_stage_review_property":   schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -MultiStageReviewProperty parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"name":                          schema.StringAttribute{Required: true, Description: "Maps to the -Name parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
 			"notes":                         schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -Notes parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"regulatory":                    schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -Regulatory parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.RequiresReplace(), boolplanmodifier.UseStateForUnknown()}},
-			"retention_action":              schema.StringAttribute{Required: true, Description: "Maps to the -RetentionAction parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
-			"retention_duration":            schema.StringAttribute{Required: true, Description: "Maps to the -RetentionDuration parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
-			"retention_type":                schema.StringAttribute{Required: true, Description: "Maps to the -RetentionType parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
+			"retention_action":              schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -RetentionAction parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace(), stringplanmodifier.UseStateForUnknown()}},
+			"retention_duration":            schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -RetentionDuration parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"retention_type":                schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -RetentionType parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace(), stringplanmodifier.UseStateForUnknown()}},
 			"reviewer_email":                schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -ReviewerEmail parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
 			"web_hook_url":                  schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -WebHookUrl parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 		},
@@ -106,44 +107,89 @@ func (r *complianceTagResource) Create(ctx context.Context, req resource.CreateR
 		return
 	}
 
-	p := purview.NewComplianceTagParams{
-		ArchiveEnabled:            plan.ArchiveEnabled.ValueBool(),
-		ArchiveTriggerBasedOn:     plan.ArchiveTriggerBasedOn.ValueString(),
-		Comment:                   plan.Comment.ValueString(),
-		ComplianceTagForNextStage: plan.ComplianceTagForNextStage.ValueString(),
-		FilePlanProperty:          plan.FilePlanProperty.ValueString(),
-		IsRecordUnlockedAsDefault: plan.IsRecordUnlockedAsDefault.ValueBool(),
-		MultiStageReviewProperty:  plan.MultiStageReviewProperty.ValueString(),
-		Name:                      plan.Name.ValueString(),
-		Notes:                     plan.Notes.ValueString(),
-		Regulatory:                plan.Regulatory.ValueBool(),
-		RetentionAction:           plan.RetentionAction.ValueString(),
-		RetentionType:             plan.RetentionType.ValueString(),
-		ReviewerEmail:             toStringSlice(ctx, plan.ReviewerEmail, &resp.Diagnostics),
-		WebHookUrl:                plan.WebHookUrl.ValueString(),
+	var config complianceTagModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
+	if resp.Diagnostics.HasError() {
+		return
 	}
-	if v := plan.ArchiveTriggerInDays.ValueString(); v != "" {
-		p.ArchiveTriggerInDays = v
+
+	p := purview.NewComplianceTagParams{}
+	if !config.ArchiveEnabled.IsNull() {
+		if !plan.ArchiveEnabled.IsUnknown() {
+			p.ArchiveEnabled = plan.ArchiveEnabled.ValueBoolPointer()
+		}
 	}
-	if v := plan.AutoApprovalPeriod.ValueString(); v != "" {
-		p.AutoApprovalPeriod = v
+	if !config.ArchiveTriggerBasedOn.IsNull() {
+		p.ArchiveTriggerBasedOn = plan.ArchiveTriggerBasedOn.ValueString()
 	}
-	if v := plan.EventType.ValueString(); v != "" {
-		p.EventType = v
+	if v := config.ArchiveTriggerInDays.ValueString(); v != "" {
+		p.ArchiveTriggerInDays = objectParam(v)
 	}
-	if v := plan.FlowId.ValueString(); v != "" {
-		p.FlowId = v
+	if !config.AutoApprovalPeriod.IsNull() {
+		if !plan.AutoApprovalPeriod.IsUnknown() {
+			p.AutoApprovalPeriod = plan.AutoApprovalPeriod.ValueInt64Pointer()
+		}
 	}
-	if v := plan.IsRecordLabel.ValueString(); v != "" {
-		p.IsRecordLabel = v
+	if !config.Comment.IsNull() {
+		p.Comment = plan.Comment.ValueString()
 	}
-	if v := plan.RetentionDuration.ValueString(); v != "" {
-		p.RetentionDuration = v
+	if !config.ComplianceTagForNextStage.IsNull() {
+		p.ComplianceTagForNextStage = plan.ComplianceTagForNextStage.ValueString()
+	}
+	if v := config.EventType.ValueString(); v != "" {
+		p.EventType = objectParam(v)
+	}
+	if !config.FilePlanProperty.IsNull() {
+		p.FilePlanProperty = plan.FilePlanProperty.ValueString()
+	}
+	if v := config.FlowId.ValueString(); v != "" {
+		p.FlowId = objectParam(v)
+	}
+	if !config.IsRecordLabel.IsNull() {
+		if !plan.IsRecordLabel.IsUnknown() {
+			p.IsRecordLabel = plan.IsRecordLabel.ValueBoolPointer()
+		}
+	}
+	if !config.IsRecordUnlockedAsDefault.IsNull() {
+		if !plan.IsRecordUnlockedAsDefault.IsUnknown() {
+			p.IsRecordUnlockedAsDefault = plan.IsRecordUnlockedAsDefault.ValueBoolPointer()
+		}
+	}
+	if !config.MultiStageReviewProperty.IsNull() {
+		p.MultiStageReviewProperty = plan.MultiStageReviewProperty.ValueString()
+	}
+	if !config.Name.IsNull() {
+		p.Name = plan.Name.ValueString()
+	}
+	if !config.Notes.IsNull() {
+		p.Notes = plan.Notes.ValueString()
+	}
+	if !config.Regulatory.IsNull() {
+		if !plan.Regulatory.IsUnknown() {
+			p.Regulatory = plan.Regulatory.ValueBoolPointer()
+		}
+	}
+	if !config.RetentionAction.IsNull() {
+		p.RetentionAction = plan.RetentionAction.ValueString()
+	}
+	if v := config.RetentionDuration.ValueString(); v != "" {
+		p.RetentionDuration = objectParam(v)
+	}
+	if !config.RetentionType.IsNull() {
+		p.RetentionType = plan.RetentionType.ValueString()
+	}
+	if !config.ReviewerEmail.IsNull() {
+		if v := toStringSlice(ctx, plan.ReviewerEmail, &resp.Diagnostics); len(v) > 0 {
+			p.ReviewerEmail = v
+		}
+	}
+	if !config.WebHookUrl.IsNull() {
+		p.WebHookUrl = plan.WebHookUrl.ValueString()
 	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	res, err := r.client.SCC.NewComplianceTag(ctx, p)
+	res, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.NewComplianceTag, p, isNotFound)
 	if err != nil {
 		resp.Diagnostics.AddError("New-ComplianceTag failed", err.Error())
 		return
@@ -190,47 +236,95 @@ func (r *complianceTagResource) Update(ctx context.Context, req resource.UpdateR
 	id := r.identityOf(state)
 	sp := purview.SetComplianceTagParams{}
 	sp.Identity = id
-	sp.ArchiveEnabled = plan.ArchiveEnabled.ValueBool()
-	sp.ArchiveTriggerBasedOn = plan.ArchiveTriggerBasedOn.ValueString()
-	if v := plan.ArchiveTriggerInDays.ValueString(); v != "" {
-		sp.ArchiveTriggerInDays = v
+	if !plan.ArchiveEnabled.Equal(state.ArchiveEnabled) {
+		if !plan.ArchiveEnabled.IsUnknown() {
+			sp.ArchiveEnabled = plan.ArchiveEnabled.ValueBoolPointer()
+		}
 	}
-	if v := plan.AutoApprovalPeriod.ValueString(); v != "" {
-		sp.AutoApprovalPeriod = v
+	if !plan.ArchiveTriggerBasedOn.Equal(state.ArchiveTriggerBasedOn) {
+		sp.ArchiveTriggerBasedOn = plan.ArchiveTriggerBasedOn.ValueString()
 	}
-	sp.Comment = plan.Comment.ValueString()
-	sp.ComplianceTagForNextStage = plan.ComplianceTagForNextStage.ValueString()
-	if v := plan.EventType.ValueString(); v != "" {
-		sp.EventType = v
+	if !plan.ArchiveTriggerInDays.Equal(state.ArchiveTriggerInDays) {
+		if v := plan.ArchiveTriggerInDays.ValueString(); v != "" {
+			sp.ArchiveTriggerInDays = objectParam(v)
+		}
 	}
-	sp.FilePlanProperty = plan.FilePlanProperty.ValueString()
-	if v := plan.FlowId.ValueString(); v != "" {
-		sp.FlowId = v
+	if !plan.AutoApprovalPeriod.Equal(state.AutoApprovalPeriod) {
+		if !plan.AutoApprovalPeriod.IsUnknown() {
+			sp.AutoApprovalPeriod = plan.AutoApprovalPeriod.ValueInt64Pointer()
+		}
 	}
-	sp.Notes = plan.Notes.ValueString()
-	sp.ReviewerEmail = toStringSlice(ctx, plan.ReviewerEmail, &resp.Diagnostics)
-	sp.WebHookUrl = plan.WebHookUrl.ValueString()
+	if !plan.Comment.Equal(state.Comment) {
+		sp.Comment = plan.Comment.ValueString()
+	}
+	if !plan.ComplianceTagForNextStage.Equal(state.ComplianceTagForNextStage) {
+		sp.ComplianceTagForNextStage = plan.ComplianceTagForNextStage.ValueString()
+	}
+	if !plan.EventType.Equal(state.EventType) {
+		if v := plan.EventType.ValueString(); v != "" {
+			sp.EventType = objectParam(v)
+		}
+	}
+	if !plan.FilePlanProperty.Equal(state.FilePlanProperty) {
+		sp.FilePlanProperty = plan.FilePlanProperty.ValueString()
+	}
+	if !plan.FlowId.Equal(state.FlowId) {
+		if v := plan.FlowId.ValueString(); v != "" {
+			sp.FlowId = objectParam(v)
+		}
+	}
+	if !plan.MultiStageReviewProperty.Equal(state.MultiStageReviewProperty) {
+		sp.MultiStageReviewProperty = plan.MultiStageReviewProperty.ValueString()
+	}
+	if !plan.Notes.Equal(state.Notes) {
+		sp.Notes = plan.Notes.ValueString()
+	}
+	if !plan.RetentionDuration.Equal(state.RetentionDuration) {
+		if v := plan.RetentionDuration.ValueString(); v != "" {
+			sp.RetentionDuration = objectParam(v)
+		}
+	}
+	if !plan.ReviewerEmail.Equal(state.ReviewerEmail) {
+		if !plan.ReviewerEmail.IsNull() && !plan.ReviewerEmail.IsUnknown() {
+			sp.ReviewerEmail = append([]string{}, toStringSlice(ctx, plan.ReviewerEmail, &resp.Diagnostics)...)
+		}
+	}
+	if !plan.WebHookUrl.Equal(state.WebHookUrl) {
+		sp.WebHookUrl = plan.WebHookUrl.ValueString()
+	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	if _, err := r.client.SCC.SetComplianceTag(ctx, sp); err != nil {
+	if _, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.SetComplianceTag, sp, isNotFound); err != nil {
 		resp.Diagnostics.AddError("Set-ComplianceTag failed", err.Error())
 		return
 	}
 	cfg := plan
 	reflected := reconcile.ReflectsFields(map[string]types.String{
 		"ArchiveTriggerBasedOn":     cfg.ArchiveTriggerBasedOn,
-		"ArchiveTriggerInDays":      cfg.ArchiveTriggerInDays,
-		"AutoApprovalPeriod":        cfg.AutoApprovalPeriod,
 		"Comment":                   cfg.Comment,
 		"ComplianceTagForNextStage": cfg.ComplianceTagForNextStage,
-		"EventType":                 cfg.EventType,
 		"FilePlanProperty":          cfg.FilePlanProperty,
-		"FlowId":                    cfg.FlowId,
+		"MultiStageReviewProperty":  cfg.MultiStageReviewProperty,
 		"Notes":                     cfg.Notes,
 		"WebHookUrl":                cfg.WebHookUrl,
 	}, getString)
+	if !cfg.ArchiveEnabled.IsUnknown() && !cfg.ArchiveEnabled.IsNull() && !cfg.ArchiveEnabled.Equal(state.ArchiveEnabled) {
+		prev, want := reflected, cfg.ArchiveEnabled.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["ArchiveEnabled"] == nil || getBool(obj, "ArchiveEnabled") == want)
+		}
+	}
+	if !cfg.AutoApprovalPeriod.IsUnknown() && !cfg.AutoApprovalPeriod.IsNull() && !cfg.AutoApprovalPeriod.Equal(state.AutoApprovalPeriod) {
+		prev, want := reflected, cfg.AutoApprovalPeriod.ValueInt64()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["AutoApprovalPeriod"] == nil || getInt(obj, "AutoApprovalPeriod") == want)
+		}
+	}
 	r.refresh(ctx, id, &plan, &resp.Diagnostics, reflected)
+	if !cfg.ID.IsUnknown() && !cfg.ID.IsNull() {
+		plan.ID = cfg.ID
+	}
 	r.reconcileState(&cfg, &plan)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
@@ -292,21 +386,21 @@ func readComplianceTag(ctx context.Context, obj map[string]any, m *complianceTag
 	m.Identity = types.StringValue(firstNonEmptyStr(getString(obj, "Identity"), getString(obj, "Guid"), getString(obj, "Name")))
 	m.ArchiveEnabled = types.BoolValue(getBool(obj, "ArchiveEnabled"))
 	m.ArchiveTriggerBasedOn = types.StringValue(getString(obj, "ArchiveTriggerBasedOn"))
-	m.ArchiveTriggerInDays = types.StringValue(getString(obj, "ArchiveTriggerInDays"))
-	m.AutoApprovalPeriod = types.StringValue(getString(obj, "AutoApprovalPeriod"))
+	m.ArchiveTriggerInDays = types.StringValue(getObjectJSON(obj, "ArchiveTriggerInDays"))
+	m.AutoApprovalPeriod = types.Int64Value(getInt(obj, "AutoApprovalPeriod"))
 	m.Comment = types.StringValue(getString(obj, "Comment"))
 	m.ComplianceTagForNextStage = types.StringValue(getString(obj, "ComplianceTagForNextStage"))
-	m.EventType = types.StringValue(getString(obj, "EventType"))
+	m.EventType = types.StringValue(getObjectJSON(obj, "EventType"))
 	m.FilePlanProperty = types.StringValue(getString(obj, "FilePlanProperty"))
-	m.FlowId = types.StringValue(getString(obj, "FlowId"))
-	m.IsRecordLabel = types.StringValue(getString(obj, "IsRecordLabel"))
+	m.FlowId = types.StringValue(getObjectJSON(obj, "FlowId"))
+	m.IsRecordLabel = types.BoolValue(getBool(obj, "IsRecordLabel"))
 	m.IsRecordUnlockedAsDefault = types.BoolValue(getBool(obj, "IsRecordUnlockedAsDefault"))
 	m.MultiStageReviewProperty = types.StringValue(getString(obj, "MultiStageReviewProperty"))
 	m.Name = types.StringValue(getString(obj, "Name"))
 	m.Notes = types.StringValue(getString(obj, "Notes"))
 	m.Regulatory = types.BoolValue(getBool(obj, "Regulatory"))
 	m.RetentionAction = types.StringValue(getString(obj, "RetentionAction"))
-	m.RetentionDuration = types.StringValue(getString(obj, "RetentionDuration"))
+	m.RetentionDuration = types.StringValue(getObjectJSON(obj, "RetentionDuration"))
 	m.RetentionType = types.StringValue(getString(obj, "RetentionType"))
 	m.ReviewerEmail = stringSetValue(ctx, getStringSlice(obj, "ReviewerEmail"))
 	m.WebHookUrl = types.StringValue(getString(obj, "WebHookUrl"))
@@ -317,13 +411,13 @@ func (r *complianceTagResource) reconcileState(cfg, read *complianceTagModel) {
 	read.ArchiveEnabled = reconcile.KeepBool(cfg.ArchiveEnabled, read.ArchiveEnabled)
 	read.ArchiveTriggerBasedOn = reconcile.KeepStr(cfg.ArchiveTriggerBasedOn, read.ArchiveTriggerBasedOn)
 	read.ArchiveTriggerInDays = reconcile.KeepStr(cfg.ArchiveTriggerInDays, read.ArchiveTriggerInDays)
-	read.AutoApprovalPeriod = reconcile.KeepStr(cfg.AutoApprovalPeriod, read.AutoApprovalPeriod)
+	read.AutoApprovalPeriod = reconcile.KeepInt64(cfg.AutoApprovalPeriod, read.AutoApprovalPeriod)
 	read.Comment = reconcile.KeepStr(cfg.Comment, read.Comment)
 	read.ComplianceTagForNextStage = reconcile.KeepStr(cfg.ComplianceTagForNextStage, read.ComplianceTagForNextStage)
 	read.EventType = reconcile.KeepStr(cfg.EventType, read.EventType)
 	read.FilePlanProperty = reconcile.KeepStr(cfg.FilePlanProperty, read.FilePlanProperty)
 	read.FlowId = reconcile.KeepStr(cfg.FlowId, read.FlowId)
-	read.IsRecordLabel = reconcile.KeepStr(cfg.IsRecordLabel, read.IsRecordLabel)
+	read.IsRecordLabel = reconcile.KeepBool(cfg.IsRecordLabel, read.IsRecordLabel)
 	read.IsRecordUnlockedAsDefault = reconcile.KeepBool(cfg.IsRecordUnlockedAsDefault, read.IsRecordUnlockedAsDefault)
 	read.MultiStageReviewProperty = reconcile.KeepStr(cfg.MultiStageReviewProperty, read.MultiStageReviewProperty)
 	read.Name = reconcile.KeepStr(cfg.Name, read.Name)

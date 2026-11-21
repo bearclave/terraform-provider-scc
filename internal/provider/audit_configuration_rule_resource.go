@@ -47,8 +47,8 @@ func (r *auditConfigurationRuleResource) Schema(_ context.Context, _ resource.Sc
 		Description: "Manages the AuditConfigurationRule object via New-AuditConfigurationRule / Get-AuditConfigurationRule / Set-AuditConfigurationRule / Remove-AuditConfigurationRule.",
 		Attributes: map[string]schema.Attribute{
 			"id":              schema.StringAttribute{Computed: true, Description: "Object identifier (GUID).", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"identity":        schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets."},
-			"audit_operation": schema.StringAttribute{Required: true, Description: "Maps to the -AuditOperation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
+			"identity":        schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"audit_operation": schema.StringAttribute{Required: true, Description: "Maps to the -AuditOperation parameter."},
 			"workload":        schema.StringAttribute{Required: true, Description: "Maps to the -Workload parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
 		},
 	}
@@ -68,17 +68,23 @@ func (r *auditConfigurationRuleResource) Create(ctx context.Context, req resourc
 		return
 	}
 
-	p := purview.NewAuditConfigurationRuleParams{}
-	if v := plan.AuditOperation.ValueString(); v != "" {
-		p.AuditOperation = v
+	var config auditConfigurationRuleModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
+	if resp.Diagnostics.HasError() {
+		return
 	}
-	if v := plan.Workload.ValueString(); v != "" {
-		p.Workload = v
+
+	p := purview.NewAuditConfigurationRuleParams{}
+	if v := config.AuditOperation.ValueString(); v != "" {
+		p.AuditOperation = objectParam(v)
+	}
+	if v := config.Workload.ValueString(); v != "" {
+		p.Workload = objectParam(v)
 	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	res, err := r.client.SCC.NewAuditConfigurationRule(ctx, p)
+	res, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.NewAuditConfigurationRule, p, isNotFound)
 	if err != nil {
 		resp.Diagnostics.AddError("New-AuditConfigurationRule failed", err.Error())
 		return
@@ -125,16 +131,24 @@ func (r *auditConfigurationRuleResource) Update(ctx context.Context, req resourc
 	id := r.identityOf(state)
 	sp := purview.SetAuditConfigurationRuleParams{}
 	sp.Identity = id
+	if !plan.AuditOperation.Equal(state.AuditOperation) {
+		if v := plan.AuditOperation.ValueString(); v != "" {
+			sp.AuditOperation = objectParam(v)
+		}
+	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	if _, err := r.client.SCC.SetAuditConfigurationRule(ctx, sp); err != nil {
+	if _, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.SetAuditConfigurationRule, sp, isNotFound); err != nil {
 		resp.Diagnostics.AddError("Set-AuditConfigurationRule failed", err.Error())
 		return
 	}
 	cfg := plan
 	reflected := reconcile.ReflectsFields(map[string]types.String{}, getString)
 	r.refresh(ctx, id, &plan, &resp.Diagnostics, reflected)
+	if !cfg.ID.IsUnknown() && !cfg.ID.IsNull() {
+		plan.ID = cfg.ID
+	}
 	r.reconcileState(&cfg, &plan)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
@@ -194,8 +208,8 @@ func (r *auditConfigurationRuleResource) refresh(ctx context.Context, identity s
 func readAuditConfigurationRule(ctx context.Context, obj map[string]any, m *auditConfigurationRuleModel) {
 	m.ID = types.StringValue(firstNonEmptyStr(getString(obj, "Guid"), getString(obj, "Id"), getString(obj, "Identity")))
 	m.Identity = types.StringValue(firstNonEmptyStr(getString(obj, "Identity"), getString(obj, "Guid"), getString(obj, "Name")))
-	m.AuditOperation = types.StringValue(getString(obj, "AuditOperation"))
-	m.Workload = types.StringValue(getString(obj, "Workload"))
+	m.AuditOperation = types.StringValue(getObjectJSON(obj, "AuditOperation"))
+	m.Workload = types.StringValue(getObjectJSON(obj, "Workload"))
 	_ = ctx
 }
 

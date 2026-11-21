@@ -53,7 +53,7 @@ func (r *caseHoldRuleResource) Schema(_ context.Context, _ resource.SchemaReques
 		Description: "Manages the CaseHoldRule object via New-CaseHoldRule / Get-CaseHoldRule / Set-CaseHoldRule / Remove-CaseHoldRule.",
 		Attributes: map[string]schema.Attribute{
 			"id":                  schema.StringAttribute{Computed: true, Description: "Object identifier (GUID).", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"identity":            schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets."},
+			"identity":            schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"comment":             schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -Comment parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"content_date_from":   schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ContentDateFrom parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"content_date_to":     schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ContentDateTo parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
@@ -79,25 +79,40 @@ func (r *caseHoldRuleResource) Create(ctx context.Context, req resource.CreateRe
 		return
 	}
 
-	p := purview.NewCaseHoldRuleParams{
-		Comment:           plan.Comment.ValueString(),
-		ContentMatchQuery: plan.ContentMatchQuery.ValueString(),
-		Disabled:          plan.Disabled.ValueBool(),
-		Name:              plan.Name.ValueString(),
+	var config caseHoldRuleModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
+	if resp.Diagnostics.HasError() {
+		return
 	}
-	if v := plan.ContentDateFrom.ValueString(); v != "" {
-		p.ContentDateFrom = v
+
+	p := purview.NewCaseHoldRuleParams{}
+	if !config.Comment.IsNull() {
+		p.Comment = plan.Comment.ValueString()
 	}
-	if v := plan.ContentDateTo.ValueString(); v != "" {
-		p.ContentDateTo = v
+	if v := config.ContentDateFrom.ValueString(); v != "" {
+		p.ContentDateFrom = objectParam(v)
 	}
-	if v := plan.Policy.ValueString(); v != "" {
-		p.Policy = v
+	if v := config.ContentDateTo.ValueString(); v != "" {
+		p.ContentDateTo = objectParam(v)
+	}
+	if !config.ContentMatchQuery.IsNull() {
+		p.ContentMatchQuery = plan.ContentMatchQuery.ValueString()
+	}
+	if !config.Disabled.IsNull() {
+		if !plan.Disabled.IsUnknown() {
+			p.Disabled = plan.Disabled.ValueBoolPointer()
+		}
+	}
+	if !config.Name.IsNull() {
+		p.Name = plan.Name.ValueString()
+	}
+	if v := config.Policy.ValueString(); v != "" {
+		p.Policy = objectParam(v)
 	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	res, err := r.client.SCC.NewCaseHoldRule(ctx, p)
+	res, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.NewCaseHoldRule, p, isNotFound)
 	if err != nil {
 		resp.Diagnostics.AddError("New-CaseHoldRule failed", err.Error())
 		return
@@ -144,30 +159,49 @@ func (r *caseHoldRuleResource) Update(ctx context.Context, req resource.UpdateRe
 	id := r.identityOf(state)
 	sp := purview.SetCaseHoldRuleParams{}
 	sp.Identity = id
-	sp.Comment = plan.Comment.ValueString()
-	if v := plan.ContentDateFrom.ValueString(); v != "" {
-		sp.ContentDateFrom = v
+	if !plan.Comment.Equal(state.Comment) {
+		sp.Comment = plan.Comment.ValueString()
 	}
-	if v := plan.ContentDateTo.ValueString(); v != "" {
-		sp.ContentDateTo = v
+	if !plan.ContentDateFrom.Equal(state.ContentDateFrom) {
+		if v := plan.ContentDateFrom.ValueString(); v != "" {
+			sp.ContentDateFrom = objectParam(v)
+		}
 	}
-	sp.ContentMatchQuery = plan.ContentMatchQuery.ValueString()
-	sp.Disabled = plan.Disabled.ValueBool()
+	if !plan.ContentDateTo.Equal(state.ContentDateTo) {
+		if v := plan.ContentDateTo.ValueString(); v != "" {
+			sp.ContentDateTo = objectParam(v)
+		}
+	}
+	if !plan.ContentMatchQuery.Equal(state.ContentMatchQuery) {
+		sp.ContentMatchQuery = plan.ContentMatchQuery.ValueString()
+	}
+	if !plan.Disabled.Equal(state.Disabled) {
+		if !plan.Disabled.IsUnknown() {
+			sp.Disabled = plan.Disabled.ValueBoolPointer()
+		}
+	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	if _, err := r.client.SCC.SetCaseHoldRule(ctx, sp); err != nil {
+	if _, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.SetCaseHoldRule, sp, isNotFound); err != nil {
 		resp.Diagnostics.AddError("Set-CaseHoldRule failed", err.Error())
 		return
 	}
 	cfg := plan
 	reflected := reconcile.ReflectsFields(map[string]types.String{
 		"Comment":           cfg.Comment,
-		"ContentDateFrom":   cfg.ContentDateFrom,
-		"ContentDateTo":     cfg.ContentDateTo,
 		"ContentMatchQuery": cfg.ContentMatchQuery,
 	}, getString)
+	if !cfg.Disabled.IsUnknown() && !cfg.Disabled.IsNull() && !cfg.Disabled.Equal(state.Disabled) {
+		prev, want := reflected, cfg.Disabled.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["Disabled"] == nil || getBool(obj, "Disabled") == want)
+		}
+	}
 	r.refresh(ctx, id, &plan, &resp.Diagnostics, reflected)
+	if !cfg.ID.IsUnknown() && !cfg.ID.IsNull() {
+		plan.ID = cfg.ID
+	}
 	r.reconcileState(&cfg, &plan)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
@@ -228,12 +262,12 @@ func readCaseHoldRule(ctx context.Context, obj map[string]any, m *caseHoldRuleMo
 	m.ID = types.StringValue(firstNonEmptyStr(getString(obj, "Guid"), getString(obj, "Id"), getString(obj, "Identity")))
 	m.Identity = types.StringValue(firstNonEmptyStr(getString(obj, "Identity"), getString(obj, "Guid"), getString(obj, "Name")))
 	m.Comment = types.StringValue(getString(obj, "Comment"))
-	m.ContentDateFrom = types.StringValue(getString(obj, "ContentDateFrom"))
-	m.ContentDateTo = types.StringValue(getString(obj, "ContentDateTo"))
+	m.ContentDateFrom = types.StringValue(getObjectJSON(obj, "ContentDateFrom"))
+	m.ContentDateTo = types.StringValue(getObjectJSON(obj, "ContentDateTo"))
 	m.ContentMatchQuery = types.StringValue(getString(obj, "ContentMatchQuery"))
 	m.Disabled = types.BoolValue(getBool(obj, "Disabled"))
 	m.Name = types.StringValue(getString(obj, "Name"))
-	m.Policy = types.StringValue(getString(obj, "Policy"))
+	m.Policy = types.StringValue(getObjectJSON(obj, "Policy"))
 	_ = ctx
 }
 

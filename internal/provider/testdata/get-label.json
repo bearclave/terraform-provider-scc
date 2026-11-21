@@ -1,0 +1,37 @@
+{
+ "@odata.context": "https://ps.compliance.protection.outlook.com/adminapi/beta/00000000-0000-0000-0000-000000000000/$metadata#Label",
+ "value": [
+  {
+   "Identity": "6f0f0ad0-8c6e-4a39-bd0c-8b6a0f4f7d11",
+   "Guid": "6f0f0ad0-8c6e-4a39-bd0c-8b6a0f4f7d11",
+   "ImmutableId": "6f0f0ad0-8c6e-4a39-bd0c-8b6a0f4f7d11",
+   "Name": "Confidential",
+   "DisplayName": "Confidential",
+   "Tooltip": "Business data that must not be shared outside the company.",
+   "Comment": "",
+   "ContentType": "File, Email",
+   "Priority": 3,
+   "ParentId": null,
+   "IsParent": false,
+   "Disabled": false,
+   "Mode": "Enforce",
+   "Workload": "Exchange, SharePoint, OneDriveForBusiness",
+   "LabelActions": [
+    "{\"Type\":\"encrypt\",\"SubType\":null,\"Settings\":[{\"Key\":\"disabled\",\"Value\":\"false\"},{\"Key\":\"protectiontype\",\"Value\":\"template\"},{\"Key\":\"templatearchived\",\"Value\":\"False\"},{\"Key\":\"contentexpiredondateindaysornever\",\"Value\":\"Never\"},{\"Key\":\"offlineaccessdays\",\"Value\":\"-1\"},{\"Key\":\"rightsdefinitions\",\"Value\":\"[{\\\"Identity\\\":\\\"AllStaff@contoso.com\\\",\\\"Rights\\\":\\\"VIEW,VIEWRIGHTSDATA,DOCEDIT,EDIT,PRINT\\\"},{\\\"Identity\\\":\\\"contoso.com\\\",\\\"Rights\\\":\\\"VIEW\\\"}]\"}]}",
+    "{\"Type\":\"applycontentmarking\",\"SubType\":\"header\",\"Settings\":[{\"Key\":\"fontsize\",\"Value\":\"10\"},{\"Key\":\"placement\",\"Value\":\"Header\"},{\"Key\":\"text\",\"Value\":\"CONFIDENTIAL\"},{\"Key\":\"fontcolor\",\"Value\":\"#000000\"},{\"Key\":\"margin\",\"Value\":\"5\"},{\"Key\":\"alignment\",\"Value\":\"Center\"},{\"Key\":\"disabled\",\"Value\":\"false\"}]}",
+    "{\"Type\":\"applycontentmarking\",\"SubType\":\"footer\",\"Settings\":[{\"Key\":\"fontsize\",\"Value\":\"8\"},{\"Key\":\"placement\",\"Value\":\"Footer\"},{\"Key\":\"text\",\"Value\":\"Contoso - Confidential\"},{\"Key\":\"fontcolor\",\"Value\":\"#FF0000\"},{\"Key\":\"margin\",\"Value\":\"5\"},{\"Key\":\"alignment\",\"Value\":\"Left\"},{\"Key\":\"disabled\",\"Value\":\"false\"}]}",
+    "{\"Type\":\"applywatermarking\",\"SubType\":null,\"Settings\":[{\"Key\":\"fontsize\",\"Value\":\"10\"},{\"Key\":\"layout\",\"Value\":\"Diagonal\"},{\"Key\":\"fontcolor\",\"Value\":\"#000000\"},{\"Key\":\"disabled\",\"Value\":\"true\"},{\"Key\":\"text\",\"Value\":\"DRAFT\"}]}"
+   ],
+   "Settings": [
+    "[isparent, False]",
+    "[color, #40e0d0]",
+    "[contenttype, File, Email]",
+    "[tooltip, Business data that must not be shared outside the company.]"
+   ],
+   "LocaleSettings": [
+    "{\"localeKey\":\"displayName\",\"Settings\":[{\"Key\":\"de-de\",\"Value\":\"Vertraulich\"}]}"
+   ],
+   "Conditions": null
+  }
+ ]
+}

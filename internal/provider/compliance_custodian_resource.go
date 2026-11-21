@@ -58,12 +58,12 @@ func (r *complianceCustodianResource) Schema(_ context.Context, _ resource.Schem
 		Description: "Manages the ComplianceCustodian object via New-ComplianceCustodian / Get-ComplianceCustodian / Set-ComplianceCustodian / Remove-ComplianceCustodian.",
 		Attributes: map[string]schema.Attribute{
 			"id":                            schema.StringAttribute{Computed: true, Description: "Object identifier (GUID).", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"identity":                      schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets."},
+			"identity":                      schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"add_exchange_location":         schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -AddExchangeLocation parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
 			"add_public_folder_location":    schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -AddPublicFolderLocation parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
 			"add_share_point_location":      schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -AddSharePointLocation parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
 			"case":                          schema.StringAttribute{Required: true, Description: "Maps to the -Case parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
-			"contact_email":                 schema.StringAttribute{Required: true, Description: "Maps to the -ContactEmail parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
+			"contact_email":                 schema.StringAttribute{Required: true, Description: "Maps to the -ContactEmail parameter."},
 			"exchange_location":             schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -ExchangeLocation parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
 			"name":                          schema.StringAttribute{Required: true, Description: "Maps to the -Name parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
 			"public_folder_location":        schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -PublicFolderLocation parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
@@ -89,18 +89,41 @@ func (r *complianceCustodianResource) Create(ctx context.Context, req resource.C
 		return
 	}
 
-	p := purview.NewComplianceCustodianParams{
-		Case:                 plan.Case.ValueString(),
-		ContactEmail:         plan.ContactEmail.ValueString(),
-		ExchangeLocation:     toStringSlice(ctx, plan.ExchangeLocation, &resp.Diagnostics),
-		Name:                 plan.Name.ValueString(),
-		PublicFolderLocation: toStringSlice(ctx, plan.PublicFolderLocation, &resp.Diagnostics),
-		SharePointLocation:   toStringSlice(ctx, plan.SharePointLocation, &resp.Diagnostics),
+	var config complianceCustodianModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	p := purview.NewComplianceCustodianParams{}
+	if !config.Case.IsNull() {
+		p.Case = plan.Case.ValueString()
+	}
+	if !config.ContactEmail.IsNull() {
+		p.ContactEmail = plan.ContactEmail.ValueString()
+	}
+	if !config.ExchangeLocation.IsNull() {
+		if v := toStringSlice(ctx, plan.ExchangeLocation, &resp.Diagnostics); len(v) > 0 {
+			p.ExchangeLocation = v
+		}
+	}
+	if !config.Name.IsNull() {
+		p.Name = plan.Name.ValueString()
+	}
+	if !config.PublicFolderLocation.IsNull() {
+		if v := toStringSlice(ctx, plan.PublicFolderLocation, &resp.Diagnostics); len(v) > 0 {
+			p.PublicFolderLocation = v
+		}
+	}
+	if !config.SharePointLocation.IsNull() {
+		if v := toStringSlice(ctx, plan.SharePointLocation, &resp.Diagnostics); len(v) > 0 {
+			p.SharePointLocation = v
+		}
 	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	res, err := r.client.SCC.NewComplianceCustodian(ctx, p)
+	res, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.NewComplianceCustodian, p, isNotFound)
 	if err != nil {
 		resp.Diagnostics.AddError("New-ComplianceCustodian failed", err.Error())
 		return
@@ -147,25 +170,69 @@ func (r *complianceCustodianResource) Update(ctx context.Context, req resource.U
 	id := r.identityOf(state)
 	sp := purview.SetComplianceCustodianParams{}
 	sp.Identity = id
-	sp.AddExchangeLocation = toStringSlice(ctx, plan.AddExchangeLocation, &resp.Diagnostics)
-	sp.AddPublicFolderLocation = toStringSlice(ctx, plan.AddPublicFolderLocation, &resp.Diagnostics)
-	sp.AddSharePointLocation = toStringSlice(ctx, plan.AddSharePointLocation, &resp.Diagnostics)
-	sp.ExchangeLocation = toStringSlice(ctx, plan.ExchangeLocation, &resp.Diagnostics)
-	sp.PublicFolderLocation = toStringSlice(ctx, plan.PublicFolderLocation, &resp.Diagnostics)
-	sp.RemoveExchangeLocation = toStringSlice(ctx, plan.RemoveExchangeLocation, &resp.Diagnostics)
-	sp.RemovePublicFolderLocation = toStringSlice(ctx, plan.RemovePublicFolderLocation, &resp.Diagnostics)
-	sp.RemoveSharePointLocation = toStringSlice(ctx, plan.RemoveSharePointLocation, &resp.Diagnostics)
-	sp.SharePointLocation = toStringSlice(ctx, plan.SharePointLocation, &resp.Diagnostics)
+	if !plan.AddExchangeLocation.Equal(state.AddExchangeLocation) {
+		if !plan.AddExchangeLocation.IsNull() && !plan.AddExchangeLocation.IsUnknown() {
+			sp.AddExchangeLocation = append([]string{}, toStringSlice(ctx, plan.AddExchangeLocation, &resp.Diagnostics)...)
+		}
+	}
+	if !plan.AddPublicFolderLocation.Equal(state.AddPublicFolderLocation) {
+		if !plan.AddPublicFolderLocation.IsNull() && !plan.AddPublicFolderLocation.IsUnknown() {
+			sp.AddPublicFolderLocation = append([]string{}, toStringSlice(ctx, plan.AddPublicFolderLocation, &resp.Diagnostics)...)
+		}
+	}
+	if !plan.AddSharePointLocation.Equal(state.AddSharePointLocation) {
+		if !plan.AddSharePointLocation.IsNull() && !plan.AddSharePointLocation.IsUnknown() {
+			sp.AddSharePointLocation = append([]string{}, toStringSlice(ctx, plan.AddSharePointLocation, &resp.Diagnostics)...)
+		}
+	}
+	if !plan.ContactEmail.Equal(state.ContactEmail) {
+		sp.ContactEmail = plan.ContactEmail.ValueString()
+	}
+	if !plan.ExchangeLocation.Equal(state.ExchangeLocation) {
+		if !plan.ExchangeLocation.IsNull() && !plan.ExchangeLocation.IsUnknown() {
+			sp.ExchangeLocation = append([]string{}, toStringSlice(ctx, plan.ExchangeLocation, &resp.Diagnostics)...)
+		}
+	}
+	if !plan.PublicFolderLocation.Equal(state.PublicFolderLocation) {
+		if !plan.PublicFolderLocation.IsNull() && !plan.PublicFolderLocation.IsUnknown() {
+			sp.PublicFolderLocation = append([]string{}, toStringSlice(ctx, plan.PublicFolderLocation, &resp.Diagnostics)...)
+		}
+	}
+	if !plan.RemoveExchangeLocation.Equal(state.RemoveExchangeLocation) {
+		if !plan.RemoveExchangeLocation.IsNull() && !plan.RemoveExchangeLocation.IsUnknown() {
+			sp.RemoveExchangeLocation = append([]string{}, toStringSlice(ctx, plan.RemoveExchangeLocation, &resp.Diagnostics)...)
+		}
+	}
+	if !plan.RemovePublicFolderLocation.Equal(state.RemovePublicFolderLocation) {
+		if !plan.RemovePublicFolderLocation.IsNull() && !plan.RemovePublicFolderLocation.IsUnknown() {
+			sp.RemovePublicFolderLocation = append([]string{}, toStringSlice(ctx, plan.RemovePublicFolderLocation, &resp.Diagnostics)...)
+		}
+	}
+	if !plan.RemoveSharePointLocation.Equal(state.RemoveSharePointLocation) {
+		if !plan.RemoveSharePointLocation.IsNull() && !plan.RemoveSharePointLocation.IsUnknown() {
+			sp.RemoveSharePointLocation = append([]string{}, toStringSlice(ctx, plan.RemoveSharePointLocation, &resp.Diagnostics)...)
+		}
+	}
+	if !plan.SharePointLocation.Equal(state.SharePointLocation) {
+		if !plan.SharePointLocation.IsNull() && !plan.SharePointLocation.IsUnknown() {
+			sp.SharePointLocation = append([]string{}, toStringSlice(ctx, plan.SharePointLocation, &resp.Diagnostics)...)
+		}
+	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	if _, err := r.client.SCC.SetComplianceCustodian(ctx, sp); err != nil {
+	if _, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.SetComplianceCustodian, sp, isNotFound); err != nil {
 		resp.Diagnostics.AddError("Set-ComplianceCustodian failed", err.Error())
 		return
 	}
 	cfg := plan
-	reflected := reconcile.ReflectsFields(map[string]types.String{}, getString)
+	reflected := reconcile.ReflectsFields(map[string]types.String{
+		"ContactEmail": cfg.ContactEmail,
+	}, getString)
 	r.refresh(ctx, id, &plan, &resp.Diagnostics, reflected)
+	if !cfg.ID.IsUnknown() && !cfg.ID.IsNull() {
+		plan.ID = cfg.ID
+	}
 	r.reconcileState(&cfg, &plan)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }

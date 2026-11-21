@@ -7,6 +7,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 
 	"github.com/terraprovider/go-exoscc/purview"
 	"github.com/terraprovider/go-msadmin/consistency"
@@ -35,8 +36,8 @@ func (d *deviceTenantRuleDataSource) Schema(_ context.Context, _ datasource.Sche
 			"id":                        schema.StringAttribute{Computed: true, Description: "Object identifier (GUID)."},
 			"identity":                  schema.StringAttribute{Optional: true, Computed: true, Description: "Identity used to look up the object."},
 			"apply_policy_to":           schema.StringAttribute{Computed: true, Description: "Maps to the -ApplyPolicyTo parameter."},
-			"block_unsupported_devices": schema.StringAttribute{Computed: true, Description: "Maps to the -BlockUnsupportedDevices parameter."},
-			"exclusion_list":            schema.StringAttribute{Computed: true, Description: "Maps to the -ExclusionList parameter."},
+			"block_unsupported_devices": schema.BoolAttribute{Computed: true, Description: "Maps to the -BlockUnsupportedDevices parameter."},
+			"exclusion_list":            schema.SetAttribute{ElementType: types.StringType, Computed: true, Description: "Maps to the -ExclusionList parameter."},
 		},
 	}
 }

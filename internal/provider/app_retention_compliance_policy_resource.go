@@ -38,28 +38,28 @@ func NewAppRetentionCompliancePolicyResource() resource.Resource {
 type appRetentionCompliancePolicyModel struct {
 	ID                                 types.String `tfsdk:"id"`
 	Identity                           types.String `tfsdk:"identity"`
-	AdaptiveScopeLocation              types.String `tfsdk:"adaptive_scope_location"`
-	AddAdaptiveScopeLocation           types.String `tfsdk:"add_adaptive_scope_location"`
-	AddExchangeLocation                types.String `tfsdk:"add_exchange_location"`
-	AddExchangeLocationException       types.String `tfsdk:"add_exchange_location_exception"`
-	AddModernGroupLocation             types.String `tfsdk:"add_modern_group_location"`
-	AddModernGroupLocationException    types.String `tfsdk:"add_modern_group_location_exception"`
+	AdaptiveScopeLocation              types.Set    `tfsdk:"adaptive_scope_location"`
+	AddAdaptiveScopeLocation           types.Set    `tfsdk:"add_adaptive_scope_location"`
+	AddExchangeLocation                types.Set    `tfsdk:"add_exchange_location"`
+	AddExchangeLocationException       types.Set    `tfsdk:"add_exchange_location_exception"`
+	AddModernGroupLocation             types.Set    `tfsdk:"add_modern_group_location"`
+	AddModernGroupLocationException    types.Set    `tfsdk:"add_modern_group_location_exception"`
 	Applications                       types.Set    `tfsdk:"applications"`
 	Comment                            types.String `tfsdk:"comment"`
 	DeletedResources                   types.String `tfsdk:"deleted_resources"`
 	Enabled                            types.Bool   `tfsdk:"enabled"`
-	ExchangeLocation                   types.String `tfsdk:"exchange_location"`
-	ExchangeLocationException          types.String `tfsdk:"exchange_location_exception"`
+	ExchangeLocation                   types.Set    `tfsdk:"exchange_location"`
+	ExchangeLocationException          types.Set    `tfsdk:"exchange_location_exception"`
 	Locations                          types.String `tfsdk:"locations"`
-	ModernGroupLocation                types.String `tfsdk:"modern_group_location"`
-	ModernGroupLocationException       types.String `tfsdk:"modern_group_location_exception"`
+	ModernGroupLocation                types.Set    `tfsdk:"modern_group_location"`
+	ModernGroupLocationException       types.Set    `tfsdk:"modern_group_location_exception"`
 	Name                               types.String `tfsdk:"name"`
-	PolicyRBACScopes                   types.String `tfsdk:"policy_rbac_scopes"`
-	RemoveAdaptiveScopeLocation        types.String `tfsdk:"remove_adaptive_scope_location"`
-	RemoveExchangeLocation             types.String `tfsdk:"remove_exchange_location"`
-	RemoveExchangeLocationException    types.String `tfsdk:"remove_exchange_location_exception"`
-	RemoveModernGroupLocation          types.String `tfsdk:"remove_modern_group_location"`
-	RemoveModernGroupLocationException types.String `tfsdk:"remove_modern_group_location_exception"`
+	PolicyRBACScopes                   types.Set    `tfsdk:"policy_rbac_scopes"`
+	RemoveAdaptiveScopeLocation        types.Set    `tfsdk:"remove_adaptive_scope_location"`
+	RemoveExchangeLocation             types.Set    `tfsdk:"remove_exchange_location"`
+	RemoveExchangeLocationException    types.Set    `tfsdk:"remove_exchange_location_exception"`
+	RemoveModernGroupLocation          types.Set    `tfsdk:"remove_modern_group_location"`
+	RemoveModernGroupLocationException types.Set    `tfsdk:"remove_modern_group_location_exception"`
 	RestrictiveRetention               types.Bool   `tfsdk:"restrictive_retention"`
 	RetryDistribution                  types.Bool   `tfsdk:"retry_distribution"`
 }
@@ -73,29 +73,29 @@ func (r *appRetentionCompliancePolicyResource) Schema(_ context.Context, _ resou
 		Description: "Manages the AppRetentionCompliancePolicy object via New-AppRetentionCompliancePolicy / Get-AppRetentionCompliancePolicy / Set-AppRetentionCompliancePolicy / Remove-AppRetentionCompliancePolicy.",
 		Attributes: map[string]schema.Attribute{
 			"id":                                     schema.StringAttribute{Computed: true, Description: "Object identifier (GUID).", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"identity":                               schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets."},
-			"adaptive_scope_location":                schema.StringAttribute{Required: true, Description: "Maps to the -AdaptiveScopeLocation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
-			"add_adaptive_scope_location":            schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AddAdaptiveScopeLocation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"add_exchange_location":                  schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AddExchangeLocation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"add_exchange_location_exception":        schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AddExchangeLocationException parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"add_modern_group_location":              schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AddModernGroupLocation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"add_modern_group_location_exception":    schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AddModernGroupLocationException parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"identity":                               schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"adaptive_scope_location":                schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -AdaptiveScopeLocation parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.RequiresReplace(), setplanmodifier.UseStateForUnknown()}},
+			"add_adaptive_scope_location":            schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -AddAdaptiveScopeLocation parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"add_exchange_location":                  schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -AddExchangeLocation parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"add_exchange_location_exception":        schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -AddExchangeLocationException parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"add_modern_group_location":              schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -AddModernGroupLocation parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"add_modern_group_location_exception":    schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -AddModernGroupLocationException parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
 			"applications":                           schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -Applications parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
 			"comment":                                schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -Comment parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"deleted_resources":                      schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -DeletedResources parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"enabled":                                schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -Enabled parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
-			"exchange_location":                      schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ExchangeLocation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace(), stringplanmodifier.UseStateForUnknown()}},
-			"exchange_location_exception":            schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ExchangeLocationException parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace(), stringplanmodifier.UseStateForUnknown()}},
+			"exchange_location":                      schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -ExchangeLocation parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.RequiresReplace(), setplanmodifier.UseStateForUnknown()}},
+			"exchange_location_exception":            schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -ExchangeLocationException parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.RequiresReplace(), setplanmodifier.UseStateForUnknown()}},
 			"locations":                              schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -Locations parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace(), stringplanmodifier.UseStateForUnknown()}},
-			"modern_group_location":                  schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ModernGroupLocation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace(), stringplanmodifier.UseStateForUnknown()}},
-			"modern_group_location_exception":        schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ModernGroupLocationException parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace(), stringplanmodifier.UseStateForUnknown()}},
+			"modern_group_location":                  schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -ModernGroupLocation parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.RequiresReplace(), setplanmodifier.UseStateForUnknown()}},
+			"modern_group_location_exception":        schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -ModernGroupLocationException parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.RequiresReplace(), setplanmodifier.UseStateForUnknown()}},
 			"name":                                   schema.StringAttribute{Required: true, Description: "Maps to the -Name parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
-			"policy_rbac_scopes":                     schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -PolicyRBACScopes parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"remove_adaptive_scope_location":         schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -RemoveAdaptiveScopeLocation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"remove_exchange_location":               schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -RemoveExchangeLocation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"remove_exchange_location_exception":     schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -RemoveExchangeLocationException parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"remove_modern_group_location":           schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -RemoveModernGroupLocation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"remove_modern_group_location_exception": schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -RemoveModernGroupLocationException parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"policy_rbac_scopes":                     schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -PolicyRBACScopes parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"remove_adaptive_scope_location":         schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -RemoveAdaptiveScopeLocation parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"remove_exchange_location":               schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -RemoveExchangeLocation parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"remove_exchange_location_exception":     schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -RemoveExchangeLocationException parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"remove_modern_group_location":           schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -RemoveModernGroupLocation parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"remove_modern_group_location_exception": schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -RemoveModernGroupLocationException parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
 			"restrictive_retention":                  schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -RestrictiveRetention parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
 			"retry_distribution":                     schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -RetryDistribution parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
 		},
@@ -116,36 +116,71 @@ func (r *appRetentionCompliancePolicyResource) Create(ctx context.Context, req r
 		return
 	}
 
-	p := purview.NewAppRetentionCompliancePolicyParams{
-		Applications:         toStringSlice(ctx, plan.Applications, &resp.Diagnostics),
-		Comment:              plan.Comment.ValueString(),
-		Enabled:              plan.Enabled.ValueBool(),
-		Locations:            plan.Locations.ValueString(),
-		Name:                 plan.Name.ValueString(),
-		RestrictiveRetention: plan.RestrictiveRetention.ValueBool(),
+	var config appRetentionCompliancePolicyModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
+	if resp.Diagnostics.HasError() {
+		return
 	}
-	if v := plan.AdaptiveScopeLocation.ValueString(); v != "" {
-		p.AdaptiveScopeLocation = v
+
+	p := purview.NewAppRetentionCompliancePolicyParams{}
+	if !config.AdaptiveScopeLocation.IsNull() {
+		if v := toStringSlice(ctx, plan.AdaptiveScopeLocation, &resp.Diagnostics); len(v) > 0 {
+			p.AdaptiveScopeLocation = v
+		}
 	}
-	if v := plan.ExchangeLocation.ValueString(); v != "" {
-		p.ExchangeLocation = v
+	if !config.Applications.IsNull() {
+		if v := toStringSlice(ctx, plan.Applications, &resp.Diagnostics); len(v) > 0 {
+			p.Applications = v
+		}
 	}
-	if v := plan.ExchangeLocationException.ValueString(); v != "" {
-		p.ExchangeLocationException = v
+	if !config.Comment.IsNull() {
+		p.Comment = plan.Comment.ValueString()
 	}
-	if v := plan.ModernGroupLocation.ValueString(); v != "" {
-		p.ModernGroupLocation = v
+	if !config.Enabled.IsNull() {
+		if !plan.Enabled.IsUnknown() {
+			p.Enabled = plan.Enabled.ValueBoolPointer()
+		}
 	}
-	if v := plan.ModernGroupLocationException.ValueString(); v != "" {
-		p.ModernGroupLocationException = v
+	if !config.ExchangeLocation.IsNull() {
+		if v := toStringSlice(ctx, plan.ExchangeLocation, &resp.Diagnostics); len(v) > 0 {
+			p.ExchangeLocation = v
+		}
 	}
-	if v := plan.PolicyRBACScopes.ValueString(); v != "" {
-		p.PolicyRBACScopes = v
+	if !config.ExchangeLocationException.IsNull() {
+		if v := toStringSlice(ctx, plan.ExchangeLocationException, &resp.Diagnostics); len(v) > 0 {
+			p.ExchangeLocationException = v
+		}
+	}
+	if !config.Locations.IsNull() {
+		p.Locations = plan.Locations.ValueString()
+	}
+	if !config.ModernGroupLocation.IsNull() {
+		if v := toStringSlice(ctx, plan.ModernGroupLocation, &resp.Diagnostics); len(v) > 0 {
+			p.ModernGroupLocation = v
+		}
+	}
+	if !config.ModernGroupLocationException.IsNull() {
+		if v := toStringSlice(ctx, plan.ModernGroupLocationException, &resp.Diagnostics); len(v) > 0 {
+			p.ModernGroupLocationException = v
+		}
+	}
+	if !config.Name.IsNull() {
+		p.Name = plan.Name.ValueString()
+	}
+	if !config.PolicyRBACScopes.IsNull() {
+		if v := toStringSlice(ctx, plan.PolicyRBACScopes, &resp.Diagnostics); len(v) > 0 {
+			p.PolicyRBACScopes = v
+		}
+	}
+	if !config.RestrictiveRetention.IsNull() {
+		if !plan.RestrictiveRetention.IsUnknown() {
+			p.RestrictiveRetention = plan.RestrictiveRetention.ValueBoolPointer()
+		}
 	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	res, err := r.client.SCC.NewAppRetentionCompliancePolicy(ctx, p)
+	res, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.NewAppRetentionCompliancePolicy, p, isNotFound)
 	if err != nil {
 		resp.Diagnostics.AddError("New-AppRetentionCompliancePolicy failed", err.Error())
 		return
@@ -192,69 +227,223 @@ func (r *appRetentionCompliancePolicyResource) Update(ctx context.Context, req r
 	id := r.identityOf(state)
 	sp := purview.SetAppRetentionCompliancePolicyParams{}
 	sp.Identity = id
-	if v := plan.AddAdaptiveScopeLocation.ValueString(); v != "" {
-		sp.AddAdaptiveScopeLocation = v
+	var cur *appRetentionCompliancePolicyModel
+	curRead := false
+	current := func() *appRetentionCompliancePolicyModel {
+		if !curRead {
+			curRead = true
+			var m appRetentionCompliancePolicyModel
+			if r.refresh(ctx, id, &m, &resp.Diagnostics, nil) {
+				cur = &m
+			} else if !resp.Diagnostics.HasError() {
+				resp.Diagnostics.AddError("Get-AppRetentionCompliancePolicy failed", "the object could not be read to determine the list values to remove; nothing was changed")
+			}
+		}
+		return cur
 	}
-	if v := plan.AddExchangeLocation.ValueString(); v != "" {
-		sp.AddExchangeLocation = v
+	if !plan.AddAdaptiveScopeLocation.Equal(state.AddAdaptiveScopeLocation) {
+		if !plan.AddAdaptiveScopeLocation.IsNull() && !plan.AddAdaptiveScopeLocation.IsUnknown() {
+			if v := toStringSlice(ctx, plan.AddAdaptiveScopeLocation, &resp.Diagnostics); len(v) > 0 {
+				sp.AddAdaptiveScopeLocation = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.AddAdaptiveScopeLocation, &resp.Diagnostics); len(rm) > 0 {
+						sp.AddAdaptiveScopeLocationDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
 	}
-	if v := plan.AddExchangeLocationException.ValueString(); v != "" {
-		sp.AddExchangeLocationException = v
+	if !plan.AddExchangeLocation.Equal(state.AddExchangeLocation) {
+		if !plan.AddExchangeLocation.IsNull() && !plan.AddExchangeLocation.IsUnknown() {
+			if v := toStringSlice(ctx, plan.AddExchangeLocation, &resp.Diagnostics); len(v) > 0 {
+				sp.AddExchangeLocation = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.AddExchangeLocation, &resp.Diagnostics); len(rm) > 0 {
+						sp.AddExchangeLocationDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
 	}
-	if v := plan.AddModernGroupLocation.ValueString(); v != "" {
-		sp.AddModernGroupLocation = v
+	if !plan.AddExchangeLocationException.Equal(state.AddExchangeLocationException) {
+		if !plan.AddExchangeLocationException.IsNull() && !plan.AddExchangeLocationException.IsUnknown() {
+			if v := toStringSlice(ctx, plan.AddExchangeLocationException, &resp.Diagnostics); len(v) > 0 {
+				sp.AddExchangeLocationException = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.AddExchangeLocationException, &resp.Diagnostics); len(rm) > 0 {
+						sp.AddExchangeLocationExceptionDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
 	}
-	if v := plan.AddModernGroupLocationException.ValueString(); v != "" {
-		sp.AddModernGroupLocationException = v
+	if !plan.AddModernGroupLocation.Equal(state.AddModernGroupLocation) {
+		if !plan.AddModernGroupLocation.IsNull() && !plan.AddModernGroupLocation.IsUnknown() {
+			if v := toStringSlice(ctx, plan.AddModernGroupLocation, &resp.Diagnostics); len(v) > 0 {
+				sp.AddModernGroupLocation = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.AddModernGroupLocation, &resp.Diagnostics); len(rm) > 0 {
+						sp.AddModernGroupLocationDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
 	}
-	sp.Applications = toStringSlice(ctx, plan.Applications, &resp.Diagnostics)
-	sp.Comment = plan.Comment.ValueString()
-	sp.DeletedResources = plan.DeletedResources.ValueString()
-	sp.Enabled = plan.Enabled.ValueBool()
-	if v := plan.PolicyRBACScopes.ValueString(); v != "" {
-		sp.PolicyRBACScopes = v
+	if !plan.AddModernGroupLocationException.Equal(state.AddModernGroupLocationException) {
+		if !plan.AddModernGroupLocationException.IsNull() && !plan.AddModernGroupLocationException.IsUnknown() {
+			if v := toStringSlice(ctx, plan.AddModernGroupLocationException, &resp.Diagnostics); len(v) > 0 {
+				sp.AddModernGroupLocationException = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.AddModernGroupLocationException, &resp.Diagnostics); len(rm) > 0 {
+						sp.AddModernGroupLocationExceptionDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
 	}
-	if v := plan.RemoveAdaptiveScopeLocation.ValueString(); v != "" {
-		sp.RemoveAdaptiveScopeLocation = v
+	if !plan.Applications.Equal(state.Applications) {
+		if !plan.Applications.IsNull() && !plan.Applications.IsUnknown() {
+			sp.Applications = append([]string{}, toStringSlice(ctx, plan.Applications, &resp.Diagnostics)...)
+		}
 	}
-	if v := plan.RemoveExchangeLocation.ValueString(); v != "" {
-		sp.RemoveExchangeLocation = v
+	if !plan.Comment.Equal(state.Comment) {
+		sp.Comment = plan.Comment.ValueString()
 	}
-	if v := plan.RemoveExchangeLocationException.ValueString(); v != "" {
-		sp.RemoveExchangeLocationException = v
+	if !plan.DeletedResources.Equal(state.DeletedResources) {
+		sp.DeletedResources = plan.DeletedResources.ValueString()
 	}
-	if v := plan.RemoveModernGroupLocation.ValueString(); v != "" {
-		sp.RemoveModernGroupLocation = v
+	if !plan.Enabled.Equal(state.Enabled) {
+		if !plan.Enabled.IsUnknown() {
+			sp.Enabled = plan.Enabled.ValueBoolPointer()
+		}
 	}
-	if v := plan.RemoveModernGroupLocationException.ValueString(); v != "" {
-		sp.RemoveModernGroupLocationException = v
+	if !plan.PolicyRBACScopes.Equal(state.PolicyRBACScopes) {
+		if !plan.PolicyRBACScopes.IsNull() && !plan.PolicyRBACScopes.IsUnknown() {
+			if v := toStringSlice(ctx, plan.PolicyRBACScopes, &resp.Diagnostics); len(v) > 0 {
+				sp.PolicyRBACScopes = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.PolicyRBACScopes, &resp.Diagnostics); len(rm) > 0 {
+						sp.PolicyRBACScopesDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
 	}
-	sp.RestrictiveRetention = plan.RestrictiveRetention.ValueBool()
-	sp.RetryDistribution = plan.RetryDistribution.ValueBool()
+	if !plan.RemoveAdaptiveScopeLocation.Equal(state.RemoveAdaptiveScopeLocation) {
+		if !plan.RemoveAdaptiveScopeLocation.IsNull() && !plan.RemoveAdaptiveScopeLocation.IsUnknown() {
+			if v := toStringSlice(ctx, plan.RemoveAdaptiveScopeLocation, &resp.Diagnostics); len(v) > 0 {
+				sp.RemoveAdaptiveScopeLocation = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.RemoveAdaptiveScopeLocation, &resp.Diagnostics); len(rm) > 0 {
+						sp.RemoveAdaptiveScopeLocationDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
+	}
+	if !plan.RemoveExchangeLocation.Equal(state.RemoveExchangeLocation) {
+		if !plan.RemoveExchangeLocation.IsNull() && !plan.RemoveExchangeLocation.IsUnknown() {
+			if v := toStringSlice(ctx, plan.RemoveExchangeLocation, &resp.Diagnostics); len(v) > 0 {
+				sp.RemoveExchangeLocation = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.RemoveExchangeLocation, &resp.Diagnostics); len(rm) > 0 {
+						sp.RemoveExchangeLocationDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
+	}
+	if !plan.RemoveExchangeLocationException.Equal(state.RemoveExchangeLocationException) {
+		if !plan.RemoveExchangeLocationException.IsNull() && !plan.RemoveExchangeLocationException.IsUnknown() {
+			if v := toStringSlice(ctx, plan.RemoveExchangeLocationException, &resp.Diagnostics); len(v) > 0 {
+				sp.RemoveExchangeLocationException = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.RemoveExchangeLocationException, &resp.Diagnostics); len(rm) > 0 {
+						sp.RemoveExchangeLocationExceptionDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
+	}
+	if !plan.RemoveModernGroupLocation.Equal(state.RemoveModernGroupLocation) {
+		if !plan.RemoveModernGroupLocation.IsNull() && !plan.RemoveModernGroupLocation.IsUnknown() {
+			if v := toStringSlice(ctx, plan.RemoveModernGroupLocation, &resp.Diagnostics); len(v) > 0 {
+				sp.RemoveModernGroupLocation = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.RemoveModernGroupLocation, &resp.Diagnostics); len(rm) > 0 {
+						sp.RemoveModernGroupLocationDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
+	}
+	if !plan.RemoveModernGroupLocationException.Equal(state.RemoveModernGroupLocationException) {
+		if !plan.RemoveModernGroupLocationException.IsNull() && !plan.RemoveModernGroupLocationException.IsUnknown() {
+			if v := toStringSlice(ctx, plan.RemoveModernGroupLocationException, &resp.Diagnostics); len(v) > 0 {
+				sp.RemoveModernGroupLocationException = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.RemoveModernGroupLocationException, &resp.Diagnostics); len(rm) > 0 {
+						sp.RemoveModernGroupLocationExceptionDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
+	}
+	if !plan.RestrictiveRetention.Equal(state.RestrictiveRetention) {
+		if !plan.RestrictiveRetention.IsUnknown() {
+			sp.RestrictiveRetention = plan.RestrictiveRetention.ValueBoolPointer()
+		}
+	}
+	if !plan.RetryDistribution.Equal(state.RetryDistribution) {
+		if !plan.RetryDistribution.IsUnknown() {
+			sp.RetryDistribution = plan.RetryDistribution.ValueBoolPointer()
+		}
+	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	if _, err := r.client.SCC.SetAppRetentionCompliancePolicy(ctx, sp); err != nil {
+	if _, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.SetAppRetentionCompliancePolicy, sp, isNotFound); err != nil {
 		resp.Diagnostics.AddError("Set-AppRetentionCompliancePolicy failed", err.Error())
 		return
 	}
 	cfg := plan
 	reflected := reconcile.ReflectsFields(map[string]types.String{
-		"AddAdaptiveScopeLocation":           cfg.AddAdaptiveScopeLocation,
-		"AddExchangeLocation":                cfg.AddExchangeLocation,
-		"AddExchangeLocationException":       cfg.AddExchangeLocationException,
-		"AddModernGroupLocation":             cfg.AddModernGroupLocation,
-		"AddModernGroupLocationException":    cfg.AddModernGroupLocationException,
-		"Comment":                            cfg.Comment,
-		"DeletedResources":                   cfg.DeletedResources,
-		"PolicyRBACScopes":                   cfg.PolicyRBACScopes,
-		"RemoveAdaptiveScopeLocation":        cfg.RemoveAdaptiveScopeLocation,
-		"RemoveExchangeLocation":             cfg.RemoveExchangeLocation,
-		"RemoveExchangeLocationException":    cfg.RemoveExchangeLocationException,
-		"RemoveModernGroupLocation":          cfg.RemoveModernGroupLocation,
-		"RemoveModernGroupLocationException": cfg.RemoveModernGroupLocationException,
+		"Comment":          cfg.Comment,
+		"DeletedResources": cfg.DeletedResources,
 	}, getString)
+	if !cfg.Enabled.IsUnknown() && !cfg.Enabled.IsNull() && !cfg.Enabled.Equal(state.Enabled) {
+		prev, want := reflected, cfg.Enabled.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["Enabled"] == nil || getBool(obj, "Enabled") == want)
+		}
+	}
+	if !cfg.RestrictiveRetention.IsUnknown() && !cfg.RestrictiveRetention.IsNull() && !cfg.RestrictiveRetention.Equal(state.RestrictiveRetention) {
+		prev, want := reflected, cfg.RestrictiveRetention.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["RestrictiveRetention"] == nil || getBool(obj, "RestrictiveRetention") == want)
+		}
+	}
+	if !cfg.RetryDistribution.IsUnknown() && !cfg.RetryDistribution.IsNull() && !cfg.RetryDistribution.Equal(state.RetryDistribution) {
+		prev, want := reflected, cfg.RetryDistribution.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["RetryDistribution"] == nil || getBool(obj, "RetryDistribution") == want)
+		}
+	}
 	r.refresh(ctx, id, &plan, &resp.Diagnostics, reflected)
+	if !cfg.ID.IsUnknown() && !cfg.ID.IsNull() {
+		plan.ID = cfg.ID
+	}
 	r.reconcileState(&cfg, &plan)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
@@ -314,56 +503,56 @@ func (r *appRetentionCompliancePolicyResource) refresh(ctx context.Context, iden
 func readAppRetentionCompliancePolicy(ctx context.Context, obj map[string]any, m *appRetentionCompliancePolicyModel) {
 	m.ID = types.StringValue(firstNonEmptyStr(getString(obj, "Guid"), getString(obj, "Id"), getString(obj, "Identity")))
 	m.Identity = types.StringValue(firstNonEmptyStr(getString(obj, "Identity"), getString(obj, "Guid"), getString(obj, "Name")))
-	m.AdaptiveScopeLocation = types.StringValue(getString(obj, "AdaptiveScopeLocation"))
-	m.AddAdaptiveScopeLocation = types.StringValue(getString(obj, "AddAdaptiveScopeLocation"))
-	m.AddExchangeLocation = types.StringValue(getString(obj, "AddExchangeLocation"))
-	m.AddExchangeLocationException = types.StringValue(getString(obj, "AddExchangeLocationException"))
-	m.AddModernGroupLocation = types.StringValue(getString(obj, "AddModernGroupLocation"))
-	m.AddModernGroupLocationException = types.StringValue(getString(obj, "AddModernGroupLocationException"))
+	m.AdaptiveScopeLocation = stringSetValue(ctx, getStringSlice(obj, "AdaptiveScopeLocation"))
+	m.AddAdaptiveScopeLocation = stringSetValue(ctx, getStringSlice(obj, "AddAdaptiveScopeLocation"))
+	m.AddExchangeLocation = stringSetValue(ctx, getStringSlice(obj, "AddExchangeLocation"))
+	m.AddExchangeLocationException = stringSetValue(ctx, getStringSlice(obj, "AddExchangeLocationException"))
+	m.AddModernGroupLocation = stringSetValue(ctx, getStringSlice(obj, "AddModernGroupLocation"))
+	m.AddModernGroupLocationException = stringSetValue(ctx, getStringSlice(obj, "AddModernGroupLocationException"))
 	m.Applications = stringSetValue(ctx, getStringSlice(obj, "Applications"))
 	m.Comment = types.StringValue(getString(obj, "Comment"))
 	m.DeletedResources = types.StringValue(getString(obj, "DeletedResources"))
 	m.Enabled = types.BoolValue(getBool(obj, "Enabled"))
-	m.ExchangeLocation = types.StringValue(getString(obj, "ExchangeLocation"))
-	m.ExchangeLocationException = types.StringValue(getString(obj, "ExchangeLocationException"))
+	m.ExchangeLocation = stringSetValue(ctx, getStringSlice(obj, "ExchangeLocation"))
+	m.ExchangeLocationException = stringSetValue(ctx, getStringSlice(obj, "ExchangeLocationException"))
 	m.Locations = types.StringValue(getString(obj, "Locations"))
-	m.ModernGroupLocation = types.StringValue(getString(obj, "ModernGroupLocation"))
-	m.ModernGroupLocationException = types.StringValue(getString(obj, "ModernGroupLocationException"))
+	m.ModernGroupLocation = stringSetValue(ctx, getStringSlice(obj, "ModernGroupLocation"))
+	m.ModernGroupLocationException = stringSetValue(ctx, getStringSlice(obj, "ModernGroupLocationException"))
 	m.Name = types.StringValue(getString(obj, "Name"))
-	m.PolicyRBACScopes = types.StringValue(getString(obj, "PolicyRBACScopes"))
-	m.RemoveAdaptiveScopeLocation = types.StringValue(getString(obj, "RemoveAdaptiveScopeLocation"))
-	m.RemoveExchangeLocation = types.StringValue(getString(obj, "RemoveExchangeLocation"))
-	m.RemoveExchangeLocationException = types.StringValue(getString(obj, "RemoveExchangeLocationException"))
-	m.RemoveModernGroupLocation = types.StringValue(getString(obj, "RemoveModernGroupLocation"))
-	m.RemoveModernGroupLocationException = types.StringValue(getString(obj, "RemoveModernGroupLocationException"))
+	m.PolicyRBACScopes = stringSetValue(ctx, getStringSlice(obj, "PolicyRBACScopes"))
+	m.RemoveAdaptiveScopeLocation = stringSetValue(ctx, getStringSlice(obj, "RemoveAdaptiveScopeLocation"))
+	m.RemoveExchangeLocation = stringSetValue(ctx, getStringSlice(obj, "RemoveExchangeLocation"))
+	m.RemoveExchangeLocationException = stringSetValue(ctx, getStringSlice(obj, "RemoveExchangeLocationException"))
+	m.RemoveModernGroupLocation = stringSetValue(ctx, getStringSlice(obj, "RemoveModernGroupLocation"))
+	m.RemoveModernGroupLocationException = stringSetValue(ctx, getStringSlice(obj, "RemoveModernGroupLocationException"))
 	m.RestrictiveRetention = types.BoolValue(getBool(obj, "RestrictiveRetention"))
 	m.RetryDistribution = types.BoolValue(getBool(obj, "RetryDistribution"))
 	_ = ctx
 }
 
 func (r *appRetentionCompliancePolicyResource) reconcileState(cfg, read *appRetentionCompliancePolicyModel) {
-	read.AdaptiveScopeLocation = reconcile.KeepStr(cfg.AdaptiveScopeLocation, read.AdaptiveScopeLocation)
-	read.AddAdaptiveScopeLocation = reconcile.KeepStr(cfg.AddAdaptiveScopeLocation, read.AddAdaptiveScopeLocation)
-	read.AddExchangeLocation = reconcile.KeepStr(cfg.AddExchangeLocation, read.AddExchangeLocation)
-	read.AddExchangeLocationException = reconcile.KeepStr(cfg.AddExchangeLocationException, read.AddExchangeLocationException)
-	read.AddModernGroupLocation = reconcile.KeepStr(cfg.AddModernGroupLocation, read.AddModernGroupLocation)
-	read.AddModernGroupLocationException = reconcile.KeepStr(cfg.AddModernGroupLocationException, read.AddModernGroupLocationException)
+	read.AdaptiveScopeLocation = reconcile.KeepSet(cfg.AdaptiveScopeLocation, read.AdaptiveScopeLocation)
+	read.AddAdaptiveScopeLocation = reconcile.KeepSet(cfg.AddAdaptiveScopeLocation, read.AddAdaptiveScopeLocation)
+	read.AddExchangeLocation = reconcile.KeepSet(cfg.AddExchangeLocation, read.AddExchangeLocation)
+	read.AddExchangeLocationException = reconcile.KeepSet(cfg.AddExchangeLocationException, read.AddExchangeLocationException)
+	read.AddModernGroupLocation = reconcile.KeepSet(cfg.AddModernGroupLocation, read.AddModernGroupLocation)
+	read.AddModernGroupLocationException = reconcile.KeepSet(cfg.AddModernGroupLocationException, read.AddModernGroupLocationException)
 	read.Applications = reconcile.KeepSet(cfg.Applications, read.Applications)
 	read.Comment = reconcile.KeepStr(cfg.Comment, read.Comment)
 	read.DeletedResources = reconcile.KeepStr(cfg.DeletedResources, read.DeletedResources)
 	read.Enabled = reconcile.KeepBool(cfg.Enabled, read.Enabled)
-	read.ExchangeLocation = reconcile.KeepStr(cfg.ExchangeLocation, read.ExchangeLocation)
-	read.ExchangeLocationException = reconcile.KeepStr(cfg.ExchangeLocationException, read.ExchangeLocationException)
+	read.ExchangeLocation = reconcile.KeepSet(cfg.ExchangeLocation, read.ExchangeLocation)
+	read.ExchangeLocationException = reconcile.KeepSet(cfg.ExchangeLocationException, read.ExchangeLocationException)
 	read.Locations = reconcile.KeepStr(cfg.Locations, read.Locations)
-	read.ModernGroupLocation = reconcile.KeepStr(cfg.ModernGroupLocation, read.ModernGroupLocation)
-	read.ModernGroupLocationException = reconcile.KeepStr(cfg.ModernGroupLocationException, read.ModernGroupLocationException)
+	read.ModernGroupLocation = reconcile.KeepSet(cfg.ModernGroupLocation, read.ModernGroupLocation)
+	read.ModernGroupLocationException = reconcile.KeepSet(cfg.ModernGroupLocationException, read.ModernGroupLocationException)
 	read.Name = reconcile.KeepStr(cfg.Name, read.Name)
-	read.PolicyRBACScopes = reconcile.KeepStr(cfg.PolicyRBACScopes, read.PolicyRBACScopes)
-	read.RemoveAdaptiveScopeLocation = reconcile.KeepStr(cfg.RemoveAdaptiveScopeLocation, read.RemoveAdaptiveScopeLocation)
-	read.RemoveExchangeLocation = reconcile.KeepStr(cfg.RemoveExchangeLocation, read.RemoveExchangeLocation)
-	read.RemoveExchangeLocationException = reconcile.KeepStr(cfg.RemoveExchangeLocationException, read.RemoveExchangeLocationException)
-	read.RemoveModernGroupLocation = reconcile.KeepStr(cfg.RemoveModernGroupLocation, read.RemoveModernGroupLocation)
-	read.RemoveModernGroupLocationException = reconcile.KeepStr(cfg.RemoveModernGroupLocationException, read.RemoveModernGroupLocationException)
+	read.PolicyRBACScopes = reconcile.KeepSet(cfg.PolicyRBACScopes, read.PolicyRBACScopes)
+	read.RemoveAdaptiveScopeLocation = reconcile.KeepSet(cfg.RemoveAdaptiveScopeLocation, read.RemoveAdaptiveScopeLocation)
+	read.RemoveExchangeLocation = reconcile.KeepSet(cfg.RemoveExchangeLocation, read.RemoveExchangeLocation)
+	read.RemoveExchangeLocationException = reconcile.KeepSet(cfg.RemoveExchangeLocationException, read.RemoveExchangeLocationException)
+	read.RemoveModernGroupLocation = reconcile.KeepSet(cfg.RemoveModernGroupLocation, read.RemoveModernGroupLocation)
+	read.RemoveModernGroupLocationException = reconcile.KeepSet(cfg.RemoveModernGroupLocationException, read.RemoveModernGroupLocationException)
 	read.RestrictiveRetention = reconcile.KeepBool(cfg.RestrictiveRetention, read.RestrictiveRetention)
 	read.RetryDistribution = reconcile.KeepBool(cfg.RetryDistribution, read.RetryDistribution)
 }

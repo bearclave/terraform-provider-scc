@@ -49,7 +49,7 @@ func (r *dspmPolicyResource) Schema(_ context.Context, _ resource.SchemaRequest,
 		Description: "Manages the DspmPolicy object via New-DspmPolicy / Get-DspmPolicy / Set-DspmPolicy / Remove-DspmPolicy.",
 		Attributes: map[string]schema.Attribute{
 			"id":             schema.StringAttribute{Computed: true, Description: "Object identifier (GUID).", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"identity":       schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets."},
+			"identity":       schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"enabled":        schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -Enabled parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
 			"name":           schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -Name parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace(), stringplanmodifier.UseStateForUnknown()}},
 			"tenant_setting": schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -TenantSetting parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
@@ -71,15 +71,28 @@ func (r *dspmPolicyResource) Create(ctx context.Context, req resource.CreateRequ
 		return
 	}
 
-	p := purview.NewDspmPolicyParams{
-		Enabled:       plan.Enabled.ValueBool(),
-		Name:          plan.Name.ValueString(),
-		TenantSetting: plan.TenantSetting.ValueString(),
+	var config dspmPolicyModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	p := purview.NewDspmPolicyParams{}
+	if !config.Enabled.IsNull() {
+		if !plan.Enabled.IsUnknown() {
+			p.Enabled = plan.Enabled.ValueBoolPointer()
+		}
+	}
+	if !config.Name.IsNull() {
+		p.Name = plan.Name.ValueString()
+	}
+	if !config.TenantSetting.IsNull() {
+		p.TenantSetting = plan.TenantSetting.ValueString()
 	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	res, err := r.client.SCC.NewDspmPolicy(ctx, p)
+	res, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.NewDspmPolicy, p, isNotFound)
 	if err != nil {
 		resp.Diagnostics.AddError("New-DspmPolicy failed", err.Error())
 		return
@@ -126,12 +139,18 @@ func (r *dspmPolicyResource) Update(ctx context.Context, req resource.UpdateRequ
 	id := r.identityOf(state)
 	sp := purview.SetDspmPolicyParams{}
 	sp.Identity = id
-	sp.Enabled = plan.Enabled.ValueBool()
-	sp.TenantSetting = plan.TenantSetting.ValueString()
+	if !plan.Enabled.Equal(state.Enabled) {
+		if !plan.Enabled.IsUnknown() {
+			sp.Enabled = plan.Enabled.ValueBoolPointer()
+		}
+	}
+	if !plan.TenantSetting.Equal(state.TenantSetting) {
+		sp.TenantSetting = plan.TenantSetting.ValueString()
+	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	if _, err := r.client.SCC.SetDspmPolicy(ctx, sp); err != nil {
+	if _, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.SetDspmPolicy, sp, isNotFound); err != nil {
 		resp.Diagnostics.AddError("Set-DspmPolicy failed", err.Error())
 		return
 	}
@@ -139,7 +158,16 @@ func (r *dspmPolicyResource) Update(ctx context.Context, req resource.UpdateRequ
 	reflected := reconcile.ReflectsFields(map[string]types.String{
 		"TenantSetting": cfg.TenantSetting,
 	}, getString)
+	if !cfg.Enabled.IsUnknown() && !cfg.Enabled.IsNull() && !cfg.Enabled.Equal(state.Enabled) {
+		prev, want := reflected, cfg.Enabled.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["Enabled"] == nil || getBool(obj, "Enabled") == want)
+		}
+	}
 	r.refresh(ctx, id, &plan, &resp.Diagnostics, reflected)
+	if !cfg.ID.IsUnknown() && !cfg.ID.IsNull() {
+		plan.ID = cfg.ID
+	}
 	r.reconcileState(&cfg, &plan)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }

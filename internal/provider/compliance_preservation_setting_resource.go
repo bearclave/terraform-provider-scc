@@ -25,6 +25,7 @@ var (
 	_ resource.Resource                = &compliancePreservationSettingResource{}
 	_ resource.ResourceWithConfigure   = &compliancePreservationSettingResource{}
 	_ resource.ResourceWithImportState = &compliancePreservationSettingResource{}
+	_ resource.ResourceWithModifyPlan  = &compliancePreservationSettingResource{}
 )
 
 type compliancePreservationSettingResource struct{ client *clients.Client }
@@ -49,7 +50,7 @@ func (r *compliancePreservationSettingResource) Schema(_ context.Context, _ reso
 		Description: "Manages the CompliancePreservationSetting configuration via Set-CompliancePreservationSetting.",
 		Attributes: map[string]schema.Attribute{
 			"id":                                 schema.StringAttribute{Computed: true, Description: "Object identifier (GUID).", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"identity":                           schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets."},
+			"identity":                           schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"case_hold_cloud_attachment_enabled": schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -CaseHoldCloudAttachmentEnabled parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
 		},
 	}
@@ -68,12 +69,21 @@ func (r *compliancePreservationSettingResource) Create(ctx context.Context, req 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	sp := purview.SetCompliancePreservationSettingParams{}
-	sp.CaseHoldCloudAttachmentEnabled = plan.CaseHoldCloudAttachmentEnabled.ValueBool()
+	var config compliancePreservationSettingModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	if _, err := r.client.SCC.SetCompliancePreservationSetting(ctx, sp); err != nil {
+	sp := purview.SetCompliancePreservationSettingParams{}
+	if !config.CaseHoldCloudAttachmentEnabled.IsNull() {
+		if !plan.CaseHoldCloudAttachmentEnabled.IsUnknown() {
+			sp.CaseHoldCloudAttachmentEnabled = plan.CaseHoldCloudAttachmentEnabled.ValueBoolPointer()
+		}
+	}
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	if _, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.SetCompliancePreservationSetting, sp, isNotFound); err != nil {
 		resp.Diagnostics.AddError("Set-CompliancePreservationSetting failed", err.Error())
 		return
 	}
@@ -108,17 +118,30 @@ func (r *compliancePreservationSettingResource) Update(ctx context.Context, req 
 	}
 	id := r.identityOf(state)
 	sp := purview.SetCompliancePreservationSettingParams{}
-	sp.CaseHoldCloudAttachmentEnabled = plan.CaseHoldCloudAttachmentEnabled.ValueBool()
+	if !plan.CaseHoldCloudAttachmentEnabled.Equal(state.CaseHoldCloudAttachmentEnabled) {
+		if !plan.CaseHoldCloudAttachmentEnabled.IsUnknown() {
+			sp.CaseHoldCloudAttachmentEnabled = plan.CaseHoldCloudAttachmentEnabled.ValueBoolPointer()
+		}
+	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	if _, err := r.client.SCC.SetCompliancePreservationSetting(ctx, sp); err != nil {
+	if _, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.SetCompliancePreservationSetting, sp, isNotFound); err != nil {
 		resp.Diagnostics.AddError("Set-CompliancePreservationSetting failed", err.Error())
 		return
 	}
 	cfg := plan
 	reflected := reconcile.ReflectsFields(map[string]types.String{}, getString)
+	if !cfg.CaseHoldCloudAttachmentEnabled.IsUnknown() && !cfg.CaseHoldCloudAttachmentEnabled.IsNull() && !cfg.CaseHoldCloudAttachmentEnabled.Equal(state.CaseHoldCloudAttachmentEnabled) {
+		prev, want := reflected, cfg.CaseHoldCloudAttachmentEnabled.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["CaseHoldCloudAttachmentEnabled"] == nil || getBool(obj, "CaseHoldCloudAttachmentEnabled") == want)
+		}
+	}
 	r.refresh(ctx, id, &plan, &resp.Diagnostics, reflected)
+	if !cfg.ID.IsUnknown() && !cfg.ID.IsNull() {
+		plan.ID = cfg.ID
+	}
 	r.reconcileState(&cfg, &plan)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
@@ -130,6 +153,37 @@ func (r *compliancePreservationSettingResource) Delete(_ context.Context, _ reso
 func (r *compliancePreservationSettingResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("id"), req.ID)...)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("identity"), req.ID)...)
+}
+
+func (r *compliancePreservationSettingResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
+	if req.Plan.Raw.IsNull() || !req.State.Raw.IsNull() || r.client == nil {
+		return
+	}
+	var plan compliancePreservationSettingModel
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	res, err := r.client.SCC.GetCompliancePreservationSetting(ctx, purview.GetCompliancePreservationSettingParams{})
+	if err != nil {
+		return
+	}
+	obj := firstObject(res.Value)
+	if obj == nil {
+		return
+	}
+	var cur compliancePreservationSettingModel
+	readCompliancePreservationSetting(ctx, obj, &cur)
+	if plan.ID.IsUnknown() {
+		plan.ID = cur.ID
+	}
+	if plan.Identity.IsUnknown() {
+		plan.Identity = cur.Identity
+	}
+	if plan.CaseHoldCloudAttachmentEnabled.IsUnknown() {
+		plan.CaseHoldCloudAttachmentEnabled = cur.CaseHoldCloudAttachmentEnabled
+	}
+	resp.Diagnostics.Append(resp.Plan.Set(ctx, &plan)...)
 }
 
 func (r *compliancePreservationSettingResource) identityOf(m compliancePreservationSettingModel) string {

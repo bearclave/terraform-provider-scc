@@ -30,8 +30,10 @@ Read-Only:
 - `id` (String) Object identifier (GUID).
 - `identity` (String) Identity used to target the object.
 - `name` (String) Maps to the -Name parameter.
-- `policy_rbac_scopes` (String) Maps to the -PolicyRBACScopes parameter.
+- `policy_rbac_scopes` (Set of String) Maps to the -PolicyRBACScopes parameter.
 - `policy_template` (String) Maps to the -PolicyTemplate parameter.
+- `preservation_period_in_days` (Number) Maps to the -PreservationPeriodInDays parameter.
 - `remove_reviewers` (Set of String) Maps to the -RemoveReviewers parameter.
+- `retention_period_in_days` (Number) Maps to the -RetentionPeriodInDays parameter.
 - `reviewers` (Set of String) Maps to the -Reviewers parameter.
 - `user_reporting_workloads` (Set of String) Maps to the -UserReportingWorkloads parameter.

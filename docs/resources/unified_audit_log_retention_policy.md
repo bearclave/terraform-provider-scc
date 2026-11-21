@@ -18,14 +18,15 @@ Manages the UnifiedAuditLogRetentionPolicy object via New-UnifiedAuditLogRetenti
 ### Required
 
 - `name` (String) Maps to the -Name parameter.
+- `priority` (Number) Maps to the -Priority parameter.
 - `retention_duration` (String) Maps to the -RetentionDuration parameter.
 
 ### Optional
 
 - `description` (String) Maps to the -Description parameter.
-- `operations` (String) Maps to the -Operations parameter.
-- `record_types` (String) Maps to the -RecordTypes parameter.
-- `user_ids` (String) Maps to the -UserIds parameter.
+- `operations` (Set of String) Maps to the -Operations parameter.
+- `record_types` (Set of String) Maps to the -RecordTypes parameter.
+- `user_ids` (Set of String) Maps to the -UserIds parameter.
 
 ### Read-Only
 

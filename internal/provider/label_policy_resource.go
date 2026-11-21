@@ -9,8 +9,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
@@ -33,57 +33,32 @@ type labelPolicyResource struct{ client *clients.Client }
 func NewLabelPolicyResource() resource.Resource { return &labelPolicyResource{} }
 
 type labelPolicyModel struct {
-	ID                                 types.String `tfsdk:"id"`
-	Identity                           types.String `tfsdk:"identity"`
-	AddExchangeLocation                types.String `tfsdk:"add_exchange_location"`
-	AddExchangeLocationException       types.String `tfsdk:"add_exchange_location_exception"`
-	AddLabels                          types.String `tfsdk:"add_labels"`
-	AddModernGroupLocation             types.String `tfsdk:"add_modern_group_location"`
-	AddModernGroupLocationException    types.String `tfsdk:"add_modern_group_location_exception"`
-	AddOneDriveLocation                types.String `tfsdk:"add_one_drive_location"`
-	AddOneDriveLocationException       types.String `tfsdk:"add_one_drive_location_exception"`
-	AddPublicFolderLocation            types.String `tfsdk:"add_public_folder_location"`
-	AddSharePointLocation              types.String `tfsdk:"add_share_point_location"`
-	AddSharePointLocationException     types.String `tfsdk:"add_share_point_location_exception"`
-	AddSkypeLocation                   types.String `tfsdk:"add_skype_location"`
-	AddSkypeLocationException          types.String `tfsdk:"add_skype_location_exception"`
-	AdvancedSettings                   types.String `tfsdk:"advanced_settings"`
-	Comment                            types.String `tfsdk:"comment"`
-	ExchangeAdaptiveScopes             types.String `tfsdk:"exchange_adaptive_scopes"`
-	ExchangeAdaptiveScopesException    types.String `tfsdk:"exchange_adaptive_scopes_exception"`
-	ExchangeLocation                   types.String `tfsdk:"exchange_location"`
-	ExchangeLocationException          types.String `tfsdk:"exchange_location_exception"`
-	Labels                             types.String `tfsdk:"labels"`
-	Locations                          types.String `tfsdk:"locations"`
-	MigrationId                        types.String `tfsdk:"migration_id"`
-	ModernGroupLocation                types.String `tfsdk:"modern_group_location"`
-	ModernGroupLocationException       types.String `tfsdk:"modern_group_location_exception"`
-	Name                               types.String `tfsdk:"name"`
-	NextLabelPolicy                    types.String `tfsdk:"next_label_policy"`
-	OneDriveLocation                   types.String `tfsdk:"one_drive_location"`
-	OneDriveLocationException          types.String `tfsdk:"one_drive_location_exception"`
-	PolicyRBACScopes                   types.String `tfsdk:"policy_rbac_scopes"`
-	PreviousLabelPolicy                types.String `tfsdk:"previous_label_policy"`
-	PublicFolderLocation               types.String `tfsdk:"public_folder_location"`
-	RemoveExchangeLocation             types.String `tfsdk:"remove_exchange_location"`
-	RemoveExchangeLocationException    types.String `tfsdk:"remove_exchange_location_exception"`
-	RemoveLabels                       types.String `tfsdk:"remove_labels"`
-	RemoveModernGroupLocation          types.String `tfsdk:"remove_modern_group_location"`
-	RemoveModernGroupLocationException types.String `tfsdk:"remove_modern_group_location_exception"`
-	RemoveOneDriveLocation             types.String `tfsdk:"remove_one_drive_location"`
-	RemoveOneDriveLocationException    types.String `tfsdk:"remove_one_drive_location_exception"`
-	RemovePublicFolderLocation         types.String `tfsdk:"remove_public_folder_location"`
-	RemoveSharePointLocation           types.String `tfsdk:"remove_share_point_location"`
-	RemoveSharePointLocationException  types.String `tfsdk:"remove_share_point_location_exception"`
-	RemoveSkypeLocation                types.String `tfsdk:"remove_skype_location"`
-	RemoveSkypeLocationException       types.String `tfsdk:"remove_skype_location_exception"`
-	RetryDistribution                  types.Bool   `tfsdk:"retry_distribution"`
-	Setting                            types.String `tfsdk:"setting"`
-	Settings                           types.String `tfsdk:"settings"`
-	SharePointLocation                 types.String `tfsdk:"share_point_location"`
-	SharePointLocationException        types.String `tfsdk:"share_point_location_exception"`
-	SkypeLocation                      types.String `tfsdk:"skype_location"`
-	SkypeLocationException             types.String `tfsdk:"skype_location_exception"`
+	ID                              types.String `tfsdk:"id"`
+	Identity                        types.String `tfsdk:"identity"`
+	AdvancedSettings                types.String `tfsdk:"advanced_settings"`
+	Comment                         types.String `tfsdk:"comment"`
+	ExchangeAdaptiveScopes          types.Set    `tfsdk:"exchange_adaptive_scopes"`
+	ExchangeAdaptiveScopesException types.Set    `tfsdk:"exchange_adaptive_scopes_exception"`
+	ExchangeLocation                types.Set    `tfsdk:"exchange_location"`
+	ExchangeLocationException       types.Set    `tfsdk:"exchange_location_exception"`
+	Labels                          types.Set    `tfsdk:"labels"`
+	Locations                       types.String `tfsdk:"locations"`
+	MigrationId                     types.String `tfsdk:"migration_id"`
+	ModernGroupLocation             types.Set    `tfsdk:"modern_group_location"`
+	ModernGroupLocationException    types.Set    `tfsdk:"modern_group_location_exception"`
+	Name                            types.String `tfsdk:"name"`
+	NextLabelPolicy                 types.String `tfsdk:"next_label_policy"`
+	OneDriveLocation                types.Set    `tfsdk:"one_drive_location"`
+	OneDriveLocationException       types.Set    `tfsdk:"one_drive_location_exception"`
+	PolicyRBACScopes                types.Set    `tfsdk:"policy_rbac_scopes"`
+	PreviousLabelPolicy             types.String `tfsdk:"previous_label_policy"`
+	PublicFolderLocation            types.Set    `tfsdk:"public_folder_location"`
+	Setting                         types.String `tfsdk:"setting"`
+	Settings                        types.String `tfsdk:"settings"`
+	SharePointLocation              types.Set    `tfsdk:"share_point_location"`
+	SharePointLocationException     types.Set    `tfsdk:"share_point_location_exception"`
+	SkypeLocation                   types.Set    `tfsdk:"skype_location"`
+	SkypeLocationException          types.Set    `tfsdk:"skype_location_exception"`
 }
 
 func (r *labelPolicyResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -94,57 +69,32 @@ func (r *labelPolicyResource) Schema(_ context.Context, _ resource.SchemaRequest
 	resp.Schema = schema.Schema{
 		Description: "Manages the LabelPolicy object via New-LabelPolicy / Get-LabelPolicy / Set-LabelPolicy / Remove-LabelPolicy.",
 		Attributes: map[string]schema.Attribute{
-			"id":                                     schema.StringAttribute{Computed: true, Description: "Object identifier (GUID).", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"identity":                               schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets."},
-			"add_exchange_location":                  schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AddExchangeLocation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"add_exchange_location_exception":        schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AddExchangeLocationException parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"add_labels":                             schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AddLabels parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"add_modern_group_location":              schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AddModernGroupLocation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"add_modern_group_location_exception":    schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AddModernGroupLocationException parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"add_one_drive_location":                 schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AddOneDriveLocation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"add_one_drive_location_exception":       schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AddOneDriveLocationException parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"add_public_folder_location":             schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AddPublicFolderLocation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"add_share_point_location":               schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AddSharePointLocation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"add_share_point_location_exception":     schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AddSharePointLocationException parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"add_skype_location":                     schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AddSkypeLocation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"add_skype_location_exception":           schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AddSkypeLocationException parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"advanced_settings":                      schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AdvancedSettings parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"comment":                                schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -Comment parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"exchange_adaptive_scopes":               schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ExchangeAdaptiveScopes parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"exchange_adaptive_scopes_exception":     schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ExchangeAdaptiveScopesException parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"exchange_location":                      schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ExchangeLocation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace(), stringplanmodifier.UseStateForUnknown()}},
-			"exchange_location_exception":            schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ExchangeLocationException parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace(), stringplanmodifier.UseStateForUnknown()}},
-			"labels":                                 schema.StringAttribute{Required: true, Description: "Maps to the -Labels parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
-			"locations":                              schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -Locations parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"migration_id":                           schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -MigrationId parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"modern_group_location":                  schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ModernGroupLocation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace(), stringplanmodifier.UseStateForUnknown()}},
-			"modern_group_location_exception":        schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ModernGroupLocationException parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace(), stringplanmodifier.UseStateForUnknown()}},
-			"name":                                   schema.StringAttribute{Required: true, Description: "Maps to the -Name parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
-			"next_label_policy":                      schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -NextLabelPolicy parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"one_drive_location":                     schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -OneDriveLocation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace(), stringplanmodifier.UseStateForUnknown()}},
-			"one_drive_location_exception":           schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -OneDriveLocationException parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace(), stringplanmodifier.UseStateForUnknown()}},
-			"policy_rbac_scopes":                     schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -PolicyRBACScopes parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"previous_label_policy":                  schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -PreviousLabelPolicy parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"public_folder_location":                 schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -PublicFolderLocation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace(), stringplanmodifier.UseStateForUnknown()}},
-			"remove_exchange_location":               schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -RemoveExchangeLocation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"remove_exchange_location_exception":     schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -RemoveExchangeLocationException parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"remove_labels":                          schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -RemoveLabels parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"remove_modern_group_location":           schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -RemoveModernGroupLocation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"remove_modern_group_location_exception": schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -RemoveModernGroupLocationException parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"remove_one_drive_location":              schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -RemoveOneDriveLocation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"remove_one_drive_location_exception":    schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -RemoveOneDriveLocationException parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"remove_public_folder_location":          schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -RemovePublicFolderLocation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"remove_share_point_location":            schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -RemoveSharePointLocation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"remove_share_point_location_exception":  schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -RemoveSharePointLocationException parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"remove_skype_location":                  schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -RemoveSkypeLocation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"remove_skype_location_exception":        schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -RemoveSkypeLocationException parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"retry_distribution":                     schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -RetryDistribution parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
-			"setting":                                schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -Setting parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"settings":                               schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -Settings parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"share_point_location":                   schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -SharePointLocation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace(), stringplanmodifier.UseStateForUnknown()}},
-			"share_point_location_exception":         schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -SharePointLocationException parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace(), stringplanmodifier.UseStateForUnknown()}},
-			"skype_location":                         schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -SkypeLocation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace(), stringplanmodifier.UseStateForUnknown()}},
-			"skype_location_exception":               schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -SkypeLocationException parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace(), stringplanmodifier.UseStateForUnknown()}},
+			"id":                                 schema.StringAttribute{Computed: true, Description: "Object identifier (GUID).", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"identity":                           schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"advanced_settings":                  schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AdvancedSettings parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"comment":                            schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -Comment parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"exchange_adaptive_scopes":           schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -ExchangeAdaptiveScopes parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"exchange_adaptive_scopes_exception": schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -ExchangeAdaptiveScopesException parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"exchange_location":                  schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -ExchangeLocation parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"exchange_location_exception":        schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -ExchangeLocationException parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"labels":                             schema.SetAttribute{ElementType: types.StringType, Required: true, Description: "Maps to the -Labels parameter."},
+			"locations":                          schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -Locations parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"migration_id":                       schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -MigrationId parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"modern_group_location":              schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -ModernGroupLocation parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"modern_group_location_exception":    schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -ModernGroupLocationException parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"name":                               schema.StringAttribute{Required: true, Description: "Maps to the -Name parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
+			"next_label_policy":                  schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -NextLabelPolicy parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"one_drive_location":                 schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -OneDriveLocation parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"one_drive_location_exception":       schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -OneDriveLocationException parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"policy_rbac_scopes":                 schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -PolicyRBACScopes parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"previous_label_policy":              schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -PreviousLabelPolicy parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"public_folder_location":             schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -PublicFolderLocation parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"setting":                            schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -Setting parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"settings":                           schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -Settings parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"share_point_location":               schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -SharePointLocation parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"share_point_location_exception":     schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -SharePointLocationException parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"skype_location":                     schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -SkypeLocation parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"skype_location_exception":           schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -SkypeLocationException parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
 		},
 	}
 }
@@ -163,70 +113,113 @@ func (r *labelPolicyResource) Create(ctx context.Context, req resource.CreateReq
 		return
 	}
 
-	p := purview.NewLabelPolicyParams{
-		Comment:     plan.Comment.ValueString(),
-		Locations:   plan.Locations.ValueString(),
-		MigrationId: plan.MigrationId.ValueString(),
-		Name:        plan.Name.ValueString(),
+	var config labelPolicyModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
+	if resp.Diagnostics.HasError() {
+		return
 	}
-	if v := plan.AdvancedSettings.ValueString(); v != "" {
-		p.AdvancedSettings = v
+
+	p := purview.NewLabelPolicyParams{}
+	if v := config.AdvancedSettings.ValueString(); v != "" {
+		p.AdvancedSettings = objectParam(v)
 	}
-	if v := plan.ExchangeAdaptiveScopes.ValueString(); v != "" {
-		p.ExchangeAdaptiveScopes = v
+	if !config.Comment.IsNull() {
+		p.Comment = plan.Comment.ValueString()
 	}
-	if v := plan.ExchangeAdaptiveScopesException.ValueString(); v != "" {
-		p.ExchangeAdaptiveScopesException = v
+	if !config.ExchangeAdaptiveScopes.IsNull() {
+		if v := toStringSlice(ctx, plan.ExchangeAdaptiveScopes, &resp.Diagnostics); len(v) > 0 {
+			p.ExchangeAdaptiveScopes = v
+		}
 	}
-	if v := plan.ExchangeLocation.ValueString(); v != "" {
-		p.ExchangeLocation = v
+	if !config.ExchangeAdaptiveScopesException.IsNull() {
+		if v := toStringSlice(ctx, plan.ExchangeAdaptiveScopesException, &resp.Diagnostics); len(v) > 0 {
+			p.ExchangeAdaptiveScopesException = v
+		}
 	}
-	if v := plan.ExchangeLocationException.ValueString(); v != "" {
-		p.ExchangeLocationException = v
+	if !config.ExchangeLocation.IsNull() {
+		if v := toStringSlice(ctx, plan.ExchangeLocation, &resp.Diagnostics); len(v) > 0 {
+			p.ExchangeLocation = v
+		}
 	}
-	if v := plan.Labels.ValueString(); v != "" {
-		p.Labels = v
+	if !config.ExchangeLocationException.IsNull() {
+		if v := toStringSlice(ctx, plan.ExchangeLocationException, &resp.Diagnostics); len(v) > 0 {
+			p.ExchangeLocationException = v
+		}
 	}
-	if v := plan.ModernGroupLocation.ValueString(); v != "" {
-		p.ModernGroupLocation = v
+	if !config.Labels.IsNull() {
+		if v := toStringSlice(ctx, plan.Labels, &resp.Diagnostics); len(v) > 0 {
+			p.Labels = v
+		}
 	}
-	if v := plan.ModernGroupLocationException.ValueString(); v != "" {
-		p.ModernGroupLocationException = v
+	if !config.Locations.IsNull() {
+		p.Locations = plan.Locations.ValueString()
 	}
-	if v := plan.OneDriveLocation.ValueString(); v != "" {
-		p.OneDriveLocation = v
+	if !config.MigrationId.IsNull() {
+		p.MigrationId = plan.MigrationId.ValueString()
 	}
-	if v := plan.OneDriveLocationException.ValueString(); v != "" {
-		p.OneDriveLocationException = v
+	if !config.ModernGroupLocation.IsNull() {
+		if v := toStringSlice(ctx, plan.ModernGroupLocation, &resp.Diagnostics); len(v) > 0 {
+			p.ModernGroupLocation = v
+		}
 	}
-	if v := plan.PolicyRBACScopes.ValueString(); v != "" {
-		p.PolicyRBACScopes = v
+	if !config.ModernGroupLocationException.IsNull() {
+		if v := toStringSlice(ctx, plan.ModernGroupLocationException, &resp.Diagnostics); len(v) > 0 {
+			p.ModernGroupLocationException = v
+		}
 	}
-	if v := plan.PublicFolderLocation.ValueString(); v != "" {
-		p.PublicFolderLocation = v
+	if !config.Name.IsNull() {
+		p.Name = plan.Name.ValueString()
 	}
-	if v := plan.Setting.ValueString(); v != "" {
-		p.Setting = v
+	if !config.OneDriveLocation.IsNull() {
+		if v := toStringSlice(ctx, plan.OneDriveLocation, &resp.Diagnostics); len(v) > 0 {
+			p.OneDriveLocation = v
+		}
 	}
-	if v := plan.Settings.ValueString(); v != "" {
-		p.Settings = v
+	if !config.OneDriveLocationException.IsNull() {
+		if v := toStringSlice(ctx, plan.OneDriveLocationException, &resp.Diagnostics); len(v) > 0 {
+			p.OneDriveLocationException = v
+		}
 	}
-	if v := plan.SharePointLocation.ValueString(); v != "" {
-		p.SharePointLocation = v
+	if !config.PolicyRBACScopes.IsNull() {
+		if v := toStringSlice(ctx, plan.PolicyRBACScopes, &resp.Diagnostics); len(v) > 0 {
+			p.PolicyRBACScopes = v
+		}
 	}
-	if v := plan.SharePointLocationException.ValueString(); v != "" {
-		p.SharePointLocationException = v
+	if !config.PublicFolderLocation.IsNull() {
+		if v := toStringSlice(ctx, plan.PublicFolderLocation, &resp.Diagnostics); len(v) > 0 {
+			p.PublicFolderLocation = v
+		}
 	}
-	if v := plan.SkypeLocation.ValueString(); v != "" {
-		p.SkypeLocation = v
+	if v := config.Setting.ValueString(); v != "" {
+		p.Setting = objectParam(v)
 	}
-	if v := plan.SkypeLocationException.ValueString(); v != "" {
-		p.SkypeLocationException = v
+	if v := config.Settings.ValueString(); v != "" {
+		p.Settings = objectParam(v)
+	}
+	if !config.SharePointLocation.IsNull() {
+		if v := toStringSlice(ctx, plan.SharePointLocation, &resp.Diagnostics); len(v) > 0 {
+			p.SharePointLocation = v
+		}
+	}
+	if !config.SharePointLocationException.IsNull() {
+		if v := toStringSlice(ctx, plan.SharePointLocationException, &resp.Diagnostics); len(v) > 0 {
+			p.SharePointLocationException = v
+		}
+	}
+	if !config.SkypeLocation.IsNull() {
+		if v := toStringSlice(ctx, plan.SkypeLocation, &resp.Diagnostics); len(v) > 0 {
+			p.SkypeLocation = v
+		}
+	}
+	if !config.SkypeLocationException.IsNull() {
+		if v := toStringSlice(ctx, plan.SkypeLocationException, &resp.Diagnostics); len(v) > 0 {
+			p.SkypeLocationException = v
+		}
 	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	res, err := r.client.SCC.NewLabelPolicy(ctx, p)
+	res, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.NewLabelPolicy, p, isNotFound)
 	if err != nil {
 		resp.Diagnostics.AddError("New-LabelPolicy failed", err.Error())
 		return
@@ -273,152 +266,110 @@ func (r *labelPolicyResource) Update(ctx context.Context, req resource.UpdateReq
 	id := r.identityOf(state)
 	sp := purview.SetLabelPolicyParams{}
 	sp.Identity = id
-	if v := plan.AddExchangeLocation.ValueString(); v != "" {
-		sp.AddExchangeLocation = v
+	var cur *labelPolicyModel
+	curRead := false
+	current := func() *labelPolicyModel {
+		if !curRead {
+			curRead = true
+			var m labelPolicyModel
+			if r.refresh(ctx, id, &m, &resp.Diagnostics, nil) {
+				cur = &m
+			} else if !resp.Diagnostics.HasError() {
+				resp.Diagnostics.AddError("Get-LabelPolicy failed", "the object could not be read to determine the list values to remove; nothing was changed")
+			}
+		}
+		return cur
 	}
-	if v := plan.AddExchangeLocationException.ValueString(); v != "" {
-		sp.AddExchangeLocationException = v
+	if !plan.AdvancedSettings.Equal(state.AdvancedSettings) {
+		if v := plan.AdvancedSettings.ValueString(); v != "" {
+			sp.AdvancedSettings = objectParam(v)
+		}
 	}
-	if v := plan.AddLabels.ValueString(); v != "" {
-		sp.AddLabels = v
+	if !plan.Comment.Equal(state.Comment) {
+		sp.Comment = plan.Comment.ValueString()
 	}
-	if v := plan.AddModernGroupLocation.ValueString(); v != "" {
-		sp.AddModernGroupLocation = v
+	if !plan.ExchangeAdaptiveScopes.Equal(state.ExchangeAdaptiveScopes) {
+		if !plan.ExchangeAdaptiveScopes.IsNull() && !plan.ExchangeAdaptiveScopes.IsUnknown() {
+			if v := toStringSlice(ctx, plan.ExchangeAdaptiveScopes, &resp.Diagnostics); len(v) > 0 {
+				sp.ExchangeAdaptiveScopes = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.ExchangeAdaptiveScopes, &resp.Diagnostics); len(rm) > 0 {
+						sp.ExchangeAdaptiveScopesDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
 	}
-	if v := plan.AddModernGroupLocationException.ValueString(); v != "" {
-		sp.AddModernGroupLocationException = v
+	if !plan.ExchangeAdaptiveScopesException.Equal(state.ExchangeAdaptiveScopesException) {
+		if !plan.ExchangeAdaptiveScopesException.IsNull() && !plan.ExchangeAdaptiveScopesException.IsUnknown() {
+			if v := toStringSlice(ctx, plan.ExchangeAdaptiveScopesException, &resp.Diagnostics); len(v) > 0 {
+				sp.ExchangeAdaptiveScopesException = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.ExchangeAdaptiveScopesException, &resp.Diagnostics); len(rm) > 0 {
+						sp.ExchangeAdaptiveScopesExceptionDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
 	}
-	if v := plan.AddOneDriveLocation.ValueString(); v != "" {
-		sp.AddOneDriveLocation = v
+	if !plan.Locations.Equal(state.Locations) {
+		sp.Locations = plan.Locations.ValueString()
 	}
-	if v := plan.AddOneDriveLocationException.ValueString(); v != "" {
-		sp.AddOneDriveLocationException = v
+	if !plan.MigrationId.Equal(state.MigrationId) {
+		sp.MigrationId = plan.MigrationId.ValueString()
 	}
-	if v := plan.AddPublicFolderLocation.ValueString(); v != "" {
-		sp.AddPublicFolderLocation = v
+	if !plan.NextLabelPolicy.Equal(state.NextLabelPolicy) {
+		if v := plan.NextLabelPolicy.ValueString(); v != "" {
+			sp.NextLabelPolicy = objectParam(v)
+		}
 	}
-	if v := plan.AddSharePointLocation.ValueString(); v != "" {
-		sp.AddSharePointLocation = v
+	if !plan.PolicyRBACScopes.Equal(state.PolicyRBACScopes) {
+		if !plan.PolicyRBACScopes.IsNull() && !plan.PolicyRBACScopes.IsUnknown() {
+			if v := toStringSlice(ctx, plan.PolicyRBACScopes, &resp.Diagnostics); len(v) > 0 {
+				sp.PolicyRBACScopes = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.PolicyRBACScopes, &resp.Diagnostics); len(rm) > 0 {
+						sp.PolicyRBACScopesDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
 	}
-	if v := plan.AddSharePointLocationException.ValueString(); v != "" {
-		sp.AddSharePointLocationException = v
+	if !plan.PreviousLabelPolicy.Equal(state.PreviousLabelPolicy) {
+		if v := plan.PreviousLabelPolicy.ValueString(); v != "" {
+			sp.PreviousLabelPolicy = objectParam(v)
+		}
 	}
-	if v := plan.AddSkypeLocation.ValueString(); v != "" {
-		sp.AddSkypeLocation = v
+	if !plan.Setting.Equal(state.Setting) {
+		if v := plan.Setting.ValueString(); v != "" {
+			sp.Setting = objectParam(v)
+		}
 	}
-	if v := plan.AddSkypeLocationException.ValueString(); v != "" {
-		sp.AddSkypeLocationException = v
-	}
-	if v := plan.AdvancedSettings.ValueString(); v != "" {
-		sp.AdvancedSettings = v
-	}
-	sp.Comment = plan.Comment.ValueString()
-	if v := plan.ExchangeAdaptiveScopes.ValueString(); v != "" {
-		sp.ExchangeAdaptiveScopes = v
-	}
-	if v := plan.ExchangeAdaptiveScopesException.ValueString(); v != "" {
-		sp.ExchangeAdaptiveScopesException = v
-	}
-	sp.Locations = plan.Locations.ValueString()
-	sp.MigrationId = plan.MigrationId.ValueString()
-	if v := plan.NextLabelPolicy.ValueString(); v != "" {
-		sp.NextLabelPolicy = v
-	}
-	if v := plan.PolicyRBACScopes.ValueString(); v != "" {
-		sp.PolicyRBACScopes = v
-	}
-	if v := plan.PreviousLabelPolicy.ValueString(); v != "" {
-		sp.PreviousLabelPolicy = v
-	}
-	if v := plan.RemoveExchangeLocation.ValueString(); v != "" {
-		sp.RemoveExchangeLocation = v
-	}
-	if v := plan.RemoveExchangeLocationException.ValueString(); v != "" {
-		sp.RemoveExchangeLocationException = v
-	}
-	if v := plan.RemoveLabels.ValueString(); v != "" {
-		sp.RemoveLabels = v
-	}
-	if v := plan.RemoveModernGroupLocation.ValueString(); v != "" {
-		sp.RemoveModernGroupLocation = v
-	}
-	if v := plan.RemoveModernGroupLocationException.ValueString(); v != "" {
-		sp.RemoveModernGroupLocationException = v
-	}
-	if v := plan.RemoveOneDriveLocation.ValueString(); v != "" {
-		sp.RemoveOneDriveLocation = v
-	}
-	if v := plan.RemoveOneDriveLocationException.ValueString(); v != "" {
-		sp.RemoveOneDriveLocationException = v
-	}
-	if v := plan.RemovePublicFolderLocation.ValueString(); v != "" {
-		sp.RemovePublicFolderLocation = v
-	}
-	if v := plan.RemoveSharePointLocation.ValueString(); v != "" {
-		sp.RemoveSharePointLocation = v
-	}
-	if v := plan.RemoveSharePointLocationException.ValueString(); v != "" {
-		sp.RemoveSharePointLocationException = v
-	}
-	if v := plan.RemoveSkypeLocation.ValueString(); v != "" {
-		sp.RemoveSkypeLocation = v
-	}
-	if v := plan.RemoveSkypeLocationException.ValueString(); v != "" {
-		sp.RemoveSkypeLocationException = v
-	}
-	sp.RetryDistribution = plan.RetryDistribution.ValueBool()
-	if v := plan.Setting.ValueString(); v != "" {
-		sp.Setting = v
-	}
-	if v := plan.Settings.ValueString(); v != "" {
-		sp.Settings = v
+	if !plan.Settings.Equal(state.Settings) {
+		if v := plan.Settings.ValueString(); v != "" {
+			sp.Settings = objectParam(v)
+		}
 	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	if _, err := r.client.SCC.SetLabelPolicy(ctx, sp); err != nil {
+	if _, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.SetLabelPolicy, sp, isNotFound); err != nil {
 		resp.Diagnostics.AddError("Set-LabelPolicy failed", err.Error())
 		return
 	}
 	cfg := plan
 	reflected := reconcile.ReflectsFields(map[string]types.String{
-		"AddExchangeLocation":                cfg.AddExchangeLocation,
-		"AddExchangeLocationException":       cfg.AddExchangeLocationException,
-		"AddLabels":                          cfg.AddLabels,
-		"AddModernGroupLocation":             cfg.AddModernGroupLocation,
-		"AddModernGroupLocationException":    cfg.AddModernGroupLocationException,
-		"AddOneDriveLocation":                cfg.AddOneDriveLocation,
-		"AddOneDriveLocationException":       cfg.AddOneDriveLocationException,
-		"AddPublicFolderLocation":            cfg.AddPublicFolderLocation,
-		"AddSharePointLocation":              cfg.AddSharePointLocation,
-		"AddSharePointLocationException":     cfg.AddSharePointLocationException,
-		"AddSkypeLocation":                   cfg.AddSkypeLocation,
-		"AddSkypeLocationException":          cfg.AddSkypeLocationException,
-		"AdvancedSettings":                   cfg.AdvancedSettings,
-		"Comment":                            cfg.Comment,
-		"ExchangeAdaptiveScopes":             cfg.ExchangeAdaptiveScopes,
-		"ExchangeAdaptiveScopesException":    cfg.ExchangeAdaptiveScopesException,
-		"Locations":                          cfg.Locations,
-		"MigrationId":                        cfg.MigrationId,
-		"NextLabelPolicy":                    cfg.NextLabelPolicy,
-		"PolicyRBACScopes":                   cfg.PolicyRBACScopes,
-		"PreviousLabelPolicy":                cfg.PreviousLabelPolicy,
-		"RemoveExchangeLocation":             cfg.RemoveExchangeLocation,
-		"RemoveExchangeLocationException":    cfg.RemoveExchangeLocationException,
-		"RemoveLabels":                       cfg.RemoveLabels,
-		"RemoveModernGroupLocation":          cfg.RemoveModernGroupLocation,
-		"RemoveModernGroupLocationException": cfg.RemoveModernGroupLocationException,
-		"RemoveOneDriveLocation":             cfg.RemoveOneDriveLocation,
-		"RemoveOneDriveLocationException":    cfg.RemoveOneDriveLocationException,
-		"RemovePublicFolderLocation":         cfg.RemovePublicFolderLocation,
-		"RemoveSharePointLocation":           cfg.RemoveSharePointLocation,
-		"RemoveSharePointLocationException":  cfg.RemoveSharePointLocationException,
-		"RemoveSkypeLocation":                cfg.RemoveSkypeLocation,
-		"RemoveSkypeLocationException":       cfg.RemoveSkypeLocationException,
-		"Setting":                            cfg.Setting,
-		"Settings":                           cfg.Settings,
+		"Comment":     cfg.Comment,
+		"Locations":   cfg.Locations,
+		"MigrationId": cfg.MigrationId,
 	}, getString)
 	r.refresh(ctx, id, &plan, &resp.Diagnostics, reflected)
+	if !cfg.ID.IsUnknown() && !cfg.ID.IsNull() {
+		plan.ID = cfg.ID
+	}
 	r.reconcileState(&cfg, &plan)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
@@ -478,106 +429,56 @@ func (r *labelPolicyResource) refresh(ctx context.Context, identity string, m *l
 func readLabelPolicy(ctx context.Context, obj map[string]any, m *labelPolicyModel) {
 	m.ID = types.StringValue(firstNonEmptyStr(getString(obj, "Guid"), getString(obj, "Id"), getString(obj, "Identity")))
 	m.Identity = types.StringValue(firstNonEmptyStr(getString(obj, "Identity"), getString(obj, "Guid"), getString(obj, "Name")))
-	m.AddExchangeLocation = types.StringValue(getString(obj, "AddExchangeLocation"))
-	m.AddExchangeLocationException = types.StringValue(getString(obj, "AddExchangeLocationException"))
-	m.AddLabels = types.StringValue(getString(obj, "AddLabels"))
-	m.AddModernGroupLocation = types.StringValue(getString(obj, "AddModernGroupLocation"))
-	m.AddModernGroupLocationException = types.StringValue(getString(obj, "AddModernGroupLocationException"))
-	m.AddOneDriveLocation = types.StringValue(getString(obj, "AddOneDriveLocation"))
-	m.AddOneDriveLocationException = types.StringValue(getString(obj, "AddOneDriveLocationException"))
-	m.AddPublicFolderLocation = types.StringValue(getString(obj, "AddPublicFolderLocation"))
-	m.AddSharePointLocation = types.StringValue(getString(obj, "AddSharePointLocation"))
-	m.AddSharePointLocationException = types.StringValue(getString(obj, "AddSharePointLocationException"))
-	m.AddSkypeLocation = types.StringValue(getString(obj, "AddSkypeLocation"))
-	m.AddSkypeLocationException = types.StringValue(getString(obj, "AddSkypeLocationException"))
-	m.AdvancedSettings = types.StringValue(getString(obj, "AdvancedSettings"))
+	m.AdvancedSettings = types.StringValue(getObjectJSON(obj, "AdvancedSettings"))
 	m.Comment = types.StringValue(getString(obj, "Comment"))
-	m.ExchangeAdaptiveScopes = types.StringValue(getString(obj, "ExchangeAdaptiveScopes"))
-	m.ExchangeAdaptiveScopesException = types.StringValue(getString(obj, "ExchangeAdaptiveScopesException"))
-	m.ExchangeLocation = types.StringValue(getString(obj, "ExchangeLocation"))
-	m.ExchangeLocationException = types.StringValue(getString(obj, "ExchangeLocationException"))
-	m.Labels = types.StringValue(getString(obj, "Labels"))
+	m.ExchangeAdaptiveScopes = stringSetValue(ctx, getStringSlice(obj, "ExchangeAdaptiveScopes"))
+	m.ExchangeAdaptiveScopesException = stringSetValue(ctx, getStringSlice(obj, "ExchangeAdaptiveScopesException"))
+	m.ExchangeLocation = stringSetValue(ctx, getStringSlice(obj, "ExchangeLocation"))
+	m.ExchangeLocationException = stringSetValue(ctx, getStringSlice(obj, "ExchangeLocationException"))
+	m.Labels = stringSetValue(ctx, getStringSlice(obj, "Labels"))
 	m.Locations = types.StringValue(getString(obj, "Locations"))
 	m.MigrationId = types.StringValue(getString(obj, "MigrationId"))
-	m.ModernGroupLocation = types.StringValue(getString(obj, "ModernGroupLocation"))
-	m.ModernGroupLocationException = types.StringValue(getString(obj, "ModernGroupLocationException"))
+	m.ModernGroupLocation = stringSetValue(ctx, getStringSlice(obj, "ModernGroupLocation"))
+	m.ModernGroupLocationException = stringSetValue(ctx, getStringSlice(obj, "ModernGroupLocationException"))
 	m.Name = types.StringValue(getString(obj, "Name"))
-	m.NextLabelPolicy = types.StringValue(getString(obj, "NextLabelPolicy"))
-	m.OneDriveLocation = types.StringValue(getString(obj, "OneDriveLocation"))
-	m.OneDriveLocationException = types.StringValue(getString(obj, "OneDriveLocationException"))
-	m.PolicyRBACScopes = types.StringValue(getString(obj, "PolicyRBACScopes"))
-	m.PreviousLabelPolicy = types.StringValue(getString(obj, "PreviousLabelPolicy"))
-	m.PublicFolderLocation = types.StringValue(getString(obj, "PublicFolderLocation"))
-	m.RemoveExchangeLocation = types.StringValue(getString(obj, "RemoveExchangeLocation"))
-	m.RemoveExchangeLocationException = types.StringValue(getString(obj, "RemoveExchangeLocationException"))
-	m.RemoveLabels = types.StringValue(getString(obj, "RemoveLabels"))
-	m.RemoveModernGroupLocation = types.StringValue(getString(obj, "RemoveModernGroupLocation"))
-	m.RemoveModernGroupLocationException = types.StringValue(getString(obj, "RemoveModernGroupLocationException"))
-	m.RemoveOneDriveLocation = types.StringValue(getString(obj, "RemoveOneDriveLocation"))
-	m.RemoveOneDriveLocationException = types.StringValue(getString(obj, "RemoveOneDriveLocationException"))
-	m.RemovePublicFolderLocation = types.StringValue(getString(obj, "RemovePublicFolderLocation"))
-	m.RemoveSharePointLocation = types.StringValue(getString(obj, "RemoveSharePointLocation"))
-	m.RemoveSharePointLocationException = types.StringValue(getString(obj, "RemoveSharePointLocationException"))
-	m.RemoveSkypeLocation = types.StringValue(getString(obj, "RemoveSkypeLocation"))
-	m.RemoveSkypeLocationException = types.StringValue(getString(obj, "RemoveSkypeLocationException"))
-	m.RetryDistribution = types.BoolValue(getBool(obj, "RetryDistribution"))
-	m.Setting = types.StringValue(getString(obj, "Setting"))
-	m.Settings = types.StringValue(getString(obj, "Settings"))
-	m.SharePointLocation = types.StringValue(getString(obj, "SharePointLocation"))
-	m.SharePointLocationException = types.StringValue(getString(obj, "SharePointLocationException"))
-	m.SkypeLocation = types.StringValue(getString(obj, "SkypeLocation"))
-	m.SkypeLocationException = types.StringValue(getString(obj, "SkypeLocationException"))
+	m.NextLabelPolicy = types.StringValue(getObjectJSON(obj, "NextLabelPolicy"))
+	m.OneDriveLocation = stringSetValue(ctx, getStringSlice(obj, "OneDriveLocation"))
+	m.OneDriveLocationException = stringSetValue(ctx, getStringSlice(obj, "OneDriveLocationException"))
+	m.PolicyRBACScopes = stringSetValue(ctx, getStringSlice(obj, "PolicyRBACScopes"))
+	m.PreviousLabelPolicy = types.StringValue(getObjectJSON(obj, "PreviousLabelPolicy"))
+	m.PublicFolderLocation = stringSetValue(ctx, getStringSlice(obj, "PublicFolderLocation"))
+	m.Setting = types.StringValue(getObjectJSON(obj, "Setting"))
+	m.Settings = types.StringValue(getObjectJSON(obj, "Settings"))
+	m.SharePointLocation = stringSetValue(ctx, getStringSlice(obj, "SharePointLocation"))
+	m.SharePointLocationException = stringSetValue(ctx, getStringSlice(obj, "SharePointLocationException"))
+	m.SkypeLocation = stringSetValue(ctx, getStringSlice(obj, "SkypeLocation"))
+	m.SkypeLocationException = stringSetValue(ctx, getStringSlice(obj, "SkypeLocationException"))
 	_ = ctx
 }
 
 func (r *labelPolicyResource) reconcileState(cfg, read *labelPolicyModel) {
-	read.AddExchangeLocation = reconcile.KeepStr(cfg.AddExchangeLocation, read.AddExchangeLocation)
-	read.AddExchangeLocationException = reconcile.KeepStr(cfg.AddExchangeLocationException, read.AddExchangeLocationException)
-	read.AddLabels = reconcile.KeepStr(cfg.AddLabels, read.AddLabels)
-	read.AddModernGroupLocation = reconcile.KeepStr(cfg.AddModernGroupLocation, read.AddModernGroupLocation)
-	read.AddModernGroupLocationException = reconcile.KeepStr(cfg.AddModernGroupLocationException, read.AddModernGroupLocationException)
-	read.AddOneDriveLocation = reconcile.KeepStr(cfg.AddOneDriveLocation, read.AddOneDriveLocation)
-	read.AddOneDriveLocationException = reconcile.KeepStr(cfg.AddOneDriveLocationException, read.AddOneDriveLocationException)
-	read.AddPublicFolderLocation = reconcile.KeepStr(cfg.AddPublicFolderLocation, read.AddPublicFolderLocation)
-	read.AddSharePointLocation = reconcile.KeepStr(cfg.AddSharePointLocation, read.AddSharePointLocation)
-	read.AddSharePointLocationException = reconcile.KeepStr(cfg.AddSharePointLocationException, read.AddSharePointLocationException)
-	read.AddSkypeLocation = reconcile.KeepStr(cfg.AddSkypeLocation, read.AddSkypeLocation)
-	read.AddSkypeLocationException = reconcile.KeepStr(cfg.AddSkypeLocationException, read.AddSkypeLocationException)
 	read.AdvancedSettings = reconcile.KeepStr(cfg.AdvancedSettings, read.AdvancedSettings)
 	read.Comment = reconcile.KeepStr(cfg.Comment, read.Comment)
-	read.ExchangeAdaptiveScopes = reconcile.KeepStr(cfg.ExchangeAdaptiveScopes, read.ExchangeAdaptiveScopes)
-	read.ExchangeAdaptiveScopesException = reconcile.KeepStr(cfg.ExchangeAdaptiveScopesException, read.ExchangeAdaptiveScopesException)
-	read.ExchangeLocation = reconcile.KeepStr(cfg.ExchangeLocation, read.ExchangeLocation)
-	read.ExchangeLocationException = reconcile.KeepStr(cfg.ExchangeLocationException, read.ExchangeLocationException)
-	read.Labels = reconcile.KeepStr(cfg.Labels, read.Labels)
+	read.ExchangeAdaptiveScopes = reconcile.KeepSet(cfg.ExchangeAdaptiveScopes, read.ExchangeAdaptiveScopes)
+	read.ExchangeAdaptiveScopesException = reconcile.KeepSet(cfg.ExchangeAdaptiveScopesException, read.ExchangeAdaptiveScopesException)
+	read.ExchangeLocation = reconcile.KeepSet(cfg.ExchangeLocation, read.ExchangeLocation)
+	read.ExchangeLocationException = reconcile.KeepSet(cfg.ExchangeLocationException, read.ExchangeLocationException)
+	read.Labels = reconcile.KeepSet(cfg.Labels, read.Labels)
 	read.Locations = reconcile.KeepStr(cfg.Locations, read.Locations)
 	read.MigrationId = reconcile.KeepStr(cfg.MigrationId, read.MigrationId)
-	read.ModernGroupLocation = reconcile.KeepStr(cfg.ModernGroupLocation, read.ModernGroupLocation)
-	read.ModernGroupLocationException = reconcile.KeepStr(cfg.ModernGroupLocationException, read.ModernGroupLocationException)
+	read.ModernGroupLocation = reconcile.KeepSet(cfg.ModernGroupLocation, read.ModernGroupLocation)
+	read.ModernGroupLocationException = reconcile.KeepSet(cfg.ModernGroupLocationException, read.ModernGroupLocationException)
 	read.Name = reconcile.KeepStr(cfg.Name, read.Name)
 	read.NextLabelPolicy = reconcile.KeepStr(cfg.NextLabelPolicy, read.NextLabelPolicy)
-	read.OneDriveLocation = reconcile.KeepStr(cfg.OneDriveLocation, read.OneDriveLocation)
-	read.OneDriveLocationException = reconcile.KeepStr(cfg.OneDriveLocationException, read.OneDriveLocationException)
-	read.PolicyRBACScopes = reconcile.KeepStr(cfg.PolicyRBACScopes, read.PolicyRBACScopes)
+	read.OneDriveLocation = reconcile.KeepSet(cfg.OneDriveLocation, read.OneDriveLocation)
+	read.OneDriveLocationException = reconcile.KeepSet(cfg.OneDriveLocationException, read.OneDriveLocationException)
+	read.PolicyRBACScopes = reconcile.KeepSet(cfg.PolicyRBACScopes, read.PolicyRBACScopes)
 	read.PreviousLabelPolicy = reconcile.KeepStr(cfg.PreviousLabelPolicy, read.PreviousLabelPolicy)
-	read.PublicFolderLocation = reconcile.KeepStr(cfg.PublicFolderLocation, read.PublicFolderLocation)
-	read.RemoveExchangeLocation = reconcile.KeepStr(cfg.RemoveExchangeLocation, read.RemoveExchangeLocation)
-	read.RemoveExchangeLocationException = reconcile.KeepStr(cfg.RemoveExchangeLocationException, read.RemoveExchangeLocationException)
-	read.RemoveLabels = reconcile.KeepStr(cfg.RemoveLabels, read.RemoveLabels)
-	read.RemoveModernGroupLocation = reconcile.KeepStr(cfg.RemoveModernGroupLocation, read.RemoveModernGroupLocation)
-	read.RemoveModernGroupLocationException = reconcile.KeepStr(cfg.RemoveModernGroupLocationException, read.RemoveModernGroupLocationException)
-	read.RemoveOneDriveLocation = reconcile.KeepStr(cfg.RemoveOneDriveLocation, read.RemoveOneDriveLocation)
-	read.RemoveOneDriveLocationException = reconcile.KeepStr(cfg.RemoveOneDriveLocationException, read.RemoveOneDriveLocationException)
-	read.RemovePublicFolderLocation = reconcile.KeepStr(cfg.RemovePublicFolderLocation, read.RemovePublicFolderLocation)
-	read.RemoveSharePointLocation = reconcile.KeepStr(cfg.RemoveSharePointLocation, read.RemoveSharePointLocation)
-	read.RemoveSharePointLocationException = reconcile.KeepStr(cfg.RemoveSharePointLocationException, read.RemoveSharePointLocationException)
-	read.RemoveSkypeLocation = reconcile.KeepStr(cfg.RemoveSkypeLocation, read.RemoveSkypeLocation)
-	read.RemoveSkypeLocationException = reconcile.KeepStr(cfg.RemoveSkypeLocationException, read.RemoveSkypeLocationException)
-	read.RetryDistribution = reconcile.KeepBool(cfg.RetryDistribution, read.RetryDistribution)
+	read.PublicFolderLocation = reconcile.KeepSet(cfg.PublicFolderLocation, read.PublicFolderLocation)
 	read.Setting = reconcile.KeepStr(cfg.Setting, read.Setting)
 	read.Settings = reconcile.KeepStr(cfg.Settings, read.Settings)
-	read.SharePointLocation = reconcile.KeepStr(cfg.SharePointLocation, read.SharePointLocation)
-	read.SharePointLocationException = reconcile.KeepStr(cfg.SharePointLocationException, read.SharePointLocationException)
-	read.SkypeLocation = reconcile.KeepStr(cfg.SkypeLocation, read.SkypeLocation)
-	read.SkypeLocationException = reconcile.KeepStr(cfg.SkypeLocationException, read.SkypeLocationException)
+	read.SharePointLocation = reconcile.KeepSet(cfg.SharePointLocation, read.SharePointLocation)
+	read.SharePointLocationException = reconcile.KeepSet(cfg.SharePointLocationException, read.SharePointLocationException)
+	read.SkypeLocation = reconcile.KeepSet(cfg.SkypeLocation, read.SkypeLocation)
+	read.SkypeLocationException = reconcile.KeepSet(cfg.SkypeLocationException, read.SkypeLocationException)
 }

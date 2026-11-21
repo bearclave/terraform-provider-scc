@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -25,6 +26,7 @@ var (
 	_ resource.Resource                = &dlpSensitiveInformationTypeConfigResource{}
 	_ resource.ResourceWithConfigure   = &dlpSensitiveInformationTypeConfigResource{}
 	_ resource.ResourceWithImportState = &dlpSensitiveInformationTypeConfigResource{}
+	_ resource.ResourceWithModifyPlan  = &dlpSensitiveInformationTypeConfigResource{}
 )
 
 type dlpSensitiveInformationTypeConfigResource struct{ client *clients.Client }
@@ -35,9 +37,10 @@ func NewDlpSensitiveInformationTypeConfigResource() resource.Resource {
 }
 
 type dlpSensitiveInformationTypeConfigModel struct {
-	ID                types.String `tfsdk:"id"`
-	Identity          types.String `tfsdk:"identity"`
-	RegExGrammarLimit types.Bool   `tfsdk:"reg_ex_grammar_limit"`
+	ID                   types.String `tfsdk:"id"`
+	Identity             types.String `tfsdk:"identity"`
+	FingerprintThreshold types.Int64  `tfsdk:"fingerprint_threshold"`
+	RegExGrammarLimit    types.Bool   `tfsdk:"reg_ex_grammar_limit"`
 }
 
 func (r *dlpSensitiveInformationTypeConfigResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -48,9 +51,10 @@ func (r *dlpSensitiveInformationTypeConfigResource) Schema(_ context.Context, _ 
 	resp.Schema = schema.Schema{
 		Description: "Manages the DlpSensitiveInformationTypeConfig configuration via Set-DlpSensitiveInformationTypeConfig.",
 		Attributes: map[string]schema.Attribute{
-			"id":                   schema.StringAttribute{Computed: true, Description: "Object identifier (GUID).", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"identity":             schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets."},
-			"reg_ex_grammar_limit": schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -RegExGrammarLimit parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
+			"id":                    schema.StringAttribute{Computed: true, Description: "Object identifier (GUID).", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"identity":              schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"fingerprint_threshold": schema.Int64Attribute{Optional: true, Computed: true, Description: "Maps to the -FingerprintThreshold parameter.", PlanModifiers: []planmodifier.Int64{int64planmodifier.UseStateForUnknown()}},
+			"reg_ex_grammar_limit":  schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -RegExGrammarLimit parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
 		},
 	}
 }
@@ -68,12 +72,26 @@ func (r *dlpSensitiveInformationTypeConfigResource) Create(ctx context.Context, 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	sp := purview.SetDlpSensitiveInformationTypeConfigParams{}
-	sp.RegExGrammarLimit = plan.RegExGrammarLimit.ValueBool()
+	var config dlpSensitiveInformationTypeConfigModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	if _, err := r.client.SCC.SetDlpSensitiveInformationTypeConfig(ctx, sp); err != nil {
+	sp := purview.SetDlpSensitiveInformationTypeConfigParams{}
+	if !config.FingerprintThreshold.IsNull() {
+		if !plan.FingerprintThreshold.IsUnknown() {
+			sp.FingerprintThreshold = plan.FingerprintThreshold.ValueInt64Pointer()
+		}
+	}
+	if !config.RegExGrammarLimit.IsNull() {
+		if !plan.RegExGrammarLimit.IsUnknown() {
+			sp.RegExGrammarLimit = plan.RegExGrammarLimit.ValueBoolPointer()
+		}
+	}
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	if _, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.SetDlpSensitiveInformationTypeConfig, sp, isNotFound); err != nil {
 		resp.Diagnostics.AddError("Set-DlpSensitiveInformationTypeConfig failed", err.Error())
 		return
 	}
@@ -108,17 +126,41 @@ func (r *dlpSensitiveInformationTypeConfigResource) Update(ctx context.Context, 
 	}
 	id := r.identityOf(state)
 	sp := purview.SetDlpSensitiveInformationTypeConfigParams{}
-	sp.RegExGrammarLimit = plan.RegExGrammarLimit.ValueBool()
+	if !plan.FingerprintThreshold.Equal(state.FingerprintThreshold) {
+		if !plan.FingerprintThreshold.IsUnknown() {
+			sp.FingerprintThreshold = plan.FingerprintThreshold.ValueInt64Pointer()
+		}
+	}
+	if !plan.RegExGrammarLimit.Equal(state.RegExGrammarLimit) {
+		if !plan.RegExGrammarLimit.IsUnknown() {
+			sp.RegExGrammarLimit = plan.RegExGrammarLimit.ValueBoolPointer()
+		}
+	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	if _, err := r.client.SCC.SetDlpSensitiveInformationTypeConfig(ctx, sp); err != nil {
+	if _, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.SetDlpSensitiveInformationTypeConfig, sp, isNotFound); err != nil {
 		resp.Diagnostics.AddError("Set-DlpSensitiveInformationTypeConfig failed", err.Error())
 		return
 	}
 	cfg := plan
 	reflected := reconcile.ReflectsFields(map[string]types.String{}, getString)
+	if !cfg.FingerprintThreshold.IsUnknown() && !cfg.FingerprintThreshold.IsNull() && !cfg.FingerprintThreshold.Equal(state.FingerprintThreshold) {
+		prev, want := reflected, cfg.FingerprintThreshold.ValueInt64()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["FingerprintThreshold"] == nil || getInt(obj, "FingerprintThreshold") == want)
+		}
+	}
+	if !cfg.RegExGrammarLimit.IsUnknown() && !cfg.RegExGrammarLimit.IsNull() && !cfg.RegExGrammarLimit.Equal(state.RegExGrammarLimit) {
+		prev, want := reflected, cfg.RegExGrammarLimit.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["RegExGrammarLimit"] == nil || getBool(obj, "RegExGrammarLimit") == want)
+		}
+	}
 	r.refresh(ctx, id, &plan, &resp.Diagnostics, reflected)
+	if !cfg.ID.IsUnknown() && !cfg.ID.IsNull() {
+		plan.ID = cfg.ID
+	}
 	r.reconcileState(&cfg, &plan)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
@@ -130,6 +172,40 @@ func (r *dlpSensitiveInformationTypeConfigResource) Delete(_ context.Context, _ 
 func (r *dlpSensitiveInformationTypeConfigResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("id"), req.ID)...)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("identity"), req.ID)...)
+}
+
+func (r *dlpSensitiveInformationTypeConfigResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
+	if req.Plan.Raw.IsNull() || !req.State.Raw.IsNull() || r.client == nil {
+		return
+	}
+	var plan dlpSensitiveInformationTypeConfigModel
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	res, err := r.client.SCC.GetDlpSensitiveInformationTypeConfig(ctx, purview.GetDlpSensitiveInformationTypeConfigParams{})
+	if err != nil {
+		return
+	}
+	obj := firstObject(res.Value)
+	if obj == nil {
+		return
+	}
+	var cur dlpSensitiveInformationTypeConfigModel
+	readDlpSensitiveInformationTypeConfig(ctx, obj, &cur)
+	if plan.ID.IsUnknown() {
+		plan.ID = cur.ID
+	}
+	if plan.Identity.IsUnknown() {
+		plan.Identity = cur.Identity
+	}
+	if plan.FingerprintThreshold.IsUnknown() {
+		plan.FingerprintThreshold = cur.FingerprintThreshold
+	}
+	if plan.RegExGrammarLimit.IsUnknown() {
+		plan.RegExGrammarLimit = cur.RegExGrammarLimit
+	}
+	resp.Diagnostics.Append(resp.Plan.Set(ctx, &plan)...)
 }
 
 func (r *dlpSensitiveInformationTypeConfigResource) identityOf(m dlpSensitiveInformationTypeConfigModel) string {
@@ -170,10 +246,12 @@ func (r *dlpSensitiveInformationTypeConfigResource) refresh(ctx context.Context,
 func readDlpSensitiveInformationTypeConfig(ctx context.Context, obj map[string]any, m *dlpSensitiveInformationTypeConfigModel) {
 	m.ID = types.StringValue(firstNonEmptyStr(getString(obj, "Guid"), getString(obj, "Id"), getString(obj, "Identity")))
 	m.Identity = types.StringValue(firstNonEmptyStr(getString(obj, "Identity"), getString(obj, "Guid"), getString(obj, "Name")))
+	m.FingerprintThreshold = types.Int64Value(getInt(obj, "FingerprintThreshold"))
 	m.RegExGrammarLimit = types.BoolValue(getBool(obj, "RegExGrammarLimit"))
 	_ = ctx
 }
 
 func (r *dlpSensitiveInformationTypeConfigResource) reconcileState(cfg, read *dlpSensitiveInformationTypeConfigModel) {
+	read.FingerprintThreshold = reconcile.KeepInt64(cfg.FingerprintThreshold, read.FingerprintThreshold)
 	read.RegExGrammarLimit = reconcile.KeepBool(cfg.RegExGrammarLimit, read.RegExGrammarLimit)
 }

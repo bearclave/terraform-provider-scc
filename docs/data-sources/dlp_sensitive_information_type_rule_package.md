@@ -21,6 +21,6 @@ Look up an existing DlpSensitiveInformationTypeRulePackage object. Set identity 
 
 ### Read-Only
 
-- `file_data` (Set of String) Maps to the -FileData parameter.
+- `file_data` (String) Maps to the -FileData parameter.
 - `id` (String) Object identifier (GUID).
 - `migration_id` (String) Maps to the -MigrationId parameter.

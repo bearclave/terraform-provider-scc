@@ -51,7 +51,7 @@ func (r *protectionCompliancePolicyResource) Schema(_ context.Context, _ resourc
 		Description: "Manages the ProtectionCompliancePolicy object via New-ProtectionCompliancePolicy / Get-ProtectionCompliancePolicy / Set-ProtectionCompliancePolicy / Remove-ProtectionCompliancePolicy.",
 		Attributes: map[string]schema.Attribute{
 			"id":        schema.StringAttribute{Computed: true, Description: "Object identifier (GUID).", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"identity":  schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets."},
+			"identity":  schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"enabled":   schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -Enabled parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
 			"locations": schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -Locations parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"name":      schema.StringAttribute{Required: true, Description: "Maps to the -Name parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
@@ -73,15 +73,28 @@ func (r *protectionCompliancePolicyResource) Create(ctx context.Context, req res
 		return
 	}
 
-	p := purview.NewProtectionCompliancePolicyParams{
-		Enabled:   plan.Enabled.ValueBool(),
-		Locations: plan.Locations.ValueString(),
-		Name:      plan.Name.ValueString(),
+	var config protectionCompliancePolicyModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	p := purview.NewProtectionCompliancePolicyParams{}
+	if !config.Enabled.IsNull() {
+		if !plan.Enabled.IsUnknown() {
+			p.Enabled = plan.Enabled.ValueBoolPointer()
+		}
+	}
+	if !config.Locations.IsNull() {
+		p.Locations = plan.Locations.ValueString()
+	}
+	if !config.Name.IsNull() {
+		p.Name = plan.Name.ValueString()
 	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	res, err := r.client.SCC.NewProtectionCompliancePolicy(ctx, p)
+	res, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.NewProtectionCompliancePolicy, p, isNotFound)
 	if err != nil {
 		resp.Diagnostics.AddError("New-ProtectionCompliancePolicy failed", err.Error())
 		return
@@ -128,12 +141,18 @@ func (r *protectionCompliancePolicyResource) Update(ctx context.Context, req res
 	id := r.identityOf(state)
 	sp := purview.SetProtectionCompliancePolicyParams{}
 	sp.Identity = id
-	sp.Enabled = plan.Enabled.ValueBool()
-	sp.Locations = plan.Locations.ValueString()
+	if !plan.Enabled.Equal(state.Enabled) {
+		if !plan.Enabled.IsUnknown() {
+			sp.Enabled = plan.Enabled.ValueBoolPointer()
+		}
+	}
+	if !plan.Locations.Equal(state.Locations) {
+		sp.Locations = plan.Locations.ValueString()
+	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	if _, err := r.client.SCC.SetProtectionCompliancePolicy(ctx, sp); err != nil {
+	if _, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.SetProtectionCompliancePolicy, sp, isNotFound); err != nil {
 		resp.Diagnostics.AddError("Set-ProtectionCompliancePolicy failed", err.Error())
 		return
 	}
@@ -141,7 +160,16 @@ func (r *protectionCompliancePolicyResource) Update(ctx context.Context, req res
 	reflected := reconcile.ReflectsFields(map[string]types.String{
 		"Locations": cfg.Locations,
 	}, getString)
+	if !cfg.Enabled.IsUnknown() && !cfg.Enabled.IsNull() && !cfg.Enabled.Equal(state.Enabled) {
+		prev, want := reflected, cfg.Enabled.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["Enabled"] == nil || getBool(obj, "Enabled") == want)
+		}
+	}
 	r.refresh(ctx, id, &plan, &resp.Diagnostics, reflected)
+	if !cfg.ID.IsUnknown() && !cfg.ID.IsNull() {
+		plan.ID = cfg.ID
+	}
 	r.reconcileState(&cfg, &plan)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }

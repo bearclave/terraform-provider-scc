@@ -61,7 +61,7 @@ func (r *privacyManagementPolicyResource) Schema(_ context.Context, _ resource.S
 		Description: "Manages the PrivacyManagementPolicy object via New-PrivacyManagementPolicy / Get-PrivacyManagementPolicy / Set-PrivacyManagementPolicy / Remove-PrivacyManagementPolicy.",
 		Attributes: map[string]schema.Attribute{
 			"id":                             schema.StringAttribute{Computed: true, Description: "Object identifier (GUID).", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"identity":                       schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets."},
+			"identity":                       schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"comment":                        schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -Comment parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"enabled":                        schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -Enabled parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
 			"exchange_location":              schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ExchangeLocation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace(), stringplanmodifier.UseStateForUnknown()}},
@@ -93,45 +93,58 @@ func (r *privacyManagementPolicyResource) Create(ctx context.Context, req resour
 		return
 	}
 
-	p := purview.NewPrivacyManagementPolicyParams{
-		Comment: plan.Comment.ValueString(),
-		Enabled: plan.Enabled.ValueBool(),
-		Name:    plan.Name.ValueString(),
+	var config privacyManagementPolicyModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
+	if resp.Diagnostics.HasError() {
+		return
 	}
-	if v := plan.ExchangeLocation.ValueString(); v != "" {
-		p.ExchangeLocation = v
+
+	p := purview.NewPrivacyManagementPolicyParams{}
+	if !config.Comment.IsNull() {
+		p.Comment = plan.Comment.ValueString()
 	}
-	if v := plan.ExchangeLocationException.ValueString(); v != "" {
-		p.ExchangeLocationException = v
+	if !config.Enabled.IsNull() {
+		if !plan.Enabled.IsUnknown() {
+			p.Enabled = plan.Enabled.ValueBoolPointer()
+		}
 	}
-	if v := plan.Mode.ValueString(); v != "" {
-		p.Mode = v
+	if v := config.ExchangeLocation.ValueString(); v != "" {
+		p.ExchangeLocation = objectParam(v)
 	}
-	if v := plan.OneDriveLocation.ValueString(); v != "" {
-		p.OneDriveLocation = v
+	if v := config.ExchangeLocationException.ValueString(); v != "" {
+		p.ExchangeLocationException = objectParam(v)
 	}
-	if v := plan.OneDriveLocationException.ValueString(); v != "" {
-		p.OneDriveLocationException = v
+	if v := config.Mode.ValueString(); v != "" {
+		p.Mode = objectParam(v)
 	}
-	if v := plan.PrivacyManagementScenario.ValueString(); v != "" {
-		p.PrivacyManagementScenario = v
+	if !config.Name.IsNull() {
+		p.Name = plan.Name.ValueString()
 	}
-	if v := plan.SharePointLocation.ValueString(); v != "" {
-		p.SharePointLocation = v
+	if v := config.OneDriveLocation.ValueString(); v != "" {
+		p.OneDriveLocation = objectParam(v)
 	}
-	if v := plan.SharePointLocationException.ValueString(); v != "" {
-		p.SharePointLocationException = v
+	if v := config.OneDriveLocationException.ValueString(); v != "" {
+		p.OneDriveLocationException = objectParam(v)
 	}
-	if v := plan.TeamsLocation.ValueString(); v != "" {
-		p.TeamsLocation = v
+	if v := config.PrivacyManagementScenario.ValueString(); v != "" {
+		p.PrivacyManagementScenario = objectParam(v)
 	}
-	if v := plan.TeamsLocationException.ValueString(); v != "" {
-		p.TeamsLocationException = v
+	if v := config.SharePointLocation.ValueString(); v != "" {
+		p.SharePointLocation = objectParam(v)
+	}
+	if v := config.SharePointLocationException.ValueString(); v != "" {
+		p.SharePointLocationException = objectParam(v)
+	}
+	if v := config.TeamsLocation.ValueString(); v != "" {
+		p.TeamsLocation = objectParam(v)
+	}
+	if v := config.TeamsLocationException.ValueString(); v != "" {
+		p.TeamsLocationException = objectParam(v)
 	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	res, err := r.client.SCC.NewPrivacyManagementPolicy(ctx, p)
+	res, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.NewPrivacyManagementPolicy, p, isNotFound)
 	if err != nil {
 		resp.Diagnostics.AddError("New-PrivacyManagementPolicy failed", err.Error())
 		return
@@ -178,24 +191,40 @@ func (r *privacyManagementPolicyResource) Update(ctx context.Context, req resour
 	id := r.identityOf(state)
 	sp := purview.SetPrivacyManagementPolicyParams{}
 	sp.Identity = id
-	sp.Comment = plan.Comment.ValueString()
-	sp.Enabled = plan.Enabled.ValueBool()
-	if v := plan.Mode.ValueString(); v != "" {
-		sp.Mode = v
+	if !plan.Comment.Equal(state.Comment) {
+		sp.Comment = plan.Comment.ValueString()
+	}
+	if !plan.Enabled.Equal(state.Enabled) {
+		if !plan.Enabled.IsUnknown() {
+			sp.Enabled = plan.Enabled.ValueBoolPointer()
+		}
+	}
+	if !plan.Mode.Equal(state.Mode) {
+		if v := plan.Mode.ValueString(); v != "" {
+			sp.Mode = objectParam(v)
+		}
 	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	if _, err := r.client.SCC.SetPrivacyManagementPolicy(ctx, sp); err != nil {
+	if _, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.SetPrivacyManagementPolicy, sp, isNotFound); err != nil {
 		resp.Diagnostics.AddError("Set-PrivacyManagementPolicy failed", err.Error())
 		return
 	}
 	cfg := plan
 	reflected := reconcile.ReflectsFields(map[string]types.String{
 		"Comment": cfg.Comment,
-		"Mode":    cfg.Mode,
 	}, getString)
+	if !cfg.Enabled.IsUnknown() && !cfg.Enabled.IsNull() && !cfg.Enabled.Equal(state.Enabled) {
+		prev, want := reflected, cfg.Enabled.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["Enabled"] == nil || getBool(obj, "Enabled") == want)
+		}
+	}
 	r.refresh(ctx, id, &plan, &resp.Diagnostics, reflected)
+	if !cfg.ID.IsUnknown() && !cfg.ID.IsNull() {
+		plan.ID = cfg.ID
+	}
 	r.reconcileState(&cfg, &plan)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
@@ -257,17 +286,17 @@ func readPrivacyManagementPolicy(ctx context.Context, obj map[string]any, m *pri
 	m.Identity = types.StringValue(firstNonEmptyStr(getString(obj, "Identity"), getString(obj, "Guid"), getString(obj, "Name")))
 	m.Comment = types.StringValue(getString(obj, "Comment"))
 	m.Enabled = types.BoolValue(getBool(obj, "Enabled"))
-	m.ExchangeLocation = types.StringValue(getString(obj, "ExchangeLocation"))
-	m.ExchangeLocationException = types.StringValue(getString(obj, "ExchangeLocationException"))
-	m.Mode = types.StringValue(getString(obj, "Mode"))
+	m.ExchangeLocation = types.StringValue(getObjectJSON(obj, "ExchangeLocation"))
+	m.ExchangeLocationException = types.StringValue(getObjectJSON(obj, "ExchangeLocationException"))
+	m.Mode = types.StringValue(getObjectJSON(obj, "Mode"))
 	m.Name = types.StringValue(getString(obj, "Name"))
-	m.OneDriveLocation = types.StringValue(getString(obj, "OneDriveLocation"))
-	m.OneDriveLocationException = types.StringValue(getString(obj, "OneDriveLocationException"))
-	m.PrivacyManagementScenario = types.StringValue(getString(obj, "PrivacyManagementScenario"))
-	m.SharePointLocation = types.StringValue(getString(obj, "SharePointLocation"))
-	m.SharePointLocationException = types.StringValue(getString(obj, "SharePointLocationException"))
-	m.TeamsLocation = types.StringValue(getString(obj, "TeamsLocation"))
-	m.TeamsLocationException = types.StringValue(getString(obj, "TeamsLocationException"))
+	m.OneDriveLocation = types.StringValue(getObjectJSON(obj, "OneDriveLocation"))
+	m.OneDriveLocationException = types.StringValue(getObjectJSON(obj, "OneDriveLocationException"))
+	m.PrivacyManagementScenario = types.StringValue(getObjectJSON(obj, "PrivacyManagementScenario"))
+	m.SharePointLocation = types.StringValue(getObjectJSON(obj, "SharePointLocation"))
+	m.SharePointLocationException = types.StringValue(getObjectJSON(obj, "SharePointLocationException"))
+	m.TeamsLocation = types.StringValue(getObjectJSON(obj, "TeamsLocation"))
+	m.TeamsLocationException = types.StringValue(getObjectJSON(obj, "TeamsLocationException"))
 	_ = ctx
 }
 

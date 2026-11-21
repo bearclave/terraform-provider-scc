@@ -9,7 +9,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
@@ -35,8 +37,8 @@ type deviceTenantRuleModel struct {
 	ID                      types.String `tfsdk:"id"`
 	Identity                types.String `tfsdk:"identity"`
 	ApplyPolicyTo           types.String `tfsdk:"apply_policy_to"`
-	BlockUnsupportedDevices types.String `tfsdk:"block_unsupported_devices"`
-	ExclusionList           types.String `tfsdk:"exclusion_list"`
+	BlockUnsupportedDevices types.Bool   `tfsdk:"block_unsupported_devices"`
+	ExclusionList           types.Set    `tfsdk:"exclusion_list"`
 }
 
 func (r *deviceTenantRuleResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -48,10 +50,10 @@ func (r *deviceTenantRuleResource) Schema(_ context.Context, _ resource.SchemaRe
 		Description: "Manages the DeviceTenantRule object via New-DeviceTenantRule / Get-DeviceTenantRule / Set-DeviceTenantRule / Remove-DeviceTenantRule.",
 		Attributes: map[string]schema.Attribute{
 			"id":                        schema.StringAttribute{Computed: true, Description: "Object identifier (GUID).", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"identity":                  schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets."},
+			"identity":                  schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"apply_policy_to":           schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ApplyPolicyTo parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"block_unsupported_devices": schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -BlockUnsupportedDevices parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"exclusion_list":            schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ExclusionList parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"block_unsupported_devices": schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -BlockUnsupportedDevices parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
+			"exclusion_list":            schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -ExclusionList parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
 		},
 	}
 }
@@ -70,20 +72,30 @@ func (r *deviceTenantRuleResource) Create(ctx context.Context, req resource.Crea
 		return
 	}
 
+	var config deviceTenantRuleModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	p := purview.NewDeviceTenantRuleParams{}
-	if v := plan.ApplyPolicyTo.ValueString(); v != "" {
-		p.ApplyPolicyTo = v
+	if v := config.ApplyPolicyTo.ValueString(); v != "" {
+		p.ApplyPolicyTo = objectParam(v)
 	}
-	if v := plan.BlockUnsupportedDevices.ValueString(); v != "" {
-		p.BlockUnsupportedDevices = v
+	if !config.BlockUnsupportedDevices.IsNull() {
+		if !plan.BlockUnsupportedDevices.IsUnknown() {
+			p.BlockUnsupportedDevices = plan.BlockUnsupportedDevices.ValueBoolPointer()
+		}
 	}
-	if v := plan.ExclusionList.ValueString(); v != "" {
-		p.ExclusionList = v
+	if !config.ExclusionList.IsNull() {
+		if v := toStringSlice(ctx, plan.ExclusionList, &resp.Diagnostics); len(v) > 0 {
+			p.ExclusionList = v
+		}
 	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	res, err := r.client.SCC.NewDeviceTenantRule(ctx, p)
+	res, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.NewDeviceTenantRule, p, isNotFound)
 	if err != nil {
 		resp.Diagnostics.AddError("New-DeviceTenantRule failed", err.Error())
 		return
@@ -130,29 +142,62 @@ func (r *deviceTenantRuleResource) Update(ctx context.Context, req resource.Upda
 	id := r.identityOf(state)
 	sp := purview.SetDeviceTenantRuleParams{}
 	sp.Identity = id
-	if v := plan.ApplyPolicyTo.ValueString(); v != "" {
-		sp.ApplyPolicyTo = v
+	var cur *deviceTenantRuleModel
+	curRead := false
+	current := func() *deviceTenantRuleModel {
+		if !curRead {
+			curRead = true
+			var m deviceTenantRuleModel
+			if r.refresh(ctx, id, &m, &resp.Diagnostics, nil) {
+				cur = &m
+			} else if !resp.Diagnostics.HasError() {
+				resp.Diagnostics.AddError("Get-DeviceTenantRule failed", "the object could not be read to determine the list values to remove; nothing was changed")
+			}
+		}
+		return cur
 	}
-	if v := plan.BlockUnsupportedDevices.ValueString(); v != "" {
-		sp.BlockUnsupportedDevices = v
+	if !plan.ApplyPolicyTo.Equal(state.ApplyPolicyTo) {
+		if v := plan.ApplyPolicyTo.ValueString(); v != "" {
+			sp.ApplyPolicyTo = objectParam(v)
+		}
 	}
-	if v := plan.ExclusionList.ValueString(); v != "" {
-		sp.ExclusionList = v
+	if !plan.BlockUnsupportedDevices.Equal(state.BlockUnsupportedDevices) {
+		if !plan.BlockUnsupportedDevices.IsUnknown() {
+			sp.BlockUnsupportedDevices = plan.BlockUnsupportedDevices.ValueBoolPointer()
+		}
+	}
+	if !plan.ExclusionList.Equal(state.ExclusionList) {
+		if !plan.ExclusionList.IsNull() && !plan.ExclusionList.IsUnknown() {
+			if v := toStringSlice(ctx, plan.ExclusionList, &resp.Diagnostics); len(v) > 0 {
+				sp.ExclusionList = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.ExclusionList, &resp.Diagnostics); len(rm) > 0 {
+						sp.ExclusionListDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
 	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	if _, err := r.client.SCC.SetDeviceTenantRule(ctx, sp); err != nil {
+	if _, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.SetDeviceTenantRule, sp, isNotFound); err != nil {
 		resp.Diagnostics.AddError("Set-DeviceTenantRule failed", err.Error())
 		return
 	}
 	cfg := plan
-	reflected := reconcile.ReflectsFields(map[string]types.String{
-		"ApplyPolicyTo":           cfg.ApplyPolicyTo,
-		"BlockUnsupportedDevices": cfg.BlockUnsupportedDevices,
-		"ExclusionList":           cfg.ExclusionList,
-	}, getString)
+	reflected := reconcile.ReflectsFields(map[string]types.String{}, getString)
+	if !cfg.BlockUnsupportedDevices.IsUnknown() && !cfg.BlockUnsupportedDevices.IsNull() && !cfg.BlockUnsupportedDevices.Equal(state.BlockUnsupportedDevices) {
+		prev, want := reflected, cfg.BlockUnsupportedDevices.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["BlockUnsupportedDevices"] == nil || getBool(obj, "BlockUnsupportedDevices") == want)
+		}
+	}
 	r.refresh(ctx, id, &plan, &resp.Diagnostics, reflected)
+	if !cfg.ID.IsUnknown() && !cfg.ID.IsNull() {
+		plan.ID = cfg.ID
+	}
 	r.reconcileState(&cfg, &plan)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
@@ -212,14 +257,14 @@ func (r *deviceTenantRuleResource) refresh(ctx context.Context, identity string,
 func readDeviceTenantRule(ctx context.Context, obj map[string]any, m *deviceTenantRuleModel) {
 	m.ID = types.StringValue(firstNonEmptyStr(getString(obj, "Guid"), getString(obj, "Id"), getString(obj, "Identity")))
 	m.Identity = types.StringValue(firstNonEmptyStr(getString(obj, "Identity"), getString(obj, "Guid"), getString(obj, "Name")))
-	m.ApplyPolicyTo = types.StringValue(getString(obj, "ApplyPolicyTo"))
-	m.BlockUnsupportedDevices = types.StringValue(getString(obj, "BlockUnsupportedDevices"))
-	m.ExclusionList = types.StringValue(getString(obj, "ExclusionList"))
+	m.ApplyPolicyTo = types.StringValue(getObjectJSON(obj, "ApplyPolicyTo"))
+	m.BlockUnsupportedDevices = types.BoolValue(getBool(obj, "BlockUnsupportedDevices"))
+	m.ExclusionList = stringSetValue(ctx, getStringSlice(obj, "ExclusionList"))
 	_ = ctx
 }
 
 func (r *deviceTenantRuleResource) reconcileState(cfg, read *deviceTenantRuleModel) {
 	read.ApplyPolicyTo = reconcile.KeepStr(cfg.ApplyPolicyTo, read.ApplyPolicyTo)
-	read.BlockUnsupportedDevices = reconcile.KeepStr(cfg.BlockUnsupportedDevices, read.BlockUnsupportedDevices)
-	read.ExclusionList = reconcile.KeepStr(cfg.ExclusionList, read.ExclusionList)
+	read.BlockUnsupportedDevices = reconcile.KeepBool(cfg.BlockUnsupportedDevices, read.BlockUnsupportedDevices)
+	read.ExclusionList = reconcile.KeepSet(cfg.ExclusionList, read.ExclusionList)
 }

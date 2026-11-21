@@ -41,8 +41,8 @@ func (d *deviceTenantRuleListDataSource) Schema(_ context.Context, _ datasource.
 				"id":                        schema.StringAttribute{Computed: true, Description: "Object identifier (GUID)."},
 				"identity":                  schema.StringAttribute{Computed: true, Description: "Identity used to target the object."},
 				"apply_policy_to":           schema.StringAttribute{Computed: true, Description: "Maps to the -ApplyPolicyTo parameter."},
-				"block_unsupported_devices": schema.StringAttribute{Computed: true, Description: "Maps to the -BlockUnsupportedDevices parameter."},
-				"exclusion_list":            schema.StringAttribute{Computed: true, Description: "Maps to the -ExclusionList parameter."},
+				"block_unsupported_devices": schema.BoolAttribute{Computed: true, Description: "Maps to the -BlockUnsupportedDevices parameter."},
+				"exclusion_list":            schema.SetAttribute{ElementType: types.StringType, Computed: true, Description: "Maps to the -ExclusionList parameter."},
 			}}},
 		},
 	}

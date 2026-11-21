@@ -38,25 +38,25 @@ func NewSensitiveInformationScanResource() resource.Resource {
 type sensitiveInformationScanModel struct {
 	ID                                         types.String `tfsdk:"id"`
 	Identity                                   types.String `tfsdk:"identity"`
-	AddEndpointDlpLocation                     types.String `tfsdk:"add_endpoint_dlp_location"`
-	AddEndpointDlpLocationException            types.String `tfsdk:"add_endpoint_dlp_location_exception"`
-	AddExchangeLocation                        types.String `tfsdk:"add_exchange_location"`
-	AddOneDriveLocation                        types.String `tfsdk:"add_one_drive_location"`
-	AddOneDriveLocationException               types.String `tfsdk:"add_one_drive_location_exception"`
-	AddSharePointLocation                      types.String `tfsdk:"add_share_point_location"`
-	AddSharePointLocationException             types.String `tfsdk:"add_share_point_location_exception"`
-	AddTeamsLocation                           types.String `tfsdk:"add_teams_location"`
-	AddTeamsLocationException                  types.String `tfsdk:"add_teams_location_exception"`
+	AddEndpointDlpLocation                     types.Set    `tfsdk:"add_endpoint_dlp_location"`
+	AddEndpointDlpLocationException            types.Set    `tfsdk:"add_endpoint_dlp_location_exception"`
+	AddExchangeLocation                        types.Set    `tfsdk:"add_exchange_location"`
+	AddOneDriveLocation                        types.Set    `tfsdk:"add_one_drive_location"`
+	AddOneDriveLocationException               types.Set    `tfsdk:"add_one_drive_location_exception"`
+	AddSharePointLocation                      types.Set    `tfsdk:"add_share_point_location"`
+	AddSharePointLocationException             types.Set    `tfsdk:"add_share_point_location_exception"`
+	AddTeamsLocation                           types.Set    `tfsdk:"add_teams_location"`
+	AddTeamsLocationException                  types.Set    `tfsdk:"add_teams_location_exception"`
 	CancelImpactAssessment                     types.Bool   `tfsdk:"cancel_impact_assessment"`
 	CancelScan                                 types.Bool   `tfsdk:"cancel_scan"`
 	Comment                                    types.String `tfsdk:"comment"`
-	EndpointDlpLocation                        types.String `tfsdk:"endpoint_dlp_location"`
-	EndpointDlpLocationException               types.String `tfsdk:"endpoint_dlp_location_exception"`
+	EndpointDlpLocation                        types.Set    `tfsdk:"endpoint_dlp_location"`
+	EndpointDlpLocationException               types.Set    `tfsdk:"endpoint_dlp_location_exception"`
 	ExceptIfOneDriveSharedBy                   types.Set    `tfsdk:"except_if_one_drive_shared_by"`
 	ExceptIfOneDriveSharedByMemberOf           types.Set    `tfsdk:"except_if_one_drive_shared_by_member_of"`
 	ExchangeAdaptiveScopes                     types.String `tfsdk:"exchange_adaptive_scopes"`
 	ExchangeAdaptiveScopesException            types.String `tfsdk:"exchange_adaptive_scopes_exception"`
-	ExchangeLocation                           types.String `tfsdk:"exchange_location"`
+	ExchangeLocation                           types.Set    `tfsdk:"exchange_location"`
 	ExchangeSender                             types.Set    `tfsdk:"exchange_sender"`
 	ExchangeSenderException                    types.Set    `tfsdk:"exchange_sender_exception"`
 	ExchangeSenderMemberOf                     types.Set    `tfsdk:"exchange_sender_member_of"`
@@ -65,32 +65,32 @@ type sensitiveInformationScanModel struct {
 	Name                                       types.String `tfsdk:"name"`
 	OneDriveAdaptiveScopes                     types.String `tfsdk:"one_drive_adaptive_scopes"`
 	OneDriveAdaptiveScopesException            types.String `tfsdk:"one_drive_adaptive_scopes_exception"`
-	OneDriveLocation                           types.String `tfsdk:"one_drive_location"`
-	OneDriveLocationException                  types.String `tfsdk:"one_drive_location_exception"`
+	OneDriveLocation                           types.Set    `tfsdk:"one_drive_location"`
+	OneDriveLocationException                  types.Set    `tfsdk:"one_drive_location_exception"`
 	OneDriveSharedBy                           types.Set    `tfsdk:"one_drive_shared_by"`
 	OneDriveSharedByMemberOf                   types.Set    `tfsdk:"one_drive_shared_by_member_of"`
-	PolicyRBACScopes                           types.String `tfsdk:"policy_rbac_scopes"`
-	RemoveEndpointDlpLocation                  types.String `tfsdk:"remove_endpoint_dlp_location"`
-	RemoveEndpointDlpLocationException         types.String `tfsdk:"remove_endpoint_dlp_location_exception"`
-	RemoveExchangeLocation                     types.String `tfsdk:"remove_exchange_location"`
-	RemoveOneDriveLocation                     types.String `tfsdk:"remove_one_drive_location"`
-	RemoveOneDriveLocationException            types.String `tfsdk:"remove_one_drive_location_exception"`
-	RemoveSharePointLocation                   types.String `tfsdk:"remove_share_point_location"`
-	RemoveSharePointLocationException          types.String `tfsdk:"remove_share_point_location_exception"`
-	RemoveTeamsLocation                        types.String `tfsdk:"remove_teams_location"`
-	RemoveTeamsLocationException               types.String `tfsdk:"remove_teams_location_exception"`
+	PolicyRBACScopes                           types.Set    `tfsdk:"policy_rbac_scopes"`
+	RemoveEndpointDlpLocation                  types.Set    `tfsdk:"remove_endpoint_dlp_location"`
+	RemoveEndpointDlpLocationException         types.Set    `tfsdk:"remove_endpoint_dlp_location_exception"`
+	RemoveExchangeLocation                     types.Set    `tfsdk:"remove_exchange_location"`
+	RemoveOneDriveLocation                     types.Set    `tfsdk:"remove_one_drive_location"`
+	RemoveOneDriveLocationException            types.Set    `tfsdk:"remove_one_drive_location_exception"`
+	RemoveSharePointLocation                   types.Set    `tfsdk:"remove_share_point_location"`
+	RemoveSharePointLocationException          types.Set    `tfsdk:"remove_share_point_location_exception"`
+	RemoveTeamsLocation                        types.Set    `tfsdk:"remove_teams_location"`
+	RemoveTeamsLocationException               types.Set    `tfsdk:"remove_teams_location_exception"`
 	ScanBudget                                 types.String `tfsdk:"scan_budget"`
 	ScanType                                   types.String `tfsdk:"scan_type"`
 	SharePointAdaptiveScopes                   types.String `tfsdk:"share_point_adaptive_scopes"`
 	SharePointAdaptiveScopesException          types.String `tfsdk:"share_point_adaptive_scopes_exception"`
-	SharePointLocation                         types.String `tfsdk:"share_point_location"`
-	SharePointLocationException                types.String `tfsdk:"share_point_location_exception"`
+	SharePointLocation                         types.Set    `tfsdk:"share_point_location"`
+	SharePointLocationException                types.Set    `tfsdk:"share_point_location_exception"`
 	StartImpactAssessment                      types.Bool   `tfsdk:"start_impact_assessment"`
 	StopImpactAssessmentAndStartClassification types.Bool   `tfsdk:"stop_impact_assessment_and_start_classification"`
 	TeamsAdaptiveScopes                        types.String `tfsdk:"teams_adaptive_scopes"`
 	TeamsAdaptiveScopesException               types.String `tfsdk:"teams_adaptive_scopes_exception"`
-	TeamsLocation                              types.String `tfsdk:"teams_location"`
-	TeamsLocationException                     types.String `tfsdk:"teams_location_exception"`
+	TeamsLocation                              types.Set    `tfsdk:"teams_location"`
+	TeamsLocationException                     types.Set    `tfsdk:"teams_location_exception"`
 }
 
 func (r *sensitiveInformationScanResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -102,26 +102,26 @@ func (r *sensitiveInformationScanResource) Schema(_ context.Context, _ resource.
 		Description: "Manages the SensitiveInformationScan object via New-SensitiveInformationScan / Get-SensitiveInformationScan / Set-SensitiveInformationScan / Remove-SensitiveInformationScan.",
 		Attributes: map[string]schema.Attribute{
 			"id":                                              schema.StringAttribute{Computed: true, Description: "Object identifier (GUID).", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"identity":                                        schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets."},
-			"add_endpoint_dlp_location":                       schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AddEndpointDlpLocation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"add_endpoint_dlp_location_exception":             schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AddEndpointDlpLocationException parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"add_exchange_location":                           schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AddExchangeLocation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"add_one_drive_location":                          schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AddOneDriveLocation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"add_one_drive_location_exception":                schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AddOneDriveLocationException parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"add_share_point_location":                        schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AddSharePointLocation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"add_share_point_location_exception":              schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AddSharePointLocationException parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"add_teams_location":                              schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AddTeamsLocation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"add_teams_location_exception":                    schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AddTeamsLocationException parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"identity":                                        schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"add_endpoint_dlp_location":                       schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -AddEndpointDlpLocation parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"add_endpoint_dlp_location_exception":             schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -AddEndpointDlpLocationException parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"add_exchange_location":                           schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -AddExchangeLocation parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"add_one_drive_location":                          schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -AddOneDriveLocation parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"add_one_drive_location_exception":                schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -AddOneDriveLocationException parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"add_share_point_location":                        schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -AddSharePointLocation parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"add_share_point_location_exception":              schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -AddSharePointLocationException parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"add_teams_location":                              schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -AddTeamsLocation parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"add_teams_location_exception":                    schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -AddTeamsLocationException parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
 			"cancel_impact_assessment":                        schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -CancelImpactAssessment parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
 			"cancel_scan":                                     schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -CancelScan parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
 			"comment":                                         schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -Comment parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"endpoint_dlp_location":                           schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -EndpointDlpLocation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace(), stringplanmodifier.UseStateForUnknown()}},
-			"endpoint_dlp_location_exception":                 schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -EndpointDlpLocationException parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace(), stringplanmodifier.UseStateForUnknown()}},
+			"endpoint_dlp_location":                           schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -EndpointDlpLocation parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.RequiresReplace(), setplanmodifier.UseStateForUnknown()}},
+			"endpoint_dlp_location_exception":                 schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -EndpointDlpLocationException parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.RequiresReplace(), setplanmodifier.UseStateForUnknown()}},
 			"except_if_one_drive_shared_by":                   schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -ExceptIfOneDriveSharedBy parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
 			"except_if_one_drive_shared_by_member_of":         schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -ExceptIfOneDriveSharedByMemberOf parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
 			"exchange_adaptive_scopes":                        schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ExchangeAdaptiveScopes parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"exchange_adaptive_scopes_exception":              schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ExchangeAdaptiveScopesException parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"exchange_location":                               schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ExchangeLocation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace(), stringplanmodifier.UseStateForUnknown()}},
+			"exchange_location":                               schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -ExchangeLocation parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.RequiresReplace(), setplanmodifier.UseStateForUnknown()}},
 			"exchange_sender":                                 schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -ExchangeSender parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
 			"exchange_sender_exception":                       schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -ExchangeSenderException parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
 			"exchange_sender_member_of":                       schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -ExchangeSenderMemberOf parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
@@ -130,32 +130,32 @@ func (r *sensitiveInformationScanResource) Schema(_ context.Context, _ resource.
 			"name":                                            schema.StringAttribute{Required: true, Description: "Maps to the -Name parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
 			"one_drive_adaptive_scopes":                       schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -OneDriveAdaptiveScopes parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"one_drive_adaptive_scopes_exception":             schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -OneDriveAdaptiveScopesException parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"one_drive_location":                              schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -OneDriveLocation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace(), stringplanmodifier.UseStateForUnknown()}},
-			"one_drive_location_exception":                    schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -OneDriveLocationException parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace(), stringplanmodifier.UseStateForUnknown()}},
+			"one_drive_location":                              schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -OneDriveLocation parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.RequiresReplace(), setplanmodifier.UseStateForUnknown()}},
+			"one_drive_location_exception":                    schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -OneDriveLocationException parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.RequiresReplace(), setplanmodifier.UseStateForUnknown()}},
 			"one_drive_shared_by":                             schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -OneDriveSharedBy parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
 			"one_drive_shared_by_member_of":                   schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -OneDriveSharedByMemberOf parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
-			"policy_rbac_scopes":                              schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -PolicyRBACScopes parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"remove_endpoint_dlp_location":                    schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -RemoveEndpointDlpLocation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"remove_endpoint_dlp_location_exception":          schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -RemoveEndpointDlpLocationException parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"remove_exchange_location":                        schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -RemoveExchangeLocation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"remove_one_drive_location":                       schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -RemoveOneDriveLocation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"remove_one_drive_location_exception":             schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -RemoveOneDriveLocationException parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"remove_share_point_location":                     schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -RemoveSharePointLocation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"remove_share_point_location_exception":           schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -RemoveSharePointLocationException parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"remove_teams_location":                           schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -RemoveTeamsLocation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"remove_teams_location_exception":                 schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -RemoveTeamsLocationException parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"policy_rbac_scopes":                              schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -PolicyRBACScopes parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"remove_endpoint_dlp_location":                    schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -RemoveEndpointDlpLocation parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"remove_endpoint_dlp_location_exception":          schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -RemoveEndpointDlpLocationException parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"remove_exchange_location":                        schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -RemoveExchangeLocation parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"remove_one_drive_location":                       schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -RemoveOneDriveLocation parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"remove_one_drive_location_exception":             schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -RemoveOneDriveLocationException parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"remove_share_point_location":                     schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -RemoveSharePointLocation parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"remove_share_point_location_exception":           schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -RemoveSharePointLocationException parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"remove_teams_location":                           schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -RemoveTeamsLocation parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"remove_teams_location_exception":                 schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -RemoveTeamsLocationException parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
 			"scan_budget":                                     schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ScanBudget parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"scan_type":                                       schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ScanType parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"share_point_adaptive_scopes":                     schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -SharePointAdaptiveScopes parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"share_point_adaptive_scopes_exception":           schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -SharePointAdaptiveScopesException parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"share_point_location":                            schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -SharePointLocation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace(), stringplanmodifier.UseStateForUnknown()}},
-			"share_point_location_exception":                  schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -SharePointLocationException parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace(), stringplanmodifier.UseStateForUnknown()}},
+			"share_point_location":                            schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -SharePointLocation parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.RequiresReplace(), setplanmodifier.UseStateForUnknown()}},
+			"share_point_location_exception":                  schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -SharePointLocationException parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.RequiresReplace(), setplanmodifier.UseStateForUnknown()}},
 			"start_impact_assessment":                         schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -StartImpactAssessment parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
 			"stop_impact_assessment_and_start_classification": schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -StopImpactAssessmentAndStartClassification parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
 			"teams_adaptive_scopes":                           schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -TeamsAdaptiveScopes parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"teams_adaptive_scopes_exception":                 schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -TeamsAdaptiveScopesException parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"teams_location":                                  schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -TeamsLocation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace(), stringplanmodifier.UseStateForUnknown()}},
-			"teams_location_exception":                        schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -TeamsLocationException parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace(), stringplanmodifier.UseStateForUnknown()}},
+			"teams_location":                                  schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -TeamsLocation parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.RequiresReplace(), setplanmodifier.UseStateForUnknown()}},
+			"teams_location_exception":                        schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -TeamsLocationException parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.RequiresReplace(), setplanmodifier.UseStateForUnknown()}},
 		},
 	}
 }
@@ -174,80 +174,143 @@ func (r *sensitiveInformationScanResource) Create(ctx context.Context, req resou
 		return
 	}
 
-	p := purview.NewSensitiveInformationScanParams{
-		Comment:                          plan.Comment.ValueString(),
-		ExceptIfOneDriveSharedBy:         toStringSlice(ctx, plan.ExceptIfOneDriveSharedBy, &resp.Diagnostics),
-		ExceptIfOneDriveSharedByMemberOf: toStringSlice(ctx, plan.ExceptIfOneDriveSharedByMemberOf, &resp.Diagnostics),
-		ExchangeSender:                   toStringSlice(ctx, plan.ExchangeSender, &resp.Diagnostics),
-		ExchangeSenderException:          toStringSlice(ctx, plan.ExchangeSenderException, &resp.Diagnostics),
-		ExchangeSenderMemberOf:           toStringSlice(ctx, plan.ExchangeSenderMemberOf, &resp.Diagnostics),
-		ExchangeSenderMemberOfException:  toStringSlice(ctx, plan.ExchangeSenderMemberOfException, &resp.Diagnostics),
-		Name:                             plan.Name.ValueString(),
-		OneDriveSharedBy:                 toStringSlice(ctx, plan.OneDriveSharedBy, &resp.Diagnostics),
-		OneDriveSharedByMemberOf:         toStringSlice(ctx, plan.OneDriveSharedByMemberOf, &resp.Diagnostics),
-		ScanType:                         plan.ScanType.ValueString(),
+	var config sensitiveInformationScanModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
+	if resp.Diagnostics.HasError() {
+		return
 	}
-	if v := plan.EndpointDlpLocation.ValueString(); v != "" {
-		p.EndpointDlpLocation = v
+
+	p := purview.NewSensitiveInformationScanParams{}
+	if !config.Comment.IsNull() {
+		p.Comment = plan.Comment.ValueString()
 	}
-	if v := plan.EndpointDlpLocationException.ValueString(); v != "" {
-		p.EndpointDlpLocationException = v
+	if !config.EndpointDlpLocation.IsNull() {
+		if v := toStringSlice(ctx, plan.EndpointDlpLocation, &resp.Diagnostics); len(v) > 0 {
+			p.EndpointDlpLocation = v
+		}
 	}
-	if v := plan.ExchangeAdaptiveScopes.ValueString(); v != "" {
-		p.ExchangeAdaptiveScopes = v
+	if !config.EndpointDlpLocationException.IsNull() {
+		if v := toStringSlice(ctx, plan.EndpointDlpLocationException, &resp.Diagnostics); len(v) > 0 {
+			p.EndpointDlpLocationException = v
+		}
 	}
-	if v := plan.ExchangeAdaptiveScopesException.ValueString(); v != "" {
-		p.ExchangeAdaptiveScopesException = v
+	if !config.ExceptIfOneDriveSharedBy.IsNull() {
+		if v := toStringSlice(ctx, plan.ExceptIfOneDriveSharedBy, &resp.Diagnostics); len(v) > 0 {
+			p.ExceptIfOneDriveSharedBy = v
+		}
 	}
-	if v := plan.ExchangeLocation.ValueString(); v != "" {
-		p.ExchangeLocation = v
+	if !config.ExceptIfOneDriveSharedByMemberOf.IsNull() {
+		if v := toStringSlice(ctx, plan.ExceptIfOneDriveSharedByMemberOf, &resp.Diagnostics); len(v) > 0 {
+			p.ExceptIfOneDriveSharedByMemberOf = v
+		}
 	}
-	if v := plan.OneDriveAdaptiveScopes.ValueString(); v != "" {
-		p.OneDriveAdaptiveScopes = v
+	if v := config.ExchangeAdaptiveScopes.ValueString(); v != "" {
+		p.ExchangeAdaptiveScopes = objectParam(v)
 	}
-	if v := plan.OneDriveAdaptiveScopesException.ValueString(); v != "" {
-		p.OneDriveAdaptiveScopesException = v
+	if v := config.ExchangeAdaptiveScopesException.ValueString(); v != "" {
+		p.ExchangeAdaptiveScopesException = objectParam(v)
 	}
-	if v := plan.OneDriveLocation.ValueString(); v != "" {
-		p.OneDriveLocation = v
+	if !config.ExchangeLocation.IsNull() {
+		if v := toStringSlice(ctx, plan.ExchangeLocation, &resp.Diagnostics); len(v) > 0 {
+			p.ExchangeLocation = v
+		}
 	}
-	if v := plan.OneDriveLocationException.ValueString(); v != "" {
-		p.OneDriveLocationException = v
+	if !config.ExchangeSender.IsNull() {
+		if v := toStringSlice(ctx, plan.ExchangeSender, &resp.Diagnostics); len(v) > 0 {
+			p.ExchangeSender = v
+		}
 	}
-	if v := plan.PolicyRBACScopes.ValueString(); v != "" {
-		p.PolicyRBACScopes = v
+	if !config.ExchangeSenderException.IsNull() {
+		if v := toStringSlice(ctx, plan.ExchangeSenderException, &resp.Diagnostics); len(v) > 0 {
+			p.ExchangeSenderException = v
+		}
 	}
-	if v := plan.ScanBudget.ValueString(); v != "" {
-		p.ScanBudget = v
+	if !config.ExchangeSenderMemberOf.IsNull() {
+		if v := toStringSlice(ctx, plan.ExchangeSenderMemberOf, &resp.Diagnostics); len(v) > 0 {
+			p.ExchangeSenderMemberOf = v
+		}
 	}
-	if v := plan.SharePointAdaptiveScopes.ValueString(); v != "" {
-		p.SharePointAdaptiveScopes = v
+	if !config.ExchangeSenderMemberOfException.IsNull() {
+		if v := toStringSlice(ctx, plan.ExchangeSenderMemberOfException, &resp.Diagnostics); len(v) > 0 {
+			p.ExchangeSenderMemberOfException = v
+		}
 	}
-	if v := plan.SharePointAdaptiveScopesException.ValueString(); v != "" {
-		p.SharePointAdaptiveScopesException = v
+	if !config.Name.IsNull() {
+		p.Name = plan.Name.ValueString()
 	}
-	if v := plan.SharePointLocation.ValueString(); v != "" {
-		p.SharePointLocation = v
+	if v := config.OneDriveAdaptiveScopes.ValueString(); v != "" {
+		p.OneDriveAdaptiveScopes = objectParam(v)
 	}
-	if v := plan.SharePointLocationException.ValueString(); v != "" {
-		p.SharePointLocationException = v
+	if v := config.OneDriveAdaptiveScopesException.ValueString(); v != "" {
+		p.OneDriveAdaptiveScopesException = objectParam(v)
 	}
-	if v := plan.TeamsAdaptiveScopes.ValueString(); v != "" {
-		p.TeamsAdaptiveScopes = v
+	if !config.OneDriveLocation.IsNull() {
+		if v := toStringSlice(ctx, plan.OneDriveLocation, &resp.Diagnostics); len(v) > 0 {
+			p.OneDriveLocation = v
+		}
 	}
-	if v := plan.TeamsAdaptiveScopesException.ValueString(); v != "" {
-		p.TeamsAdaptiveScopesException = v
+	if !config.OneDriveLocationException.IsNull() {
+		if v := toStringSlice(ctx, plan.OneDriveLocationException, &resp.Diagnostics); len(v) > 0 {
+			p.OneDriveLocationException = v
+		}
 	}
-	if v := plan.TeamsLocation.ValueString(); v != "" {
-		p.TeamsLocation = v
+	if !config.OneDriveSharedBy.IsNull() {
+		if v := toStringSlice(ctx, plan.OneDriveSharedBy, &resp.Diagnostics); len(v) > 0 {
+			p.OneDriveSharedBy = v
+		}
 	}
-	if v := plan.TeamsLocationException.ValueString(); v != "" {
-		p.TeamsLocationException = v
+	if !config.OneDriveSharedByMemberOf.IsNull() {
+		if v := toStringSlice(ctx, plan.OneDriveSharedByMemberOf, &resp.Diagnostics); len(v) > 0 {
+			p.OneDriveSharedByMemberOf = v
+		}
+	}
+	if !config.PolicyRBACScopes.IsNull() {
+		if v := toStringSlice(ctx, plan.PolicyRBACScopes, &resp.Diagnostics); len(v) > 0 {
+			p.PolicyRBACScopes = v
+		}
+	}
+	if v := config.ScanBudget.ValueString(); v != "" {
+		p.ScanBudget = objectParam(v)
+	}
+	if !config.ScanType.IsNull() {
+		p.ScanType = plan.ScanType.ValueString()
+	}
+	if v := config.SharePointAdaptiveScopes.ValueString(); v != "" {
+		p.SharePointAdaptiveScopes = objectParam(v)
+	}
+	if v := config.SharePointAdaptiveScopesException.ValueString(); v != "" {
+		p.SharePointAdaptiveScopesException = objectParam(v)
+	}
+	if !config.SharePointLocation.IsNull() {
+		if v := toStringSlice(ctx, plan.SharePointLocation, &resp.Diagnostics); len(v) > 0 {
+			p.SharePointLocation = v
+		}
+	}
+	if !config.SharePointLocationException.IsNull() {
+		if v := toStringSlice(ctx, plan.SharePointLocationException, &resp.Diagnostics); len(v) > 0 {
+			p.SharePointLocationException = v
+		}
+	}
+	if v := config.TeamsAdaptiveScopes.ValueString(); v != "" {
+		p.TeamsAdaptiveScopes = objectParam(v)
+	}
+	if v := config.TeamsAdaptiveScopesException.ValueString(); v != "" {
+		p.TeamsAdaptiveScopesException = objectParam(v)
+	}
+	if !config.TeamsLocation.IsNull() {
+		if v := toStringSlice(ctx, plan.TeamsLocation, &resp.Diagnostics); len(v) > 0 {
+			p.TeamsLocation = v
+		}
+	}
+	if !config.TeamsLocationException.IsNull() {
+		if v := toStringSlice(ctx, plan.TeamsLocationException, &resp.Diagnostics); len(v) > 0 {
+			p.TeamsLocationException = v
+		}
 	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	res, err := r.client.SCC.NewSensitiveInformationScan(ctx, p)
+	res, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.NewSensitiveInformationScan, p, isNotFound)
 	if err != nil {
 		resp.Diagnostics.AddError("New-SensitiveInformationScan failed", err.Error())
 		return
@@ -294,149 +357,423 @@ func (r *sensitiveInformationScanResource) Update(ctx context.Context, req resou
 	id := r.identityOf(state)
 	sp := purview.SetSensitiveInformationScanParams{}
 	sp.Identity = id
-	if v := plan.AddEndpointDlpLocation.ValueString(); v != "" {
-		sp.AddEndpointDlpLocation = v
+	var cur *sensitiveInformationScanModel
+	curRead := false
+	current := func() *sensitiveInformationScanModel {
+		if !curRead {
+			curRead = true
+			var m sensitiveInformationScanModel
+			if r.refresh(ctx, id, &m, &resp.Diagnostics, nil) {
+				cur = &m
+			} else if !resp.Diagnostics.HasError() {
+				resp.Diagnostics.AddError("Get-SensitiveInformationScan failed", "the object could not be read to determine the list values to remove; nothing was changed")
+			}
+		}
+		return cur
 	}
-	if v := plan.AddEndpointDlpLocationException.ValueString(); v != "" {
-		sp.AddEndpointDlpLocationException = v
+	if !plan.AddEndpointDlpLocation.Equal(state.AddEndpointDlpLocation) {
+		if !plan.AddEndpointDlpLocation.IsNull() && !plan.AddEndpointDlpLocation.IsUnknown() {
+			if v := toStringSlice(ctx, plan.AddEndpointDlpLocation, &resp.Diagnostics); len(v) > 0 {
+				sp.AddEndpointDlpLocation = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.AddEndpointDlpLocation, &resp.Diagnostics); len(rm) > 0 {
+						sp.AddEndpointDlpLocationDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
 	}
-	if v := plan.AddExchangeLocation.ValueString(); v != "" {
-		sp.AddExchangeLocation = v
+	if !plan.AddEndpointDlpLocationException.Equal(state.AddEndpointDlpLocationException) {
+		if !plan.AddEndpointDlpLocationException.IsNull() && !plan.AddEndpointDlpLocationException.IsUnknown() {
+			if v := toStringSlice(ctx, plan.AddEndpointDlpLocationException, &resp.Diagnostics); len(v) > 0 {
+				sp.AddEndpointDlpLocationException = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.AddEndpointDlpLocationException, &resp.Diagnostics); len(rm) > 0 {
+						sp.AddEndpointDlpLocationExceptionDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
 	}
-	if v := plan.AddOneDriveLocation.ValueString(); v != "" {
-		sp.AddOneDriveLocation = v
+	if !plan.AddExchangeLocation.Equal(state.AddExchangeLocation) {
+		if !plan.AddExchangeLocation.IsNull() && !plan.AddExchangeLocation.IsUnknown() {
+			if v := toStringSlice(ctx, plan.AddExchangeLocation, &resp.Diagnostics); len(v) > 0 {
+				sp.AddExchangeLocation = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.AddExchangeLocation, &resp.Diagnostics); len(rm) > 0 {
+						sp.AddExchangeLocationDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
 	}
-	if v := plan.AddOneDriveLocationException.ValueString(); v != "" {
-		sp.AddOneDriveLocationException = v
+	if !plan.AddOneDriveLocation.Equal(state.AddOneDriveLocation) {
+		if !plan.AddOneDriveLocation.IsNull() && !plan.AddOneDriveLocation.IsUnknown() {
+			if v := toStringSlice(ctx, plan.AddOneDriveLocation, &resp.Diagnostics); len(v) > 0 {
+				sp.AddOneDriveLocation = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.AddOneDriveLocation, &resp.Diagnostics); len(rm) > 0 {
+						sp.AddOneDriveLocationDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
 	}
-	if v := plan.AddSharePointLocation.ValueString(); v != "" {
-		sp.AddSharePointLocation = v
+	if !plan.AddOneDriveLocationException.Equal(state.AddOneDriveLocationException) {
+		if !plan.AddOneDriveLocationException.IsNull() && !plan.AddOneDriveLocationException.IsUnknown() {
+			if v := toStringSlice(ctx, plan.AddOneDriveLocationException, &resp.Diagnostics); len(v) > 0 {
+				sp.AddOneDriveLocationException = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.AddOneDriveLocationException, &resp.Diagnostics); len(rm) > 0 {
+						sp.AddOneDriveLocationExceptionDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
 	}
-	if v := plan.AddSharePointLocationException.ValueString(); v != "" {
-		sp.AddSharePointLocationException = v
+	if !plan.AddSharePointLocation.Equal(state.AddSharePointLocation) {
+		if !plan.AddSharePointLocation.IsNull() && !plan.AddSharePointLocation.IsUnknown() {
+			if v := toStringSlice(ctx, plan.AddSharePointLocation, &resp.Diagnostics); len(v) > 0 {
+				sp.AddSharePointLocation = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.AddSharePointLocation, &resp.Diagnostics); len(rm) > 0 {
+						sp.AddSharePointLocationDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
 	}
-	if v := plan.AddTeamsLocation.ValueString(); v != "" {
-		sp.AddTeamsLocation = v
+	if !plan.AddSharePointLocationException.Equal(state.AddSharePointLocationException) {
+		if !plan.AddSharePointLocationException.IsNull() && !plan.AddSharePointLocationException.IsUnknown() {
+			if v := toStringSlice(ctx, plan.AddSharePointLocationException, &resp.Diagnostics); len(v) > 0 {
+				sp.AddSharePointLocationException = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.AddSharePointLocationException, &resp.Diagnostics); len(rm) > 0 {
+						sp.AddSharePointLocationExceptionDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
 	}
-	if v := plan.AddTeamsLocationException.ValueString(); v != "" {
-		sp.AddTeamsLocationException = v
+	if !plan.AddTeamsLocation.Equal(state.AddTeamsLocation) {
+		if !plan.AddTeamsLocation.IsNull() && !plan.AddTeamsLocation.IsUnknown() {
+			if v := toStringSlice(ctx, plan.AddTeamsLocation, &resp.Diagnostics); len(v) > 0 {
+				sp.AddTeamsLocation = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.AddTeamsLocation, &resp.Diagnostics); len(rm) > 0 {
+						sp.AddTeamsLocationDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
 	}
-	sp.CancelImpactAssessment = plan.CancelImpactAssessment.ValueBool()
-	sp.CancelScan = plan.CancelScan.ValueBool()
-	sp.Comment = plan.Comment.ValueString()
-	sp.ExceptIfOneDriveSharedBy = toStringSlice(ctx, plan.ExceptIfOneDriveSharedBy, &resp.Diagnostics)
-	sp.ExceptIfOneDriveSharedByMemberOf = toStringSlice(ctx, plan.ExceptIfOneDriveSharedByMemberOf, &resp.Diagnostics)
-	if v := plan.ExchangeAdaptiveScopes.ValueString(); v != "" {
-		sp.ExchangeAdaptiveScopes = v
+	if !plan.AddTeamsLocationException.Equal(state.AddTeamsLocationException) {
+		if !plan.AddTeamsLocationException.IsNull() && !plan.AddTeamsLocationException.IsUnknown() {
+			if v := toStringSlice(ctx, plan.AddTeamsLocationException, &resp.Diagnostics); len(v) > 0 {
+				sp.AddTeamsLocationException = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.AddTeamsLocationException, &resp.Diagnostics); len(rm) > 0 {
+						sp.AddTeamsLocationExceptionDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
 	}
-	if v := plan.ExchangeAdaptiveScopesException.ValueString(); v != "" {
-		sp.ExchangeAdaptiveScopesException = v
+	if !plan.CancelImpactAssessment.Equal(state.CancelImpactAssessment) {
+		if !plan.CancelImpactAssessment.IsUnknown() {
+			sp.CancelImpactAssessment = plan.CancelImpactAssessment.ValueBoolPointer()
+		}
 	}
-	sp.ExchangeSender = toStringSlice(ctx, plan.ExchangeSender, &resp.Diagnostics)
-	sp.ExchangeSenderException = toStringSlice(ctx, plan.ExchangeSenderException, &resp.Diagnostics)
-	sp.ExchangeSenderMemberOf = toStringSlice(ctx, plan.ExchangeSenderMemberOf, &resp.Diagnostics)
-	sp.ExchangeSenderMemberOfException = toStringSlice(ctx, plan.ExchangeSenderMemberOfException, &resp.Diagnostics)
-	if v := plan.Mode.ValueString(); v != "" {
-		sp.Mode = v
+	if !plan.CancelScan.Equal(state.CancelScan) {
+		if !plan.CancelScan.IsUnknown() {
+			sp.CancelScan = plan.CancelScan.ValueBoolPointer()
+		}
 	}
-	if v := plan.OneDriveAdaptiveScopes.ValueString(); v != "" {
-		sp.OneDriveAdaptiveScopes = v
+	if !plan.Comment.Equal(state.Comment) {
+		sp.Comment = plan.Comment.ValueString()
 	}
-	if v := plan.OneDriveAdaptiveScopesException.ValueString(); v != "" {
-		sp.OneDriveAdaptiveScopesException = v
+	if !plan.ExceptIfOneDriveSharedBy.Equal(state.ExceptIfOneDriveSharedBy) {
+		if !plan.ExceptIfOneDriveSharedBy.IsNull() && !plan.ExceptIfOneDriveSharedBy.IsUnknown() {
+			sp.ExceptIfOneDriveSharedBy = append([]string{}, toStringSlice(ctx, plan.ExceptIfOneDriveSharedBy, &resp.Diagnostics)...)
+		}
 	}
-	sp.OneDriveSharedBy = toStringSlice(ctx, plan.OneDriveSharedBy, &resp.Diagnostics)
-	sp.OneDriveSharedByMemberOf = toStringSlice(ctx, plan.OneDriveSharedByMemberOf, &resp.Diagnostics)
-	if v := plan.PolicyRBACScopes.ValueString(); v != "" {
-		sp.PolicyRBACScopes = v
+	if !plan.ExceptIfOneDriveSharedByMemberOf.Equal(state.ExceptIfOneDriveSharedByMemberOf) {
+		if !plan.ExceptIfOneDriveSharedByMemberOf.IsNull() && !plan.ExceptIfOneDriveSharedByMemberOf.IsUnknown() {
+			sp.ExceptIfOneDriveSharedByMemberOf = append([]string{}, toStringSlice(ctx, plan.ExceptIfOneDriveSharedByMemberOf, &resp.Diagnostics)...)
+		}
 	}
-	if v := plan.RemoveEndpointDlpLocation.ValueString(); v != "" {
-		sp.RemoveEndpointDlpLocation = v
+	if !plan.ExchangeAdaptiveScopes.Equal(state.ExchangeAdaptiveScopes) {
+		if v := plan.ExchangeAdaptiveScopes.ValueString(); v != "" {
+			sp.ExchangeAdaptiveScopes = objectParam(v)
+		}
 	}
-	if v := plan.RemoveEndpointDlpLocationException.ValueString(); v != "" {
-		sp.RemoveEndpointDlpLocationException = v
+	if !plan.ExchangeAdaptiveScopesException.Equal(state.ExchangeAdaptiveScopesException) {
+		if v := plan.ExchangeAdaptiveScopesException.ValueString(); v != "" {
+			sp.ExchangeAdaptiveScopesException = objectParam(v)
+		}
 	}
-	if v := plan.RemoveExchangeLocation.ValueString(); v != "" {
-		sp.RemoveExchangeLocation = v
+	if !plan.ExchangeSender.Equal(state.ExchangeSender) {
+		if !plan.ExchangeSender.IsNull() && !plan.ExchangeSender.IsUnknown() {
+			sp.ExchangeSender = append([]string{}, toStringSlice(ctx, plan.ExchangeSender, &resp.Diagnostics)...)
+		}
 	}
-	if v := plan.RemoveOneDriveLocation.ValueString(); v != "" {
-		sp.RemoveOneDriveLocation = v
+	if !plan.ExchangeSenderException.Equal(state.ExchangeSenderException) {
+		if !plan.ExchangeSenderException.IsNull() && !plan.ExchangeSenderException.IsUnknown() {
+			sp.ExchangeSenderException = append([]string{}, toStringSlice(ctx, plan.ExchangeSenderException, &resp.Diagnostics)...)
+		}
 	}
-	if v := plan.RemoveOneDriveLocationException.ValueString(); v != "" {
-		sp.RemoveOneDriveLocationException = v
+	if !plan.ExchangeSenderMemberOf.Equal(state.ExchangeSenderMemberOf) {
+		if !plan.ExchangeSenderMemberOf.IsNull() && !plan.ExchangeSenderMemberOf.IsUnknown() {
+			sp.ExchangeSenderMemberOf = append([]string{}, toStringSlice(ctx, plan.ExchangeSenderMemberOf, &resp.Diagnostics)...)
+		}
 	}
-	if v := plan.RemoveSharePointLocation.ValueString(); v != "" {
-		sp.RemoveSharePointLocation = v
+	if !plan.ExchangeSenderMemberOfException.Equal(state.ExchangeSenderMemberOfException) {
+		if !plan.ExchangeSenderMemberOfException.IsNull() && !plan.ExchangeSenderMemberOfException.IsUnknown() {
+			sp.ExchangeSenderMemberOfException = append([]string{}, toStringSlice(ctx, plan.ExchangeSenderMemberOfException, &resp.Diagnostics)...)
+		}
 	}
-	if v := plan.RemoveSharePointLocationException.ValueString(); v != "" {
-		sp.RemoveSharePointLocationException = v
+	if !plan.Mode.Equal(state.Mode) {
+		if v := plan.Mode.ValueString(); v != "" {
+			sp.Mode = objectParam(v)
+		}
 	}
-	if v := plan.RemoveTeamsLocation.ValueString(); v != "" {
-		sp.RemoveTeamsLocation = v
+	if !plan.OneDriveAdaptiveScopes.Equal(state.OneDriveAdaptiveScopes) {
+		if v := plan.OneDriveAdaptiveScopes.ValueString(); v != "" {
+			sp.OneDriveAdaptiveScopes = objectParam(v)
+		}
 	}
-	if v := plan.RemoveTeamsLocationException.ValueString(); v != "" {
-		sp.RemoveTeamsLocationException = v
+	if !plan.OneDriveAdaptiveScopesException.Equal(state.OneDriveAdaptiveScopesException) {
+		if v := plan.OneDriveAdaptiveScopesException.ValueString(); v != "" {
+			sp.OneDriveAdaptiveScopesException = objectParam(v)
+		}
 	}
-	if v := plan.ScanBudget.ValueString(); v != "" {
-		sp.ScanBudget = v
+	if !plan.OneDriveSharedBy.Equal(state.OneDriveSharedBy) {
+		if !plan.OneDriveSharedBy.IsNull() && !plan.OneDriveSharedBy.IsUnknown() {
+			sp.OneDriveSharedBy = append([]string{}, toStringSlice(ctx, plan.OneDriveSharedBy, &resp.Diagnostics)...)
+		}
 	}
-	sp.ScanType = plan.ScanType.ValueString()
-	if v := plan.SharePointAdaptiveScopes.ValueString(); v != "" {
-		sp.SharePointAdaptiveScopes = v
+	if !plan.OneDriveSharedByMemberOf.Equal(state.OneDriveSharedByMemberOf) {
+		if !plan.OneDriveSharedByMemberOf.IsNull() && !plan.OneDriveSharedByMemberOf.IsUnknown() {
+			sp.OneDriveSharedByMemberOf = append([]string{}, toStringSlice(ctx, plan.OneDriveSharedByMemberOf, &resp.Diagnostics)...)
+		}
 	}
-	if v := plan.SharePointAdaptiveScopesException.ValueString(); v != "" {
-		sp.SharePointAdaptiveScopesException = v
+	if !plan.PolicyRBACScopes.Equal(state.PolicyRBACScopes) {
+		if !plan.PolicyRBACScopes.IsNull() && !plan.PolicyRBACScopes.IsUnknown() {
+			if v := toStringSlice(ctx, plan.PolicyRBACScopes, &resp.Diagnostics); len(v) > 0 {
+				sp.PolicyRBACScopes = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.PolicyRBACScopes, &resp.Diagnostics); len(rm) > 0 {
+						sp.PolicyRBACScopesDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
 	}
-	sp.StartImpactAssessment = plan.StartImpactAssessment.ValueBool()
-	sp.StopImpactAssessmentAndStartClassification = plan.StopImpactAssessmentAndStartClassification.ValueBool()
-	if v := plan.TeamsAdaptiveScopes.ValueString(); v != "" {
-		sp.TeamsAdaptiveScopes = v
+	if !plan.RemoveEndpointDlpLocation.Equal(state.RemoveEndpointDlpLocation) {
+		if !plan.RemoveEndpointDlpLocation.IsNull() && !plan.RemoveEndpointDlpLocation.IsUnknown() {
+			if v := toStringSlice(ctx, plan.RemoveEndpointDlpLocation, &resp.Diagnostics); len(v) > 0 {
+				sp.RemoveEndpointDlpLocation = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.RemoveEndpointDlpLocation, &resp.Diagnostics); len(rm) > 0 {
+						sp.RemoveEndpointDlpLocationDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
 	}
-	if v := plan.TeamsAdaptiveScopesException.ValueString(); v != "" {
-		sp.TeamsAdaptiveScopesException = v
+	if !plan.RemoveEndpointDlpLocationException.Equal(state.RemoveEndpointDlpLocationException) {
+		if !plan.RemoveEndpointDlpLocationException.IsNull() && !plan.RemoveEndpointDlpLocationException.IsUnknown() {
+			if v := toStringSlice(ctx, plan.RemoveEndpointDlpLocationException, &resp.Diagnostics); len(v) > 0 {
+				sp.RemoveEndpointDlpLocationException = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.RemoveEndpointDlpLocationException, &resp.Diagnostics); len(rm) > 0 {
+						sp.RemoveEndpointDlpLocationExceptionDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
+	}
+	if !plan.RemoveExchangeLocation.Equal(state.RemoveExchangeLocation) {
+		if !plan.RemoveExchangeLocation.IsNull() && !plan.RemoveExchangeLocation.IsUnknown() {
+			if v := toStringSlice(ctx, plan.RemoveExchangeLocation, &resp.Diagnostics); len(v) > 0 {
+				sp.RemoveExchangeLocation = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.RemoveExchangeLocation, &resp.Diagnostics); len(rm) > 0 {
+						sp.RemoveExchangeLocationDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
+	}
+	if !plan.RemoveOneDriveLocation.Equal(state.RemoveOneDriveLocation) {
+		if !plan.RemoveOneDriveLocation.IsNull() && !plan.RemoveOneDriveLocation.IsUnknown() {
+			if v := toStringSlice(ctx, plan.RemoveOneDriveLocation, &resp.Diagnostics); len(v) > 0 {
+				sp.RemoveOneDriveLocation = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.RemoveOneDriveLocation, &resp.Diagnostics); len(rm) > 0 {
+						sp.RemoveOneDriveLocationDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
+	}
+	if !plan.RemoveOneDriveLocationException.Equal(state.RemoveOneDriveLocationException) {
+		if !plan.RemoveOneDriveLocationException.IsNull() && !plan.RemoveOneDriveLocationException.IsUnknown() {
+			if v := toStringSlice(ctx, plan.RemoveOneDriveLocationException, &resp.Diagnostics); len(v) > 0 {
+				sp.RemoveOneDriveLocationException = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.RemoveOneDriveLocationException, &resp.Diagnostics); len(rm) > 0 {
+						sp.RemoveOneDriveLocationExceptionDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
+	}
+	if !plan.RemoveSharePointLocation.Equal(state.RemoveSharePointLocation) {
+		if !plan.RemoveSharePointLocation.IsNull() && !plan.RemoveSharePointLocation.IsUnknown() {
+			if v := toStringSlice(ctx, plan.RemoveSharePointLocation, &resp.Diagnostics); len(v) > 0 {
+				sp.RemoveSharePointLocation = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.RemoveSharePointLocation, &resp.Diagnostics); len(rm) > 0 {
+						sp.RemoveSharePointLocationDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
+	}
+	if !plan.RemoveSharePointLocationException.Equal(state.RemoveSharePointLocationException) {
+		if !plan.RemoveSharePointLocationException.IsNull() && !plan.RemoveSharePointLocationException.IsUnknown() {
+			if v := toStringSlice(ctx, plan.RemoveSharePointLocationException, &resp.Diagnostics); len(v) > 0 {
+				sp.RemoveSharePointLocationException = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.RemoveSharePointLocationException, &resp.Diagnostics); len(rm) > 0 {
+						sp.RemoveSharePointLocationExceptionDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
+	}
+	if !plan.RemoveTeamsLocation.Equal(state.RemoveTeamsLocation) {
+		if !plan.RemoveTeamsLocation.IsNull() && !plan.RemoveTeamsLocation.IsUnknown() {
+			if v := toStringSlice(ctx, plan.RemoveTeamsLocation, &resp.Diagnostics); len(v) > 0 {
+				sp.RemoveTeamsLocation = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.RemoveTeamsLocation, &resp.Diagnostics); len(rm) > 0 {
+						sp.RemoveTeamsLocationDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
+	}
+	if !plan.RemoveTeamsLocationException.Equal(state.RemoveTeamsLocationException) {
+		if !plan.RemoveTeamsLocationException.IsNull() && !plan.RemoveTeamsLocationException.IsUnknown() {
+			if v := toStringSlice(ctx, plan.RemoveTeamsLocationException, &resp.Diagnostics); len(v) > 0 {
+				sp.RemoveTeamsLocationException = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.RemoveTeamsLocationException, &resp.Diagnostics); len(rm) > 0 {
+						sp.RemoveTeamsLocationExceptionDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
+	}
+	if !plan.ScanBudget.Equal(state.ScanBudget) {
+		if v := plan.ScanBudget.ValueString(); v != "" {
+			sp.ScanBudget = objectParam(v)
+		}
+	}
+	if !plan.ScanType.Equal(state.ScanType) {
+		sp.ScanType = plan.ScanType.ValueString()
+	}
+	if !plan.SharePointAdaptiveScopes.Equal(state.SharePointAdaptiveScopes) {
+		if v := plan.SharePointAdaptiveScopes.ValueString(); v != "" {
+			sp.SharePointAdaptiveScopes = objectParam(v)
+		}
+	}
+	if !plan.SharePointAdaptiveScopesException.Equal(state.SharePointAdaptiveScopesException) {
+		if v := plan.SharePointAdaptiveScopesException.ValueString(); v != "" {
+			sp.SharePointAdaptiveScopesException = objectParam(v)
+		}
+	}
+	if !plan.StartImpactAssessment.Equal(state.StartImpactAssessment) {
+		if !plan.StartImpactAssessment.IsUnknown() {
+			sp.StartImpactAssessment = plan.StartImpactAssessment.ValueBoolPointer()
+		}
+	}
+	if !plan.StopImpactAssessmentAndStartClassification.Equal(state.StopImpactAssessmentAndStartClassification) {
+		if !plan.StopImpactAssessmentAndStartClassification.IsUnknown() {
+			sp.StopImpactAssessmentAndStartClassification = plan.StopImpactAssessmentAndStartClassification.ValueBoolPointer()
+		}
+	}
+	if !plan.TeamsAdaptiveScopes.Equal(state.TeamsAdaptiveScopes) {
+		if v := plan.TeamsAdaptiveScopes.ValueString(); v != "" {
+			sp.TeamsAdaptiveScopes = objectParam(v)
+		}
+	}
+	if !plan.TeamsAdaptiveScopesException.Equal(state.TeamsAdaptiveScopesException) {
+		if v := plan.TeamsAdaptiveScopesException.ValueString(); v != "" {
+			sp.TeamsAdaptiveScopesException = objectParam(v)
+		}
 	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	if _, err := r.client.SCC.SetSensitiveInformationScan(ctx, sp); err != nil {
+	if _, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.SetSensitiveInformationScan, sp, isNotFound); err != nil {
 		resp.Diagnostics.AddError("Set-SensitiveInformationScan failed", err.Error())
 		return
 	}
 	cfg := plan
 	reflected := reconcile.ReflectsFields(map[string]types.String{
-		"AddEndpointDlpLocation":             cfg.AddEndpointDlpLocation,
-		"AddEndpointDlpLocationException":    cfg.AddEndpointDlpLocationException,
-		"AddExchangeLocation":                cfg.AddExchangeLocation,
-		"AddOneDriveLocation":                cfg.AddOneDriveLocation,
-		"AddOneDriveLocationException":       cfg.AddOneDriveLocationException,
-		"AddSharePointLocation":              cfg.AddSharePointLocation,
-		"AddSharePointLocationException":     cfg.AddSharePointLocationException,
-		"AddTeamsLocation":                   cfg.AddTeamsLocation,
-		"AddTeamsLocationException":          cfg.AddTeamsLocationException,
-		"Comment":                            cfg.Comment,
-		"ExchangeAdaptiveScopes":             cfg.ExchangeAdaptiveScopes,
-		"ExchangeAdaptiveScopesException":    cfg.ExchangeAdaptiveScopesException,
-		"Mode":                               cfg.Mode,
-		"OneDriveAdaptiveScopes":             cfg.OneDriveAdaptiveScopes,
-		"OneDriveAdaptiveScopesException":    cfg.OneDriveAdaptiveScopesException,
-		"PolicyRBACScopes":                   cfg.PolicyRBACScopes,
-		"RemoveEndpointDlpLocation":          cfg.RemoveEndpointDlpLocation,
-		"RemoveEndpointDlpLocationException": cfg.RemoveEndpointDlpLocationException,
-		"RemoveExchangeLocation":             cfg.RemoveExchangeLocation,
-		"RemoveOneDriveLocation":             cfg.RemoveOneDriveLocation,
-		"RemoveOneDriveLocationException":    cfg.RemoveOneDriveLocationException,
-		"RemoveSharePointLocation":           cfg.RemoveSharePointLocation,
-		"RemoveSharePointLocationException":  cfg.RemoveSharePointLocationException,
-		"RemoveTeamsLocation":                cfg.RemoveTeamsLocation,
-		"RemoveTeamsLocationException":       cfg.RemoveTeamsLocationException,
-		"ScanBudget":                         cfg.ScanBudget,
-		"ScanType":                           cfg.ScanType,
-		"SharePointAdaptiveScopes":           cfg.SharePointAdaptiveScopes,
-		"SharePointAdaptiveScopesException":  cfg.SharePointAdaptiveScopesException,
-		"TeamsAdaptiveScopes":                cfg.TeamsAdaptiveScopes,
-		"TeamsAdaptiveScopesException":       cfg.TeamsAdaptiveScopesException,
+		"Comment":  cfg.Comment,
+		"ScanType": cfg.ScanType,
 	}, getString)
+	if !cfg.CancelImpactAssessment.IsUnknown() && !cfg.CancelImpactAssessment.IsNull() && !cfg.CancelImpactAssessment.Equal(state.CancelImpactAssessment) {
+		prev, want := reflected, cfg.CancelImpactAssessment.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["CancelImpactAssessment"] == nil || getBool(obj, "CancelImpactAssessment") == want)
+		}
+	}
+	if !cfg.CancelScan.IsUnknown() && !cfg.CancelScan.IsNull() && !cfg.CancelScan.Equal(state.CancelScan) {
+		prev, want := reflected, cfg.CancelScan.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["CancelScan"] == nil || getBool(obj, "CancelScan") == want)
+		}
+	}
+	if !cfg.StartImpactAssessment.IsUnknown() && !cfg.StartImpactAssessment.IsNull() && !cfg.StartImpactAssessment.Equal(state.StartImpactAssessment) {
+		prev, want := reflected, cfg.StartImpactAssessment.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["StartImpactAssessment"] == nil || getBool(obj, "StartImpactAssessment") == want)
+		}
+	}
+	if !cfg.StopImpactAssessmentAndStartClassification.IsUnknown() && !cfg.StopImpactAssessmentAndStartClassification.IsNull() && !cfg.StopImpactAssessmentAndStartClassification.Equal(state.StopImpactAssessmentAndStartClassification) {
+		prev, want := reflected, cfg.StopImpactAssessmentAndStartClassification.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["StopImpactAssessmentAndStartClassification"] == nil || getBool(obj, "StopImpactAssessmentAndStartClassification") == want)
+		}
+	}
 	r.refresh(ctx, id, &plan, &resp.Diagnostics, reflected)
+	if !cfg.ID.IsUnknown() && !cfg.ID.IsNull() {
+		plan.ID = cfg.ID
+	}
 	r.reconcileState(&cfg, &plan)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
@@ -496,82 +833,82 @@ func (r *sensitiveInformationScanResource) refresh(ctx context.Context, identity
 func readSensitiveInformationScan(ctx context.Context, obj map[string]any, m *sensitiveInformationScanModel) {
 	m.ID = types.StringValue(firstNonEmptyStr(getString(obj, "Guid"), getString(obj, "Id"), getString(obj, "Identity")))
 	m.Identity = types.StringValue(firstNonEmptyStr(getString(obj, "Identity"), getString(obj, "Guid"), getString(obj, "Name")))
-	m.AddEndpointDlpLocation = types.StringValue(getString(obj, "AddEndpointDlpLocation"))
-	m.AddEndpointDlpLocationException = types.StringValue(getString(obj, "AddEndpointDlpLocationException"))
-	m.AddExchangeLocation = types.StringValue(getString(obj, "AddExchangeLocation"))
-	m.AddOneDriveLocation = types.StringValue(getString(obj, "AddOneDriveLocation"))
-	m.AddOneDriveLocationException = types.StringValue(getString(obj, "AddOneDriveLocationException"))
-	m.AddSharePointLocation = types.StringValue(getString(obj, "AddSharePointLocation"))
-	m.AddSharePointLocationException = types.StringValue(getString(obj, "AddSharePointLocationException"))
-	m.AddTeamsLocation = types.StringValue(getString(obj, "AddTeamsLocation"))
-	m.AddTeamsLocationException = types.StringValue(getString(obj, "AddTeamsLocationException"))
+	m.AddEndpointDlpLocation = stringSetValue(ctx, getStringSlice(obj, "AddEndpointDlpLocation"))
+	m.AddEndpointDlpLocationException = stringSetValue(ctx, getStringSlice(obj, "AddEndpointDlpLocationException"))
+	m.AddExchangeLocation = stringSetValue(ctx, getStringSlice(obj, "AddExchangeLocation"))
+	m.AddOneDriveLocation = stringSetValue(ctx, getStringSlice(obj, "AddOneDriveLocation"))
+	m.AddOneDriveLocationException = stringSetValue(ctx, getStringSlice(obj, "AddOneDriveLocationException"))
+	m.AddSharePointLocation = stringSetValue(ctx, getStringSlice(obj, "AddSharePointLocation"))
+	m.AddSharePointLocationException = stringSetValue(ctx, getStringSlice(obj, "AddSharePointLocationException"))
+	m.AddTeamsLocation = stringSetValue(ctx, getStringSlice(obj, "AddTeamsLocation"))
+	m.AddTeamsLocationException = stringSetValue(ctx, getStringSlice(obj, "AddTeamsLocationException"))
 	m.CancelImpactAssessment = types.BoolValue(getBool(obj, "CancelImpactAssessment"))
 	m.CancelScan = types.BoolValue(getBool(obj, "CancelScan"))
 	m.Comment = types.StringValue(getString(obj, "Comment"))
-	m.EndpointDlpLocation = types.StringValue(getString(obj, "EndpointDlpLocation"))
-	m.EndpointDlpLocationException = types.StringValue(getString(obj, "EndpointDlpLocationException"))
+	m.EndpointDlpLocation = stringSetValue(ctx, getStringSlice(obj, "EndpointDlpLocation"))
+	m.EndpointDlpLocationException = stringSetValue(ctx, getStringSlice(obj, "EndpointDlpLocationException"))
 	m.ExceptIfOneDriveSharedBy = stringSetValue(ctx, getStringSlice(obj, "ExceptIfOneDriveSharedBy"))
 	m.ExceptIfOneDriveSharedByMemberOf = stringSetValue(ctx, getStringSlice(obj, "ExceptIfOneDriveSharedByMemberOf"))
-	m.ExchangeAdaptiveScopes = types.StringValue(getString(obj, "ExchangeAdaptiveScopes"))
-	m.ExchangeAdaptiveScopesException = types.StringValue(getString(obj, "ExchangeAdaptiveScopesException"))
-	m.ExchangeLocation = types.StringValue(getString(obj, "ExchangeLocation"))
+	m.ExchangeAdaptiveScopes = types.StringValue(getObjectJSON(obj, "ExchangeAdaptiveScopes"))
+	m.ExchangeAdaptiveScopesException = types.StringValue(getObjectJSON(obj, "ExchangeAdaptiveScopesException"))
+	m.ExchangeLocation = stringSetValue(ctx, getStringSlice(obj, "ExchangeLocation"))
 	m.ExchangeSender = stringSetValue(ctx, getStringSlice(obj, "ExchangeSender"))
 	m.ExchangeSenderException = stringSetValue(ctx, getStringSlice(obj, "ExchangeSenderException"))
 	m.ExchangeSenderMemberOf = stringSetValue(ctx, getStringSlice(obj, "ExchangeSenderMemberOf"))
 	m.ExchangeSenderMemberOfException = stringSetValue(ctx, getStringSlice(obj, "ExchangeSenderMemberOfException"))
-	m.Mode = types.StringValue(getString(obj, "Mode"))
+	m.Mode = types.StringValue(getObjectJSON(obj, "Mode"))
 	m.Name = types.StringValue(getString(obj, "Name"))
-	m.OneDriveAdaptiveScopes = types.StringValue(getString(obj, "OneDriveAdaptiveScopes"))
-	m.OneDriveAdaptiveScopesException = types.StringValue(getString(obj, "OneDriveAdaptiveScopesException"))
-	m.OneDriveLocation = types.StringValue(getString(obj, "OneDriveLocation"))
-	m.OneDriveLocationException = types.StringValue(getString(obj, "OneDriveLocationException"))
+	m.OneDriveAdaptiveScopes = types.StringValue(getObjectJSON(obj, "OneDriveAdaptiveScopes"))
+	m.OneDriveAdaptiveScopesException = types.StringValue(getObjectJSON(obj, "OneDriveAdaptiveScopesException"))
+	m.OneDriveLocation = stringSetValue(ctx, getStringSlice(obj, "OneDriveLocation"))
+	m.OneDriveLocationException = stringSetValue(ctx, getStringSlice(obj, "OneDriveLocationException"))
 	m.OneDriveSharedBy = stringSetValue(ctx, getStringSlice(obj, "OneDriveSharedBy"))
 	m.OneDriveSharedByMemberOf = stringSetValue(ctx, getStringSlice(obj, "OneDriveSharedByMemberOf"))
-	m.PolicyRBACScopes = types.StringValue(getString(obj, "PolicyRBACScopes"))
-	m.RemoveEndpointDlpLocation = types.StringValue(getString(obj, "RemoveEndpointDlpLocation"))
-	m.RemoveEndpointDlpLocationException = types.StringValue(getString(obj, "RemoveEndpointDlpLocationException"))
-	m.RemoveExchangeLocation = types.StringValue(getString(obj, "RemoveExchangeLocation"))
-	m.RemoveOneDriveLocation = types.StringValue(getString(obj, "RemoveOneDriveLocation"))
-	m.RemoveOneDriveLocationException = types.StringValue(getString(obj, "RemoveOneDriveLocationException"))
-	m.RemoveSharePointLocation = types.StringValue(getString(obj, "RemoveSharePointLocation"))
-	m.RemoveSharePointLocationException = types.StringValue(getString(obj, "RemoveSharePointLocationException"))
-	m.RemoveTeamsLocation = types.StringValue(getString(obj, "RemoveTeamsLocation"))
-	m.RemoveTeamsLocationException = types.StringValue(getString(obj, "RemoveTeamsLocationException"))
-	m.ScanBudget = types.StringValue(getString(obj, "ScanBudget"))
+	m.PolicyRBACScopes = stringSetValue(ctx, getStringSlice(obj, "PolicyRBACScopes"))
+	m.RemoveEndpointDlpLocation = stringSetValue(ctx, getStringSlice(obj, "RemoveEndpointDlpLocation"))
+	m.RemoveEndpointDlpLocationException = stringSetValue(ctx, getStringSlice(obj, "RemoveEndpointDlpLocationException"))
+	m.RemoveExchangeLocation = stringSetValue(ctx, getStringSlice(obj, "RemoveExchangeLocation"))
+	m.RemoveOneDriveLocation = stringSetValue(ctx, getStringSlice(obj, "RemoveOneDriveLocation"))
+	m.RemoveOneDriveLocationException = stringSetValue(ctx, getStringSlice(obj, "RemoveOneDriveLocationException"))
+	m.RemoveSharePointLocation = stringSetValue(ctx, getStringSlice(obj, "RemoveSharePointLocation"))
+	m.RemoveSharePointLocationException = stringSetValue(ctx, getStringSlice(obj, "RemoveSharePointLocationException"))
+	m.RemoveTeamsLocation = stringSetValue(ctx, getStringSlice(obj, "RemoveTeamsLocation"))
+	m.RemoveTeamsLocationException = stringSetValue(ctx, getStringSlice(obj, "RemoveTeamsLocationException"))
+	m.ScanBudget = types.StringValue(getObjectJSON(obj, "ScanBudget"))
 	m.ScanType = types.StringValue(getString(obj, "ScanType"))
-	m.SharePointAdaptiveScopes = types.StringValue(getString(obj, "SharePointAdaptiveScopes"))
-	m.SharePointAdaptiveScopesException = types.StringValue(getString(obj, "SharePointAdaptiveScopesException"))
-	m.SharePointLocation = types.StringValue(getString(obj, "SharePointLocation"))
-	m.SharePointLocationException = types.StringValue(getString(obj, "SharePointLocationException"))
+	m.SharePointAdaptiveScopes = types.StringValue(getObjectJSON(obj, "SharePointAdaptiveScopes"))
+	m.SharePointAdaptiveScopesException = types.StringValue(getObjectJSON(obj, "SharePointAdaptiveScopesException"))
+	m.SharePointLocation = stringSetValue(ctx, getStringSlice(obj, "SharePointLocation"))
+	m.SharePointLocationException = stringSetValue(ctx, getStringSlice(obj, "SharePointLocationException"))
 	m.StartImpactAssessment = types.BoolValue(getBool(obj, "StartImpactAssessment"))
 	m.StopImpactAssessmentAndStartClassification = types.BoolValue(getBool(obj, "StopImpactAssessmentAndStartClassification"))
-	m.TeamsAdaptiveScopes = types.StringValue(getString(obj, "TeamsAdaptiveScopes"))
-	m.TeamsAdaptiveScopesException = types.StringValue(getString(obj, "TeamsAdaptiveScopesException"))
-	m.TeamsLocation = types.StringValue(getString(obj, "TeamsLocation"))
-	m.TeamsLocationException = types.StringValue(getString(obj, "TeamsLocationException"))
+	m.TeamsAdaptiveScopes = types.StringValue(getObjectJSON(obj, "TeamsAdaptiveScopes"))
+	m.TeamsAdaptiveScopesException = types.StringValue(getObjectJSON(obj, "TeamsAdaptiveScopesException"))
+	m.TeamsLocation = stringSetValue(ctx, getStringSlice(obj, "TeamsLocation"))
+	m.TeamsLocationException = stringSetValue(ctx, getStringSlice(obj, "TeamsLocationException"))
 	_ = ctx
 }
 
 func (r *sensitiveInformationScanResource) reconcileState(cfg, read *sensitiveInformationScanModel) {
-	read.AddEndpointDlpLocation = reconcile.KeepStr(cfg.AddEndpointDlpLocation, read.AddEndpointDlpLocation)
-	read.AddEndpointDlpLocationException = reconcile.KeepStr(cfg.AddEndpointDlpLocationException, read.AddEndpointDlpLocationException)
-	read.AddExchangeLocation = reconcile.KeepStr(cfg.AddExchangeLocation, read.AddExchangeLocation)
-	read.AddOneDriveLocation = reconcile.KeepStr(cfg.AddOneDriveLocation, read.AddOneDriveLocation)
-	read.AddOneDriveLocationException = reconcile.KeepStr(cfg.AddOneDriveLocationException, read.AddOneDriveLocationException)
-	read.AddSharePointLocation = reconcile.KeepStr(cfg.AddSharePointLocation, read.AddSharePointLocation)
-	read.AddSharePointLocationException = reconcile.KeepStr(cfg.AddSharePointLocationException, read.AddSharePointLocationException)
-	read.AddTeamsLocation = reconcile.KeepStr(cfg.AddTeamsLocation, read.AddTeamsLocation)
-	read.AddTeamsLocationException = reconcile.KeepStr(cfg.AddTeamsLocationException, read.AddTeamsLocationException)
+	read.AddEndpointDlpLocation = reconcile.KeepSet(cfg.AddEndpointDlpLocation, read.AddEndpointDlpLocation)
+	read.AddEndpointDlpLocationException = reconcile.KeepSet(cfg.AddEndpointDlpLocationException, read.AddEndpointDlpLocationException)
+	read.AddExchangeLocation = reconcile.KeepSet(cfg.AddExchangeLocation, read.AddExchangeLocation)
+	read.AddOneDriveLocation = reconcile.KeepSet(cfg.AddOneDriveLocation, read.AddOneDriveLocation)
+	read.AddOneDriveLocationException = reconcile.KeepSet(cfg.AddOneDriveLocationException, read.AddOneDriveLocationException)
+	read.AddSharePointLocation = reconcile.KeepSet(cfg.AddSharePointLocation, read.AddSharePointLocation)
+	read.AddSharePointLocationException = reconcile.KeepSet(cfg.AddSharePointLocationException, read.AddSharePointLocationException)
+	read.AddTeamsLocation = reconcile.KeepSet(cfg.AddTeamsLocation, read.AddTeamsLocation)
+	read.AddTeamsLocationException = reconcile.KeepSet(cfg.AddTeamsLocationException, read.AddTeamsLocationException)
 	read.CancelImpactAssessment = reconcile.KeepBool(cfg.CancelImpactAssessment, read.CancelImpactAssessment)
 	read.CancelScan = reconcile.KeepBool(cfg.CancelScan, read.CancelScan)
 	read.Comment = reconcile.KeepStr(cfg.Comment, read.Comment)
-	read.EndpointDlpLocation = reconcile.KeepStr(cfg.EndpointDlpLocation, read.EndpointDlpLocation)
-	read.EndpointDlpLocationException = reconcile.KeepStr(cfg.EndpointDlpLocationException, read.EndpointDlpLocationException)
+	read.EndpointDlpLocation = reconcile.KeepSet(cfg.EndpointDlpLocation, read.EndpointDlpLocation)
+	read.EndpointDlpLocationException = reconcile.KeepSet(cfg.EndpointDlpLocationException, read.EndpointDlpLocationException)
 	read.ExceptIfOneDriveSharedBy = reconcile.KeepSet(cfg.ExceptIfOneDriveSharedBy, read.ExceptIfOneDriveSharedBy)
 	read.ExceptIfOneDriveSharedByMemberOf = reconcile.KeepSet(cfg.ExceptIfOneDriveSharedByMemberOf, read.ExceptIfOneDriveSharedByMemberOf)
 	read.ExchangeAdaptiveScopes = reconcile.KeepStr(cfg.ExchangeAdaptiveScopes, read.ExchangeAdaptiveScopes)
 	read.ExchangeAdaptiveScopesException = reconcile.KeepStr(cfg.ExchangeAdaptiveScopesException, read.ExchangeAdaptiveScopesException)
-	read.ExchangeLocation = reconcile.KeepStr(cfg.ExchangeLocation, read.ExchangeLocation)
+	read.ExchangeLocation = reconcile.KeepSet(cfg.ExchangeLocation, read.ExchangeLocation)
 	read.ExchangeSender = reconcile.KeepSet(cfg.ExchangeSender, read.ExchangeSender)
 	read.ExchangeSenderException = reconcile.KeepSet(cfg.ExchangeSenderException, read.ExchangeSenderException)
 	read.ExchangeSenderMemberOf = reconcile.KeepSet(cfg.ExchangeSenderMemberOf, read.ExchangeSenderMemberOf)
@@ -580,30 +917,30 @@ func (r *sensitiveInformationScanResource) reconcileState(cfg, read *sensitiveIn
 	read.Name = reconcile.KeepStr(cfg.Name, read.Name)
 	read.OneDriveAdaptiveScopes = reconcile.KeepStr(cfg.OneDriveAdaptiveScopes, read.OneDriveAdaptiveScopes)
 	read.OneDriveAdaptiveScopesException = reconcile.KeepStr(cfg.OneDriveAdaptiveScopesException, read.OneDriveAdaptiveScopesException)
-	read.OneDriveLocation = reconcile.KeepStr(cfg.OneDriveLocation, read.OneDriveLocation)
-	read.OneDriveLocationException = reconcile.KeepStr(cfg.OneDriveLocationException, read.OneDriveLocationException)
+	read.OneDriveLocation = reconcile.KeepSet(cfg.OneDriveLocation, read.OneDriveLocation)
+	read.OneDriveLocationException = reconcile.KeepSet(cfg.OneDriveLocationException, read.OneDriveLocationException)
 	read.OneDriveSharedBy = reconcile.KeepSet(cfg.OneDriveSharedBy, read.OneDriveSharedBy)
 	read.OneDriveSharedByMemberOf = reconcile.KeepSet(cfg.OneDriveSharedByMemberOf, read.OneDriveSharedByMemberOf)
-	read.PolicyRBACScopes = reconcile.KeepStr(cfg.PolicyRBACScopes, read.PolicyRBACScopes)
-	read.RemoveEndpointDlpLocation = reconcile.KeepStr(cfg.RemoveEndpointDlpLocation, read.RemoveEndpointDlpLocation)
-	read.RemoveEndpointDlpLocationException = reconcile.KeepStr(cfg.RemoveEndpointDlpLocationException, read.RemoveEndpointDlpLocationException)
-	read.RemoveExchangeLocation = reconcile.KeepStr(cfg.RemoveExchangeLocation, read.RemoveExchangeLocation)
-	read.RemoveOneDriveLocation = reconcile.KeepStr(cfg.RemoveOneDriveLocation, read.RemoveOneDriveLocation)
-	read.RemoveOneDriveLocationException = reconcile.KeepStr(cfg.RemoveOneDriveLocationException, read.RemoveOneDriveLocationException)
-	read.RemoveSharePointLocation = reconcile.KeepStr(cfg.RemoveSharePointLocation, read.RemoveSharePointLocation)
-	read.RemoveSharePointLocationException = reconcile.KeepStr(cfg.RemoveSharePointLocationException, read.RemoveSharePointLocationException)
-	read.RemoveTeamsLocation = reconcile.KeepStr(cfg.RemoveTeamsLocation, read.RemoveTeamsLocation)
-	read.RemoveTeamsLocationException = reconcile.KeepStr(cfg.RemoveTeamsLocationException, read.RemoveTeamsLocationException)
+	read.PolicyRBACScopes = reconcile.KeepSet(cfg.PolicyRBACScopes, read.PolicyRBACScopes)
+	read.RemoveEndpointDlpLocation = reconcile.KeepSet(cfg.RemoveEndpointDlpLocation, read.RemoveEndpointDlpLocation)
+	read.RemoveEndpointDlpLocationException = reconcile.KeepSet(cfg.RemoveEndpointDlpLocationException, read.RemoveEndpointDlpLocationException)
+	read.RemoveExchangeLocation = reconcile.KeepSet(cfg.RemoveExchangeLocation, read.RemoveExchangeLocation)
+	read.RemoveOneDriveLocation = reconcile.KeepSet(cfg.RemoveOneDriveLocation, read.RemoveOneDriveLocation)
+	read.RemoveOneDriveLocationException = reconcile.KeepSet(cfg.RemoveOneDriveLocationException, read.RemoveOneDriveLocationException)
+	read.RemoveSharePointLocation = reconcile.KeepSet(cfg.RemoveSharePointLocation, read.RemoveSharePointLocation)
+	read.RemoveSharePointLocationException = reconcile.KeepSet(cfg.RemoveSharePointLocationException, read.RemoveSharePointLocationException)
+	read.RemoveTeamsLocation = reconcile.KeepSet(cfg.RemoveTeamsLocation, read.RemoveTeamsLocation)
+	read.RemoveTeamsLocationException = reconcile.KeepSet(cfg.RemoveTeamsLocationException, read.RemoveTeamsLocationException)
 	read.ScanBudget = reconcile.KeepStr(cfg.ScanBudget, read.ScanBudget)
 	read.ScanType = reconcile.KeepStr(cfg.ScanType, read.ScanType)
 	read.SharePointAdaptiveScopes = reconcile.KeepStr(cfg.SharePointAdaptiveScopes, read.SharePointAdaptiveScopes)
 	read.SharePointAdaptiveScopesException = reconcile.KeepStr(cfg.SharePointAdaptiveScopesException, read.SharePointAdaptiveScopesException)
-	read.SharePointLocation = reconcile.KeepStr(cfg.SharePointLocation, read.SharePointLocation)
-	read.SharePointLocationException = reconcile.KeepStr(cfg.SharePointLocationException, read.SharePointLocationException)
+	read.SharePointLocation = reconcile.KeepSet(cfg.SharePointLocation, read.SharePointLocation)
+	read.SharePointLocationException = reconcile.KeepSet(cfg.SharePointLocationException, read.SharePointLocationException)
 	read.StartImpactAssessment = reconcile.KeepBool(cfg.StartImpactAssessment, read.StartImpactAssessment)
 	read.StopImpactAssessmentAndStartClassification = reconcile.KeepBool(cfg.StopImpactAssessmentAndStartClassification, read.StopImpactAssessmentAndStartClassification)
 	read.TeamsAdaptiveScopes = reconcile.KeepStr(cfg.TeamsAdaptiveScopes, read.TeamsAdaptiveScopes)
 	read.TeamsAdaptiveScopesException = reconcile.KeepStr(cfg.TeamsAdaptiveScopesException, read.TeamsAdaptiveScopesException)
-	read.TeamsLocation = reconcile.KeepStr(cfg.TeamsLocation, read.TeamsLocation)
-	read.TeamsLocationException = reconcile.KeepStr(cfg.TeamsLocationException, read.TeamsLocationException)
+	read.TeamsLocation = reconcile.KeepSet(cfg.TeamsLocation, read.TeamsLocation)
+	read.TeamsLocationException = reconcile.KeepSet(cfg.TeamsLocationException, read.TeamsLocationException)
 }

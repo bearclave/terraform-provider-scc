@@ -21,5 +21,6 @@ Look up an existing DlpSensitiveInformationTypeConfig object. Set identity to se
 
 ### Read-Only
 
+- `fingerprint_threshold` (Number) Maps to the -FingerprintThreshold parameter.
 - `id` (String) Object identifier (GUID).
 - `reg_ex_grammar_limit` (Boolean) Maps to the -RegExGrammarLimit parameter.

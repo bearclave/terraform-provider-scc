@@ -34,9 +34,10 @@ func (d *dlpSensitiveInformationTypeConfigDataSource) Schema(_ context.Context, 
 	resp.Schema = schema.Schema{
 		Description: "Look up an existing DlpSensitiveInformationTypeConfig object. Set identity to select it.",
 		Attributes: map[string]schema.Attribute{
-			"id":                   schema.StringAttribute{Computed: true, Description: "Object identifier (GUID)."},
-			"identity":             schema.StringAttribute{Optional: true, Computed: true, Description: "Identity used to look up the object."},
-			"reg_ex_grammar_limit": schema.BoolAttribute{Computed: true, Description: "Maps to the -RegExGrammarLimit parameter."},
+			"id":                    schema.StringAttribute{Computed: true, Description: "Object identifier (GUID)."},
+			"identity":              schema.StringAttribute{Optional: true, Computed: true, Description: "Identity used to look up the object."},
+			"fingerprint_threshold": schema.Int64Attribute{Computed: true, Description: "Maps to the -FingerprintThreshold parameter."},
+			"reg_ex_grammar_limit":  schema.BoolAttribute{Computed: true, Description: "Maps to the -RegExGrammarLimit parameter."},
 		},
 	}
 }
@@ -55,10 +56,6 @@ func (d *dlpSensitiveInformationTypeConfigDataSource) Read(ctx context.Context, 
 		return
 	}
 	identity := firstNonEmptyStr(data.Identity.ValueString(), data.ID.ValueString())
-	if identity == "" {
-		resp.Diagnostics.AddError("Missing lookup key", "set identity to select the object")
-		return
-	}
 	get := func(ctx context.Context) (map[string]any, bool, error) {
 		_ = identity
 		res, gerr := d.client.SCC.GetDlpSensitiveInformationTypeConfig(ctx, purview.GetDlpSensitiveInformationTypeConfigParams{})

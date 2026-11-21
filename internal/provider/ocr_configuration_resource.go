@@ -92,7 +92,7 @@ func (r *ocrConfigurationResource) Schema(_ context.Context, _ resource.SchemaRe
 		Description: "Manages the OcrConfiguration object via New-OcrConfiguration / Get-OcrConfiguration / Set-OcrConfiguration / Remove-OcrConfiguration.",
 		Attributes: map[string]schema.Attribute{
 			"id":                                        schema.StringAttribute{Computed: true, Description: "Object identifier (GUID).", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"identity":                                  schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets."},
+			"identity":                                  schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"add_endpoint_dlp_location":                 schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AddEndpointDlpLocation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"add_endpoint_dlp_location_exception":       schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AddEndpointDlpLocationException parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"add_exchange_location":                     schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AddExchangeLocation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
@@ -156,63 +156,110 @@ func (r *ocrConfigurationResource) Create(ctx context.Context, req resource.Crea
 		return
 	}
 
-	p := purview.NewOcrConfigurationParams{
-		Comment:                              plan.Comment.ValueString(),
-		ExceptIfOneDriveSharedBy:             toStringSlice(ctx, plan.ExceptIfOneDriveSharedBy, &resp.Diagnostics),
-		ExceptIfOneDriveSharedByMemberOf:     toStringSlice(ctx, plan.ExceptIfOneDriveSharedByMemberOf, &resp.Diagnostics),
-		ExchangeScopeOcrAnyRecipientExternal: plan.ExchangeScopeOcrAnyRecipientExternal.ValueBool(),
-		ExchangeSender:                       toStringSlice(ctx, plan.ExchangeSender, &resp.Diagnostics),
-		ExchangeSenderException:              toStringSlice(ctx, plan.ExchangeSenderException, &resp.Diagnostics),
-		ExchangeSenderMemberOf:               toStringSlice(ctx, plan.ExchangeSenderMemberOf, &resp.Diagnostics),
-		ExchangeSenderMemberOfException:      toStringSlice(ctx, plan.ExchangeSenderMemberOfException, &resp.Diagnostics),
-		Locations:                            plan.Locations.ValueString(),
-		Name:                                 plan.Name.ValueString(),
-		OneDriveSharedBy:                     toStringSlice(ctx, plan.OneDriveSharedBy, &resp.Diagnostics),
-		OneDriveSharedByMemberOf:             toStringSlice(ctx, plan.OneDriveSharedByMemberOf, &resp.Diagnostics),
+	var config ocrConfigurationModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
+	if resp.Diagnostics.HasError() {
+		return
 	}
-	if v := plan.EndpointDlpLocation.ValueString(); v != "" {
-		p.EndpointDlpLocation = v
+
+	p := purview.NewOcrConfigurationParams{}
+	if !config.Comment.IsNull() {
+		p.Comment = plan.Comment.ValueString()
 	}
-	if v := plan.EndpointDlpLocationException.ValueString(); v != "" {
-		p.EndpointDlpLocationException = v
+	if v := config.EndpointDlpLocation.ValueString(); v != "" {
+		p.EndpointDlpLocation = objectParam(v)
 	}
-	if v := plan.EnforcementPlanes.ValueString(); v != "" {
-		p.EnforcementPlanes = v
+	if v := config.EndpointDlpLocationException.ValueString(); v != "" {
+		p.EndpointDlpLocationException = objectParam(v)
 	}
-	if v := plan.ExchangeLocation.ValueString(); v != "" {
-		p.ExchangeLocation = v
+	if v := config.EnforcementPlanes.ValueString(); v != "" {
+		p.EnforcementPlanes = objectParam(v)
 	}
-	if v := plan.ExchangeLocationException.ValueString(); v != "" {
-		p.ExchangeLocationException = v
+	if !config.ExceptIfOneDriveSharedBy.IsNull() {
+		if v := toStringSlice(ctx, plan.ExceptIfOneDriveSharedBy, &resp.Diagnostics); len(v) > 0 {
+			p.ExceptIfOneDriveSharedBy = v
+		}
 	}
-	if v := plan.Mode.ValueString(); v != "" {
-		p.Mode = v
+	if !config.ExceptIfOneDriveSharedByMemberOf.IsNull() {
+		if v := toStringSlice(ctx, plan.ExceptIfOneDriveSharedByMemberOf, &resp.Diagnostics); len(v) > 0 {
+			p.ExceptIfOneDriveSharedByMemberOf = v
+		}
 	}
-	if v := plan.OcrMode.ValueString(); v != "" {
-		p.OcrMode = v
+	if v := config.ExchangeLocation.ValueString(); v != "" {
+		p.ExchangeLocation = objectParam(v)
 	}
-	if v := plan.OneDriveLocation.ValueString(); v != "" {
-		p.OneDriveLocation = v
+	if v := config.ExchangeLocationException.ValueString(); v != "" {
+		p.ExchangeLocationException = objectParam(v)
 	}
-	if v := plan.OneDriveLocationException.ValueString(); v != "" {
-		p.OneDriveLocationException = v
+	if !config.ExchangeScopeOcrAnyRecipientExternal.IsNull() {
+		if !plan.ExchangeScopeOcrAnyRecipientExternal.IsUnknown() {
+			p.ExchangeScopeOcrAnyRecipientExternal = plan.ExchangeScopeOcrAnyRecipientExternal.ValueBoolPointer()
+		}
 	}
-	if v := plan.SharePointLocation.ValueString(); v != "" {
-		p.SharePointLocation = v
+	if !config.ExchangeSender.IsNull() {
+		if v := toStringSlice(ctx, plan.ExchangeSender, &resp.Diagnostics); len(v) > 0 {
+			p.ExchangeSender = v
+		}
 	}
-	if v := plan.SharePointLocationException.ValueString(); v != "" {
-		p.SharePointLocationException = v
+	if !config.ExchangeSenderException.IsNull() {
+		if v := toStringSlice(ctx, plan.ExchangeSenderException, &resp.Diagnostics); len(v) > 0 {
+			p.ExchangeSenderException = v
+		}
 	}
-	if v := plan.TeamsLocation.ValueString(); v != "" {
-		p.TeamsLocation = v
+	if !config.ExchangeSenderMemberOf.IsNull() {
+		if v := toStringSlice(ctx, plan.ExchangeSenderMemberOf, &resp.Diagnostics); len(v) > 0 {
+			p.ExchangeSenderMemberOf = v
+		}
 	}
-	if v := plan.TeamsLocationException.ValueString(); v != "" {
-		p.TeamsLocationException = v
+	if !config.ExchangeSenderMemberOfException.IsNull() {
+		if v := toStringSlice(ctx, plan.ExchangeSenderMemberOfException, &resp.Diagnostics); len(v) > 0 {
+			p.ExchangeSenderMemberOfException = v
+		}
+	}
+	if !config.Locations.IsNull() {
+		p.Locations = plan.Locations.ValueString()
+	}
+	if v := config.Mode.ValueString(); v != "" {
+		p.Mode = objectParam(v)
+	}
+	if !config.Name.IsNull() {
+		p.Name = plan.Name.ValueString()
+	}
+	if v := config.OcrMode.ValueString(); v != "" {
+		p.OcrMode = objectParam(v)
+	}
+	if v := config.OneDriveLocation.ValueString(); v != "" {
+		p.OneDriveLocation = objectParam(v)
+	}
+	if v := config.OneDriveLocationException.ValueString(); v != "" {
+		p.OneDriveLocationException = objectParam(v)
+	}
+	if !config.OneDriveSharedBy.IsNull() {
+		if v := toStringSlice(ctx, plan.OneDriveSharedBy, &resp.Diagnostics); len(v) > 0 {
+			p.OneDriveSharedBy = v
+		}
+	}
+	if !config.OneDriveSharedByMemberOf.IsNull() {
+		if v := toStringSlice(ctx, plan.OneDriveSharedByMemberOf, &resp.Diagnostics); len(v) > 0 {
+			p.OneDriveSharedByMemberOf = v
+		}
+	}
+	if v := config.SharePointLocation.ValueString(); v != "" {
+		p.SharePointLocation = objectParam(v)
+	}
+	if v := config.SharePointLocationException.ValueString(); v != "" {
+		p.SharePointLocationException = objectParam(v)
+	}
+	if v := config.TeamsLocation.ValueString(); v != "" {
+		p.TeamsLocation = objectParam(v)
+	}
+	if v := config.TeamsLocationException.ValueString(); v != "" {
+		p.TeamsLocationException = objectParam(v)
 	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	res, err := r.client.SCC.NewOcrConfiguration(ctx, p)
+	res, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.NewOcrConfiguration, p, isNotFound)
 	if err != nil {
 		resp.Diagnostics.AddError("New-OcrConfiguration failed", err.Error())
 		return
@@ -259,122 +306,194 @@ func (r *ocrConfigurationResource) Update(ctx context.Context, req resource.Upda
 	id := r.identityOf(state)
 	sp := purview.SetOcrConfigurationParams{}
 	sp.Identity = id
-	if v := plan.AddEndpointDlpLocation.ValueString(); v != "" {
-		sp.AddEndpointDlpLocation = v
+	if !plan.AddEndpointDlpLocation.Equal(state.AddEndpointDlpLocation) {
+		if v := plan.AddEndpointDlpLocation.ValueString(); v != "" {
+			sp.AddEndpointDlpLocation = objectParam(v)
+		}
 	}
-	if v := plan.AddEndpointDlpLocationException.ValueString(); v != "" {
-		sp.AddEndpointDlpLocationException = v
+	if !plan.AddEndpointDlpLocationException.Equal(state.AddEndpointDlpLocationException) {
+		if v := plan.AddEndpointDlpLocationException.ValueString(); v != "" {
+			sp.AddEndpointDlpLocationException = objectParam(v)
+		}
 	}
-	if v := plan.AddExchangeLocation.ValueString(); v != "" {
-		sp.AddExchangeLocation = v
+	if !plan.AddExchangeLocation.Equal(state.AddExchangeLocation) {
+		if v := plan.AddExchangeLocation.ValueString(); v != "" {
+			sp.AddExchangeLocation = objectParam(v)
+		}
 	}
-	if v := plan.AddExchangeLocationException.ValueString(); v != "" {
-		sp.AddExchangeLocationException = v
+	if !plan.AddExchangeLocationException.Equal(state.AddExchangeLocationException) {
+		if v := plan.AddExchangeLocationException.ValueString(); v != "" {
+			sp.AddExchangeLocationException = objectParam(v)
+		}
 	}
-	if v := plan.AddOneDriveLocation.ValueString(); v != "" {
-		sp.AddOneDriveLocation = v
+	if !plan.AddOneDriveLocation.Equal(state.AddOneDriveLocation) {
+		if v := plan.AddOneDriveLocation.ValueString(); v != "" {
+			sp.AddOneDriveLocation = objectParam(v)
+		}
 	}
-	if v := plan.AddOneDriveLocationException.ValueString(); v != "" {
-		sp.AddOneDriveLocationException = v
+	if !plan.AddOneDriveLocationException.Equal(state.AddOneDriveLocationException) {
+		if v := plan.AddOneDriveLocationException.ValueString(); v != "" {
+			sp.AddOneDriveLocationException = objectParam(v)
+		}
 	}
-	if v := plan.AddSharePointLocation.ValueString(); v != "" {
-		sp.AddSharePointLocation = v
+	if !plan.AddSharePointLocation.Equal(state.AddSharePointLocation) {
+		if v := plan.AddSharePointLocation.ValueString(); v != "" {
+			sp.AddSharePointLocation = objectParam(v)
+		}
 	}
-	if v := plan.AddSharePointLocationException.ValueString(); v != "" {
-		sp.AddSharePointLocationException = v
+	if !plan.AddSharePointLocationException.Equal(state.AddSharePointLocationException) {
+		if v := plan.AddSharePointLocationException.ValueString(); v != "" {
+			sp.AddSharePointLocationException = objectParam(v)
+		}
 	}
-	if v := plan.AddTeamsLocation.ValueString(); v != "" {
-		sp.AddTeamsLocation = v
+	if !plan.AddTeamsLocation.Equal(state.AddTeamsLocation) {
+		if v := plan.AddTeamsLocation.ValueString(); v != "" {
+			sp.AddTeamsLocation = objectParam(v)
+		}
 	}
-	if v := plan.AddTeamsLocationException.ValueString(); v != "" {
-		sp.AddTeamsLocationException = v
+	if !plan.AddTeamsLocationException.Equal(state.AddTeamsLocationException) {
+		if v := plan.AddTeamsLocationException.ValueString(); v != "" {
+			sp.AddTeamsLocationException = objectParam(v)
+		}
 	}
-	sp.Comment = plan.Comment.ValueString()
-	if v := plan.EnforcementPlanes.ValueString(); v != "" {
-		sp.EnforcementPlanes = v
+	if !plan.Comment.Equal(state.Comment) {
+		sp.Comment = plan.Comment.ValueString()
 	}
-	sp.ExceptIfOneDriveSharedBy = toStringSlice(ctx, plan.ExceptIfOneDriveSharedBy, &resp.Diagnostics)
-	sp.ExceptIfOneDriveSharedByMemberOf = toStringSlice(ctx, plan.ExceptIfOneDriveSharedByMemberOf, &resp.Diagnostics)
-	sp.ExchangeScopeOcrAnyRecipientExternal = plan.ExchangeScopeOcrAnyRecipientExternal.ValueBool()
-	sp.ExchangeSender = toStringSlice(ctx, plan.ExchangeSender, &resp.Diagnostics)
-	sp.ExchangeSenderException = toStringSlice(ctx, plan.ExchangeSenderException, &resp.Diagnostics)
-	sp.ExchangeSenderMemberOf = toStringSlice(ctx, plan.ExchangeSenderMemberOf, &resp.Diagnostics)
-	sp.ExchangeSenderMemberOfException = toStringSlice(ctx, plan.ExchangeSenderMemberOfException, &resp.Diagnostics)
-	sp.Locations = plan.Locations.ValueString()
-	if v := plan.Mode.ValueString(); v != "" {
-		sp.Mode = v
+	if !plan.EnforcementPlanes.Equal(state.EnforcementPlanes) {
+		if v := plan.EnforcementPlanes.ValueString(); v != "" {
+			sp.EnforcementPlanes = objectParam(v)
+		}
 	}
-	if v := plan.OcrMode.ValueString(); v != "" {
-		sp.OcrMode = v
+	if !plan.ExceptIfOneDriveSharedBy.Equal(state.ExceptIfOneDriveSharedBy) {
+		if !plan.ExceptIfOneDriveSharedBy.IsNull() && !plan.ExceptIfOneDriveSharedBy.IsUnknown() {
+			sp.ExceptIfOneDriveSharedBy = append([]string{}, toStringSlice(ctx, plan.ExceptIfOneDriveSharedBy, &resp.Diagnostics)...)
+		}
 	}
-	sp.OneDriveSharedBy = toStringSlice(ctx, plan.OneDriveSharedBy, &resp.Diagnostics)
-	sp.OneDriveSharedByMemberOf = toStringSlice(ctx, plan.OneDriveSharedByMemberOf, &resp.Diagnostics)
-	if v := plan.RemoveEndpointDlpLocation.ValueString(); v != "" {
-		sp.RemoveEndpointDlpLocation = v
+	if !plan.ExceptIfOneDriveSharedByMemberOf.Equal(state.ExceptIfOneDriveSharedByMemberOf) {
+		if !plan.ExceptIfOneDriveSharedByMemberOf.IsNull() && !plan.ExceptIfOneDriveSharedByMemberOf.IsUnknown() {
+			sp.ExceptIfOneDriveSharedByMemberOf = append([]string{}, toStringSlice(ctx, plan.ExceptIfOneDriveSharedByMemberOf, &resp.Diagnostics)...)
+		}
 	}
-	if v := plan.RemoveEndpointDlpLocationException.ValueString(); v != "" {
-		sp.RemoveEndpointDlpLocationException = v
+	if !plan.ExchangeScopeOcrAnyRecipientExternal.Equal(state.ExchangeScopeOcrAnyRecipientExternal) {
+		if !plan.ExchangeScopeOcrAnyRecipientExternal.IsUnknown() {
+			sp.ExchangeScopeOcrAnyRecipientExternal = plan.ExchangeScopeOcrAnyRecipientExternal.ValueBoolPointer()
+		}
 	}
-	if v := plan.RemoveExchangeLocation.ValueString(); v != "" {
-		sp.RemoveExchangeLocation = v
+	if !plan.ExchangeSender.Equal(state.ExchangeSender) {
+		if !plan.ExchangeSender.IsNull() && !plan.ExchangeSender.IsUnknown() {
+			sp.ExchangeSender = append([]string{}, toStringSlice(ctx, plan.ExchangeSender, &resp.Diagnostics)...)
+		}
 	}
-	if v := plan.RemoveExchangeLocationException.ValueString(); v != "" {
-		sp.RemoveExchangeLocationException = v
+	if !plan.ExchangeSenderException.Equal(state.ExchangeSenderException) {
+		if !plan.ExchangeSenderException.IsNull() && !plan.ExchangeSenderException.IsUnknown() {
+			sp.ExchangeSenderException = append([]string{}, toStringSlice(ctx, plan.ExchangeSenderException, &resp.Diagnostics)...)
+		}
 	}
-	if v := plan.RemoveOneDriveLocation.ValueString(); v != "" {
-		sp.RemoveOneDriveLocation = v
+	if !plan.ExchangeSenderMemberOf.Equal(state.ExchangeSenderMemberOf) {
+		if !plan.ExchangeSenderMemberOf.IsNull() && !plan.ExchangeSenderMemberOf.IsUnknown() {
+			sp.ExchangeSenderMemberOf = append([]string{}, toStringSlice(ctx, plan.ExchangeSenderMemberOf, &resp.Diagnostics)...)
+		}
 	}
-	if v := plan.RemoveOneDriveLocationException.ValueString(); v != "" {
-		sp.RemoveOneDriveLocationException = v
+	if !plan.ExchangeSenderMemberOfException.Equal(state.ExchangeSenderMemberOfException) {
+		if !plan.ExchangeSenderMemberOfException.IsNull() && !plan.ExchangeSenderMemberOfException.IsUnknown() {
+			sp.ExchangeSenderMemberOfException = append([]string{}, toStringSlice(ctx, plan.ExchangeSenderMemberOfException, &resp.Diagnostics)...)
+		}
 	}
-	if v := plan.RemoveSharePointLocation.ValueString(); v != "" {
-		sp.RemoveSharePointLocation = v
+	if !plan.Locations.Equal(state.Locations) {
+		sp.Locations = plan.Locations.ValueString()
 	}
-	if v := plan.RemoveSharePointLocationException.ValueString(); v != "" {
-		sp.RemoveSharePointLocationException = v
+	if !plan.Mode.Equal(state.Mode) {
+		if v := plan.Mode.ValueString(); v != "" {
+			sp.Mode = objectParam(v)
+		}
 	}
-	if v := plan.RemoveTeamsLocation.ValueString(); v != "" {
-		sp.RemoveTeamsLocation = v
+	if !plan.OcrMode.Equal(state.OcrMode) {
+		if v := plan.OcrMode.ValueString(); v != "" {
+			sp.OcrMode = objectParam(v)
+		}
 	}
-	if v := plan.RemoveTeamsLocationException.ValueString(); v != "" {
-		sp.RemoveTeamsLocationException = v
+	if !plan.OneDriveSharedBy.Equal(state.OneDriveSharedBy) {
+		if !plan.OneDriveSharedBy.IsNull() && !plan.OneDriveSharedBy.IsUnknown() {
+			sp.OneDriveSharedBy = append([]string{}, toStringSlice(ctx, plan.OneDriveSharedBy, &resp.Diagnostics)...)
+		}
+	}
+	if !plan.OneDriveSharedByMemberOf.Equal(state.OneDriveSharedByMemberOf) {
+		if !plan.OneDriveSharedByMemberOf.IsNull() && !plan.OneDriveSharedByMemberOf.IsUnknown() {
+			sp.OneDriveSharedByMemberOf = append([]string{}, toStringSlice(ctx, plan.OneDriveSharedByMemberOf, &resp.Diagnostics)...)
+		}
+	}
+	if !plan.RemoveEndpointDlpLocation.Equal(state.RemoveEndpointDlpLocation) {
+		if v := plan.RemoveEndpointDlpLocation.ValueString(); v != "" {
+			sp.RemoveEndpointDlpLocation = objectParam(v)
+		}
+	}
+	if !plan.RemoveEndpointDlpLocationException.Equal(state.RemoveEndpointDlpLocationException) {
+		if v := plan.RemoveEndpointDlpLocationException.ValueString(); v != "" {
+			sp.RemoveEndpointDlpLocationException = objectParam(v)
+		}
+	}
+	if !plan.RemoveExchangeLocation.Equal(state.RemoveExchangeLocation) {
+		if v := plan.RemoveExchangeLocation.ValueString(); v != "" {
+			sp.RemoveExchangeLocation = objectParam(v)
+		}
+	}
+	if !plan.RemoveExchangeLocationException.Equal(state.RemoveExchangeLocationException) {
+		if v := plan.RemoveExchangeLocationException.ValueString(); v != "" {
+			sp.RemoveExchangeLocationException = objectParam(v)
+		}
+	}
+	if !plan.RemoveOneDriveLocation.Equal(state.RemoveOneDriveLocation) {
+		if v := plan.RemoveOneDriveLocation.ValueString(); v != "" {
+			sp.RemoveOneDriveLocation = objectParam(v)
+		}
+	}
+	if !plan.RemoveOneDriveLocationException.Equal(state.RemoveOneDriveLocationException) {
+		if v := plan.RemoveOneDriveLocationException.ValueString(); v != "" {
+			sp.RemoveOneDriveLocationException = objectParam(v)
+		}
+	}
+	if !plan.RemoveSharePointLocation.Equal(state.RemoveSharePointLocation) {
+		if v := plan.RemoveSharePointLocation.ValueString(); v != "" {
+			sp.RemoveSharePointLocation = objectParam(v)
+		}
+	}
+	if !plan.RemoveSharePointLocationException.Equal(state.RemoveSharePointLocationException) {
+		if v := plan.RemoveSharePointLocationException.ValueString(); v != "" {
+			sp.RemoveSharePointLocationException = objectParam(v)
+		}
+	}
+	if !plan.RemoveTeamsLocation.Equal(state.RemoveTeamsLocation) {
+		if v := plan.RemoveTeamsLocation.ValueString(); v != "" {
+			sp.RemoveTeamsLocation = objectParam(v)
+		}
+	}
+	if !plan.RemoveTeamsLocationException.Equal(state.RemoveTeamsLocationException) {
+		if v := plan.RemoveTeamsLocationException.ValueString(); v != "" {
+			sp.RemoveTeamsLocationException = objectParam(v)
+		}
 	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	if _, err := r.client.SCC.SetOcrConfiguration(ctx, sp); err != nil {
+	if _, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.SetOcrConfiguration, sp, isNotFound); err != nil {
 		resp.Diagnostics.AddError("Set-OcrConfiguration failed", err.Error())
 		return
 	}
 	cfg := plan
 	reflected := reconcile.ReflectsFields(map[string]types.String{
-		"AddEndpointDlpLocation":             cfg.AddEndpointDlpLocation,
-		"AddEndpointDlpLocationException":    cfg.AddEndpointDlpLocationException,
-		"AddExchangeLocation":                cfg.AddExchangeLocation,
-		"AddExchangeLocationException":       cfg.AddExchangeLocationException,
-		"AddOneDriveLocation":                cfg.AddOneDriveLocation,
-		"AddOneDriveLocationException":       cfg.AddOneDriveLocationException,
-		"AddSharePointLocation":              cfg.AddSharePointLocation,
-		"AddSharePointLocationException":     cfg.AddSharePointLocationException,
-		"AddTeamsLocation":                   cfg.AddTeamsLocation,
-		"AddTeamsLocationException":          cfg.AddTeamsLocationException,
-		"Comment":                            cfg.Comment,
-		"EnforcementPlanes":                  cfg.EnforcementPlanes,
-		"Locations":                          cfg.Locations,
-		"Mode":                               cfg.Mode,
-		"OcrMode":                            cfg.OcrMode,
-		"RemoveEndpointDlpLocation":          cfg.RemoveEndpointDlpLocation,
-		"RemoveEndpointDlpLocationException": cfg.RemoveEndpointDlpLocationException,
-		"RemoveExchangeLocation":             cfg.RemoveExchangeLocation,
-		"RemoveExchangeLocationException":    cfg.RemoveExchangeLocationException,
-		"RemoveOneDriveLocation":             cfg.RemoveOneDriveLocation,
-		"RemoveOneDriveLocationException":    cfg.RemoveOneDriveLocationException,
-		"RemoveSharePointLocation":           cfg.RemoveSharePointLocation,
-		"RemoveSharePointLocationException":  cfg.RemoveSharePointLocationException,
-		"RemoveTeamsLocation":                cfg.RemoveTeamsLocation,
-		"RemoveTeamsLocationException":       cfg.RemoveTeamsLocationException,
+		"Comment":   cfg.Comment,
+		"Locations": cfg.Locations,
 	}, getString)
+	if !cfg.ExchangeScopeOcrAnyRecipientExternal.IsUnknown() && !cfg.ExchangeScopeOcrAnyRecipientExternal.IsNull() && !cfg.ExchangeScopeOcrAnyRecipientExternal.Equal(state.ExchangeScopeOcrAnyRecipientExternal) {
+		prev, want := reflected, cfg.ExchangeScopeOcrAnyRecipientExternal.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["ExchangeScopeOcrAnyRecipientExternal"] == nil || getBool(obj, "ExchangeScopeOcrAnyRecipientExternal") == want)
+		}
+	}
 	r.refresh(ctx, id, &plan, &resp.Diagnostics, reflected)
+	if !cfg.ID.IsUnknown() && !cfg.ID.IsNull() {
+		plan.ID = cfg.ID
+	}
 	r.reconcileState(&cfg, &plan)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
@@ -434,51 +553,51 @@ func (r *ocrConfigurationResource) refresh(ctx context.Context, identity string,
 func readOcrConfiguration(ctx context.Context, obj map[string]any, m *ocrConfigurationModel) {
 	m.ID = types.StringValue(firstNonEmptyStr(getString(obj, "Guid"), getString(obj, "Id"), getString(obj, "Identity")))
 	m.Identity = types.StringValue(firstNonEmptyStr(getString(obj, "Identity"), getString(obj, "Guid"), getString(obj, "Name")))
-	m.AddEndpointDlpLocation = types.StringValue(getString(obj, "AddEndpointDlpLocation"))
-	m.AddEndpointDlpLocationException = types.StringValue(getString(obj, "AddEndpointDlpLocationException"))
-	m.AddExchangeLocation = types.StringValue(getString(obj, "AddExchangeLocation"))
-	m.AddExchangeLocationException = types.StringValue(getString(obj, "AddExchangeLocationException"))
-	m.AddOneDriveLocation = types.StringValue(getString(obj, "AddOneDriveLocation"))
-	m.AddOneDriveLocationException = types.StringValue(getString(obj, "AddOneDriveLocationException"))
-	m.AddSharePointLocation = types.StringValue(getString(obj, "AddSharePointLocation"))
-	m.AddSharePointLocationException = types.StringValue(getString(obj, "AddSharePointLocationException"))
-	m.AddTeamsLocation = types.StringValue(getString(obj, "AddTeamsLocation"))
-	m.AddTeamsLocationException = types.StringValue(getString(obj, "AddTeamsLocationException"))
+	m.AddEndpointDlpLocation = types.StringValue(getObjectJSON(obj, "AddEndpointDlpLocation"))
+	m.AddEndpointDlpLocationException = types.StringValue(getObjectJSON(obj, "AddEndpointDlpLocationException"))
+	m.AddExchangeLocation = types.StringValue(getObjectJSON(obj, "AddExchangeLocation"))
+	m.AddExchangeLocationException = types.StringValue(getObjectJSON(obj, "AddExchangeLocationException"))
+	m.AddOneDriveLocation = types.StringValue(getObjectJSON(obj, "AddOneDriveLocation"))
+	m.AddOneDriveLocationException = types.StringValue(getObjectJSON(obj, "AddOneDriveLocationException"))
+	m.AddSharePointLocation = types.StringValue(getObjectJSON(obj, "AddSharePointLocation"))
+	m.AddSharePointLocationException = types.StringValue(getObjectJSON(obj, "AddSharePointLocationException"))
+	m.AddTeamsLocation = types.StringValue(getObjectJSON(obj, "AddTeamsLocation"))
+	m.AddTeamsLocationException = types.StringValue(getObjectJSON(obj, "AddTeamsLocationException"))
 	m.Comment = types.StringValue(getString(obj, "Comment"))
-	m.EndpointDlpLocation = types.StringValue(getString(obj, "EndpointDlpLocation"))
-	m.EndpointDlpLocationException = types.StringValue(getString(obj, "EndpointDlpLocationException"))
-	m.EnforcementPlanes = types.StringValue(getString(obj, "EnforcementPlanes"))
+	m.EndpointDlpLocation = types.StringValue(getObjectJSON(obj, "EndpointDlpLocation"))
+	m.EndpointDlpLocationException = types.StringValue(getObjectJSON(obj, "EndpointDlpLocationException"))
+	m.EnforcementPlanes = types.StringValue(getObjectJSON(obj, "EnforcementPlanes"))
 	m.ExceptIfOneDriveSharedBy = stringSetValue(ctx, getStringSlice(obj, "ExceptIfOneDriveSharedBy"))
 	m.ExceptIfOneDriveSharedByMemberOf = stringSetValue(ctx, getStringSlice(obj, "ExceptIfOneDriveSharedByMemberOf"))
-	m.ExchangeLocation = types.StringValue(getString(obj, "ExchangeLocation"))
-	m.ExchangeLocationException = types.StringValue(getString(obj, "ExchangeLocationException"))
+	m.ExchangeLocation = types.StringValue(getObjectJSON(obj, "ExchangeLocation"))
+	m.ExchangeLocationException = types.StringValue(getObjectJSON(obj, "ExchangeLocationException"))
 	m.ExchangeScopeOcrAnyRecipientExternal = types.BoolValue(getBool(obj, "ExchangeScopeOcrAnyRecipientExternal"))
 	m.ExchangeSender = stringSetValue(ctx, getStringSlice(obj, "ExchangeSender"))
 	m.ExchangeSenderException = stringSetValue(ctx, getStringSlice(obj, "ExchangeSenderException"))
 	m.ExchangeSenderMemberOf = stringSetValue(ctx, getStringSlice(obj, "ExchangeSenderMemberOf"))
 	m.ExchangeSenderMemberOfException = stringSetValue(ctx, getStringSlice(obj, "ExchangeSenderMemberOfException"))
 	m.Locations = types.StringValue(getString(obj, "Locations"))
-	m.Mode = types.StringValue(getString(obj, "Mode"))
+	m.Mode = types.StringValue(getObjectJSON(obj, "Mode"))
 	m.Name = types.StringValue(getString(obj, "Name"))
-	m.OcrMode = types.StringValue(getString(obj, "OcrMode"))
-	m.OneDriveLocation = types.StringValue(getString(obj, "OneDriveLocation"))
-	m.OneDriveLocationException = types.StringValue(getString(obj, "OneDriveLocationException"))
+	m.OcrMode = types.StringValue(getObjectJSON(obj, "OcrMode"))
+	m.OneDriveLocation = types.StringValue(getObjectJSON(obj, "OneDriveLocation"))
+	m.OneDriveLocationException = types.StringValue(getObjectJSON(obj, "OneDriveLocationException"))
 	m.OneDriveSharedBy = stringSetValue(ctx, getStringSlice(obj, "OneDriveSharedBy"))
 	m.OneDriveSharedByMemberOf = stringSetValue(ctx, getStringSlice(obj, "OneDriveSharedByMemberOf"))
-	m.RemoveEndpointDlpLocation = types.StringValue(getString(obj, "RemoveEndpointDlpLocation"))
-	m.RemoveEndpointDlpLocationException = types.StringValue(getString(obj, "RemoveEndpointDlpLocationException"))
-	m.RemoveExchangeLocation = types.StringValue(getString(obj, "RemoveExchangeLocation"))
-	m.RemoveExchangeLocationException = types.StringValue(getString(obj, "RemoveExchangeLocationException"))
-	m.RemoveOneDriveLocation = types.StringValue(getString(obj, "RemoveOneDriveLocation"))
-	m.RemoveOneDriveLocationException = types.StringValue(getString(obj, "RemoveOneDriveLocationException"))
-	m.RemoveSharePointLocation = types.StringValue(getString(obj, "RemoveSharePointLocation"))
-	m.RemoveSharePointLocationException = types.StringValue(getString(obj, "RemoveSharePointLocationException"))
-	m.RemoveTeamsLocation = types.StringValue(getString(obj, "RemoveTeamsLocation"))
-	m.RemoveTeamsLocationException = types.StringValue(getString(obj, "RemoveTeamsLocationException"))
-	m.SharePointLocation = types.StringValue(getString(obj, "SharePointLocation"))
-	m.SharePointLocationException = types.StringValue(getString(obj, "SharePointLocationException"))
-	m.TeamsLocation = types.StringValue(getString(obj, "TeamsLocation"))
-	m.TeamsLocationException = types.StringValue(getString(obj, "TeamsLocationException"))
+	m.RemoveEndpointDlpLocation = types.StringValue(getObjectJSON(obj, "RemoveEndpointDlpLocation"))
+	m.RemoveEndpointDlpLocationException = types.StringValue(getObjectJSON(obj, "RemoveEndpointDlpLocationException"))
+	m.RemoveExchangeLocation = types.StringValue(getObjectJSON(obj, "RemoveExchangeLocation"))
+	m.RemoveExchangeLocationException = types.StringValue(getObjectJSON(obj, "RemoveExchangeLocationException"))
+	m.RemoveOneDriveLocation = types.StringValue(getObjectJSON(obj, "RemoveOneDriveLocation"))
+	m.RemoveOneDriveLocationException = types.StringValue(getObjectJSON(obj, "RemoveOneDriveLocationException"))
+	m.RemoveSharePointLocation = types.StringValue(getObjectJSON(obj, "RemoveSharePointLocation"))
+	m.RemoveSharePointLocationException = types.StringValue(getObjectJSON(obj, "RemoveSharePointLocationException"))
+	m.RemoveTeamsLocation = types.StringValue(getObjectJSON(obj, "RemoveTeamsLocation"))
+	m.RemoveTeamsLocationException = types.StringValue(getObjectJSON(obj, "RemoveTeamsLocationException"))
+	m.SharePointLocation = types.StringValue(getObjectJSON(obj, "SharePointLocation"))
+	m.SharePointLocationException = types.StringValue(getObjectJSON(obj, "SharePointLocationException"))
+	m.TeamsLocation = types.StringValue(getObjectJSON(obj, "TeamsLocation"))
+	m.TeamsLocationException = types.StringValue(getObjectJSON(obj, "TeamsLocationException"))
 	_ = ctx
 }
 

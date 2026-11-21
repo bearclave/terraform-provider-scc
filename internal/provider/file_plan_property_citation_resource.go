@@ -51,7 +51,7 @@ func (r *filePlanPropertyCitationResource) Schema(_ context.Context, _ resource.
 		Description: "Manages the FilePlanPropertyCitation object via New-FilePlanPropertyCitation / Get-FilePlanPropertyCitation / Set-FilePlanPropertyCitation / Remove-FilePlanPropertyCitation.",
 		Attributes: map[string]schema.Attribute{
 			"id":                    schema.StringAttribute{Computed: true, Description: "Object identifier (GUID).", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"identity":              schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets."},
+			"identity":              schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"citation_jurisdiction": schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -CitationJurisdiction parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"citation_url":          schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -CitationUrl parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"display_name":          schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -DisplayName parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
@@ -74,15 +74,26 @@ func (r *filePlanPropertyCitationResource) Create(ctx context.Context, req resou
 		return
 	}
 
-	p := purview.NewFilePlanPropertyCitationParams{
-		CitationJurisdiction: plan.CitationJurisdiction.ValueString(),
-		CitationUrl:          plan.CitationUrl.ValueString(),
-		Name:                 plan.Name.ValueString(),
+	var config filePlanPropertyCitationModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	p := purview.NewFilePlanPropertyCitationParams{}
+	if !config.CitationJurisdiction.IsNull() {
+		p.CitationJurisdiction = plan.CitationJurisdiction.ValueString()
+	}
+	if !config.CitationUrl.IsNull() {
+		p.CitationUrl = plan.CitationUrl.ValueString()
+	}
+	if !config.Name.IsNull() {
+		p.Name = plan.Name.ValueString()
 	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	res, err := r.client.SCC.NewFilePlanPropertyCitation(ctx, p)
+	res, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.NewFilePlanPropertyCitation, p, isNotFound)
 	if err != nil {
 		resp.Diagnostics.AddError("New-FilePlanPropertyCitation failed", err.Error())
 		return
@@ -129,13 +140,19 @@ func (r *filePlanPropertyCitationResource) Update(ctx context.Context, req resou
 	id := r.identityOf(state)
 	sp := purview.SetFilePlanPropertyCitationParams{}
 	sp.Identity = id
-	sp.CitationJurisdiction = plan.CitationJurisdiction.ValueString()
-	sp.CitationUrl = plan.CitationUrl.ValueString()
-	sp.DisplayName = plan.DisplayName.ValueString()
+	if !plan.CitationJurisdiction.Equal(state.CitationJurisdiction) {
+		sp.CitationJurisdiction = plan.CitationJurisdiction.ValueString()
+	}
+	if !plan.CitationUrl.Equal(state.CitationUrl) {
+		sp.CitationUrl = plan.CitationUrl.ValueString()
+	}
+	if !plan.DisplayName.Equal(state.DisplayName) {
+		sp.DisplayName = plan.DisplayName.ValueString()
+	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	if _, err := r.client.SCC.SetFilePlanPropertyCitation(ctx, sp); err != nil {
+	if _, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.SetFilePlanPropertyCitation, sp, isNotFound); err != nil {
 		resp.Diagnostics.AddError("Set-FilePlanPropertyCitation failed", err.Error())
 		return
 	}
@@ -146,6 +163,9 @@ func (r *filePlanPropertyCitationResource) Update(ctx context.Context, req resou
 		"DisplayName":          cfg.DisplayName,
 	}, getString)
 	r.refresh(ctx, id, &plan, &resp.Diagnostics, reflected)
+	if !cfg.ID.IsUnknown() && !cfg.ID.IsNull() {
+		plan.ID = cfg.ID
+	}
 	r.reconcileState(&cfg, &plan)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }

@@ -10,7 +10,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
@@ -36,8 +38,8 @@ type protectionAlertModel struct {
 	ID                                                          types.String `tfsdk:"id"`
 	Identity                                                    types.String `tfsdk:"identity"`
 	AggregationType                                             types.String `tfsdk:"aggregation_type"`
-	AlertBy                                                     types.String `tfsdk:"alert_by"`
-	AlertFor                                                    types.String `tfsdk:"alert_for"`
+	AlertBy                                                     types.Set    `tfsdk:"alert_by"`
+	AlertFor                                                    types.Set    `tfsdk:"alert_for"`
 	Category                                                    types.String `tfsdk:"category"`
 	Comment                                                     types.String `tfsdk:"comment"`
 	CorrelationPolicyId                                         types.String `tfsdk:"correlation_policy_id"`
@@ -50,22 +52,22 @@ type protectionAlertModel struct {
 	Name                                                        types.String `tfsdk:"name"`
 	NotificationCulture                                         types.String `tfsdk:"notification_culture"`
 	NotificationEnabled                                         types.Bool   `tfsdk:"notification_enabled"`
-	NotifyUser                                                  types.String `tfsdk:"notify_user"`
+	NotifyUser                                                  types.Set    `tfsdk:"notify_user"`
 	NotifyUserOnFilterMatch                                     types.Bool   `tfsdk:"notify_user_on_filter_match"`
 	NotifyUserSuppressionExpiryDate                             types.String `tfsdk:"notify_user_suppression_expiry_date"`
-	NotifyUserThrottleThreshold                                 types.String `tfsdk:"notify_user_throttle_threshold"`
-	NotifyUserThrottleWindow                                    types.String `tfsdk:"notify_user_throttle_window"`
-	Operation                                                   types.String `tfsdk:"operation"`
-	PrivacyManagementScopedSensitiveInformationTypes            types.String `tfsdk:"privacy_management_scoped_sensitive_information_types"`
-	PrivacyManagementScopedSensitiveInformationTypesForCounting types.String `tfsdk:"privacy_management_scoped_sensitive_information_types_for_counting"`
-	PrivacyManagementScopedSensitiveInformationTypesThreshold   types.String `tfsdk:"privacy_management_scoped_sensitive_information_types_threshold"`
+	NotifyUserThrottleThreshold                                 types.Int64  `tfsdk:"notify_user_throttle_threshold"`
+	NotifyUserThrottleWindow                                    types.Int64  `tfsdk:"notify_user_throttle_window"`
+	Operation                                                   types.Set    `tfsdk:"operation"`
+	PrivacyManagementScopedSensitiveInformationTypes            types.Set    `tfsdk:"privacy_management_scoped_sensitive_information_types"`
+	PrivacyManagementScopedSensitiveInformationTypesForCounting types.Set    `tfsdk:"privacy_management_scoped_sensitive_information_types_for_counting"`
+	PrivacyManagementScopedSensitiveInformationTypesThreshold   types.Int64  `tfsdk:"privacy_management_scoped_sensitive_information_types_threshold"`
 	Severity                                                    types.String `tfsdk:"severity"`
 	StreamType                                                  types.String `tfsdk:"stream_type"`
 	ThreatType                                                  types.String `tfsdk:"threat_type"`
-	Threshold                                                   types.String `tfsdk:"threshold"`
-	TimeWindow                                                  types.String `tfsdk:"time_window"`
-	UseCreatedDateTime                                          types.String `tfsdk:"use_created_date_time"`
-	VolumeThreshold                                             types.String `tfsdk:"volume_threshold"`
+	Threshold                                                   types.Int64  `tfsdk:"threshold"`
+	TimeWindow                                                  types.Int64  `tfsdk:"time_window"`
+	UseCreatedDateTime                                          types.Bool   `tfsdk:"use_created_date_time"`
+	VolumeThreshold                                             types.Int64  `tfsdk:"volume_threshold"`
 }
 
 func (r *protectionAlertResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -77,11 +79,11 @@ func (r *protectionAlertResource) Schema(_ context.Context, _ resource.SchemaReq
 		Description: "Manages the ProtectionAlert object via New-ProtectionAlert / Get-ProtectionAlert / Set-ProtectionAlert / Remove-ProtectionAlert.",
 		Attributes: map[string]schema.Attribute{
 			"id":                                  schema.StringAttribute{Computed: true, Description: "Object identifier (GUID).", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"identity":                            schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets."},
+			"identity":                            schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"aggregation_type":                    schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AggregationType parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"alert_by":                            schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AlertBy parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"alert_for":                           schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AlertFor parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"category":                            schema.StringAttribute{Required: true, Description: "Maps to the -Category parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
+			"alert_by":                            schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -AlertBy parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"alert_for":                           schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -AlertFor parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"category":                            schema.StringAttribute{Required: true, Description: "Maps to the -Category parameter."},
 			"comment":                             schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -Comment parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"correlation_policy_id":               schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -CorrelationPolicyId parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace(), stringplanmodifier.UseStateForUnknown()}},
 			"custom_properties":                   schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -CustomProperties parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace(), stringplanmodifier.UseStateForUnknown()}},
@@ -93,22 +95,22 @@ func (r *protectionAlertResource) Schema(_ context.Context, _ resource.SchemaReq
 			"name":                                schema.StringAttribute{Required: true, Description: "Maps to the -Name parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
 			"notification_culture":                schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -NotificationCulture parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"notification_enabled":                schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -NotificationEnabled parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
-			"notify_user":                         schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -NotifyUser parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"notify_user":                         schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -NotifyUser parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
 			"notify_user_on_filter_match":         schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -NotifyUserOnFilterMatch parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
 			"notify_user_suppression_expiry_date": schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -NotifyUserSuppressionExpiryDate parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"notify_user_throttle_threshold":      schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -NotifyUserThrottleThreshold parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"notify_user_throttle_window":         schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -NotifyUserThrottleWindow parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"operation":                           schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -Operation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"privacy_management_scoped_sensitive_information_types":              schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -PrivacyManagementScopedSensitiveInformationTypes parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"privacy_management_scoped_sensitive_information_types_for_counting": schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -PrivacyManagementScopedSensitiveInformationTypesForCounting parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"privacy_management_scoped_sensitive_information_types_threshold":    schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -PrivacyManagementScopedSensitiveInformationTypesThreshold parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"notify_user_throttle_threshold":      schema.Int64Attribute{Optional: true, Computed: true, Description: "Maps to the -NotifyUserThrottleThreshold parameter.", PlanModifiers: []planmodifier.Int64{int64planmodifier.UseStateForUnknown()}},
+			"notify_user_throttle_window":         schema.Int64Attribute{Optional: true, Computed: true, Description: "Maps to the -NotifyUserThrottleWindow parameter.", PlanModifiers: []planmodifier.Int64{int64planmodifier.UseStateForUnknown()}},
+			"operation":                           schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -Operation parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"privacy_management_scoped_sensitive_information_types":              schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -PrivacyManagementScopedSensitiveInformationTypes parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"privacy_management_scoped_sensitive_information_types_for_counting": schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -PrivacyManagementScopedSensitiveInformationTypesForCounting parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"privacy_management_scoped_sensitive_information_types_threshold":    schema.Int64Attribute{Optional: true, Computed: true, Description: "Maps to the -PrivacyManagementScopedSensitiveInformationTypesThreshold parameter.", PlanModifiers: []planmodifier.Int64{int64planmodifier.UseStateForUnknown()}},
 			"severity":              schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -Severity parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"stream_type":           schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -StreamType parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace(), stringplanmodifier.UseStateForUnknown()}},
 			"threat_type":           schema.StringAttribute{Required: true, Description: "Maps to the -ThreatType parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
-			"threshold":             schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -Threshold parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"time_window":           schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -TimeWindow parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"use_created_date_time": schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -UseCreatedDateTime parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace(), stringplanmodifier.UseStateForUnknown()}},
-			"volume_threshold":      schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -VolumeThreshold parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"threshold":             schema.Int64Attribute{Optional: true, Computed: true, Description: "Maps to the -Threshold parameter.", PlanModifiers: []planmodifier.Int64{int64planmodifier.UseStateForUnknown()}},
+			"time_window":           schema.Int64Attribute{Optional: true, Computed: true, Description: "Maps to the -TimeWindow parameter.", PlanModifiers: []planmodifier.Int64{int64planmodifier.UseStateForUnknown()}},
+			"use_created_date_time": schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -UseCreatedDateTime parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.RequiresReplace(), boolplanmodifier.UseStateForUnknown()}},
+			"volume_threshold":      schema.Int64Attribute{Optional: true, Computed: true, Description: "Maps to the -VolumeThreshold parameter.", PlanModifiers: []planmodifier.Int64{int64planmodifier.UseStateForUnknown()}},
 		},
 	}
 }
@@ -127,89 +129,142 @@ func (r *protectionAlertResource) Create(ctx context.Context, req resource.Creat
 		return
 	}
 
-	p := purview.NewProtectionAlertParams{
-		Comment:                 plan.Comment.ValueString(),
-		Description:             plan.Description.ValueString(),
-		Disabled:                plan.Disabled.ValueBool(),
-		Filter:                  plan.Filter.ValueString(),
-		LogicalOperationName:    plan.LogicalOperationName.ValueString(),
-		Name:                    plan.Name.ValueString(),
-		NotificationEnabled:     plan.NotificationEnabled.ValueBool(),
-		NotifyUserOnFilterMatch: plan.NotifyUserOnFilterMatch.ValueBool(),
+	var config protectionAlertModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
+	if resp.Diagnostics.HasError() {
+		return
 	}
-	if v := plan.AggregationType.ValueString(); v != "" {
-		p.AggregationType = v
+
+	p := purview.NewProtectionAlertParams{}
+	if v := config.AggregationType.ValueString(); v != "" {
+		p.AggregationType = objectParam(v)
 	}
-	if v := plan.AlertBy.ValueString(); v != "" {
-		p.AlertBy = v
+	if !config.AlertBy.IsNull() {
+		if v := toStringSlice(ctx, plan.AlertBy, &resp.Diagnostics); len(v) > 0 {
+			p.AlertBy = v
+		}
 	}
-	if v := plan.AlertFor.ValueString(); v != "" {
-		p.AlertFor = v
+	if !config.AlertFor.IsNull() {
+		if v := toStringSlice(ctx, plan.AlertFor, &resp.Diagnostics); len(v) > 0 {
+			p.AlertFor = v
+		}
 	}
-	if v := plan.Category.ValueString(); v != "" {
-		p.Category = v
+	if v := config.Category.ValueString(); v != "" {
+		p.Category = objectParam(v)
 	}
-	if v := plan.CorrelationPolicyId.ValueString(); v != "" {
-		p.CorrelationPolicyId = v
+	if !config.Comment.IsNull() {
+		p.Comment = plan.Comment.ValueString()
 	}
-	if v := plan.CustomProperties.ValueString(); v != "" {
-		p.CustomProperties = v
+	if v := config.CorrelationPolicyId.ValueString(); v != "" {
+		p.CorrelationPolicyId = objectParam(v)
 	}
-	if v := plan.ExternalScenarioData.ValueString(); v != "" {
-		p.ExternalScenarioData = v
+	if v := config.CustomProperties.ValueString(); v != "" {
+		p.CustomProperties = objectParam(v)
 	}
-	if v := plan.NotificationCulture.ValueString(); v != "" {
-		p.NotificationCulture = v
+	if !config.Description.IsNull() {
+		p.Description = plan.Description.ValueString()
 	}
-	if v := plan.NotifyUser.ValueString(); v != "" {
-		p.NotifyUser = v
+	if !config.Disabled.IsNull() {
+		if !plan.Disabled.IsUnknown() {
+			p.Disabled = plan.Disabled.ValueBoolPointer()
+		}
 	}
-	if v := plan.NotifyUserSuppressionExpiryDate.ValueString(); v != "" {
-		p.NotifyUserSuppressionExpiryDate = v
+	if v := config.ExternalScenarioData.ValueString(); v != "" {
+		p.ExternalScenarioData = objectParam(v)
 	}
-	if v := plan.NotifyUserThrottleThreshold.ValueString(); v != "" {
-		p.NotifyUserThrottleThreshold = v
+	if !config.Filter.IsNull() {
+		p.Filter = plan.Filter.ValueString()
 	}
-	if v := plan.NotifyUserThrottleWindow.ValueString(); v != "" {
-		p.NotifyUserThrottleWindow = v
+	if !config.LogicalOperationName.IsNull() {
+		p.LogicalOperationName = plan.LogicalOperationName.ValueString()
 	}
-	if v := plan.Operation.ValueString(); v != "" {
-		p.Operation = v
+	if !config.Name.IsNull() {
+		p.Name = plan.Name.ValueString()
 	}
-	if v := plan.PrivacyManagementScopedSensitiveInformationTypes.ValueString(); v != "" {
-		p.PrivacyManagementScopedSensitiveInformationTypes = v
+	if v := config.NotificationCulture.ValueString(); v != "" {
+		p.NotificationCulture = objectParam(v)
 	}
-	if v := plan.PrivacyManagementScopedSensitiveInformationTypesForCounting.ValueString(); v != "" {
-		p.PrivacyManagementScopedSensitiveInformationTypesForCounting = v
+	if !config.NotificationEnabled.IsNull() {
+		if !plan.NotificationEnabled.IsUnknown() {
+			p.NotificationEnabled = plan.NotificationEnabled.ValueBoolPointer()
+		}
 	}
-	if v := plan.PrivacyManagementScopedSensitiveInformationTypesThreshold.ValueString(); v != "" {
-		p.PrivacyManagementScopedSensitiveInformationTypesThreshold = v
+	if !config.NotifyUser.IsNull() {
+		if v := toStringSlice(ctx, plan.NotifyUser, &resp.Diagnostics); len(v) > 0 {
+			p.NotifyUser = v
+		}
 	}
-	if v := plan.Severity.ValueString(); v != "" {
-		p.Severity = v
+	if !config.NotifyUserOnFilterMatch.IsNull() {
+		if !plan.NotifyUserOnFilterMatch.IsUnknown() {
+			p.NotifyUserOnFilterMatch = plan.NotifyUserOnFilterMatch.ValueBoolPointer()
+		}
 	}
-	if v := plan.StreamType.ValueString(); v != "" {
-		p.StreamType = v
+	if v := config.NotifyUserSuppressionExpiryDate.ValueString(); v != "" {
+		p.NotifyUserSuppressionExpiryDate = objectParam(v)
 	}
-	if v := plan.ThreatType.ValueString(); v != "" {
-		p.ThreatType = v
+	if !config.NotifyUserThrottleThreshold.IsNull() {
+		if !plan.NotifyUserThrottleThreshold.IsUnknown() {
+			p.NotifyUserThrottleThreshold = plan.NotifyUserThrottleThreshold.ValueInt64Pointer()
+		}
 	}
-	if v := plan.Threshold.ValueString(); v != "" {
-		p.Threshold = v
+	if !config.NotifyUserThrottleWindow.IsNull() {
+		if !plan.NotifyUserThrottleWindow.IsUnknown() {
+			p.NotifyUserThrottleWindow = plan.NotifyUserThrottleWindow.ValueInt64Pointer()
+		}
 	}
-	if v := plan.TimeWindow.ValueString(); v != "" {
-		p.TimeWindow = v
+	if !config.Operation.IsNull() {
+		if v := toStringSlice(ctx, plan.Operation, &resp.Diagnostics); len(v) > 0 {
+			p.Operation = v
+		}
 	}
-	if v := plan.UseCreatedDateTime.ValueString(); v != "" {
-		p.UseCreatedDateTime = v
+	if !config.PrivacyManagementScopedSensitiveInformationTypes.IsNull() {
+		if v := toStringSlice(ctx, plan.PrivacyManagementScopedSensitiveInformationTypes, &resp.Diagnostics); len(v) > 0 {
+			p.PrivacyManagementScopedSensitiveInformationTypes = v
+		}
 	}
-	if v := plan.VolumeThreshold.ValueString(); v != "" {
-		p.VolumeThreshold = v
+	if !config.PrivacyManagementScopedSensitiveInformationTypesForCounting.IsNull() {
+		if v := toStringSlice(ctx, plan.PrivacyManagementScopedSensitiveInformationTypesForCounting, &resp.Diagnostics); len(v) > 0 {
+			p.PrivacyManagementScopedSensitiveInformationTypesForCounting = v
+		}
+	}
+	if !config.PrivacyManagementScopedSensitiveInformationTypesThreshold.IsNull() {
+		if !plan.PrivacyManagementScopedSensitiveInformationTypesThreshold.IsUnknown() {
+			p.PrivacyManagementScopedSensitiveInformationTypesThreshold = plan.PrivacyManagementScopedSensitiveInformationTypesThreshold.ValueInt64Pointer()
+		}
+	}
+	if v := config.Severity.ValueString(); v != "" {
+		p.Severity = objectParam(v)
+	}
+	if v := config.StreamType.ValueString(); v != "" {
+		p.StreamType = objectParam(v)
+	}
+	if v := config.ThreatType.ValueString(); v != "" {
+		p.ThreatType = objectParam(v)
+	}
+	if !config.Threshold.IsNull() {
+		if !plan.Threshold.IsUnknown() {
+			p.Threshold = plan.Threshold.ValueInt64Pointer()
+		}
+	}
+	if !config.TimeWindow.IsNull() {
+		if !plan.TimeWindow.IsUnknown() {
+			p.TimeWindow = plan.TimeWindow.ValueInt64Pointer()
+		}
+	}
+	if !config.UseCreatedDateTime.IsNull() {
+		if !plan.UseCreatedDateTime.IsUnknown() {
+			p.UseCreatedDateTime = plan.UseCreatedDateTime.ValueBoolPointer()
+		}
+	}
+	if !config.VolumeThreshold.IsNull() {
+		if !plan.VolumeThreshold.IsUnknown() {
+			p.VolumeThreshold = plan.VolumeThreshold.ValueInt64Pointer()
+		}
 	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	res, err := r.client.SCC.NewProtectionAlert(ctx, p)
+	res, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.NewProtectionAlert, p, isNotFound)
 	if err != nil {
 		resp.Diagnostics.AddError("New-ProtectionAlert failed", err.Error())
 		return
@@ -256,94 +311,253 @@ func (r *protectionAlertResource) Update(ctx context.Context, req resource.Updat
 	id := r.identityOf(state)
 	sp := purview.SetProtectionAlertParams{}
 	sp.Identity = id
-	if v := plan.AggregationType.ValueString(); v != "" {
-		sp.AggregationType = v
+	var cur *protectionAlertModel
+	curRead := false
+	current := func() *protectionAlertModel {
+		if !curRead {
+			curRead = true
+			var m protectionAlertModel
+			if r.refresh(ctx, id, &m, &resp.Diagnostics, nil) {
+				cur = &m
+			} else if !resp.Diagnostics.HasError() {
+				resp.Diagnostics.AddError("Get-ProtectionAlert failed", "the object could not be read to determine the list values to remove; nothing was changed")
+			}
+		}
+		return cur
 	}
-	if v := plan.AlertBy.ValueString(); v != "" {
-		sp.AlertBy = v
+	if !plan.AggregationType.Equal(state.AggregationType) {
+		if v := plan.AggregationType.ValueString(); v != "" {
+			sp.AggregationType = objectParam(v)
+		}
 	}
-	if v := plan.AlertFor.ValueString(); v != "" {
-		sp.AlertFor = v
+	if !plan.AlertBy.Equal(state.AlertBy) {
+		if !plan.AlertBy.IsNull() && !plan.AlertBy.IsUnknown() {
+			if v := toStringSlice(ctx, plan.AlertBy, &resp.Diagnostics); len(v) > 0 {
+				sp.AlertBy = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.AlertBy, &resp.Diagnostics); len(rm) > 0 {
+						sp.AlertByDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
 	}
-	sp.Comment = plan.Comment.ValueString()
-	sp.Description = plan.Description.ValueString()
-	sp.Disabled = plan.Disabled.ValueBool()
-	if v := plan.ExternalScenarioData.ValueString(); v != "" {
-		sp.ExternalScenarioData = v
+	if !plan.AlertFor.Equal(state.AlertFor) {
+		if !plan.AlertFor.IsNull() && !plan.AlertFor.IsUnknown() {
+			if v := toStringSlice(ctx, plan.AlertFor, &resp.Diagnostics); len(v) > 0 {
+				sp.AlertFor = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.AlertFor, &resp.Diagnostics); len(rm) > 0 {
+						sp.AlertForDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
 	}
-	sp.Filter = plan.Filter.ValueString()
-	if v := plan.NotificationCulture.ValueString(); v != "" {
-		sp.NotificationCulture = v
+	if !plan.Category.Equal(state.Category) {
+		if v := plan.Category.ValueString(); v != "" {
+			sp.Category = objectParam(v)
+		}
 	}
-	sp.NotificationEnabled = plan.NotificationEnabled.ValueBool()
-	if v := plan.NotifyUser.ValueString(); v != "" {
-		sp.NotifyUser = v
+	if !plan.Comment.Equal(state.Comment) {
+		sp.Comment = plan.Comment.ValueString()
 	}
-	sp.NotifyUserOnFilterMatch = plan.NotifyUserOnFilterMatch.ValueBool()
-	if v := plan.NotifyUserSuppressionExpiryDate.ValueString(); v != "" {
-		sp.NotifyUserSuppressionExpiryDate = v
+	if !plan.Description.Equal(state.Description) {
+		sp.Description = plan.Description.ValueString()
 	}
-	if v := plan.NotifyUserThrottleThreshold.ValueString(); v != "" {
-		sp.NotifyUserThrottleThreshold = v
+	if !plan.Disabled.Equal(state.Disabled) {
+		if !plan.Disabled.IsUnknown() {
+			sp.Disabled = plan.Disabled.ValueBoolPointer()
+		}
 	}
-	if v := plan.NotifyUserThrottleWindow.ValueString(); v != "" {
-		sp.NotifyUserThrottleWindow = v
+	if !plan.ExternalScenarioData.Equal(state.ExternalScenarioData) {
+		if v := plan.ExternalScenarioData.ValueString(); v != "" {
+			sp.ExternalScenarioData = objectParam(v)
+		}
 	}
-	if v := plan.Operation.ValueString(); v != "" {
-		sp.Operation = v
+	if !plan.Filter.Equal(state.Filter) {
+		sp.Filter = plan.Filter.ValueString()
 	}
-	if v := plan.PrivacyManagementScopedSensitiveInformationTypes.ValueString(); v != "" {
-		sp.PrivacyManagementScopedSensitiveInformationTypes = v
+	if !plan.NotificationCulture.Equal(state.NotificationCulture) {
+		if v := plan.NotificationCulture.ValueString(); v != "" {
+			sp.NotificationCulture = objectParam(v)
+		}
 	}
-	if v := plan.PrivacyManagementScopedSensitiveInformationTypesForCounting.ValueString(); v != "" {
-		sp.PrivacyManagementScopedSensitiveInformationTypesForCounting = v
+	if !plan.NotificationEnabled.Equal(state.NotificationEnabled) {
+		if !plan.NotificationEnabled.IsUnknown() {
+			sp.NotificationEnabled = plan.NotificationEnabled.ValueBoolPointer()
+		}
 	}
-	if v := plan.PrivacyManagementScopedSensitiveInformationTypesThreshold.ValueString(); v != "" {
-		sp.PrivacyManagementScopedSensitiveInformationTypesThreshold = v
+	if !plan.NotifyUser.Equal(state.NotifyUser) {
+		if !plan.NotifyUser.IsNull() && !plan.NotifyUser.IsUnknown() {
+			if v := toStringSlice(ctx, plan.NotifyUser, &resp.Diagnostics); len(v) > 0 {
+				sp.NotifyUser = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.NotifyUser, &resp.Diagnostics); len(rm) > 0 {
+						sp.NotifyUserDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
 	}
-	if v := plan.Severity.ValueString(); v != "" {
-		sp.Severity = v
+	if !plan.NotifyUserOnFilterMatch.Equal(state.NotifyUserOnFilterMatch) {
+		if !plan.NotifyUserOnFilterMatch.IsUnknown() {
+			sp.NotifyUserOnFilterMatch = plan.NotifyUserOnFilterMatch.ValueBoolPointer()
+		}
 	}
-	if v := plan.Threshold.ValueString(); v != "" {
-		sp.Threshold = v
+	if !plan.NotifyUserSuppressionExpiryDate.Equal(state.NotifyUserSuppressionExpiryDate) {
+		if v := plan.NotifyUserSuppressionExpiryDate.ValueString(); v != "" {
+			sp.NotifyUserSuppressionExpiryDate = objectParam(v)
+		}
 	}
-	if v := plan.TimeWindow.ValueString(); v != "" {
-		sp.TimeWindow = v
+	if !plan.NotifyUserThrottleThreshold.Equal(state.NotifyUserThrottleThreshold) {
+		if !plan.NotifyUserThrottleThreshold.IsUnknown() {
+			sp.NotifyUserThrottleThreshold = plan.NotifyUserThrottleThreshold.ValueInt64Pointer()
+		}
 	}
-	if v := plan.VolumeThreshold.ValueString(); v != "" {
-		sp.VolumeThreshold = v
+	if !plan.NotifyUserThrottleWindow.Equal(state.NotifyUserThrottleWindow) {
+		if !plan.NotifyUserThrottleWindow.IsUnknown() {
+			sp.NotifyUserThrottleWindow = plan.NotifyUserThrottleWindow.ValueInt64Pointer()
+		}
+	}
+	if !plan.Operation.Equal(state.Operation) {
+		if !plan.Operation.IsNull() && !plan.Operation.IsUnknown() {
+			if v := toStringSlice(ctx, plan.Operation, &resp.Diagnostics); len(v) > 0 {
+				sp.Operation = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.Operation, &resp.Diagnostics); len(rm) > 0 {
+						sp.OperationDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
+	}
+	if !plan.PrivacyManagementScopedSensitiveInformationTypes.Equal(state.PrivacyManagementScopedSensitiveInformationTypes) {
+		if !plan.PrivacyManagementScopedSensitiveInformationTypes.IsNull() && !plan.PrivacyManagementScopedSensitiveInformationTypes.IsUnknown() {
+			if v := toStringSlice(ctx, plan.PrivacyManagementScopedSensitiveInformationTypes, &resp.Diagnostics); len(v) > 0 {
+				sp.PrivacyManagementScopedSensitiveInformationTypes = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.PrivacyManagementScopedSensitiveInformationTypes, &resp.Diagnostics); len(rm) > 0 {
+						sp.PrivacyManagementScopedSensitiveInformationTypesDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
+	}
+	if !plan.PrivacyManagementScopedSensitiveInformationTypesForCounting.Equal(state.PrivacyManagementScopedSensitiveInformationTypesForCounting) {
+		if !plan.PrivacyManagementScopedSensitiveInformationTypesForCounting.IsNull() && !plan.PrivacyManagementScopedSensitiveInformationTypesForCounting.IsUnknown() {
+			if v := toStringSlice(ctx, plan.PrivacyManagementScopedSensitiveInformationTypesForCounting, &resp.Diagnostics); len(v) > 0 {
+				sp.PrivacyManagementScopedSensitiveInformationTypesForCounting = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.PrivacyManagementScopedSensitiveInformationTypesForCounting, &resp.Diagnostics); len(rm) > 0 {
+						sp.PrivacyManagementScopedSensitiveInformationTypesForCountingDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
+	}
+	if !plan.PrivacyManagementScopedSensitiveInformationTypesThreshold.Equal(state.PrivacyManagementScopedSensitiveInformationTypesThreshold) {
+		if !plan.PrivacyManagementScopedSensitiveInformationTypesThreshold.IsUnknown() {
+			sp.PrivacyManagementScopedSensitiveInformationTypesThreshold = plan.PrivacyManagementScopedSensitiveInformationTypesThreshold.ValueInt64Pointer()
+		}
+	}
+	if !plan.Severity.Equal(state.Severity) {
+		if v := plan.Severity.ValueString(); v != "" {
+			sp.Severity = objectParam(v)
+		}
+	}
+	if !plan.Threshold.Equal(state.Threshold) {
+		if !plan.Threshold.IsUnknown() {
+			sp.Threshold = plan.Threshold.ValueInt64Pointer()
+		}
+	}
+	if !plan.TimeWindow.Equal(state.TimeWindow) {
+		if !plan.TimeWindow.IsUnknown() {
+			sp.TimeWindow = plan.TimeWindow.ValueInt64Pointer()
+		}
+	}
+	if !plan.VolumeThreshold.Equal(state.VolumeThreshold) {
+		if !plan.VolumeThreshold.IsUnknown() {
+			sp.VolumeThreshold = plan.VolumeThreshold.ValueInt64Pointer()
+		}
 	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	if _, err := r.client.SCC.SetProtectionAlert(ctx, sp); err != nil {
+	if _, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.SetProtectionAlert, sp, isNotFound); err != nil {
 		resp.Diagnostics.AddError("Set-ProtectionAlert failed", err.Error())
 		return
 	}
 	cfg := plan
 	reflected := reconcile.ReflectsFields(map[string]types.String{
-		"AggregationType":                 cfg.AggregationType,
-		"AlertBy":                         cfg.AlertBy,
-		"AlertFor":                        cfg.AlertFor,
-		"Comment":                         cfg.Comment,
-		"Description":                     cfg.Description,
-		"ExternalScenarioData":            cfg.ExternalScenarioData,
-		"Filter":                          cfg.Filter,
-		"NotificationCulture":             cfg.NotificationCulture,
-		"NotifyUser":                      cfg.NotifyUser,
-		"NotifyUserSuppressionExpiryDate": cfg.NotifyUserSuppressionExpiryDate,
-		"NotifyUserThrottleThreshold":     cfg.NotifyUserThrottleThreshold,
-		"NotifyUserThrottleWindow":        cfg.NotifyUserThrottleWindow,
-		"Operation":                       cfg.Operation,
-		"PrivacyManagementScopedSensitiveInformationTypes":            cfg.PrivacyManagementScopedSensitiveInformationTypes,
-		"PrivacyManagementScopedSensitiveInformationTypesForCounting": cfg.PrivacyManagementScopedSensitiveInformationTypesForCounting,
-		"PrivacyManagementScopedSensitiveInformationTypesThreshold":   cfg.PrivacyManagementScopedSensitiveInformationTypesThreshold,
-		"Severity":        cfg.Severity,
-		"Threshold":       cfg.Threshold,
-		"TimeWindow":      cfg.TimeWindow,
-		"VolumeThreshold": cfg.VolumeThreshold,
+		"Comment":     cfg.Comment,
+		"Description": cfg.Description,
+		"Filter":      cfg.Filter,
 	}, getString)
+	if !cfg.Disabled.IsUnknown() && !cfg.Disabled.IsNull() && !cfg.Disabled.Equal(state.Disabled) {
+		prev, want := reflected, cfg.Disabled.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["Disabled"] == nil || getBool(obj, "Disabled") == want)
+		}
+	}
+	if !cfg.NotificationEnabled.IsUnknown() && !cfg.NotificationEnabled.IsNull() && !cfg.NotificationEnabled.Equal(state.NotificationEnabled) {
+		prev, want := reflected, cfg.NotificationEnabled.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["NotificationEnabled"] == nil || getBool(obj, "NotificationEnabled") == want)
+		}
+	}
+	if !cfg.NotifyUserOnFilterMatch.IsUnknown() && !cfg.NotifyUserOnFilterMatch.IsNull() && !cfg.NotifyUserOnFilterMatch.Equal(state.NotifyUserOnFilterMatch) {
+		prev, want := reflected, cfg.NotifyUserOnFilterMatch.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["NotifyUserOnFilterMatch"] == nil || getBool(obj, "NotifyUserOnFilterMatch") == want)
+		}
+	}
+	if !cfg.NotifyUserThrottleThreshold.IsUnknown() && !cfg.NotifyUserThrottleThreshold.IsNull() && !cfg.NotifyUserThrottleThreshold.Equal(state.NotifyUserThrottleThreshold) {
+		prev, want := reflected, cfg.NotifyUserThrottleThreshold.ValueInt64()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["NotifyUserThrottleThreshold"] == nil || getInt(obj, "NotifyUserThrottleThreshold") == want)
+		}
+	}
+	if !cfg.NotifyUserThrottleWindow.IsUnknown() && !cfg.NotifyUserThrottleWindow.IsNull() && !cfg.NotifyUserThrottleWindow.Equal(state.NotifyUserThrottleWindow) {
+		prev, want := reflected, cfg.NotifyUserThrottleWindow.ValueInt64()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["NotifyUserThrottleWindow"] == nil || getInt(obj, "NotifyUserThrottleWindow") == want)
+		}
+	}
+	if !cfg.PrivacyManagementScopedSensitiveInformationTypesThreshold.IsUnknown() && !cfg.PrivacyManagementScopedSensitiveInformationTypesThreshold.IsNull() && !cfg.PrivacyManagementScopedSensitiveInformationTypesThreshold.Equal(state.PrivacyManagementScopedSensitiveInformationTypesThreshold) {
+		prev, want := reflected, cfg.PrivacyManagementScopedSensitiveInformationTypesThreshold.ValueInt64()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["PrivacyManagementScopedSensitiveInformationTypesThreshold"] == nil || getInt(obj, "PrivacyManagementScopedSensitiveInformationTypesThreshold") == want)
+		}
+	}
+	if !cfg.Threshold.IsUnknown() && !cfg.Threshold.IsNull() && !cfg.Threshold.Equal(state.Threshold) {
+		prev, want := reflected, cfg.Threshold.ValueInt64()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["Threshold"] == nil || getInt(obj, "Threshold") == want)
+		}
+	}
+	if !cfg.TimeWindow.IsUnknown() && !cfg.TimeWindow.IsNull() && !cfg.TimeWindow.Equal(state.TimeWindow) {
+		prev, want := reflected, cfg.TimeWindow.ValueInt64()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["TimeWindow"] == nil || getInt(obj, "TimeWindow") == want)
+		}
+	}
+	if !cfg.VolumeThreshold.IsUnknown() && !cfg.VolumeThreshold.IsNull() && !cfg.VolumeThreshold.Equal(state.VolumeThreshold) {
+		prev, want := reflected, cfg.VolumeThreshold.ValueInt64()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["VolumeThreshold"] == nil || getInt(obj, "VolumeThreshold") == want)
+		}
+	}
 	r.refresh(ctx, id, &plan, &resp.Diagnostics, reflected)
+	if !cfg.ID.IsUnknown() && !cfg.ID.IsNull() {
+		plan.ID = cfg.ID
+	}
 	r.reconcileState(&cfg, &plan)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
@@ -403,44 +617,44 @@ func (r *protectionAlertResource) refresh(ctx context.Context, identity string, 
 func readProtectionAlert(ctx context.Context, obj map[string]any, m *protectionAlertModel) {
 	m.ID = types.StringValue(firstNonEmptyStr(getString(obj, "Guid"), getString(obj, "Id"), getString(obj, "Identity")))
 	m.Identity = types.StringValue(firstNonEmptyStr(getString(obj, "Identity"), getString(obj, "Guid"), getString(obj, "Name")))
-	m.AggregationType = types.StringValue(getString(obj, "AggregationType"))
-	m.AlertBy = types.StringValue(getString(obj, "AlertBy"))
-	m.AlertFor = types.StringValue(getString(obj, "AlertFor"))
-	m.Category = types.StringValue(getString(obj, "Category"))
+	m.AggregationType = types.StringValue(getObjectJSON(obj, "AggregationType"))
+	m.AlertBy = stringSetValue(ctx, getStringSlice(obj, "AlertBy"))
+	m.AlertFor = stringSetValue(ctx, getStringSlice(obj, "AlertFor"))
+	m.Category = types.StringValue(getObjectJSON(obj, "Category"))
 	m.Comment = types.StringValue(getString(obj, "Comment"))
-	m.CorrelationPolicyId = types.StringValue(getString(obj, "CorrelationPolicyId"))
-	m.CustomProperties = types.StringValue(getString(obj, "CustomProperties"))
+	m.CorrelationPolicyId = types.StringValue(getObjectJSON(obj, "CorrelationPolicyId"))
+	m.CustomProperties = types.StringValue(getObjectJSON(obj, "CustomProperties"))
 	m.Description = types.StringValue(getString(obj, "Description"))
 	m.Disabled = types.BoolValue(getBool(obj, "Disabled"))
-	m.ExternalScenarioData = types.StringValue(getString(obj, "ExternalScenarioData"))
+	m.ExternalScenarioData = types.StringValue(getObjectJSON(obj, "ExternalScenarioData"))
 	m.Filter = types.StringValue(getString(obj, "Filter"))
 	m.LogicalOperationName = types.StringValue(getString(obj, "LogicalOperationName"))
 	m.Name = types.StringValue(getString(obj, "Name"))
-	m.NotificationCulture = types.StringValue(getString(obj, "NotificationCulture"))
+	m.NotificationCulture = types.StringValue(getObjectJSON(obj, "NotificationCulture"))
 	m.NotificationEnabled = types.BoolValue(getBool(obj, "NotificationEnabled"))
-	m.NotifyUser = types.StringValue(getString(obj, "NotifyUser"))
+	m.NotifyUser = stringSetValue(ctx, getStringSlice(obj, "NotifyUser"))
 	m.NotifyUserOnFilterMatch = types.BoolValue(getBool(obj, "NotifyUserOnFilterMatch"))
-	m.NotifyUserSuppressionExpiryDate = types.StringValue(getString(obj, "NotifyUserSuppressionExpiryDate"))
-	m.NotifyUserThrottleThreshold = types.StringValue(getString(obj, "NotifyUserThrottleThreshold"))
-	m.NotifyUserThrottleWindow = types.StringValue(getString(obj, "NotifyUserThrottleWindow"))
-	m.Operation = types.StringValue(getString(obj, "Operation"))
-	m.PrivacyManagementScopedSensitiveInformationTypes = types.StringValue(getString(obj, "PrivacyManagementScopedSensitiveInformationTypes"))
-	m.PrivacyManagementScopedSensitiveInformationTypesForCounting = types.StringValue(getString(obj, "PrivacyManagementScopedSensitiveInformationTypesForCounting"))
-	m.PrivacyManagementScopedSensitiveInformationTypesThreshold = types.StringValue(getString(obj, "PrivacyManagementScopedSensitiveInformationTypesThreshold"))
-	m.Severity = types.StringValue(getString(obj, "Severity"))
-	m.StreamType = types.StringValue(getString(obj, "StreamType"))
-	m.ThreatType = types.StringValue(getString(obj, "ThreatType"))
-	m.Threshold = types.StringValue(getString(obj, "Threshold"))
-	m.TimeWindow = types.StringValue(getString(obj, "TimeWindow"))
-	m.UseCreatedDateTime = types.StringValue(getString(obj, "UseCreatedDateTime"))
-	m.VolumeThreshold = types.StringValue(getString(obj, "VolumeThreshold"))
+	m.NotifyUserSuppressionExpiryDate = types.StringValue(getObjectJSON(obj, "NotifyUserSuppressionExpiryDate"))
+	m.NotifyUserThrottleThreshold = types.Int64Value(getInt(obj, "NotifyUserThrottleThreshold"))
+	m.NotifyUserThrottleWindow = types.Int64Value(getInt(obj, "NotifyUserThrottleWindow"))
+	m.Operation = stringSetValue(ctx, getStringSlice(obj, "Operation"))
+	m.PrivacyManagementScopedSensitiveInformationTypes = stringSetValue(ctx, getStringSlice(obj, "PrivacyManagementScopedSensitiveInformationTypes"))
+	m.PrivacyManagementScopedSensitiveInformationTypesForCounting = stringSetValue(ctx, getStringSlice(obj, "PrivacyManagementScopedSensitiveInformationTypesForCounting"))
+	m.PrivacyManagementScopedSensitiveInformationTypesThreshold = types.Int64Value(getInt(obj, "PrivacyManagementScopedSensitiveInformationTypesThreshold"))
+	m.Severity = types.StringValue(getObjectJSON(obj, "Severity"))
+	m.StreamType = types.StringValue(getObjectJSON(obj, "StreamType"))
+	m.ThreatType = types.StringValue(getObjectJSON(obj, "ThreatType"))
+	m.Threshold = types.Int64Value(getInt(obj, "Threshold"))
+	m.TimeWindow = types.Int64Value(getInt(obj, "TimeWindow"))
+	m.UseCreatedDateTime = types.BoolValue(getBool(obj, "UseCreatedDateTime"))
+	m.VolumeThreshold = types.Int64Value(getInt(obj, "VolumeThreshold"))
 	_ = ctx
 }
 
 func (r *protectionAlertResource) reconcileState(cfg, read *protectionAlertModel) {
 	read.AggregationType = reconcile.KeepStr(cfg.AggregationType, read.AggregationType)
-	read.AlertBy = reconcile.KeepStr(cfg.AlertBy, read.AlertBy)
-	read.AlertFor = reconcile.KeepStr(cfg.AlertFor, read.AlertFor)
+	read.AlertBy = reconcile.KeepSet(cfg.AlertBy, read.AlertBy)
+	read.AlertFor = reconcile.KeepSet(cfg.AlertFor, read.AlertFor)
 	read.Category = reconcile.KeepStr(cfg.Category, read.Category)
 	read.Comment = reconcile.KeepStr(cfg.Comment, read.Comment)
 	read.CorrelationPolicyId = reconcile.KeepStr(cfg.CorrelationPolicyId, read.CorrelationPolicyId)
@@ -453,20 +667,20 @@ func (r *protectionAlertResource) reconcileState(cfg, read *protectionAlertModel
 	read.Name = reconcile.KeepStr(cfg.Name, read.Name)
 	read.NotificationCulture = reconcile.KeepStr(cfg.NotificationCulture, read.NotificationCulture)
 	read.NotificationEnabled = reconcile.KeepBool(cfg.NotificationEnabled, read.NotificationEnabled)
-	read.NotifyUser = reconcile.KeepStr(cfg.NotifyUser, read.NotifyUser)
+	read.NotifyUser = reconcile.KeepSet(cfg.NotifyUser, read.NotifyUser)
 	read.NotifyUserOnFilterMatch = reconcile.KeepBool(cfg.NotifyUserOnFilterMatch, read.NotifyUserOnFilterMatch)
 	read.NotifyUserSuppressionExpiryDate = reconcile.KeepStr(cfg.NotifyUserSuppressionExpiryDate, read.NotifyUserSuppressionExpiryDate)
-	read.NotifyUserThrottleThreshold = reconcile.KeepStr(cfg.NotifyUserThrottleThreshold, read.NotifyUserThrottleThreshold)
-	read.NotifyUserThrottleWindow = reconcile.KeepStr(cfg.NotifyUserThrottleWindow, read.NotifyUserThrottleWindow)
-	read.Operation = reconcile.KeepStr(cfg.Operation, read.Operation)
-	read.PrivacyManagementScopedSensitiveInformationTypes = reconcile.KeepStr(cfg.PrivacyManagementScopedSensitiveInformationTypes, read.PrivacyManagementScopedSensitiveInformationTypes)
-	read.PrivacyManagementScopedSensitiveInformationTypesForCounting = reconcile.KeepStr(cfg.PrivacyManagementScopedSensitiveInformationTypesForCounting, read.PrivacyManagementScopedSensitiveInformationTypesForCounting)
-	read.PrivacyManagementScopedSensitiveInformationTypesThreshold = reconcile.KeepStr(cfg.PrivacyManagementScopedSensitiveInformationTypesThreshold, read.PrivacyManagementScopedSensitiveInformationTypesThreshold)
+	read.NotifyUserThrottleThreshold = reconcile.KeepInt64(cfg.NotifyUserThrottleThreshold, read.NotifyUserThrottleThreshold)
+	read.NotifyUserThrottleWindow = reconcile.KeepInt64(cfg.NotifyUserThrottleWindow, read.NotifyUserThrottleWindow)
+	read.Operation = reconcile.KeepSet(cfg.Operation, read.Operation)
+	read.PrivacyManagementScopedSensitiveInformationTypes = reconcile.KeepSet(cfg.PrivacyManagementScopedSensitiveInformationTypes, read.PrivacyManagementScopedSensitiveInformationTypes)
+	read.PrivacyManagementScopedSensitiveInformationTypesForCounting = reconcile.KeepSet(cfg.PrivacyManagementScopedSensitiveInformationTypesForCounting, read.PrivacyManagementScopedSensitiveInformationTypesForCounting)
+	read.PrivacyManagementScopedSensitiveInformationTypesThreshold = reconcile.KeepInt64(cfg.PrivacyManagementScopedSensitiveInformationTypesThreshold, read.PrivacyManagementScopedSensitiveInformationTypesThreshold)
 	read.Severity = reconcile.KeepStr(cfg.Severity, read.Severity)
 	read.StreamType = reconcile.KeepStr(cfg.StreamType, read.StreamType)
 	read.ThreatType = reconcile.KeepStr(cfg.ThreatType, read.ThreatType)
-	read.Threshold = reconcile.KeepStr(cfg.Threshold, read.Threshold)
-	read.TimeWindow = reconcile.KeepStr(cfg.TimeWindow, read.TimeWindow)
-	read.UseCreatedDateTime = reconcile.KeepStr(cfg.UseCreatedDateTime, read.UseCreatedDateTime)
-	read.VolumeThreshold = reconcile.KeepStr(cfg.VolumeThreshold, read.VolumeThreshold)
+	read.Threshold = reconcile.KeepInt64(cfg.Threshold, read.Threshold)
+	read.TimeWindow = reconcile.KeepInt64(cfg.TimeWindow, read.TimeWindow)
+	read.UseCreatedDateTime = reconcile.KeepBool(cfg.UseCreatedDateTime, read.UseCreatedDateTime)
+	read.VolumeThreshold = reconcile.KeepInt64(cfg.VolumeThreshold, read.VolumeThreshold)
 }

@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -54,6 +55,9 @@ type insiderRiskPolicyModel struct {
 	ExtensibleIndicators               types.String `tfsdk:"extensible_indicators"`
 	ExtensibleTriggerInsightGroups     types.String `tfsdk:"extensible_trigger_insight_groups"`
 	FileExtensions                     types.String `tfsdk:"file_extensions"`
+	FutureTerminationWindow            types.Int64  `tfsdk:"future_termination_window"`
+	HistoricTimeSpan                   types.Int64  `tfsdk:"historic_time_span"`
+	InScopeTimeSpan                    types.Int64  `tfsdk:"in_scope_time_span"`
 	Indicators                         types.String `tfsdk:"indicators"`
 	InsiderRiskScenario                types.String `tfsdk:"insider_risk_scenario"`
 	IrmAdaptiveScopeLocation           types.String `tfsdk:"irm_adaptive_scope_location"`
@@ -64,6 +68,7 @@ type insiderRiskPolicyModel struct {
 	ModernGroupLocationException       types.String `tfsdk:"modern_group_location_exception"`
 	Name                               types.String `tfsdk:"name"`
 	OptInDrpForDlp                     types.Bool   `tfsdk:"opt_in_drp_for_dlp"`
+	PastTerminationWindow              types.Int64  `tfsdk:"past_termination_window"`
 	PolicyRBACScopes                   types.String `tfsdk:"policy_rbac_scopes"`
 	PostTerminationActivity            types.Bool   `tfsdk:"post_termination_activity"`
 	RemoveExchangeLocation             types.String `tfsdk:"remove_exchange_location"`
@@ -72,6 +77,7 @@ type insiderRiskPolicyModel struct {
 	RemoveModernGroupLocation          types.String `tfsdk:"remove_modern_group_location"`
 	RemoveModernGroupLocationException types.String `tfsdk:"remove_modern_group_location_exception"`
 	RetryDistribution                  types.Bool   `tfsdk:"retry_distribution"`
+	SchemaVersion                      types.Int64  `tfsdk:"schema_version"`
 	SensitivityLabels                  types.String `tfsdk:"sensitivity_labels"`
 	SessionRecordingSettings           types.String `tfsdk:"session_recording_settings"`
 	SharepointSites                    types.String `tfsdk:"sharepoint_sites"`
@@ -81,6 +87,7 @@ type insiderRiskPolicyModel struct {
 	Triggers                           types.String `tfsdk:"triggers"`
 	TurnOnAnalytics                    types.String `tfsdk:"turn_on_analytics"`
 	TurnOnDLPUserRiskSync              types.String `tfsdk:"turn_on_dlp_user_risk_sync"`
+	UseDefaultTemplate                 types.Int64  `tfsdk:"use_default_template"`
 	UserMailList                       types.String `tfsdk:"user_mail_list"`
 }
 
@@ -93,7 +100,7 @@ func (r *insiderRiskPolicyResource) Schema(_ context.Context, _ resource.SchemaR
 		Description: "Manages the InsiderRiskPolicy object via New-InsiderRiskPolicy / Get-InsiderRiskPolicy / Set-InsiderRiskPolicy / Remove-InsiderRiskPolicy.",
 		Attributes: map[string]schema.Attribute{
 			"id":                                     schema.StringAttribute{Computed: true, Description: "Object identifier (GUID).", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"identity":                               schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets."},
+			"identity":                               schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"add_exchange_location":                  schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AddExchangeLocation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"add_exchange_location_exception":        schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AddExchangeLocationException parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"add_irm_adaptive_scope_location":        schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AddIrmAdaptiveScopeLocation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
@@ -113,6 +120,9 @@ func (r *insiderRiskPolicyResource) Schema(_ context.Context, _ resource.SchemaR
 			"extensible_indicators":                  schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ExtensibleIndicators parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"extensible_trigger_insight_groups":      schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ExtensibleTriggerInsightGroups parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"file_extensions":                        schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -FileExtensions parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"future_termination_window":              schema.Int64Attribute{Optional: true, Computed: true, Description: "Maps to the -FutureTerminationWindow parameter.", PlanModifiers: []planmodifier.Int64{int64planmodifier.UseStateForUnknown()}},
+			"historic_time_span":                     schema.Int64Attribute{Optional: true, Computed: true, Description: "Maps to the -HistoricTimeSpan parameter.", PlanModifiers: []planmodifier.Int64{int64planmodifier.UseStateForUnknown()}},
+			"in_scope_time_span":                     schema.Int64Attribute{Optional: true, Computed: true, Description: "Maps to the -InScopeTimeSpan parameter.", PlanModifiers: []planmodifier.Int64{int64planmodifier.UseStateForUnknown()}},
 			"indicators":                             schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -Indicators parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"insider_risk_scenario":                  schema.StringAttribute{Required: true, Description: "Maps to the -InsiderRiskScenario parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
 			"irm_adaptive_scope_location":            schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -IrmAdaptiveScopeLocation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace(), stringplanmodifier.UseStateForUnknown()}},
@@ -123,6 +133,7 @@ func (r *insiderRiskPolicyResource) Schema(_ context.Context, _ resource.SchemaR
 			"modern_group_location_exception":        schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ModernGroupLocationException parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace(), stringplanmodifier.UseStateForUnknown()}},
 			"name":                                   schema.StringAttribute{Required: true, Description: "Maps to the -Name parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
 			"opt_in_drp_for_dlp":                     schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -OptInDrpForDlp parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
+			"past_termination_window":                schema.Int64Attribute{Optional: true, Computed: true, Description: "Maps to the -PastTerminationWindow parameter.", PlanModifiers: []planmodifier.Int64{int64planmodifier.UseStateForUnknown()}},
 			"policy_rbac_scopes":                     schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -PolicyRBACScopes parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"post_termination_activity":              schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -PostTerminationActivity parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
 			"remove_exchange_location":               schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -RemoveExchangeLocation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
@@ -131,6 +142,7 @@ func (r *insiderRiskPolicyResource) Schema(_ context.Context, _ resource.SchemaR
 			"remove_modern_group_location":           schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -RemoveModernGroupLocation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"remove_modern_group_location_exception": schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -RemoveModernGroupLocationException parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"retry_distribution":                     schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -RetryDistribution parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
+			"schema_version":                         schema.Int64Attribute{Optional: true, Computed: true, Description: "Maps to the -SchemaVersion parameter.", PlanModifiers: []planmodifier.Int64{int64planmodifier.UseStateForUnknown()}},
 			"sensitivity_labels":                     schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -SensitivityLabels parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"session_recording_settings":             schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -SessionRecordingSettings parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"sharepoint_sites":                       schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -SharepointSites parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
@@ -140,6 +152,7 @@ func (r *insiderRiskPolicyResource) Schema(_ context.Context, _ resource.SchemaR
 			"triggers":                               schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -Triggers parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"turn_on_analytics":                      schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -TurnOnAnalytics parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"turn_on_dlp_user_risk_sync":             schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -TurnOnDLPUserRiskSync parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"use_default_template":                   schema.Int64Attribute{Optional: true, Computed: true, Description: "Maps to the -UseDefaultTemplate parameter.", PlanModifiers: []planmodifier.Int64{int64planmodifier.RequiresReplace(), int64planmodifier.UseStateForUnknown()}},
 			"user_mail_list":                         schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -UserMailList parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace(), stringplanmodifier.UseStateForUnknown()}},
 		},
 	}
@@ -159,89 +172,156 @@ func (r *insiderRiskPolicyResource) Create(ctx context.Context, req resource.Cre
 		return
 	}
 
-	p := purview.NewInsiderRiskPolicyParams{
-		CCPolicyName:                 plan.CCPolicyName.ValueString(),
-		CCPolicySdsId:                plan.CCPolicySdsId.ValueString(),
-		Comment:                      plan.Comment.ValueString(),
-		Enabled:                      plan.Enabled.ValueBool(),
-		IsCustom:                     plan.IsCustom.ValueBool(),
-		IsPriorityContentOnlyScoring: plan.IsPriorityContentOnlyScoring.ValueBool(),
-		Name:                         plan.Name.ValueString(),
-		OptInDrpForDlp:               plan.OptInDrpForDlp.ValueBool(),
-		PostTerminationActivity:      plan.PostTerminationActivity.ValueBool(),
-		SessionRecordingSettings:     plan.SessionRecordingSettings.ValueString(),
-		TenantSetting:                plan.TenantSetting.ValueString(),
+	var config insiderRiskPolicyModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
+	if resp.Diagnostics.HasError() {
+		return
 	}
-	if v := plan.CustomTags.ValueString(); v != "" {
-		p.CustomTags = v
+
+	p := purview.NewInsiderRiskPolicyParams{}
+	if !config.CCPolicyName.IsNull() {
+		p.CCPolicyName = plan.CCPolicyName.ValueString()
 	}
-	if v := plan.DlpPoliciesAsTrigger.ValueString(); v != "" {
-		p.DlpPoliciesAsTrigger = v
+	if !config.CCPolicySdsId.IsNull() {
+		p.CCPolicySdsId = plan.CCPolicySdsId.ValueString()
 	}
-	if v := plan.DlpPolicy.ValueString(); v != "" {
-		p.DlpPolicy = v
+	if !config.Comment.IsNull() {
+		p.Comment = plan.Comment.ValueString()
 	}
-	if v := plan.DlpSensitiveTypes.ValueString(); v != "" {
-		p.DlpSensitiveTypes = v
+	if v := config.CustomTags.ValueString(); v != "" {
+		p.CustomTags = objectParam(v)
 	}
-	if v := plan.ExchangeLocation.ValueString(); v != "" {
-		p.ExchangeLocation = v
+	if v := config.DlpPoliciesAsTrigger.ValueString(); v != "" {
+		p.DlpPoliciesAsTrigger = objectParam(v)
 	}
-	if v := plan.ExchangeLocationException.ValueString(); v != "" {
-		p.ExchangeLocationException = v
+	if v := config.DlpPolicy.ValueString(); v != "" {
+		p.DlpPolicy = objectParam(v)
 	}
-	if v := plan.ExtensibleIndicators.ValueString(); v != "" {
-		p.ExtensibleIndicators = v
+	if v := config.DlpSensitiveTypes.ValueString(); v != "" {
+		p.DlpSensitiveTypes = objectParam(v)
 	}
-	if v := plan.ExtensibleTriggerInsightGroups.ValueString(); v != "" {
-		p.ExtensibleTriggerInsightGroups = v
+	if !config.Enabled.IsNull() {
+		if !plan.Enabled.IsUnknown() {
+			p.Enabled = plan.Enabled.ValueBoolPointer()
+		}
 	}
-	if v := plan.FileExtensions.ValueString(); v != "" {
-		p.FileExtensions = v
+	if v := config.ExchangeLocation.ValueString(); v != "" {
+		p.ExchangeLocation = objectParam(v)
 	}
-	if v := plan.Indicators.ValueString(); v != "" {
-		p.Indicators = v
+	if v := config.ExchangeLocationException.ValueString(); v != "" {
+		p.ExchangeLocationException = objectParam(v)
 	}
-	if v := plan.InsiderRiskScenario.ValueString(); v != "" {
-		p.InsiderRiskScenario = v
+	if v := config.ExtensibleIndicators.ValueString(); v != "" {
+		p.ExtensibleIndicators = objectParam(v)
 	}
-	if v := plan.IrmAdaptiveScopeLocation.ValueString(); v != "" {
-		p.IrmAdaptiveScopeLocation = v
+	if v := config.ExtensibleTriggerInsightGroups.ValueString(); v != "" {
+		p.ExtensibleTriggerInsightGroups = objectParam(v)
 	}
-	if v := plan.MLClassifierTypes.ValueString(); v != "" {
-		p.MLClassifierTypes = v
+	if v := config.FileExtensions.ValueString(); v != "" {
+		p.FileExtensions = objectParam(v)
 	}
-	if v := plan.ModernGroupLocation.ValueString(); v != "" {
-		p.ModernGroupLocation = v
+	if !config.FutureTerminationWindow.IsNull() {
+		if !plan.FutureTerminationWindow.IsUnknown() {
+			p.FutureTerminationWindow = plan.FutureTerminationWindow.ValueInt64Pointer()
+		}
 	}
-	if v := plan.ModernGroupLocationException.ValueString(); v != "" {
-		p.ModernGroupLocationException = v
+	if !config.HistoricTimeSpan.IsNull() {
+		if !plan.HistoricTimeSpan.IsUnknown() {
+			p.HistoricTimeSpan = plan.HistoricTimeSpan.ValueInt64Pointer()
+		}
 	}
-	if v := plan.PolicyRBACScopes.ValueString(); v != "" {
-		p.PolicyRBACScopes = v
+	if !config.InScopeTimeSpan.IsNull() {
+		if !plan.InScopeTimeSpan.IsUnknown() {
+			p.InScopeTimeSpan = plan.InScopeTimeSpan.ValueInt64Pointer()
+		}
 	}
-	if v := plan.SensitivityLabels.ValueString(); v != "" {
-		p.SensitivityLabels = v
+	if v := config.Indicators.ValueString(); v != "" {
+		p.Indicators = objectParam(v)
 	}
-	if v := plan.SharepointSites.ValueString(); v != "" {
-		p.SharepointSites = v
+	if v := config.InsiderRiskScenario.ValueString(); v != "" {
+		p.InsiderRiskScenario = objectParam(v)
 	}
-	if v := plan.TeamsSites.ValueString(); v != "" {
-		p.TeamsSites = v
+	if v := config.IrmAdaptiveScopeLocation.ValueString(); v != "" {
+		p.IrmAdaptiveScopeLocation = objectParam(v)
 	}
-	if v := plan.TriggerInsightGroups.ValueString(); v != "" {
-		p.TriggerInsightGroups = v
+	if !config.IsCustom.IsNull() {
+		if !plan.IsCustom.IsUnknown() {
+			p.IsCustom = plan.IsCustom.ValueBoolPointer()
+		}
 	}
-	if v := plan.Triggers.ValueString(); v != "" {
-		p.Triggers = v
+	if !config.IsPriorityContentOnlyScoring.IsNull() {
+		if !plan.IsPriorityContentOnlyScoring.IsUnknown() {
+			p.IsPriorityContentOnlyScoring = plan.IsPriorityContentOnlyScoring.ValueBoolPointer()
+		}
 	}
-	if v := plan.UserMailList.ValueString(); v != "" {
-		p.UserMailList = v
+	if v := config.MLClassifierTypes.ValueString(); v != "" {
+		p.MLClassifierTypes = objectParam(v)
+	}
+	if v := config.ModernGroupLocation.ValueString(); v != "" {
+		p.ModernGroupLocation = objectParam(v)
+	}
+	if v := config.ModernGroupLocationException.ValueString(); v != "" {
+		p.ModernGroupLocationException = objectParam(v)
+	}
+	if !config.Name.IsNull() {
+		p.Name = plan.Name.ValueString()
+	}
+	if !config.OptInDrpForDlp.IsNull() {
+		if !plan.OptInDrpForDlp.IsUnknown() {
+			p.OptInDrpForDlp = plan.OptInDrpForDlp.ValueBoolPointer()
+		}
+	}
+	if !config.PastTerminationWindow.IsNull() {
+		if !plan.PastTerminationWindow.IsUnknown() {
+			p.PastTerminationWindow = plan.PastTerminationWindow.ValueInt64Pointer()
+		}
+	}
+	if v := config.PolicyRBACScopes.ValueString(); v != "" {
+		p.PolicyRBACScopes = objectParam(v)
+	}
+	if !config.PostTerminationActivity.IsNull() {
+		if !plan.PostTerminationActivity.IsUnknown() {
+			p.PostTerminationActivity = plan.PostTerminationActivity.ValueBoolPointer()
+		}
+	}
+	if !config.SchemaVersion.IsNull() {
+		if !plan.SchemaVersion.IsUnknown() {
+			p.SchemaVersion = plan.SchemaVersion.ValueInt64Pointer()
+		}
+	}
+	if v := config.SensitivityLabels.ValueString(); v != "" {
+		p.SensitivityLabels = objectParam(v)
+	}
+	if !config.SessionRecordingSettings.IsNull() {
+		p.SessionRecordingSettings = plan.SessionRecordingSettings.ValueString()
+	}
+	if v := config.SharepointSites.ValueString(); v != "" {
+		p.SharepointSites = objectParam(v)
+	}
+	if v := config.TeamsSites.ValueString(); v != "" {
+		p.TeamsSites = objectParam(v)
+	}
+	if !config.TenantSetting.IsNull() {
+		p.TenantSetting = plan.TenantSetting.ValueString()
+	}
+	if v := config.TriggerInsightGroups.ValueString(); v != "" {
+		p.TriggerInsightGroups = objectParam(v)
+	}
+	if v := config.Triggers.ValueString(); v != "" {
+		p.Triggers = objectParam(v)
+	}
+	if !config.UseDefaultTemplate.IsNull() {
+		if !plan.UseDefaultTemplate.IsUnknown() {
+			p.UseDefaultTemplate = plan.UseDefaultTemplate.ValueInt64Pointer()
+		}
+	}
+	if v := config.UserMailList.ValueString(); v != "" {
+		p.UserMailList = objectParam(v)
 	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	res, err := r.client.SCC.NewInsiderRiskPolicy(ctx, p)
+	res, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.NewInsiderRiskPolicy, p, isNotFound)
 	if err != nil {
 		resp.Diagnostics.AddError("New-InsiderRiskPolicy failed", err.Error())
 		return
@@ -288,141 +368,299 @@ func (r *insiderRiskPolicyResource) Update(ctx context.Context, req resource.Upd
 	id := r.identityOf(state)
 	sp := purview.SetInsiderRiskPolicyParams{}
 	sp.Identity = id
-	if v := plan.AddExchangeLocation.ValueString(); v != "" {
-		sp.AddExchangeLocation = v
+	if !plan.AddExchangeLocation.Equal(state.AddExchangeLocation) {
+		if v := plan.AddExchangeLocation.ValueString(); v != "" {
+			sp.AddExchangeLocation = objectParam(v)
+		}
 	}
-	if v := plan.AddExchangeLocationException.ValueString(); v != "" {
-		sp.AddExchangeLocationException = v
+	if !plan.AddExchangeLocationException.Equal(state.AddExchangeLocationException) {
+		if v := plan.AddExchangeLocationException.ValueString(); v != "" {
+			sp.AddExchangeLocationException = objectParam(v)
+		}
 	}
-	if v := plan.AddIrmAdaptiveScopeLocation.ValueString(); v != "" {
-		sp.AddIrmAdaptiveScopeLocation = v
+	if !plan.AddIrmAdaptiveScopeLocation.Equal(state.AddIrmAdaptiveScopeLocation) {
+		if v := plan.AddIrmAdaptiveScopeLocation.ValueString(); v != "" {
+			sp.AddIrmAdaptiveScopeLocation = objectParam(v)
+		}
 	}
-	if v := plan.AddModernGroupLocation.ValueString(); v != "" {
-		sp.AddModernGroupLocation = v
+	if !plan.AddModernGroupLocation.Equal(state.AddModernGroupLocation) {
+		if v := plan.AddModernGroupLocation.ValueString(); v != "" {
+			sp.AddModernGroupLocation = objectParam(v)
+		}
 	}
-	if v := plan.AddModernGroupLocationException.ValueString(); v != "" {
-		sp.AddModernGroupLocationException = v
+	if !plan.AddModernGroupLocationException.Equal(state.AddModernGroupLocationException) {
+		if v := plan.AddModernGroupLocationException.ValueString(); v != "" {
+			sp.AddModernGroupLocationException = objectParam(v)
+		}
 	}
-	if v := plan.AddUserMailList.ValueString(); v != "" {
-		sp.AddUserMailList = v
+	if !plan.AddUserMailList.Equal(state.AddUserMailList) {
+		if v := plan.AddUserMailList.ValueString(); v != "" {
+			sp.AddUserMailList = objectParam(v)
+		}
 	}
-	sp.CCPolicyName = plan.CCPolicyName.ValueString()
-	sp.CCPolicySdsId = plan.CCPolicySdsId.ValueString()
-	sp.Comment = plan.Comment.ValueString()
-	if v := plan.CustomTags.ValueString(); v != "" {
-		sp.CustomTags = v
+	if !plan.CCPolicyName.Equal(state.CCPolicyName) {
+		sp.CCPolicyName = plan.CCPolicyName.ValueString()
 	}
-	if v := plan.DlpPoliciesAsTrigger.ValueString(); v != "" {
-		sp.DlpPoliciesAsTrigger = v
+	if !plan.CCPolicySdsId.Equal(state.CCPolicySdsId) {
+		sp.CCPolicySdsId = plan.CCPolicySdsId.ValueString()
 	}
-	if v := plan.DlpPolicy.ValueString(); v != "" {
-		sp.DlpPolicy = v
+	if !plan.Comment.Equal(state.Comment) {
+		sp.Comment = plan.Comment.ValueString()
 	}
-	if v := plan.DlpSensitiveTypes.ValueString(); v != "" {
-		sp.DlpSensitiveTypes = v
+	if !plan.CustomTags.Equal(state.CustomTags) {
+		if v := plan.CustomTags.ValueString(); v != "" {
+			sp.CustomTags = objectParam(v)
+		}
 	}
-	sp.Enabled = plan.Enabled.ValueBool()
-	if v := plan.ExtensibleIndicators.ValueString(); v != "" {
-		sp.ExtensibleIndicators = v
+	if !plan.DlpPoliciesAsTrigger.Equal(state.DlpPoliciesAsTrigger) {
+		if v := plan.DlpPoliciesAsTrigger.ValueString(); v != "" {
+			sp.DlpPoliciesAsTrigger = objectParam(v)
+		}
 	}
-	if v := plan.ExtensibleTriggerInsightGroups.ValueString(); v != "" {
-		sp.ExtensibleTriggerInsightGroups = v
+	if !plan.DlpPolicy.Equal(state.DlpPolicy) {
+		if v := plan.DlpPolicy.ValueString(); v != "" {
+			sp.DlpPolicy = objectParam(v)
+		}
 	}
-	if v := plan.FileExtensions.ValueString(); v != "" {
-		sp.FileExtensions = v
+	if !plan.DlpSensitiveTypes.Equal(state.DlpSensitiveTypes) {
+		if v := plan.DlpSensitiveTypes.ValueString(); v != "" {
+			sp.DlpSensitiveTypes = objectParam(v)
+		}
 	}
-	if v := plan.Indicators.ValueString(); v != "" {
-		sp.Indicators = v
+	if !plan.Enabled.Equal(state.Enabled) {
+		if !plan.Enabled.IsUnknown() {
+			sp.Enabled = plan.Enabled.ValueBoolPointer()
+		}
 	}
-	sp.IsCustom = plan.IsCustom.ValueBool()
-	sp.IsPriorityContentOnlyScoring = plan.IsPriorityContentOnlyScoring.ValueBool()
-	if v := plan.MLClassifierTypes.ValueString(); v != "" {
-		sp.MLClassifierTypes = v
+	if !plan.ExtensibleIndicators.Equal(state.ExtensibleIndicators) {
+		if v := plan.ExtensibleIndicators.ValueString(); v != "" {
+			sp.ExtensibleIndicators = objectParam(v)
+		}
 	}
-	sp.OptInDrpForDlp = plan.OptInDrpForDlp.ValueBool()
-	if v := plan.PolicyRBACScopes.ValueString(); v != "" {
-		sp.PolicyRBACScopes = v
+	if !plan.ExtensibleTriggerInsightGroups.Equal(state.ExtensibleTriggerInsightGroups) {
+		if v := plan.ExtensibleTriggerInsightGroups.ValueString(); v != "" {
+			sp.ExtensibleTriggerInsightGroups = objectParam(v)
+		}
 	}
-	sp.PostTerminationActivity = plan.PostTerminationActivity.ValueBool()
-	if v := plan.RemoveExchangeLocation.ValueString(); v != "" {
-		sp.RemoveExchangeLocation = v
+	if !plan.FileExtensions.Equal(state.FileExtensions) {
+		if v := plan.FileExtensions.ValueString(); v != "" {
+			sp.FileExtensions = objectParam(v)
+		}
 	}
-	if v := plan.RemoveExchangeLocationException.ValueString(); v != "" {
-		sp.RemoveExchangeLocationException = v
+	if !plan.FutureTerminationWindow.Equal(state.FutureTerminationWindow) {
+		if !plan.FutureTerminationWindow.IsUnknown() {
+			sp.FutureTerminationWindow = plan.FutureTerminationWindow.ValueInt64Pointer()
+		}
 	}
-	if v := plan.RemoveIrmAdaptiveScopeLocation.ValueString(); v != "" {
-		sp.RemoveIrmAdaptiveScopeLocation = v
+	if !plan.HistoricTimeSpan.Equal(state.HistoricTimeSpan) {
+		if !plan.HistoricTimeSpan.IsUnknown() {
+			sp.HistoricTimeSpan = plan.HistoricTimeSpan.ValueInt64Pointer()
+		}
 	}
-	if v := plan.RemoveModernGroupLocation.ValueString(); v != "" {
-		sp.RemoveModernGroupLocation = v
+	if !plan.InScopeTimeSpan.Equal(state.InScopeTimeSpan) {
+		if !plan.InScopeTimeSpan.IsUnknown() {
+			sp.InScopeTimeSpan = plan.InScopeTimeSpan.ValueInt64Pointer()
+		}
 	}
-	if v := plan.RemoveModernGroupLocationException.ValueString(); v != "" {
-		sp.RemoveModernGroupLocationException = v
+	if !plan.Indicators.Equal(state.Indicators) {
+		if v := plan.Indicators.ValueString(); v != "" {
+			sp.Indicators = objectParam(v)
+		}
 	}
-	sp.RetryDistribution = plan.RetryDistribution.ValueBool()
-	if v := plan.SensitivityLabels.ValueString(); v != "" {
-		sp.SensitivityLabels = v
+	if !plan.IsCustom.Equal(state.IsCustom) {
+		if !plan.IsCustom.IsUnknown() {
+			sp.IsCustom = plan.IsCustom.ValueBoolPointer()
+		}
 	}
-	sp.SessionRecordingSettings = plan.SessionRecordingSettings.ValueString()
-	if v := plan.SharepointSites.ValueString(); v != "" {
-		sp.SharepointSites = v
+	if !plan.IsPriorityContentOnlyScoring.Equal(state.IsPriorityContentOnlyScoring) {
+		if !plan.IsPriorityContentOnlyScoring.IsUnknown() {
+			sp.IsPriorityContentOnlyScoring = plan.IsPriorityContentOnlyScoring.ValueBoolPointer()
+		}
 	}
-	if v := plan.TeamsSites.ValueString(); v != "" {
-		sp.TeamsSites = v
+	if !plan.MLClassifierTypes.Equal(state.MLClassifierTypes) {
+		if v := plan.MLClassifierTypes.ValueString(); v != "" {
+			sp.MLClassifierTypes = objectParam(v)
+		}
 	}
-	sp.TenantSetting = plan.TenantSetting.ValueString()
-	if v := plan.TriggerInsightGroups.ValueString(); v != "" {
-		sp.TriggerInsightGroups = v
+	if !plan.OptInDrpForDlp.Equal(state.OptInDrpForDlp) {
+		if !plan.OptInDrpForDlp.IsUnknown() {
+			sp.OptInDrpForDlp = plan.OptInDrpForDlp.ValueBoolPointer()
+		}
 	}
-	if v := plan.Triggers.ValueString(); v != "" {
-		sp.Triggers = v
+	if !plan.PastTerminationWindow.Equal(state.PastTerminationWindow) {
+		if !plan.PastTerminationWindow.IsUnknown() {
+			sp.PastTerminationWindow = plan.PastTerminationWindow.ValueInt64Pointer()
+		}
 	}
-	sp.TurnOnAnalytics = plan.TurnOnAnalytics.ValueString()
-	sp.TurnOnDLPUserRiskSync = plan.TurnOnDLPUserRiskSync.ValueString()
+	if !plan.PolicyRBACScopes.Equal(state.PolicyRBACScopes) {
+		if v := plan.PolicyRBACScopes.ValueString(); v != "" {
+			sp.PolicyRBACScopes = objectParam(v)
+		}
+	}
+	if !plan.PostTerminationActivity.Equal(state.PostTerminationActivity) {
+		if !plan.PostTerminationActivity.IsUnknown() {
+			sp.PostTerminationActivity = plan.PostTerminationActivity.ValueBoolPointer()
+		}
+	}
+	if !plan.RemoveExchangeLocation.Equal(state.RemoveExchangeLocation) {
+		if v := plan.RemoveExchangeLocation.ValueString(); v != "" {
+			sp.RemoveExchangeLocation = objectParam(v)
+		}
+	}
+	if !plan.RemoveExchangeLocationException.Equal(state.RemoveExchangeLocationException) {
+		if v := plan.RemoveExchangeLocationException.ValueString(); v != "" {
+			sp.RemoveExchangeLocationException = objectParam(v)
+		}
+	}
+	if !plan.RemoveIrmAdaptiveScopeLocation.Equal(state.RemoveIrmAdaptiveScopeLocation) {
+		if v := plan.RemoveIrmAdaptiveScopeLocation.ValueString(); v != "" {
+			sp.RemoveIrmAdaptiveScopeLocation = objectParam(v)
+		}
+	}
+	if !plan.RemoveModernGroupLocation.Equal(state.RemoveModernGroupLocation) {
+		if v := plan.RemoveModernGroupLocation.ValueString(); v != "" {
+			sp.RemoveModernGroupLocation = objectParam(v)
+		}
+	}
+	if !plan.RemoveModernGroupLocationException.Equal(state.RemoveModernGroupLocationException) {
+		if v := plan.RemoveModernGroupLocationException.ValueString(); v != "" {
+			sp.RemoveModernGroupLocationException = objectParam(v)
+		}
+	}
+	if !plan.RetryDistribution.Equal(state.RetryDistribution) {
+		if !plan.RetryDistribution.IsUnknown() {
+			sp.RetryDistribution = plan.RetryDistribution.ValueBoolPointer()
+		}
+	}
+	if !plan.SchemaVersion.Equal(state.SchemaVersion) {
+		if !plan.SchemaVersion.IsUnknown() {
+			sp.SchemaVersion = plan.SchemaVersion.ValueInt64Pointer()
+		}
+	}
+	if !plan.SensitivityLabels.Equal(state.SensitivityLabels) {
+		if v := plan.SensitivityLabels.ValueString(); v != "" {
+			sp.SensitivityLabels = objectParam(v)
+		}
+	}
+	if !plan.SessionRecordingSettings.Equal(state.SessionRecordingSettings) {
+		sp.SessionRecordingSettings = plan.SessionRecordingSettings.ValueString()
+	}
+	if !plan.SharepointSites.Equal(state.SharepointSites) {
+		if v := plan.SharepointSites.ValueString(); v != "" {
+			sp.SharepointSites = objectParam(v)
+		}
+	}
+	if !plan.TeamsSites.Equal(state.TeamsSites) {
+		if v := plan.TeamsSites.ValueString(); v != "" {
+			sp.TeamsSites = objectParam(v)
+		}
+	}
+	if !plan.TenantSetting.Equal(state.TenantSetting) {
+		sp.TenantSetting = plan.TenantSetting.ValueString()
+	}
+	if !plan.TriggerInsightGroups.Equal(state.TriggerInsightGroups) {
+		if v := plan.TriggerInsightGroups.ValueString(); v != "" {
+			sp.TriggerInsightGroups = objectParam(v)
+		}
+	}
+	if !plan.Triggers.Equal(state.Triggers) {
+		if v := plan.Triggers.ValueString(); v != "" {
+			sp.Triggers = objectParam(v)
+		}
+	}
+	if !plan.TurnOnAnalytics.Equal(state.TurnOnAnalytics) {
+		sp.TurnOnAnalytics = plan.TurnOnAnalytics.ValueString()
+	}
+	if !plan.TurnOnDLPUserRiskSync.Equal(state.TurnOnDLPUserRiskSync) {
+		sp.TurnOnDLPUserRiskSync = plan.TurnOnDLPUserRiskSync.ValueString()
+	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	if _, err := r.client.SCC.SetInsiderRiskPolicy(ctx, sp); err != nil {
+	if _, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.SetInsiderRiskPolicy, sp, isNotFound); err != nil {
 		resp.Diagnostics.AddError("Set-InsiderRiskPolicy failed", err.Error())
 		return
 	}
 	cfg := plan
 	reflected := reconcile.ReflectsFields(map[string]types.String{
-		"AddExchangeLocation":                cfg.AddExchangeLocation,
-		"AddExchangeLocationException":       cfg.AddExchangeLocationException,
-		"AddIrmAdaptiveScopeLocation":        cfg.AddIrmAdaptiveScopeLocation,
-		"AddModernGroupLocation":             cfg.AddModernGroupLocation,
-		"AddModernGroupLocationException":    cfg.AddModernGroupLocationException,
-		"AddUserMailList":                    cfg.AddUserMailList,
-		"CCPolicyName":                       cfg.CCPolicyName,
-		"CCPolicySdsId":                      cfg.CCPolicySdsId,
-		"Comment":                            cfg.Comment,
-		"CustomTags":                         cfg.CustomTags,
-		"DlpPoliciesAsTrigger":               cfg.DlpPoliciesAsTrigger,
-		"DlpPolicy":                          cfg.DlpPolicy,
-		"DlpSensitiveTypes":                  cfg.DlpSensitiveTypes,
-		"ExtensibleIndicators":               cfg.ExtensibleIndicators,
-		"ExtensibleTriggerInsightGroups":     cfg.ExtensibleTriggerInsightGroups,
-		"FileExtensions":                     cfg.FileExtensions,
-		"Indicators":                         cfg.Indicators,
-		"MLClassifierTypes":                  cfg.MLClassifierTypes,
-		"PolicyRBACScopes":                   cfg.PolicyRBACScopes,
-		"RemoveExchangeLocation":             cfg.RemoveExchangeLocation,
-		"RemoveExchangeLocationException":    cfg.RemoveExchangeLocationException,
-		"RemoveIrmAdaptiveScopeLocation":     cfg.RemoveIrmAdaptiveScopeLocation,
-		"RemoveModernGroupLocation":          cfg.RemoveModernGroupLocation,
-		"RemoveModernGroupLocationException": cfg.RemoveModernGroupLocationException,
-		"SensitivityLabels":                  cfg.SensitivityLabels,
-		"SessionRecordingSettings":           cfg.SessionRecordingSettings,
-		"SharepointSites":                    cfg.SharepointSites,
-		"TeamsSites":                         cfg.TeamsSites,
-		"TenantSetting":                      cfg.TenantSetting,
-		"TriggerInsightGroups":               cfg.TriggerInsightGroups,
-		"Triggers":                           cfg.Triggers,
-		"TurnOnAnalytics":                    cfg.TurnOnAnalytics,
-		"TurnOnDLPUserRiskSync":              cfg.TurnOnDLPUserRiskSync,
+		"CCPolicyName":             cfg.CCPolicyName,
+		"CCPolicySdsId":            cfg.CCPolicySdsId,
+		"Comment":                  cfg.Comment,
+		"SessionRecordingSettings": cfg.SessionRecordingSettings,
+		"TenantSetting":            cfg.TenantSetting,
+		"TurnOnAnalytics":          cfg.TurnOnAnalytics,
+		"TurnOnDLPUserRiskSync":    cfg.TurnOnDLPUserRiskSync,
 	}, getString)
+	if !cfg.Enabled.IsUnknown() && !cfg.Enabled.IsNull() && !cfg.Enabled.Equal(state.Enabled) {
+		prev, want := reflected, cfg.Enabled.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["Enabled"] == nil || getBool(obj, "Enabled") == want)
+		}
+	}
+	if !cfg.FutureTerminationWindow.IsUnknown() && !cfg.FutureTerminationWindow.IsNull() && !cfg.FutureTerminationWindow.Equal(state.FutureTerminationWindow) {
+		prev, want := reflected, cfg.FutureTerminationWindow.ValueInt64()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["FutureTerminationWindow"] == nil || getInt(obj, "FutureTerminationWindow") == want)
+		}
+	}
+	if !cfg.HistoricTimeSpan.IsUnknown() && !cfg.HistoricTimeSpan.IsNull() && !cfg.HistoricTimeSpan.Equal(state.HistoricTimeSpan) {
+		prev, want := reflected, cfg.HistoricTimeSpan.ValueInt64()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["HistoricTimeSpan"] == nil || getInt(obj, "HistoricTimeSpan") == want)
+		}
+	}
+	if !cfg.InScopeTimeSpan.IsUnknown() && !cfg.InScopeTimeSpan.IsNull() && !cfg.InScopeTimeSpan.Equal(state.InScopeTimeSpan) {
+		prev, want := reflected, cfg.InScopeTimeSpan.ValueInt64()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["InScopeTimeSpan"] == nil || getInt(obj, "InScopeTimeSpan") == want)
+		}
+	}
+	if !cfg.IsCustom.IsUnknown() && !cfg.IsCustom.IsNull() && !cfg.IsCustom.Equal(state.IsCustom) {
+		prev, want := reflected, cfg.IsCustom.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["IsCustom"] == nil || getBool(obj, "IsCustom") == want)
+		}
+	}
+	if !cfg.IsPriorityContentOnlyScoring.IsUnknown() && !cfg.IsPriorityContentOnlyScoring.IsNull() && !cfg.IsPriorityContentOnlyScoring.Equal(state.IsPriorityContentOnlyScoring) {
+		prev, want := reflected, cfg.IsPriorityContentOnlyScoring.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["IsPriorityContentOnlyScoring"] == nil || getBool(obj, "IsPriorityContentOnlyScoring") == want)
+		}
+	}
+	if !cfg.OptInDrpForDlp.IsUnknown() && !cfg.OptInDrpForDlp.IsNull() && !cfg.OptInDrpForDlp.Equal(state.OptInDrpForDlp) {
+		prev, want := reflected, cfg.OptInDrpForDlp.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["OptInDrpForDlp"] == nil || getBool(obj, "OptInDrpForDlp") == want)
+		}
+	}
+	if !cfg.PastTerminationWindow.IsUnknown() && !cfg.PastTerminationWindow.IsNull() && !cfg.PastTerminationWindow.Equal(state.PastTerminationWindow) {
+		prev, want := reflected, cfg.PastTerminationWindow.ValueInt64()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["PastTerminationWindow"] == nil || getInt(obj, "PastTerminationWindow") == want)
+		}
+	}
+	if !cfg.PostTerminationActivity.IsUnknown() && !cfg.PostTerminationActivity.IsNull() && !cfg.PostTerminationActivity.Equal(state.PostTerminationActivity) {
+		prev, want := reflected, cfg.PostTerminationActivity.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["PostTerminationActivity"] == nil || getBool(obj, "PostTerminationActivity") == want)
+		}
+	}
+	if !cfg.RetryDistribution.IsUnknown() && !cfg.RetryDistribution.IsNull() && !cfg.RetryDistribution.Equal(state.RetryDistribution) {
+		prev, want := reflected, cfg.RetryDistribution.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["RetryDistribution"] == nil || getBool(obj, "RetryDistribution") == want)
+		}
+	}
+	if !cfg.SchemaVersion.IsUnknown() && !cfg.SchemaVersion.IsNull() && !cfg.SchemaVersion.Equal(state.SchemaVersion) {
+		prev, want := reflected, cfg.SchemaVersion.ValueInt64()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["SchemaVersion"] == nil || getInt(obj, "SchemaVersion") == want)
+		}
+	}
 	r.refresh(ctx, id, &plan, &resp.Diagnostics, reflected)
+	if !cfg.ID.IsUnknown() && !cfg.ID.IsNull() {
+		plan.ID = cfg.ID
+	}
 	r.reconcileState(&cfg, &plan)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
@@ -482,53 +720,59 @@ func (r *insiderRiskPolicyResource) refresh(ctx context.Context, identity string
 func readInsiderRiskPolicy(ctx context.Context, obj map[string]any, m *insiderRiskPolicyModel) {
 	m.ID = types.StringValue(firstNonEmptyStr(getString(obj, "Guid"), getString(obj, "Id"), getString(obj, "Identity")))
 	m.Identity = types.StringValue(firstNonEmptyStr(getString(obj, "Identity"), getString(obj, "Guid"), getString(obj, "Name")))
-	m.AddExchangeLocation = types.StringValue(getString(obj, "AddExchangeLocation"))
-	m.AddExchangeLocationException = types.StringValue(getString(obj, "AddExchangeLocationException"))
-	m.AddIrmAdaptiveScopeLocation = types.StringValue(getString(obj, "AddIrmAdaptiveScopeLocation"))
-	m.AddModernGroupLocation = types.StringValue(getString(obj, "AddModernGroupLocation"))
-	m.AddModernGroupLocationException = types.StringValue(getString(obj, "AddModernGroupLocationException"))
-	m.AddUserMailList = types.StringValue(getString(obj, "AddUserMailList"))
+	m.AddExchangeLocation = types.StringValue(getObjectJSON(obj, "AddExchangeLocation"))
+	m.AddExchangeLocationException = types.StringValue(getObjectJSON(obj, "AddExchangeLocationException"))
+	m.AddIrmAdaptiveScopeLocation = types.StringValue(getObjectJSON(obj, "AddIrmAdaptiveScopeLocation"))
+	m.AddModernGroupLocation = types.StringValue(getObjectJSON(obj, "AddModernGroupLocation"))
+	m.AddModernGroupLocationException = types.StringValue(getObjectJSON(obj, "AddModernGroupLocationException"))
+	m.AddUserMailList = types.StringValue(getObjectJSON(obj, "AddUserMailList"))
 	m.CCPolicyName = types.StringValue(getString(obj, "CCPolicyName"))
 	m.CCPolicySdsId = types.StringValue(getString(obj, "CCPolicySdsId"))
 	m.Comment = types.StringValue(getString(obj, "Comment"))
-	m.CustomTags = types.StringValue(getString(obj, "CustomTags"))
-	m.DlpPoliciesAsTrigger = types.StringValue(getString(obj, "DlpPoliciesAsTrigger"))
-	m.DlpPolicy = types.StringValue(getString(obj, "DlpPolicy"))
-	m.DlpSensitiveTypes = types.StringValue(getString(obj, "DlpSensitiveTypes"))
+	m.CustomTags = types.StringValue(getObjectJSON(obj, "CustomTags"))
+	m.DlpPoliciesAsTrigger = types.StringValue(getObjectJSON(obj, "DlpPoliciesAsTrigger"))
+	m.DlpPolicy = types.StringValue(getObjectJSON(obj, "DlpPolicy"))
+	m.DlpSensitiveTypes = types.StringValue(getObjectJSON(obj, "DlpSensitiveTypes"))
 	m.Enabled = types.BoolValue(getBool(obj, "Enabled"))
-	m.ExchangeLocation = types.StringValue(getString(obj, "ExchangeLocation"))
-	m.ExchangeLocationException = types.StringValue(getString(obj, "ExchangeLocationException"))
-	m.ExtensibleIndicators = types.StringValue(getString(obj, "ExtensibleIndicators"))
-	m.ExtensibleTriggerInsightGroups = types.StringValue(getString(obj, "ExtensibleTriggerInsightGroups"))
-	m.FileExtensions = types.StringValue(getString(obj, "FileExtensions"))
-	m.Indicators = types.StringValue(getString(obj, "Indicators"))
-	m.InsiderRiskScenario = types.StringValue(getString(obj, "InsiderRiskScenario"))
-	m.IrmAdaptiveScopeLocation = types.StringValue(getString(obj, "IrmAdaptiveScopeLocation"))
+	m.ExchangeLocation = types.StringValue(getObjectJSON(obj, "ExchangeLocation"))
+	m.ExchangeLocationException = types.StringValue(getObjectJSON(obj, "ExchangeLocationException"))
+	m.ExtensibleIndicators = types.StringValue(getObjectJSON(obj, "ExtensibleIndicators"))
+	m.ExtensibleTriggerInsightGroups = types.StringValue(getObjectJSON(obj, "ExtensibleTriggerInsightGroups"))
+	m.FileExtensions = types.StringValue(getObjectJSON(obj, "FileExtensions"))
+	m.FutureTerminationWindow = types.Int64Value(getInt(obj, "FutureTerminationWindow"))
+	m.HistoricTimeSpan = types.Int64Value(getInt(obj, "HistoricTimeSpan"))
+	m.InScopeTimeSpan = types.Int64Value(getInt(obj, "InScopeTimeSpan"))
+	m.Indicators = types.StringValue(getObjectJSON(obj, "Indicators"))
+	m.InsiderRiskScenario = types.StringValue(getObjectJSON(obj, "InsiderRiskScenario"))
+	m.IrmAdaptiveScopeLocation = types.StringValue(getObjectJSON(obj, "IrmAdaptiveScopeLocation"))
 	m.IsCustom = types.BoolValue(getBool(obj, "IsCustom"))
 	m.IsPriorityContentOnlyScoring = types.BoolValue(getBool(obj, "IsPriorityContentOnlyScoring"))
-	m.MLClassifierTypes = types.StringValue(getString(obj, "MLClassifierTypes"))
-	m.ModernGroupLocation = types.StringValue(getString(obj, "ModernGroupLocation"))
-	m.ModernGroupLocationException = types.StringValue(getString(obj, "ModernGroupLocationException"))
+	m.MLClassifierTypes = types.StringValue(getObjectJSON(obj, "MLClassifierTypes"))
+	m.ModernGroupLocation = types.StringValue(getObjectJSON(obj, "ModernGroupLocation"))
+	m.ModernGroupLocationException = types.StringValue(getObjectJSON(obj, "ModernGroupLocationException"))
 	m.Name = types.StringValue(getString(obj, "Name"))
 	m.OptInDrpForDlp = types.BoolValue(getBool(obj, "OptInDrpForDlp"))
-	m.PolicyRBACScopes = types.StringValue(getString(obj, "PolicyRBACScopes"))
+	m.PastTerminationWindow = types.Int64Value(getInt(obj, "PastTerminationWindow"))
+	m.PolicyRBACScopes = types.StringValue(getObjectJSON(obj, "PolicyRBACScopes"))
 	m.PostTerminationActivity = types.BoolValue(getBool(obj, "PostTerminationActivity"))
-	m.RemoveExchangeLocation = types.StringValue(getString(obj, "RemoveExchangeLocation"))
-	m.RemoveExchangeLocationException = types.StringValue(getString(obj, "RemoveExchangeLocationException"))
-	m.RemoveIrmAdaptiveScopeLocation = types.StringValue(getString(obj, "RemoveIrmAdaptiveScopeLocation"))
-	m.RemoveModernGroupLocation = types.StringValue(getString(obj, "RemoveModernGroupLocation"))
-	m.RemoveModernGroupLocationException = types.StringValue(getString(obj, "RemoveModernGroupLocationException"))
+	m.RemoveExchangeLocation = types.StringValue(getObjectJSON(obj, "RemoveExchangeLocation"))
+	m.RemoveExchangeLocationException = types.StringValue(getObjectJSON(obj, "RemoveExchangeLocationException"))
+	m.RemoveIrmAdaptiveScopeLocation = types.StringValue(getObjectJSON(obj, "RemoveIrmAdaptiveScopeLocation"))
+	m.RemoveModernGroupLocation = types.StringValue(getObjectJSON(obj, "RemoveModernGroupLocation"))
+	m.RemoveModernGroupLocationException = types.StringValue(getObjectJSON(obj, "RemoveModernGroupLocationException"))
 	m.RetryDistribution = types.BoolValue(getBool(obj, "RetryDistribution"))
-	m.SensitivityLabels = types.StringValue(getString(obj, "SensitivityLabels"))
+	m.SchemaVersion = types.Int64Value(getInt(obj, "SchemaVersion"))
+	m.SensitivityLabels = types.StringValue(getObjectJSON(obj, "SensitivityLabels"))
 	m.SessionRecordingSettings = types.StringValue(getString(obj, "SessionRecordingSettings"))
-	m.SharepointSites = types.StringValue(getString(obj, "SharepointSites"))
-	m.TeamsSites = types.StringValue(getString(obj, "TeamsSites"))
+	m.SharepointSites = types.StringValue(getObjectJSON(obj, "SharepointSites"))
+	m.TeamsSites = types.StringValue(getObjectJSON(obj, "TeamsSites"))
 	m.TenantSetting = types.StringValue(getString(obj, "TenantSetting"))
-	m.TriggerInsightGroups = types.StringValue(getString(obj, "TriggerInsightGroups"))
-	m.Triggers = types.StringValue(getString(obj, "Triggers"))
+	m.TriggerInsightGroups = types.StringValue(getObjectJSON(obj, "TriggerInsightGroups"))
+	m.Triggers = types.StringValue(getObjectJSON(obj, "Triggers"))
 	m.TurnOnAnalytics = types.StringValue(getString(obj, "TurnOnAnalytics"))
 	m.TurnOnDLPUserRiskSync = types.StringValue(getString(obj, "TurnOnDLPUserRiskSync"))
-	m.UserMailList = types.StringValue(getString(obj, "UserMailList"))
+	m.UseDefaultTemplate = types.Int64Value(getInt(obj, "UseDefaultTemplate"))
+	m.UserMailList = types.StringValue(getObjectJSON(obj, "UserMailList"))
 	_ = ctx
 }
 
@@ -552,6 +796,9 @@ func (r *insiderRiskPolicyResource) reconcileState(cfg, read *insiderRiskPolicyM
 	read.ExtensibleIndicators = reconcile.KeepStr(cfg.ExtensibleIndicators, read.ExtensibleIndicators)
 	read.ExtensibleTriggerInsightGroups = reconcile.KeepStr(cfg.ExtensibleTriggerInsightGroups, read.ExtensibleTriggerInsightGroups)
 	read.FileExtensions = reconcile.KeepStr(cfg.FileExtensions, read.FileExtensions)
+	read.FutureTerminationWindow = reconcile.KeepInt64(cfg.FutureTerminationWindow, read.FutureTerminationWindow)
+	read.HistoricTimeSpan = reconcile.KeepInt64(cfg.HistoricTimeSpan, read.HistoricTimeSpan)
+	read.InScopeTimeSpan = reconcile.KeepInt64(cfg.InScopeTimeSpan, read.InScopeTimeSpan)
 	read.Indicators = reconcile.KeepStr(cfg.Indicators, read.Indicators)
 	read.InsiderRiskScenario = reconcile.KeepStr(cfg.InsiderRiskScenario, read.InsiderRiskScenario)
 	read.IrmAdaptiveScopeLocation = reconcile.KeepStr(cfg.IrmAdaptiveScopeLocation, read.IrmAdaptiveScopeLocation)
@@ -562,6 +809,7 @@ func (r *insiderRiskPolicyResource) reconcileState(cfg, read *insiderRiskPolicyM
 	read.ModernGroupLocationException = reconcile.KeepStr(cfg.ModernGroupLocationException, read.ModernGroupLocationException)
 	read.Name = reconcile.KeepStr(cfg.Name, read.Name)
 	read.OptInDrpForDlp = reconcile.KeepBool(cfg.OptInDrpForDlp, read.OptInDrpForDlp)
+	read.PastTerminationWindow = reconcile.KeepInt64(cfg.PastTerminationWindow, read.PastTerminationWindow)
 	read.PolicyRBACScopes = reconcile.KeepStr(cfg.PolicyRBACScopes, read.PolicyRBACScopes)
 	read.PostTerminationActivity = reconcile.KeepBool(cfg.PostTerminationActivity, read.PostTerminationActivity)
 	read.RemoveExchangeLocation = reconcile.KeepStr(cfg.RemoveExchangeLocation, read.RemoveExchangeLocation)
@@ -570,6 +818,7 @@ func (r *insiderRiskPolicyResource) reconcileState(cfg, read *insiderRiskPolicyM
 	read.RemoveModernGroupLocation = reconcile.KeepStr(cfg.RemoveModernGroupLocation, read.RemoveModernGroupLocation)
 	read.RemoveModernGroupLocationException = reconcile.KeepStr(cfg.RemoveModernGroupLocationException, read.RemoveModernGroupLocationException)
 	read.RetryDistribution = reconcile.KeepBool(cfg.RetryDistribution, read.RetryDistribution)
+	read.SchemaVersion = reconcile.KeepInt64(cfg.SchemaVersion, read.SchemaVersion)
 	read.SensitivityLabels = reconcile.KeepStr(cfg.SensitivityLabels, read.SensitivityLabels)
 	read.SessionRecordingSettings = reconcile.KeepStr(cfg.SessionRecordingSettings, read.SessionRecordingSettings)
 	read.SharepointSites = reconcile.KeepStr(cfg.SharepointSites, read.SharepointSites)
@@ -579,5 +828,6 @@ func (r *insiderRiskPolicyResource) reconcileState(cfg, read *insiderRiskPolicyM
 	read.Triggers = reconcile.KeepStr(cfg.Triggers, read.Triggers)
 	read.TurnOnAnalytics = reconcile.KeepStr(cfg.TurnOnAnalytics, read.TurnOnAnalytics)
 	read.TurnOnDLPUserRiskSync = reconcile.KeepStr(cfg.TurnOnDLPUserRiskSync, read.TurnOnDLPUserRiskSync)
+	read.UseDefaultTemplate = reconcile.KeepInt64(cfg.UseDefaultTemplate, read.UseDefaultTemplate)
 	read.UserMailList = reconcile.KeepStr(cfg.UserMailList, read.UserMailList)
 }

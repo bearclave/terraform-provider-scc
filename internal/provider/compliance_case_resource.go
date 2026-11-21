@@ -58,7 +58,7 @@ func (r *complianceCaseResource) Schema(_ context.Context, _ resource.SchemaRequ
 		Description: "Manages the ComplianceCase object via New-ComplianceCase / Get-ComplianceCase / Set-ComplianceCase / Remove-ComplianceCase.",
 		Attributes: map[string]schema.Attribute{
 			"id":                    schema.StringAttribute{Computed: true, Description: "Object identifier (GUID).", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"identity":              schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets."},
+			"identity":              schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"add_or_update_sources": schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -AddOrUpdateSources parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
 			"case_type":             schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -CaseType parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"close":                 schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -Close parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
@@ -88,21 +88,40 @@ func (r *complianceCaseResource) Create(ctx context.Context, req resource.Create
 		return
 	}
 
-	p := purview.NewComplianceCaseParams{
-		Description:       plan.Description.ValueString(),
-		ExternalId:        plan.ExternalId.ValueString(),
-		Name:              plan.Name.ValueString(),
-		SecondaryCaseType: plan.SecondaryCaseType.ValueString(),
-		SourceCaseType:    plan.SourceCaseType.ValueString(),
-		Sources:           toStringSlice(ctx, plan.Sources, &resp.Diagnostics),
+	var config complianceCaseModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
+	if resp.Diagnostics.HasError() {
+		return
 	}
-	if v := plan.CaseType.ValueString(); v != "" {
-		p.CaseType = v
+
+	p := purview.NewComplianceCaseParams{}
+	if v := config.CaseType.ValueString(); v != "" {
+		p.CaseType = objectParam(v)
+	}
+	if !config.Description.IsNull() {
+		p.Description = plan.Description.ValueString()
+	}
+	if !config.ExternalId.IsNull() {
+		p.ExternalId = plan.ExternalId.ValueString()
+	}
+	if !config.Name.IsNull() {
+		p.Name = plan.Name.ValueString()
+	}
+	if !config.SecondaryCaseType.IsNull() {
+		p.SecondaryCaseType = plan.SecondaryCaseType.ValueString()
+	}
+	if !config.SourceCaseType.IsNull() {
+		p.SourceCaseType = plan.SourceCaseType.ValueString()
+	}
+	if !config.Sources.IsNull() {
+		if v := toStringSlice(ctx, plan.Sources, &resp.Diagnostics); len(v) > 0 {
+			p.Sources = v
+		}
 	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	res, err := r.client.SCC.NewComplianceCase(ctx, p)
+	res, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.NewComplianceCase, p, isNotFound)
 	if err != nil {
 		resp.Diagnostics.AddError("New-ComplianceCase failed", err.Error())
 		return
@@ -149,30 +168,82 @@ func (r *complianceCaseResource) Update(ctx context.Context, req resource.Update
 	id := r.identityOf(state)
 	sp := purview.SetComplianceCaseParams{}
 	sp.Identity = id
-	sp.AddOrUpdateSources = plan.AddOrUpdateSources.ValueBool()
-	if v := plan.CaseType.ValueString(); v != "" {
-		sp.CaseType = v
+	if !plan.AddOrUpdateSources.Equal(state.AddOrUpdateSources) {
+		if !plan.AddOrUpdateSources.IsUnknown() {
+			sp.AddOrUpdateSources = plan.AddOrUpdateSources.ValueBoolPointer()
+		}
 	}
-	sp.Close = plan.Close.ValueBool()
-	sp.Description = plan.Description.ValueString()
-	sp.ExternalId = plan.ExternalId.ValueString()
-	sp.RemoveSources = plan.RemoveSources.ValueBool()
-	sp.Reopen = plan.Reopen.ValueBool()
-	sp.Sources = toStringSlice(ctx, plan.Sources, &resp.Diagnostics)
+	if !plan.CaseType.Equal(state.CaseType) {
+		if v := plan.CaseType.ValueString(); v != "" {
+			sp.CaseType = objectParam(v)
+		}
+	}
+	if !plan.Close.Equal(state.Close) {
+		if !plan.Close.IsUnknown() {
+			sp.Close = plan.Close.ValueBoolPointer()
+		}
+	}
+	if !plan.Description.Equal(state.Description) {
+		sp.Description = plan.Description.ValueString()
+	}
+	if !plan.ExternalId.Equal(state.ExternalId) {
+		sp.ExternalId = plan.ExternalId.ValueString()
+	}
+	if !plan.RemoveSources.Equal(state.RemoveSources) {
+		if !plan.RemoveSources.IsUnknown() {
+			sp.RemoveSources = plan.RemoveSources.ValueBoolPointer()
+		}
+	}
+	if !plan.Reopen.Equal(state.Reopen) {
+		if !plan.Reopen.IsUnknown() {
+			sp.Reopen = plan.Reopen.ValueBoolPointer()
+		}
+	}
+	if !plan.Sources.Equal(state.Sources) {
+		if !plan.Sources.IsNull() && !plan.Sources.IsUnknown() {
+			sp.Sources = append([]string{}, toStringSlice(ctx, plan.Sources, &resp.Diagnostics)...)
+		}
+	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	if _, err := r.client.SCC.SetComplianceCase(ctx, sp); err != nil {
+	if _, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.SetComplianceCase, sp, isNotFound); err != nil {
 		resp.Diagnostics.AddError("Set-ComplianceCase failed", err.Error())
 		return
 	}
 	cfg := plan
 	reflected := reconcile.ReflectsFields(map[string]types.String{
-		"CaseType":    cfg.CaseType,
 		"Description": cfg.Description,
 		"ExternalId":  cfg.ExternalId,
 	}, getString)
+	if !cfg.AddOrUpdateSources.IsUnknown() && !cfg.AddOrUpdateSources.IsNull() && !cfg.AddOrUpdateSources.Equal(state.AddOrUpdateSources) {
+		prev, want := reflected, cfg.AddOrUpdateSources.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["AddOrUpdateSources"] == nil || getBool(obj, "AddOrUpdateSources") == want)
+		}
+	}
+	if !cfg.Close.IsUnknown() && !cfg.Close.IsNull() && !cfg.Close.Equal(state.Close) {
+		prev, want := reflected, cfg.Close.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["Close"] == nil || getBool(obj, "Close") == want)
+		}
+	}
+	if !cfg.RemoveSources.IsUnknown() && !cfg.RemoveSources.IsNull() && !cfg.RemoveSources.Equal(state.RemoveSources) {
+		prev, want := reflected, cfg.RemoveSources.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["RemoveSources"] == nil || getBool(obj, "RemoveSources") == want)
+		}
+	}
+	if !cfg.Reopen.IsUnknown() && !cfg.Reopen.IsNull() && !cfg.Reopen.Equal(state.Reopen) {
+		prev, want := reflected, cfg.Reopen.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["Reopen"] == nil || getBool(obj, "Reopen") == want)
+		}
+	}
 	r.refresh(ctx, id, &plan, &resp.Diagnostics, reflected)
+	if !cfg.ID.IsUnknown() && !cfg.ID.IsNull() {
+		plan.ID = cfg.ID
+	}
 	r.reconcileState(&cfg, &plan)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
@@ -233,7 +304,7 @@ func readComplianceCase(ctx context.Context, obj map[string]any, m *complianceCa
 	m.ID = types.StringValue(firstNonEmptyStr(getString(obj, "Guid"), getString(obj, "Id"), getString(obj, "Identity")))
 	m.Identity = types.StringValue(firstNonEmptyStr(getString(obj, "Identity"), getString(obj, "Guid"), getString(obj, "Name")))
 	m.AddOrUpdateSources = types.BoolValue(getBool(obj, "AddOrUpdateSources"))
-	m.CaseType = types.StringValue(getString(obj, "CaseType"))
+	m.CaseType = types.StringValue(getObjectJSON(obj, "CaseType"))
 	m.Close = types.BoolValue(getBool(obj, "Close"))
 	m.Description = types.StringValue(getString(obj, "Description"))
 	m.ExternalId = types.StringValue(getString(obj, "ExternalId"))

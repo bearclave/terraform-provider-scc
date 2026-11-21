@@ -1,0 +1,52 @@
+{
+ "value": [
+  {
+   "Identity": "Contoso PCI\\Block credit cards",
+   "Guid": "d7c5b8f2-0000-4000-8000-000000000001",
+   "Name": "Block credit cards",
+   "ParentPolicyName": "Contoso PCI",
+   "Policy": "5d6a8e3c-0000-4000-8000-000000000002",
+   "Disabled": false,
+   "Priority": 0,
+   "BlockAccess": true,
+   "BlockAccessScope": "All",
+   "ReportSeverityLevel": "High",
+   "NotifyUser": [
+    "SiteAdmin",
+    "LastModifier",
+    "Owner"
+   ],
+   "GenerateAlert": [
+    "dlp-alerts@contoso.com"
+   ],
+   "ExceptIfRecipientDomainIs": [
+    "contoso.com",
+    "fabrikam.com"
+   ],
+   "ContentContainsSensitiveInformation": [
+    {
+     "groups": [
+      {
+       "Operator": "Or",
+       "labels": [],
+       "name": "Default",
+       "sensitivetypes": [
+        {
+         "confidencelevel": "High",
+         "maxcount": "-1",
+         "mincount": "1",
+         "name": "Credit Card Number",
+         "id": "50842eb7-edc8-4019-85dd-5a5c1f2bb085",
+         "rulePackId": "00000000-0000-0000-0000-000000000000",
+         "classifiertype": "Content"
+        }
+       ]
+      }
+     ],
+     "operator": "And"
+    }
+   ],
+   "AdvancedRule": "{\n  \"Version\": \"1.0\",\n  \"Condition\": {\n    \"Operator\": \"And\",\n    \"SubConditions\": [\n      {\n        \"ConditionName\": \"ContentContainsSensitiveInformation\",\n        \"Value\": [\n          {\n            \"groups\": [\n              {\n                \"Operator\": \"Or\",\n                \"labels\": [],\n                \"name\": \"Default\",\n                \"sensitivetypes\": [\n                  {\n                    \"confidencelevel\": \"High\",\n                    \"maxcount\": -1,\n                    \"mincount\": 1,\n                    \"name\": \"Credit Card Number\"\n                  }\n                ]\n              }\n            ],\n            \"operator\": \"And\"\n          }\n        ]\n      }\n    ]\n  }\n}"
+  }
+ ]
+}

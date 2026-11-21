@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
+	"net/http"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
@@ -85,6 +86,9 @@ func (p *sccProvider) Configure(ctx context.Context, req provider.ConfigureReque
 		TenantID:     tid,
 		Tokens:       tp,
 		Organization: org,
+		// Normalise read-backs whose shape differs from the write parameters
+		// (see readback.go).
+		HTTPClient: &http.Client{Transport: newReadbackTransport(http.DefaultTransport)},
 	})
 	if err != nil {
 		resp.Diagnostics.AddError("Client initialisation error", err.Error())
@@ -97,7 +101,7 @@ func (p *sccProvider) Configure(ctx context.Context, req provider.ConfigureReque
 }
 
 func (p *sccProvider) Resources(_ context.Context) []func() resource.Resource {
-	return generatedResources()
+	return withOverrides(generatedResources())
 }
 
 func (p *sccProvider) DataSources(_ context.Context) []func() datasource.DataSource {

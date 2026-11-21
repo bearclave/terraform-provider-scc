@@ -52,7 +52,7 @@ func (r *insiderRiskEntityListResource) Schema(_ context.Context, _ resource.Sch
 		Description: "Manages the InsiderRiskEntityList object via New-InsiderRiskEntityList / Get-InsiderRiskEntityList / Set-InsiderRiskEntityList / Remove-InsiderRiskEntityList.",
 		Attributes: map[string]schema.Attribute{
 			"id":              schema.StringAttribute{Computed: true, Description: "Object identifier (GUID).", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"identity":        schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets."},
+			"identity":        schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"add_entities":    schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AddEntities parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"description":     schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -Description parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"display_name":    schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -DisplayName parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
@@ -78,21 +78,32 @@ func (r *insiderRiskEntityListResource) Create(ctx context.Context, req resource
 		return
 	}
 
-	p := purview.NewInsiderRiskEntityListParams{
-		Description: plan.Description.ValueString(),
-		DisplayName: plan.DisplayName.ValueString(),
-		Name:        plan.Name.ValueString(),
+	var config insiderRiskEntityListModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
+	if resp.Diagnostics.HasError() {
+		return
 	}
-	if v := plan.Entities.ValueString(); v != "" {
-		p.Entities = v
+
+	p := purview.NewInsiderRiskEntityListParams{}
+	if !config.Description.IsNull() {
+		p.Description = plan.Description.ValueString()
 	}
-	if v := plan.Type.ValueString(); v != "" {
-		p.Type = v
+	if !config.DisplayName.IsNull() {
+		p.DisplayName = plan.DisplayName.ValueString()
+	}
+	if v := config.Entities.ValueString(); v != "" {
+		p.Entities = objectParam(v)
+	}
+	if !config.Name.IsNull() {
+		p.Name = plan.Name.ValueString()
+	}
+	if v := config.Type.ValueString(); v != "" {
+		p.Type = objectParam(v)
 	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	res, err := r.client.SCC.NewInsiderRiskEntityList(ctx, p)
+	res, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.NewInsiderRiskEntityList, p, isNotFound)
 	if err != nil {
 		resp.Diagnostics.AddError("New-InsiderRiskEntityList failed", err.Error())
 		return
@@ -139,29 +150,38 @@ func (r *insiderRiskEntityListResource) Update(ctx context.Context, req resource
 	id := r.identityOf(state)
 	sp := purview.SetInsiderRiskEntityListParams{}
 	sp.Identity = id
-	if v := plan.AddEntities.ValueString(); v != "" {
-		sp.AddEntities = v
+	if !plan.AddEntities.Equal(state.AddEntities) {
+		if v := plan.AddEntities.ValueString(); v != "" {
+			sp.AddEntities = objectParam(v)
+		}
 	}
-	sp.Description = plan.Description.ValueString()
-	sp.DisplayName = plan.DisplayName.ValueString()
-	if v := plan.RemoveEntities.ValueString(); v != "" {
-		sp.RemoveEntities = v
+	if !plan.Description.Equal(state.Description) {
+		sp.Description = plan.Description.ValueString()
+	}
+	if !plan.DisplayName.Equal(state.DisplayName) {
+		sp.DisplayName = plan.DisplayName.ValueString()
+	}
+	if !plan.RemoveEntities.Equal(state.RemoveEntities) {
+		if v := plan.RemoveEntities.ValueString(); v != "" {
+			sp.RemoveEntities = objectParam(v)
+		}
 	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	if _, err := r.client.SCC.SetInsiderRiskEntityList(ctx, sp); err != nil {
+	if _, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.SetInsiderRiskEntityList, sp, isNotFound); err != nil {
 		resp.Diagnostics.AddError("Set-InsiderRiskEntityList failed", err.Error())
 		return
 	}
 	cfg := plan
 	reflected := reconcile.ReflectsFields(map[string]types.String{
-		"AddEntities":    cfg.AddEntities,
-		"Description":    cfg.Description,
-		"DisplayName":    cfg.DisplayName,
-		"RemoveEntities": cfg.RemoveEntities,
+		"Description": cfg.Description,
+		"DisplayName": cfg.DisplayName,
 	}, getString)
 	r.refresh(ctx, id, &plan, &resp.Diagnostics, reflected)
+	if !cfg.ID.IsUnknown() && !cfg.ID.IsNull() {
+		plan.ID = cfg.ID
+	}
 	r.reconcileState(&cfg, &plan)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
@@ -221,13 +241,13 @@ func (r *insiderRiskEntityListResource) refresh(ctx context.Context, identity st
 func readInsiderRiskEntityList(ctx context.Context, obj map[string]any, m *insiderRiskEntityListModel) {
 	m.ID = types.StringValue(firstNonEmptyStr(getString(obj, "Guid"), getString(obj, "Id"), getString(obj, "Identity")))
 	m.Identity = types.StringValue(firstNonEmptyStr(getString(obj, "Identity"), getString(obj, "Guid"), getString(obj, "Name")))
-	m.AddEntities = types.StringValue(getString(obj, "AddEntities"))
+	m.AddEntities = types.StringValue(getObjectJSON(obj, "AddEntities"))
 	m.Description = types.StringValue(getString(obj, "Description"))
 	m.DisplayName = types.StringValue(getString(obj, "DisplayName"))
-	m.Entities = types.StringValue(getString(obj, "Entities"))
+	m.Entities = types.StringValue(getObjectJSON(obj, "Entities"))
 	m.Name = types.StringValue(getString(obj, "Name"))
-	m.RemoveEntities = types.StringValue(getString(obj, "RemoveEntities"))
-	m.Type = types.StringValue(getString(obj, "Type"))
+	m.RemoveEntities = types.StringValue(getObjectJSON(obj, "RemoveEntities"))
+	m.Type = types.StringValue(getObjectJSON(obj, "Type"))
 	_ = ctx
 }
 

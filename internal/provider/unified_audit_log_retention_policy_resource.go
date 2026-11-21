@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
@@ -38,10 +39,11 @@ type unifiedAuditLogRetentionPolicyModel struct {
 	Identity          types.String `tfsdk:"identity"`
 	Description       types.String `tfsdk:"description"`
 	Name              types.String `tfsdk:"name"`
-	Operations        types.String `tfsdk:"operations"`
-	RecordTypes       types.String `tfsdk:"record_types"`
+	Operations        types.Set    `tfsdk:"operations"`
+	Priority          types.Int64  `tfsdk:"priority"`
+	RecordTypes       types.Set    `tfsdk:"record_types"`
 	RetentionDuration types.String `tfsdk:"retention_duration"`
-	UserIds           types.String `tfsdk:"user_ids"`
+	UserIds           types.Set    `tfsdk:"user_ids"`
 }
 
 func (r *unifiedAuditLogRetentionPolicyResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -53,13 +55,14 @@ func (r *unifiedAuditLogRetentionPolicyResource) Schema(_ context.Context, _ res
 		Description: "Manages the UnifiedAuditLogRetentionPolicy object via New-UnifiedAuditLogRetentionPolicy / Get-UnifiedAuditLogRetentionPolicy / Set-UnifiedAuditLogRetentionPolicy / Remove-UnifiedAuditLogRetentionPolicy.",
 		Attributes: map[string]schema.Attribute{
 			"id":                 schema.StringAttribute{Computed: true, Description: "Object identifier (GUID).", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"identity":           schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets."},
+			"identity":           schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"description":        schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -Description parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"name":               schema.StringAttribute{Required: true, Description: "Maps to the -Name parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
-			"operations":         schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -Operations parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"record_types":       schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -RecordTypes parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"retention_duration": schema.StringAttribute{Required: true, Description: "Maps to the -RetentionDuration parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
-			"user_ids":           schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -UserIds parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"operations":         schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -Operations parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"priority":           schema.Int64Attribute{Required: true, Description: "Maps to the -Priority parameter."},
+			"record_types":       schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -RecordTypes parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"retention_duration": schema.StringAttribute{Required: true, Description: "Maps to the -RetentionDuration parameter."},
+			"user_ids":           schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -UserIds parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
 		},
 	}
 }
@@ -78,26 +81,46 @@ func (r *unifiedAuditLogRetentionPolicyResource) Create(ctx context.Context, req
 		return
 	}
 
-	p := purview.NewUnifiedAuditLogRetentionPolicyParams{
-		Description: plan.Description.ValueString(),
-		Name:        plan.Name.ValueString(),
+	var config unifiedAuditLogRetentionPolicyModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
+	if resp.Diagnostics.HasError() {
+		return
 	}
-	if v := plan.Operations.ValueString(); v != "" {
-		p.Operations = v
+
+	p := purview.NewUnifiedAuditLogRetentionPolicyParams{}
+	if !config.Description.IsNull() {
+		p.Description = plan.Description.ValueString()
 	}
-	if v := plan.RecordTypes.ValueString(); v != "" {
-		p.RecordTypes = v
+	if !config.Name.IsNull() {
+		p.Name = plan.Name.ValueString()
 	}
-	if v := plan.RetentionDuration.ValueString(); v != "" {
-		p.RetentionDuration = v
+	if !config.Operations.IsNull() {
+		if v := toStringSlice(ctx, plan.Operations, &resp.Diagnostics); len(v) > 0 {
+			p.Operations = v
+		}
 	}
-	if v := plan.UserIds.ValueString(); v != "" {
-		p.UserIds = v
+	if !config.Priority.IsNull() {
+		if !plan.Priority.IsUnknown() {
+			p.Priority = plan.Priority.ValueInt64Pointer()
+		}
+	}
+	if !config.RecordTypes.IsNull() {
+		if v := toStringSlice(ctx, plan.RecordTypes, &resp.Diagnostics); len(v) > 0 {
+			p.RecordTypes = v
+		}
+	}
+	if v := config.RetentionDuration.ValueString(); v != "" {
+		p.RetentionDuration = objectParam(v)
+	}
+	if !config.UserIds.IsNull() {
+		if v := toStringSlice(ctx, plan.UserIds, &resp.Diagnostics); len(v) > 0 {
+			p.UserIds = v
+		}
 	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	res, err := r.client.SCC.NewUnifiedAuditLogRetentionPolicy(ctx, p)
+	res, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.NewUnifiedAuditLogRetentionPolicy, p, isNotFound)
 	if err != nil {
 		resp.Diagnostics.AddError("New-UnifiedAuditLogRetentionPolicy failed", err.Error())
 		return
@@ -144,31 +167,93 @@ func (r *unifiedAuditLogRetentionPolicyResource) Update(ctx context.Context, req
 	id := r.identityOf(state)
 	sp := purview.SetUnifiedAuditLogRetentionPolicyParams{}
 	sp.Identity = id
-	sp.Description = plan.Description.ValueString()
-	if v := plan.Operations.ValueString(); v != "" {
-		sp.Operations = v
+	var cur *unifiedAuditLogRetentionPolicyModel
+	curRead := false
+	current := func() *unifiedAuditLogRetentionPolicyModel {
+		if !curRead {
+			curRead = true
+			var m unifiedAuditLogRetentionPolicyModel
+			if r.refresh(ctx, id, &m, &resp.Diagnostics, nil) {
+				cur = &m
+			} else if !resp.Diagnostics.HasError() {
+				resp.Diagnostics.AddError("Get-UnifiedAuditLogRetentionPolicy failed", "the object could not be read to determine the list values to remove; nothing was changed")
+			}
+		}
+		return cur
 	}
-	if v := plan.RecordTypes.ValueString(); v != "" {
-		sp.RecordTypes = v
+	if !plan.Description.Equal(state.Description) {
+		sp.Description = plan.Description.ValueString()
 	}
-	if v := plan.UserIds.ValueString(); v != "" {
-		sp.UserIds = v
+	if !plan.Operations.Equal(state.Operations) {
+		if !plan.Operations.IsNull() && !plan.Operations.IsUnknown() {
+			if v := toStringSlice(ctx, plan.Operations, &resp.Diagnostics); len(v) > 0 {
+				sp.Operations = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.Operations, &resp.Diagnostics); len(rm) > 0 {
+						sp.OperationsDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
+	}
+	if !plan.Priority.Equal(state.Priority) {
+		if !plan.Priority.IsUnknown() {
+			sp.Priority = plan.Priority.ValueInt64Pointer()
+		}
+	}
+	if !plan.RecordTypes.Equal(state.RecordTypes) {
+		if !plan.RecordTypes.IsNull() && !plan.RecordTypes.IsUnknown() {
+			if v := toStringSlice(ctx, plan.RecordTypes, &resp.Diagnostics); len(v) > 0 {
+				sp.RecordTypes = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.RecordTypes, &resp.Diagnostics); len(rm) > 0 {
+						sp.RecordTypesDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
+	}
+	if !plan.RetentionDuration.Equal(state.RetentionDuration) {
+		if v := plan.RetentionDuration.ValueString(); v != "" {
+			sp.RetentionDuration = objectParam(v)
+		}
+	}
+	if !plan.UserIds.Equal(state.UserIds) {
+		if !plan.UserIds.IsNull() && !plan.UserIds.IsUnknown() {
+			if v := toStringSlice(ctx, plan.UserIds, &resp.Diagnostics); len(v) > 0 {
+				sp.UserIds = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.UserIds, &resp.Diagnostics); len(rm) > 0 {
+						sp.UserIdsDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
 	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	if _, err := r.client.SCC.SetUnifiedAuditLogRetentionPolicy(ctx, sp); err != nil {
+	if _, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.SetUnifiedAuditLogRetentionPolicy, sp, isNotFound); err != nil {
 		resp.Diagnostics.AddError("Set-UnifiedAuditLogRetentionPolicy failed", err.Error())
 		return
 	}
 	cfg := plan
 	reflected := reconcile.ReflectsFields(map[string]types.String{
 		"Description": cfg.Description,
-		"Operations":  cfg.Operations,
-		"RecordTypes": cfg.RecordTypes,
-		"UserIds":     cfg.UserIds,
 	}, getString)
+	if !cfg.Priority.IsUnknown() && !cfg.Priority.IsNull() && !cfg.Priority.Equal(state.Priority) {
+		prev, want := reflected, cfg.Priority.ValueInt64()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["Priority"] == nil || getInt(obj, "Priority") == want)
+		}
+	}
 	r.refresh(ctx, id, &plan, &resp.Diagnostics, reflected)
+	if !cfg.ID.IsUnknown() && !cfg.ID.IsNull() {
+		plan.ID = cfg.ID
+	}
 	r.reconcileState(&cfg, &plan)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
@@ -230,18 +315,20 @@ func readUnifiedAuditLogRetentionPolicy(ctx context.Context, obj map[string]any,
 	m.Identity = types.StringValue(firstNonEmptyStr(getString(obj, "Identity"), getString(obj, "Guid"), getString(obj, "UserId"), getString(obj, "Name")))
 	m.Description = types.StringValue(getString(obj, "Description"))
 	m.Name = types.StringValue(getString(obj, "Name"))
-	m.Operations = types.StringValue(getString(obj, "Operations"))
-	m.RecordTypes = types.StringValue(getString(obj, "RecordTypes"))
-	m.RetentionDuration = types.StringValue(getString(obj, "RetentionDuration"))
-	m.UserIds = types.StringValue(getString(obj, "UserIds"))
+	m.Operations = stringSetValue(ctx, getStringSlice(obj, "Operations"))
+	m.Priority = types.Int64Value(getInt(obj, "Priority"))
+	m.RecordTypes = stringSetValue(ctx, getStringSlice(obj, "RecordTypes"))
+	m.RetentionDuration = types.StringValue(getObjectJSON(obj, "RetentionDuration"))
+	m.UserIds = stringSetValue(ctx, getStringSlice(obj, "UserIds"))
 	_ = ctx
 }
 
 func (r *unifiedAuditLogRetentionPolicyResource) reconcileState(cfg, read *unifiedAuditLogRetentionPolicyModel) {
 	read.Description = reconcile.KeepStr(cfg.Description, read.Description)
 	read.Name = reconcile.KeepStr(cfg.Name, read.Name)
-	read.Operations = reconcile.KeepStr(cfg.Operations, read.Operations)
-	read.RecordTypes = reconcile.KeepStr(cfg.RecordTypes, read.RecordTypes)
+	read.Operations = reconcile.KeepSet(cfg.Operations, read.Operations)
+	read.Priority = reconcile.KeepInt64(cfg.Priority, read.Priority)
+	read.RecordTypes = reconcile.KeepSet(cfg.RecordTypes, read.RecordTypes)
 	read.RetentionDuration = reconcile.KeepStr(cfg.RetentionDuration, read.RetentionDuration)
-	read.UserIds = reconcile.KeepStr(cfg.UserIds, read.UserIds)
+	read.UserIds = reconcile.KeepSet(cfg.UserIds, read.UserIds)
 }

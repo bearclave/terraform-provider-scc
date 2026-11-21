@@ -24,7 +24,8 @@ Look up an existing UnifiedAuditLogRetentionPolicy object. Set identity or name 
 
 - `description` (String) Maps to the -Description parameter.
 - `id` (String) Object identifier (GUID).
-- `operations` (String) Maps to the -Operations parameter.
-- `record_types` (String) Maps to the -RecordTypes parameter.
+- `operations` (Set of String) Maps to the -Operations parameter.
+- `priority` (Number) Maps to the -Priority parameter.
+- `record_types` (Set of String) Maps to the -RecordTypes parameter.
 - `retention_duration` (String) Maps to the -RetentionDuration parameter.
-- `user_ids` (String) Maps to the -UserIds parameter.
+- `user_ids` (Set of String) Maps to the -UserIds parameter.

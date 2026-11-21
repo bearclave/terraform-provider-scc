@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
@@ -44,8 +45,8 @@ type dlpComplianceRuleModel struct {
 	AddRecipients                                types.String `tfsdk:"add_recipients"`
 	AdvancedRule                                 types.String `tfsdk:"advanced_rule"`
 	AlertProperties                              types.String `tfsdk:"alert_properties"`
-	AnyOfRecipientAddressContainsWords           types.String `tfsdk:"any_of_recipient_address_contains_words"`
-	AnyOfRecipientAddressMatchesPatterns         types.String `tfsdk:"any_of_recipient_address_matches_patterns"`
+	AnyOfRecipientAddressContainsWords           types.Set    `tfsdk:"any_of_recipient_address_contains_words"`
+	AnyOfRecipientAddressMatchesPatterns         types.Set    `tfsdk:"any_of_recipient_address_matches_patterns"`
 	ApplyBrandingTemplate                        types.String `tfsdk:"apply_branding_template"`
 	ApplyHtmlDisclaimer                          types.String `tfsdk:"apply_html_disclaimer"`
 	AttachmentCountOver                          types.String `tfsdk:"attachment_count_over"`
@@ -53,57 +54,57 @@ type dlpComplianceRuleModel struct {
 	BlockAccess                                  types.Bool   `tfsdk:"block_access"`
 	BlockAccessScope                             types.String `tfsdk:"block_access_scope"`
 	Comment                                      types.String `tfsdk:"comment"`
-	ContentCharacterSetContainsWords             types.String `tfsdk:"content_character_set_contains_words"`
-	ContentContainsSensitiveInformation          types.Set    `tfsdk:"content_contains_sensitive_information"`
-	ContentExtensionMatchesWords                 types.String `tfsdk:"content_extension_matches_words"`
-	ContentFileTypeMatches                       types.String `tfsdk:"content_file_type_matches"`
+	ContentCharacterSetContainsWords             types.Set    `tfsdk:"content_character_set_contains_words"`
+	ContentContainsSensitiveInformation          types.String `tfsdk:"content_contains_sensitive_information"`
+	ContentExtensionMatchesWords                 types.Set    `tfsdk:"content_extension_matches_words"`
+	ContentFileTypeMatches                       types.Set    `tfsdk:"content_file_type_matches"`
 	ContentIsNotLabeled                          types.Bool   `tfsdk:"content_is_not_labeled"`
 	ContentIsShared                              types.Bool   `tfsdk:"content_is_shared"`
 	ContentMissingSensitivityLabel               types.String `tfsdk:"content_missing_sensitivity_label"`
-	ContentPropertyContainsWords                 types.String `tfsdk:"content_property_contains_words"`
+	ContentPropertyContainsWords                 types.Set    `tfsdk:"content_property_contains_words"`
 	ContextPropertiesContainWords                types.String `tfsdk:"context_properties_contain_words"`
 	DeviceManagementType                         types.String `tfsdk:"device_management_type"`
 	Disabled                                     types.Bool   `tfsdk:"disabled"`
 	DisplayName                                  types.String `tfsdk:"display_name"`
-	DocumentContainsWords                        types.String `tfsdk:"document_contains_words"`
-	DocumentCreatedBy                            types.String `tfsdk:"document_created_by"`
+	DocumentContainsWords                        types.Set    `tfsdk:"document_contains_words"`
+	DocumentCreatedBy                            types.Set    `tfsdk:"document_created_by"`
 	DocumentCreatedByMemberOf                    types.Set    `tfsdk:"document_created_by_member_of"`
 	DocumentIsPasswordProtected                  types.Bool   `tfsdk:"document_is_password_protected"`
 	DocumentIsUnsupported                        types.Bool   `tfsdk:"document_is_unsupported"`
-	DocumentMatchesPatterns                      types.String `tfsdk:"document_matches_patterns"`
-	DocumentNameMatchesPatterns                  types.String `tfsdk:"document_name_matches_patterns"`
-	DocumentNameMatchesWords                     types.String `tfsdk:"document_name_matches_words"`
+	DocumentMatchesPatterns                      types.Set    `tfsdk:"document_matches_patterns"`
+	DocumentNameMatchesPatterns                  types.Set    `tfsdk:"document_name_matches_patterns"`
+	DocumentNameMatchesWords                     types.Set    `tfsdk:"document_name_matches_words"`
 	DocumentSizeOver                             types.String `tfsdk:"document_size_over"`
 	EncryptRMSTemplate                           types.String `tfsdk:"encrypt_rms_template"`
 	EndpointDlpBrowserRestrictions               types.Set    `tfsdk:"endpoint_dlp_browser_restrictions"`
-	EndpointDlpRestrictions                      types.Set    `tfsdk:"endpoint_dlp_restrictions"`
+	EndpointDlpRestrictions                      types.String `tfsdk:"endpoint_dlp_restrictions"`
 	EnforcePortalAccess                          types.Bool   `tfsdk:"enforce_portal_access"`
 	EvaluateRulePerComponent                     types.Bool   `tfsdk:"evaluate_rule_per_component"`
 	ExceptIfAccessScope                          types.String `tfsdk:"except_if_access_scope"`
 	ExceptIfAccessedBy                           types.Set    `tfsdk:"except_if_accessed_by"`
 	ExceptIfAccessedByMemberOf                   types.Set    `tfsdk:"except_if_accessed_by_member_of"`
-	ExceptIfAnyOfRecipientAddressContainsWords   types.String `tfsdk:"except_if_any_of_recipient_address_contains_words"`
-	ExceptIfAnyOfRecipientAddressMatchesPatterns types.String `tfsdk:"except_if_any_of_recipient_address_matches_patterns"`
-	ExceptIfContentCharacterSetContainsWords     types.String `tfsdk:"except_if_content_character_set_contains_words"`
-	ExceptIfContentContainsSensitiveInformation  types.Set    `tfsdk:"except_if_content_contains_sensitive_information"`
-	ExceptIfContentExtensionMatchesWords         types.String `tfsdk:"except_if_content_extension_matches_words"`
-	ExceptIfContentFileTypeMatches               types.String `tfsdk:"except_if_content_file_type_matches"`
+	ExceptIfAnyOfRecipientAddressContainsWords   types.Set    `tfsdk:"except_if_any_of_recipient_address_contains_words"`
+	ExceptIfAnyOfRecipientAddressMatchesPatterns types.Set    `tfsdk:"except_if_any_of_recipient_address_matches_patterns"`
+	ExceptIfContentCharacterSetContainsWords     types.Set    `tfsdk:"except_if_content_character_set_contains_words"`
+	ExceptIfContentContainsSensitiveInformation  types.String `tfsdk:"except_if_content_contains_sensitive_information"`
+	ExceptIfContentExtensionMatchesWords         types.Set    `tfsdk:"except_if_content_extension_matches_words"`
+	ExceptIfContentFileTypeMatches               types.Set    `tfsdk:"except_if_content_file_type_matches"`
 	ExceptIfContentIsShared                      types.Bool   `tfsdk:"except_if_content_is_shared"`
-	ExceptIfContentPropertyContainsWords         types.String `tfsdk:"except_if_content_property_contains_words"`
+	ExceptIfContentPropertyContainsWords         types.Set    `tfsdk:"except_if_content_property_contains_words"`
 	ExceptIfContextPropertiesContainWords        types.String `tfsdk:"except_if_context_properties_contain_words"`
 	ExceptIfDeviceManagementType                 types.String `tfsdk:"except_if_device_management_type"`
-	ExceptIfDocumentContainsWords                types.String `tfsdk:"except_if_document_contains_words"`
-	ExceptIfDocumentCreatedBy                    types.String `tfsdk:"except_if_document_created_by"`
+	ExceptIfDocumentContainsWords                types.Set    `tfsdk:"except_if_document_contains_words"`
+	ExceptIfDocumentCreatedBy                    types.Set    `tfsdk:"except_if_document_created_by"`
 	ExceptIfDocumentCreatedByMemberOf            types.Set    `tfsdk:"except_if_document_created_by_member_of"`
 	ExceptIfDocumentIsPasswordProtected          types.Bool   `tfsdk:"except_if_document_is_password_protected"`
 	ExceptIfDocumentIsUnsupported                types.Bool   `tfsdk:"except_if_document_is_unsupported"`
-	ExceptIfDocumentMatchesPatterns              types.String `tfsdk:"except_if_document_matches_patterns"`
-	ExceptIfDocumentNameMatchesPatterns          types.String `tfsdk:"except_if_document_name_matches_patterns"`
-	ExceptIfDocumentNameMatchesWords             types.String `tfsdk:"except_if_document_name_matches_words"`
+	ExceptIfDocumentMatchesPatterns              types.Set    `tfsdk:"except_if_document_matches_patterns"`
+	ExceptIfDocumentNameMatchesPatterns          types.Set    `tfsdk:"except_if_document_name_matches_patterns"`
+	ExceptIfDocumentNameMatchesWords             types.Set    `tfsdk:"except_if_document_name_matches_words"`
 	ExceptIfDocumentSizeOver                     types.String `tfsdk:"except_if_document_size_over"`
 	ExceptIfFrom                                 types.Set    `tfsdk:"except_if_from"`
-	ExceptIfFromAddressContainsWords             types.String `tfsdk:"except_if_from_address_contains_words"`
-	ExceptIfFromAddressMatchesPatterns           types.String `tfsdk:"except_if_from_address_matches_patterns"`
+	ExceptIfFromAddressContainsWords             types.Set    `tfsdk:"except_if_from_address_contains_words"`
+	ExceptIfFromAddressMatchesPatterns           types.Set    `tfsdk:"except_if_from_address_matches_patterns"`
 	ExceptIfFromMemberOf                         types.Set    `tfsdk:"except_if_from_member_of"`
 	ExceptIfFromScope                            types.String `tfsdk:"except_if_from_scope"`
 	ExceptIfHasSenderOverride                    types.Bool   `tfsdk:"except_if_has_sender_override"`
@@ -116,30 +117,30 @@ type dlpComplianceRuleModel struct {
 	ExceptIfProcessingLimitExceeded              types.Bool   `tfsdk:"except_if_processing_limit_exceeded"`
 	ExceptIfRecipientADAttributeContainsWords    types.String `tfsdk:"except_if_recipient_ad_attribute_contains_words"`
 	ExceptIfRecipientADAttributeMatchesPatterns  types.String `tfsdk:"except_if_recipient_ad_attribute_matches_patterns"`
-	ExceptIfRecipientDomainIs                    types.String `tfsdk:"except_if_recipient_domain_is"`
+	ExceptIfRecipientDomainIs                    types.Set    `tfsdk:"except_if_recipient_domain_is"`
 	ExceptIfSenderADAttributeContainsWords       types.String `tfsdk:"except_if_sender_ad_attribute_contains_words"`
 	ExceptIfSenderADAttributeMatchesPatterns     types.String `tfsdk:"except_if_sender_ad_attribute_matches_patterns"`
-	ExceptIfSenderDomainIs                       types.String `tfsdk:"except_if_sender_domain_is"`
-	ExceptIfSenderIPRanges                       types.String `tfsdk:"except_if_sender_ip_ranges"`
-	ExceptIfSentTo                               types.String `tfsdk:"except_if_sent_to"`
+	ExceptIfSenderDomainIs                       types.Set    `tfsdk:"except_if_sender_domain_is"`
+	ExceptIfSenderIPRanges                       types.Set    `tfsdk:"except_if_sender_ip_ranges"`
+	ExceptIfSentTo                               types.Set    `tfsdk:"except_if_sent_to"`
 	ExceptIfSentToMemberOf                       types.Set    `tfsdk:"except_if_sent_to_member_of"`
 	ExceptIfSharedWithDomain                     types.String `tfsdk:"except_if_shared_with_domain"`
-	ExceptIfSubjectContainsWords                 types.String `tfsdk:"except_if_subject_contains_words"`
-	ExceptIfSubjectMatchesPatterns               types.String `tfsdk:"except_if_subject_matches_patterns"`
-	ExceptIfSubjectOrBodyContainsWords           types.String `tfsdk:"except_if_subject_or_body_contains_words"`
-	ExceptIfSubjectOrBodyMatchesPatterns         types.String `tfsdk:"except_if_subject_or_body_matches_patterns"`
+	ExceptIfSubjectContainsWords                 types.Set    `tfsdk:"except_if_subject_contains_words"`
+	ExceptIfSubjectMatchesPatterns               types.Set    `tfsdk:"except_if_subject_matches_patterns"`
+	ExceptIfSubjectOrBodyContainsWords           types.Set    `tfsdk:"except_if_subject_or_body_contains_words"`
+	ExceptIfSubjectOrBodyMatchesPatterns         types.Set    `tfsdk:"except_if_subject_or_body_matches_patterns"`
 	ExceptIfTeamsSharedWithParticipantCategory   types.String `tfsdk:"except_if_teams_shared_with_participant_category"`
-	ExceptIfUnscannableDocumentExtensionIs       types.String `tfsdk:"except_if_unscannable_document_extension_is"`
+	ExceptIfUnscannableDocumentExtensionIs       types.Set    `tfsdk:"except_if_unscannable_document_extension_is"`
 	ExceptIfUrlContainsText                      types.String `tfsdk:"except_if_url_contains_text"`
 	ExceptIfWithImportance                       types.String `tfsdk:"except_if_with_importance"`
 	ExpiryDate                                   types.String `tfsdk:"expiry_date"`
 	From                                         types.Set    `tfsdk:"from"`
-	FromAddressContainsWords                     types.String `tfsdk:"from_address_contains_words"`
-	FromAddressMatchesPatterns                   types.String `tfsdk:"from_address_matches_patterns"`
+	FromAddressContainsWords                     types.Set    `tfsdk:"from_address_contains_words"`
+	FromAddressMatchesPatterns                   types.Set    `tfsdk:"from_address_matches_patterns"`
 	FromMemberOf                                 types.Set    `tfsdk:"from_member_of"`
 	FromScope                                    types.String `tfsdk:"from_scope"`
-	GenerateAlert                                types.String `tfsdk:"generate_alert"`
-	GenerateIncidentReport                       types.String `tfsdk:"generate_incident_report"`
+	GenerateAlert                                types.Set    `tfsdk:"generate_alert"`
+	GenerateIncidentReport                       types.Set    `tfsdk:"generate_incident_report"`
 	HasActivity                                  types.String `tfsdk:"has_activity"`
 	HasLabelDowngradedFrom                       types.String `tfsdk:"has_label_downgraded_from"`
 	HasSenderOverride                            types.Bool   `tfsdk:"has_sender_override"`
@@ -153,7 +154,7 @@ type dlpComplianceRuleModel struct {
 	MessageLabelChangeDetected                   types.String `tfsdk:"message_label_change_detected"`
 	MessageSizeOver                              types.String `tfsdk:"message_size_over"`
 	MessageTypeMatches                           types.String `tfsdk:"message_type_matches"`
-	MipRestrictAccess                            types.Set    `tfsdk:"mip_restrict_access"`
+	MipRestrictAccess                            types.String `tfsdk:"mip_restrict_access"`
 	Moderate                                     types.String `tfsdk:"moderate"`
 	ModifySubject                                types.String `tfsdk:"modify_subject"`
 	MoveToQuarantineLocation                     types.Bool   `tfsdk:"move_to_quarantine_location"`
@@ -171,41 +172,41 @@ type dlpComplianceRuleModel struct {
 	NotifyOverrideRequirements                   types.String `tfsdk:"notify_override_requirements"`
 	NotifyPolicyTipCustomDialog                  types.String `tfsdk:"notify_policy_tip_custom_dialog"`
 	NotifyPolicyTipCustomText                    types.String `tfsdk:"notify_policy_tip_custom_text"`
-	NotifyPolicyTipCustomTextTranslations        types.String `tfsdk:"notify_policy_tip_custom_text_translations"`
+	NotifyPolicyTipCustomTextTranslations        types.Set    `tfsdk:"notify_policy_tip_custom_text_translations"`
 	NotifyPolicyTipDisplayOption                 types.String `tfsdk:"notify_policy_tip_display_option"`
 	NotifyPolicyTipUrl                           types.String `tfsdk:"notify_policy_tip_url"`
-	NotifyUser                                   types.String `tfsdk:"notify_user"`
+	NotifyUser                                   types.Set    `tfsdk:"notify_user"`
 	NotifyUserType                               types.String `tfsdk:"notify_user_type"`
-	OnPremisesScannerDlpRestrictions             types.Set    `tfsdk:"on_premises_scanner_dlp_restrictions"`
+	OnPremisesScannerDlpRestrictions             types.String `tfsdk:"on_premises_scanner_dlp_restrictions"`
 	Policy                                       types.String `tfsdk:"policy"`
 	PowerBIDlpRestrictions                       types.Set    `tfsdk:"power_bi_dlp_restrictions"`
 	PrependSubject                               types.String `tfsdk:"prepend_subject"`
-	Priority                                     types.String `tfsdk:"priority"`
+	Priority                                     types.Int64  `tfsdk:"priority"`
 	ProcessingLimitExceeded                      types.Bool   `tfsdk:"processing_limit_exceeded"`
 	Quarantine                                   types.Bool   `tfsdk:"quarantine"`
 	RecipientADAttributeContainsWords            types.String `tfsdk:"recipient_ad_attribute_contains_words"`
 	RecipientADAttributeMatchesPatterns          types.String `tfsdk:"recipient_ad_attribute_matches_patterns"`
-	RecipientDomainIs                            types.String `tfsdk:"recipient_domain_is"`
+	RecipientDomainIs                            types.Set    `tfsdk:"recipient_domain_is"`
 	RedactSensitiveInfo                          types.String `tfsdk:"redact_sensitive_info"`
 	RedirectMessageTo                            types.Set    `tfsdk:"redirect_message_to"`
-	RemoveHeader                                 types.String `tfsdk:"remove_header"`
+	RemoveHeader                                 types.Set    `tfsdk:"remove_header"`
 	RemoveRMSTemplate                            types.Bool   `tfsdk:"remove_rms_template"`
 	ReportSeverityLevel                          types.String `tfsdk:"report_severity_level"`
-	RestrictAccess                               types.Set    `tfsdk:"restrict_access"`
+	RestrictAccess                               types.String `tfsdk:"restrict_access"`
 	RestrictBrowserAccess                        types.Bool   `tfsdk:"restrict_browser_access"`
 	RestrictWebGrounding                         types.Bool   `tfsdk:"restrict_web_grounding"`
 	RuleErrorAction                              types.String `tfsdk:"rule_error_action"`
 	SenderADAttributeContainsWords               types.String `tfsdk:"sender_ad_attribute_contains_words"`
 	SenderADAttributeMatchesPatterns             types.String `tfsdk:"sender_ad_attribute_matches_patterns"`
 	SenderAddressLocation                        types.String `tfsdk:"sender_address_location"`
-	SenderDomainIs                               types.String `tfsdk:"sender_domain_is"`
-	SenderIPRanges                               types.String `tfsdk:"sender_ip_ranges"`
+	SenderDomainIs                               types.Set    `tfsdk:"sender_domain_is"`
+	SenderIPRanges                               types.Set    `tfsdk:"sender_ip_ranges"`
 	SenderType                                   types.String `tfsdk:"sender_type"`
-	SentTo                                       types.String `tfsdk:"sent_to"`
+	SentTo                                       types.Set    `tfsdk:"sent_to"`
 	SentToMemberOf                               types.Set    `tfsdk:"sent_to_member_of"`
 	SetHeader                                    types.String `tfsdk:"set_header"`
 	SharedByIRMAgentRisk                         types.String `tfsdk:"shared_by_irm_agent_risk"`
-	SharedByIRMUserRisk                          types.String `tfsdk:"shared_by_irm_user_risk"`
+	SharedByIRMUserRisk                          types.Set    `tfsdk:"shared_by_irm_user_risk"`
 	SharedWithDomain                             types.String `tfsdk:"shared_with_domain"`
 	SharepointBlockDomains                       types.String `tfsdk:"sharepoint_block_domains"`
 	SharepointBlockDomainsExcept                 types.String `tfsdk:"sharepoint_block_domains_except"`
@@ -214,14 +215,14 @@ type dlpComplianceRuleModel struct {
 	SharepointBlockUsersExcept                   types.String `tfsdk:"sharepoint_block_users_except"`
 	SharepointMoveToQuarantineLocation           types.Bool   `tfsdk:"sharepoint_move_to_quarantine_location"`
 	StopPolicyProcessing                         types.Bool   `tfsdk:"stop_policy_processing"`
-	SubjectContainsWords                         types.String `tfsdk:"subject_contains_words"`
-	SubjectMatchesPatterns                       types.String `tfsdk:"subject_matches_patterns"`
-	SubjectOrBodyContainsWords                   types.String `tfsdk:"subject_or_body_contains_words"`
-	SubjectOrBodyMatchesPatterns                 types.String `tfsdk:"subject_or_body_matches_patterns"`
+	SubjectContainsWords                         types.Set    `tfsdk:"subject_contains_words"`
+	SubjectMatchesPatterns                       types.Set    `tfsdk:"subject_matches_patterns"`
+	SubjectOrBodyContainsWords                   types.Set    `tfsdk:"subject_or_body_contains_words"`
+	SubjectOrBodyMatchesPatterns                 types.Set    `tfsdk:"subject_or_body_matches_patterns"`
 	TeamsSharedWithParticipantCategory           types.String `tfsdk:"teams_shared_with_participant_category"`
 	ThirdPartyAppDlpRestrictions                 types.Set    `tfsdk:"third_party_app_dlp_restrictions"`
 	TriggerPowerAutomateFlow                     types.String `tfsdk:"trigger_power_automate_flow"`
-	UnscannableDocumentExtensionIs               types.String `tfsdk:"unscannable_document_extension_is"`
+	UnscannableDocumentExtensionIs               types.Set    `tfsdk:"unscannable_document_extension_is"`
 	UrlContainsText                              types.String `tfsdk:"url_contains_text"`
 	ValidateRule                                 types.Bool   `tfsdk:"validate_rule"`
 	WithImportance                               types.String `tfsdk:"with_importance"`
@@ -236,7 +237,7 @@ func (r *dlpComplianceRuleResource) Schema(_ context.Context, _ resource.SchemaR
 		Description: "Manages the DlpComplianceRule object via New-DlpComplianceRule / Get-DlpComplianceRule / Set-DlpComplianceRule / Remove-DlpComplianceRule.",
 		Attributes: map[string]schema.Attribute{
 			"id":                    schema.StringAttribute{Computed: true, Description: "Object identifier (GUID).", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"identity":              schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets."},
+			"identity":              schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"access_scope":          schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AccessScope parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"access_time_control":   schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AccessTimeControl parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"accessed_by":           schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -AccessedBy parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
@@ -245,8 +246,8 @@ func (r *dlpComplianceRuleResource) Schema(_ context.Context, _ resource.SchemaR
 			"add_recipients":        schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AddRecipients parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"advanced_rule":         schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AdvancedRule parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"alert_properties":      schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AlertProperties parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"any_of_recipient_address_contains_words":             schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AnyOfRecipientAddressContainsWords parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"any_of_recipient_address_matches_patterns":           schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AnyOfRecipientAddressMatchesPatterns parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"any_of_recipient_address_contains_words":             schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -AnyOfRecipientAddressContainsWords parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"any_of_recipient_address_matches_patterns":           schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -AnyOfRecipientAddressMatchesPatterns parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
 			"apply_branding_template":                             schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ApplyBrandingTemplate parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"apply_html_disclaimer":                               schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ApplyHtmlDisclaimer parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"attachment_count_over":                               schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AttachmentCountOver parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
@@ -254,57 +255,57 @@ func (r *dlpComplianceRuleResource) Schema(_ context.Context, _ resource.SchemaR
 			"block_access":                                        schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -BlockAccess parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
 			"block_access_scope":                                  schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -BlockAccessScope parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"comment":                                             schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -Comment parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"content_character_set_contains_words":                schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ContentCharacterSetContainsWords parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"content_contains_sensitive_information":              schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -ContentContainsSensitiveInformation parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
-			"content_extension_matches_words":                     schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ContentExtensionMatchesWords parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"content_file_type_matches":                           schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ContentFileTypeMatches parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"content_character_set_contains_words":                schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -ContentCharacterSetContainsWords parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"content_contains_sensitive_information":              schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ContentContainsSensitiveInformation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"content_extension_matches_words":                     schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -ContentExtensionMatchesWords parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"content_file_type_matches":                           schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -ContentFileTypeMatches parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
 			"content_is_not_labeled":                              schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -ContentIsNotLabeled parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
 			"content_is_shared":                                   schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -ContentIsShared parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
 			"content_missing_sensitivity_label":                   schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ContentMissingSensitivityLabel parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"content_property_contains_words":                     schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ContentPropertyContainsWords parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"content_property_contains_words":                     schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -ContentPropertyContainsWords parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
 			"context_properties_contain_words":                    schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ContextPropertiesContainWords parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"device_management_type":                              schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -DeviceManagementType parameter. Allowed values: Managed, Unmanaged.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"disabled":                                            schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -Disabled parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
 			"display_name":                                        schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -DisplayName parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"document_contains_words":                             schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -DocumentContainsWords parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"document_created_by":                                 schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -DocumentCreatedBy parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"document_contains_words":                             schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -DocumentContainsWords parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"document_created_by":                                 schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -DocumentCreatedBy parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
 			"document_created_by_member_of":                       schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -DocumentCreatedByMemberOf parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
 			"document_is_password_protected":                      schema.BoolAttribute{Optional: true, Computed: true, Sensitive: true, Description: "Maps to the -DocumentIsPasswordProtected parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
 			"document_is_unsupported":                             schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -DocumentIsUnsupported parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
-			"document_matches_patterns":                           schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -DocumentMatchesPatterns parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"document_name_matches_patterns":                      schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -DocumentNameMatchesPatterns parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"document_name_matches_words":                         schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -DocumentNameMatchesWords parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"document_matches_patterns":                           schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -DocumentMatchesPatterns parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"document_name_matches_patterns":                      schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -DocumentNameMatchesPatterns parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"document_name_matches_words":                         schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -DocumentNameMatchesWords parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
 			"document_size_over":                                  schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -DocumentSizeOver parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"encrypt_rms_template":                                schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -EncryptRMSTemplate parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"endpoint_dlp_browser_restrictions":                   schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -EndpointDlpBrowserRestrictions parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
-			"endpoint_dlp_restrictions":                           schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -EndpointDlpRestrictions parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"endpoint_dlp_restrictions":                           schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -EndpointDlpRestrictions parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"enforce_portal_access":                               schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -EnforcePortalAccess parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
 			"evaluate_rule_per_component":                         schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -EvaluateRulePerComponent parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
 			"except_if_access_scope":                              schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ExceptIfAccessScope parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"except_if_accessed_by":                               schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -ExceptIfAccessedBy parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
 			"except_if_accessed_by_member_of":                     schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -ExceptIfAccessedByMemberOf parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
-			"except_if_any_of_recipient_address_contains_words":   schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ExceptIfAnyOfRecipientAddressContainsWords parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"except_if_any_of_recipient_address_matches_patterns": schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ExceptIfAnyOfRecipientAddressMatchesPatterns parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"except_if_content_character_set_contains_words":      schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ExceptIfContentCharacterSetContainsWords parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"except_if_content_contains_sensitive_information":    schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -ExceptIfContentContainsSensitiveInformation parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
-			"except_if_content_extension_matches_words":           schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ExceptIfContentExtensionMatchesWords parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"except_if_content_file_type_matches":                 schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ExceptIfContentFileTypeMatches parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"except_if_any_of_recipient_address_contains_words":   schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -ExceptIfAnyOfRecipientAddressContainsWords parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"except_if_any_of_recipient_address_matches_patterns": schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -ExceptIfAnyOfRecipientAddressMatchesPatterns parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"except_if_content_character_set_contains_words":      schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -ExceptIfContentCharacterSetContainsWords parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"except_if_content_contains_sensitive_information":    schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ExceptIfContentContainsSensitiveInformation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"except_if_content_extension_matches_words":           schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -ExceptIfContentExtensionMatchesWords parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"except_if_content_file_type_matches":                 schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -ExceptIfContentFileTypeMatches parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
 			"except_if_content_is_shared":                         schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -ExceptIfContentIsShared parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
-			"except_if_content_property_contains_words":           schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ExceptIfContentPropertyContainsWords parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"except_if_content_property_contains_words":           schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -ExceptIfContentPropertyContainsWords parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
 			"except_if_context_properties_contain_words":          schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ExceptIfContextPropertiesContainWords parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"except_if_device_management_type":                    schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ExceptIfDeviceManagementType parameter. Allowed values: Managed, Unmanaged.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"except_if_document_contains_words":                   schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ExceptIfDocumentContainsWords parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"except_if_document_created_by":                       schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ExceptIfDocumentCreatedBy parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"except_if_document_contains_words":                   schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -ExceptIfDocumentContainsWords parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"except_if_document_created_by":                       schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -ExceptIfDocumentCreatedBy parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
 			"except_if_document_created_by_member_of":             schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -ExceptIfDocumentCreatedByMemberOf parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
 			"except_if_document_is_password_protected":            schema.BoolAttribute{Optional: true, Computed: true, Sensitive: true, Description: "Maps to the -ExceptIfDocumentIsPasswordProtected parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
 			"except_if_document_is_unsupported":                   schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -ExceptIfDocumentIsUnsupported parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
-			"except_if_document_matches_patterns":                 schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ExceptIfDocumentMatchesPatterns parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"except_if_document_name_matches_patterns":            schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ExceptIfDocumentNameMatchesPatterns parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"except_if_document_name_matches_words":               schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ExceptIfDocumentNameMatchesWords parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"except_if_document_matches_patterns":                 schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -ExceptIfDocumentMatchesPatterns parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"except_if_document_name_matches_patterns":            schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -ExceptIfDocumentNameMatchesPatterns parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"except_if_document_name_matches_words":               schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -ExceptIfDocumentNameMatchesWords parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
 			"except_if_document_size_over":                        schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ExceptIfDocumentSizeOver parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"except_if_from":                                      schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -ExceptIfFrom parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
-			"except_if_from_address_contains_words":               schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ExceptIfFromAddressContainsWords parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"except_if_from_address_matches_patterns":             schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ExceptIfFromAddressMatchesPatterns parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"except_if_from_address_contains_words":               schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -ExceptIfFromAddressContainsWords parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"except_if_from_address_matches_patterns":             schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -ExceptIfFromAddressMatchesPatterns parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
 			"except_if_from_member_of":                            schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -ExceptIfFromMemberOf parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
 			"except_if_from_scope":                                schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ExceptIfFromScope parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"except_if_has_sender_override":                       schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -ExceptIfHasSenderOverride parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
@@ -317,30 +318,30 @@ func (r *dlpComplianceRuleResource) Schema(_ context.Context, _ resource.SchemaR
 			"except_if_processing_limit_exceeded":                 schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -ExceptIfProcessingLimitExceeded parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
 			"except_if_recipient_ad_attribute_contains_words":     schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ExceptIfRecipientADAttributeContainsWords parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"except_if_recipient_ad_attribute_matches_patterns":   schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ExceptIfRecipientADAttributeMatchesPatterns parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"except_if_recipient_domain_is":                       schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ExceptIfRecipientDomainIs parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"except_if_recipient_domain_is":                       schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -ExceptIfRecipientDomainIs parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
 			"except_if_sender_ad_attribute_contains_words":        schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ExceptIfSenderADAttributeContainsWords parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"except_if_sender_ad_attribute_matches_patterns":      schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ExceptIfSenderADAttributeMatchesPatterns parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"except_if_sender_domain_is":                          schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ExceptIfSenderDomainIs parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"except_if_sender_ip_ranges":                          schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ExceptIfSenderIPRanges parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"except_if_sent_to":                                   schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ExceptIfSentTo parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"except_if_sender_domain_is":                          schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -ExceptIfSenderDomainIs parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"except_if_sender_ip_ranges":                          schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -ExceptIfSenderIPRanges parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"except_if_sent_to":                                   schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -ExceptIfSentTo parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
 			"except_if_sent_to_member_of":                         schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -ExceptIfSentToMemberOf parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
 			"except_if_shared_with_domain":                        schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ExceptIfSharedWithDomain parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"except_if_subject_contains_words":                    schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ExceptIfSubjectContainsWords parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"except_if_subject_matches_patterns":                  schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ExceptIfSubjectMatchesPatterns parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"except_if_subject_or_body_contains_words":            schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ExceptIfSubjectOrBodyContainsWords parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"except_if_subject_or_body_matches_patterns":          schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ExceptIfSubjectOrBodyMatchesPatterns parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"except_if_subject_contains_words":                    schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -ExceptIfSubjectContainsWords parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"except_if_subject_matches_patterns":                  schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -ExceptIfSubjectMatchesPatterns parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"except_if_subject_or_body_contains_words":            schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -ExceptIfSubjectOrBodyContainsWords parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"except_if_subject_or_body_matches_patterns":          schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -ExceptIfSubjectOrBodyMatchesPatterns parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
 			"except_if_teams_shared_with_participant_category":    schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ExceptIfTeamsSharedWithParticipantCategory parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"except_if_unscannable_document_extension_is":         schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ExceptIfUnscannableDocumentExtensionIs parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"except_if_unscannable_document_extension_is":         schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -ExceptIfUnscannableDocumentExtensionIs parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
 			"except_if_url_contains_text":                         schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ExceptIfUrlContainsText parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace(), stringplanmodifier.UseStateForUnknown()}},
 			"except_if_with_importance":                           schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ExceptIfWithImportance parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"expiry_date":                                         schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ExpiryDate parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"from":                                                schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -From parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
-			"from_address_contains_words":                         schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -FromAddressContainsWords parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"from_address_matches_patterns":                       schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -FromAddressMatchesPatterns parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"from_address_contains_words":                         schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -FromAddressContainsWords parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"from_address_matches_patterns":                       schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -FromAddressMatchesPatterns parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
 			"from_member_of":                                      schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -FromMemberOf parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
 			"from_scope":                                          schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -FromScope parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"generate_alert":                                      schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -GenerateAlert parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"generate_incident_report":                            schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -GenerateIncidentReport parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"generate_alert":                                      schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -GenerateAlert parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"generate_incident_report":                            schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -GenerateIncidentReport parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
 			"has_activity":                                        schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -HasActivity parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"has_label_downgraded_from":                           schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -HasLabelDowngradedFrom parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"has_sender_override":                                 schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -HasSenderOverride parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
@@ -354,7 +355,7 @@ func (r *dlpComplianceRuleResource) Schema(_ context.Context, _ resource.SchemaR
 			"message_label_change_detected":                       schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -MessageLabelChangeDetected parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"message_size_over":                                   schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -MessageSizeOver parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"message_type_matches":                                schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -MessageTypeMatches parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"mip_restrict_access":                                 schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -MipRestrictAccess parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"mip_restrict_access":                                 schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -MipRestrictAccess parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"moderate":                                            schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -Moderate parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"modify_subject":                                      schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ModifySubject parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"move_to_quarantine_location":                         schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -MoveToQuarantineLocation parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
@@ -372,41 +373,41 @@ func (r *dlpComplianceRuleResource) Schema(_ context.Context, _ resource.SchemaR
 			"notify_override_requirements":                        schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -NotifyOverrideRequirements parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"notify_policy_tip_custom_dialog":                     schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -NotifyPolicyTipCustomDialog parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"notify_policy_tip_custom_text":                       schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -NotifyPolicyTipCustomText parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"notify_policy_tip_custom_text_translations":          schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -NotifyPolicyTipCustomTextTranslations parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"notify_policy_tip_custom_text_translations":          schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -NotifyPolicyTipCustomTextTranslations parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
 			"notify_policy_tip_display_option":                    schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -NotifyPolicyTipDisplayOption parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"notify_policy_tip_url":                               schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -NotifyPolicyTipUrl parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"notify_user":                                         schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -NotifyUser parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"notify_user":                                         schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -NotifyUser parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
 			"notify_user_type":                                    schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -NotifyUserType parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"on_premises_scanner_dlp_restrictions":                schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -OnPremisesScannerDlpRestrictions parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"on_premises_scanner_dlp_restrictions":                schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -OnPremisesScannerDlpRestrictions parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"policy":                                              schema.StringAttribute{Required: true, Description: "Maps to the -Policy parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
 			"power_bi_dlp_restrictions":                           schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -PowerBIDlpRestrictions parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
 			"prepend_subject":                                     schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -PrependSubject parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"priority":                                            schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -Priority parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"priority":                                            schema.Int64Attribute{Optional: true, Computed: true, Description: "Maps to the -Priority parameter.", PlanModifiers: []planmodifier.Int64{int64planmodifier.UseStateForUnknown()}},
 			"processing_limit_exceeded":                           schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -ProcessingLimitExceeded parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
 			"quarantine":                                          schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -Quarantine parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
 			"recipient_ad_attribute_contains_words":               schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -RecipientADAttributeContainsWords parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"recipient_ad_attribute_matches_patterns":             schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -RecipientADAttributeMatchesPatterns parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"recipient_domain_is":                                 schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -RecipientDomainIs parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"recipient_domain_is":                                 schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -RecipientDomainIs parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
 			"redact_sensitive_info":                               schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -RedactSensitiveInfo parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"redirect_message_to":                                 schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -RedirectMessageTo parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
-			"remove_header":                                       schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -RemoveHeader parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"remove_header":                                       schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -RemoveHeader parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
 			"remove_rms_template":                                 schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -RemoveRMSTemplate parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
 			"report_severity_level":                               schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ReportSeverityLevel parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"restrict_access":                                     schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -RestrictAccess parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"restrict_access":                                     schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -RestrictAccess parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"restrict_browser_access":                             schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -RestrictBrowserAccess parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
 			"restrict_web_grounding":                              schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -RestrictWebGrounding parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
 			"rule_error_action":                                   schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -RuleErrorAction parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"sender_ad_attribute_contains_words":                  schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -SenderADAttributeContainsWords parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"sender_ad_attribute_matches_patterns":                schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -SenderADAttributeMatchesPatterns parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"sender_address_location":                             schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -SenderAddressLocation parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"sender_domain_is":                                    schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -SenderDomainIs parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"sender_ip_ranges":                                    schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -SenderIPRanges parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"sender_domain_is":                                    schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -SenderDomainIs parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"sender_ip_ranges":                                    schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -SenderIPRanges parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
 			"sender_type":                                         schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -SenderType parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"sent_to":                                             schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -SentTo parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"sent_to":                                             schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -SentTo parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
 			"sent_to_member_of":                                   schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -SentToMemberOf parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
 			"set_header":                                          schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -SetHeader parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"shared_by_irm_agent_risk":                            schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -SharedByIRMAgentRisk parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"shared_by_irm_user_risk":                             schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -SharedByIRMUserRisk parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"shared_by_irm_user_risk":                             schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -SharedByIRMUserRisk parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
 			"shared_with_domain":                                  schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -SharedWithDomain parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"sharepoint_block_domains":                            schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -SharepointBlockDomains parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"sharepoint_block_domains_except":                     schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -SharepointBlockDomainsExcept parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
@@ -415,14 +416,14 @@ func (r *dlpComplianceRuleResource) Schema(_ context.Context, _ resource.SchemaR
 			"sharepoint_block_users_except":                       schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -SharepointBlockUsersExcept parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"sharepoint_move_to_quarantine_location":              schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -SharepointMoveToQuarantineLocation parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
 			"stop_policy_processing":                              schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -StopPolicyProcessing parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
-			"subject_contains_words":                              schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -SubjectContainsWords parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"subject_matches_patterns":                            schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -SubjectMatchesPatterns parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"subject_or_body_contains_words":                      schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -SubjectOrBodyContainsWords parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"subject_or_body_matches_patterns":                    schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -SubjectOrBodyMatchesPatterns parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"subject_contains_words":                              schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -SubjectContainsWords parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"subject_matches_patterns":                            schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -SubjectMatchesPatterns parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"subject_or_body_contains_words":                      schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -SubjectOrBodyContainsWords parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
+			"subject_or_body_matches_patterns":                    schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -SubjectOrBodyMatchesPatterns parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
 			"teams_shared_with_participant_category":              schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -TeamsSharedWithParticipantCategory parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"third_party_app_dlp_restrictions":                    schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -ThirdPartyAppDlpRestrictions parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
 			"trigger_power_automate_flow":                         schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -TriggerPowerAutomateFlow parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"unscannable_document_extension_is":                   schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -UnscannableDocumentExtensionIs parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"unscannable_document_extension_is":                   schema.SetAttribute{ElementType: types.StringType, Optional: true, Computed: true, Description: "Maps to the -UnscannableDocumentExtensionIs parameter.", PlanModifiers: []planmodifier.Set{setplanmodifier.UseStateForUnknown()}},
 			"url_contains_text":                                   schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -UrlContainsText parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace(), stringplanmodifier.UseStateForUnknown()}},
 			"validate_rule":                                       schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -ValidateRule parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.RequiresReplace(), boolplanmodifier.UseStateForUnknown()}},
 			"with_importance":                                     schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -WithImportance parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
@@ -444,449 +445,776 @@ func (r *dlpComplianceRuleResource) Create(ctx context.Context, req resource.Cre
 		return
 	}
 
-	p := purview.NewDlpComplianceRuleParams{
-		AccessedBy:                                  toStringSlice(ctx, plan.AccessedBy, &resp.Diagnostics),
-		AccessedByMemberOf:                          toStringSlice(ctx, plan.AccessedByMemberOf, &resp.Diagnostics),
-		AdvancedRule:                                plan.AdvancedRule.ValueString(),
-		ApplyBrandingTemplate:                       plan.ApplyBrandingTemplate.ValueString(),
-		AttachmentIsNotLabeled:                      plan.AttachmentIsNotLabeled.ValueBool(),
-		BlockAccess:                                 plan.BlockAccess.ValueBool(),
-		Comment:                                     plan.Comment.ValueString(),
-		ContentContainsSensitiveInformation:         toStringSlice(ctx, plan.ContentContainsSensitiveInformation, &resp.Diagnostics),
-		ContentIsNotLabeled:                         plan.ContentIsNotLabeled.ValueBool(),
-		ContentIsShared:                             plan.ContentIsShared.ValueBool(),
-		Disabled:                                    plan.Disabled.ValueBool(),
-		DisplayName:                                 plan.DisplayName.ValueString(),
-		DocumentCreatedByMemberOf:                   toStringSlice(ctx, plan.DocumentCreatedByMemberOf, &resp.Diagnostics),
-		DocumentIsPasswordProtected:                 plan.DocumentIsPasswordProtected.ValueBool(),
-		DocumentIsUnsupported:                       plan.DocumentIsUnsupported.ValueBool(),
-		EndpointDlpBrowserRestrictions:              toStringSlice(ctx, plan.EndpointDlpBrowserRestrictions, &resp.Diagnostics),
-		EndpointDlpRestrictions:                     toStringSlice(ctx, plan.EndpointDlpRestrictions, &resp.Diagnostics),
-		EnforcePortalAccess:                         plan.EnforcePortalAccess.ValueBool(),
-		EvaluateRulePerComponent:                    plan.EvaluateRulePerComponent.ValueBool(),
-		ExceptIfAccessedBy:                          toStringSlice(ctx, plan.ExceptIfAccessedBy, &resp.Diagnostics),
-		ExceptIfAccessedByMemberOf:                  toStringSlice(ctx, plan.ExceptIfAccessedByMemberOf, &resp.Diagnostics),
-		ExceptIfContentContainsSensitiveInformation: toStringSlice(ctx, plan.ExceptIfContentContainsSensitiveInformation, &resp.Diagnostics),
-		ExceptIfContentIsShared:                     plan.ExceptIfContentIsShared.ValueBool(),
-		ExceptIfDocumentCreatedByMemberOf:           toStringSlice(ctx, plan.ExceptIfDocumentCreatedByMemberOf, &resp.Diagnostics),
-		ExceptIfDocumentIsPasswordProtected:         plan.ExceptIfDocumentIsPasswordProtected.ValueBool(),
-		ExceptIfDocumentIsUnsupported:               plan.ExceptIfDocumentIsUnsupported.ValueBool(),
-		ExceptIfFrom:                                toStringSlice(ctx, plan.ExceptIfFrom, &resp.Diagnostics),
-		ExceptIfFromMemberOf:                        toStringSlice(ctx, plan.ExceptIfFromMemberOf, &resp.Diagnostics),
-		ExceptIfHasSenderOverride:                   plan.ExceptIfHasSenderOverride.ValueBool(),
-		ExceptIfProcessingLimitExceeded:             plan.ExceptIfProcessingLimitExceeded.ValueBool(),
-		ExceptIfSentToMemberOf:                      toStringSlice(ctx, plan.ExceptIfSentToMemberOf, &resp.Diagnostics),
-		From:                                        toStringSlice(ctx, plan.From, &resp.Diagnostics),
-		FromMemberOf:                                toStringSlice(ctx, plan.FromMemberOf, &resp.Diagnostics),
-		HasSenderOverride:                           plan.HasSenderOverride.ValueBool(),
-		IncidentReportContent:                       toStringSlice(ctx, plan.IncidentReportContent, &resp.Diagnostics),
-		MessageIsNotLabeled:                         plan.MessageIsNotLabeled.ValueBool(),
-		MipRestrictAccess:                           toStringSlice(ctx, plan.MipRestrictAccess, &resp.Diagnostics),
-		MoveToQuarantineLocation:                    plan.MoveToQuarantineLocation.ValueBool(),
-		Name:                                        plan.Name.ValueString(),
-		NotifyAllowOverride:                         toStringSlice(ctx, plan.NotifyAllowOverride, &resp.Diagnostics),
-		NotifyEmailCustomSenderDisplayName:          plan.NotifyEmailCustomSenderDisplayName.ValueString(),
-		NotifyEmailCustomSubject:                    plan.NotifyEmailCustomSubject.ValueString(),
-		NotifyEmailCustomText:                       plan.NotifyEmailCustomText.ValueString(),
-		NotifyEmailExchangeIncludeAttachment:        plan.NotifyEmailExchangeIncludeAttachment.ValueBool(),
-		NotifyJustificationCustomText:               plan.NotifyJustificationCustomText.ValueString(),
-		NotifyPolicyTipCustomDialog:                 plan.NotifyPolicyTipCustomDialog.ValueString(),
-		NotifyPolicyTipCustomText:                   plan.NotifyPolicyTipCustomText.ValueString(),
-		NotifyPolicyTipUrl:                          plan.NotifyPolicyTipUrl.ValueString(),
-		OnPremisesScannerDlpRestrictions:            toStringSlice(ctx, plan.OnPremisesScannerDlpRestrictions, &resp.Diagnostics),
-		PowerBIDlpRestrictions:                      toStringSlice(ctx, plan.PowerBIDlpRestrictions, &resp.Diagnostics),
-		PrependSubject:                              plan.PrependSubject.ValueString(),
-		ProcessingLimitExceeded:                     plan.ProcessingLimitExceeded.ValueBool(),
-		Quarantine:                                  plan.Quarantine.ValueBool(),
-		RedirectMessageTo:                           toStringSlice(ctx, plan.RedirectMessageTo, &resp.Diagnostics),
-		RemoveRMSTemplate:                           plan.RemoveRMSTemplate.ValueBool(),
-		RestrictAccess:                              toStringSlice(ctx, plan.RestrictAccess, &resp.Diagnostics),
-		RestrictBrowserAccess:                       plan.RestrictBrowserAccess.ValueBool(),
-		RestrictWebGrounding:                        plan.RestrictWebGrounding.ValueBool(),
-		SentToMemberOf:                              toStringSlice(ctx, plan.SentToMemberOf, &resp.Diagnostics),
-		SharepointBlockDomainsOrUsers:               plan.SharepointBlockDomainsOrUsers.ValueBool(),
-		SharepointMoveToQuarantineLocation:          plan.SharepointMoveToQuarantineLocation.ValueBool(),
-		StopPolicyProcessing:                        plan.StopPolicyProcessing.ValueBool(),
-		ThirdPartyAppDlpRestrictions:                toStringSlice(ctx, plan.ThirdPartyAppDlpRestrictions, &resp.Diagnostics),
-		TriggerPowerAutomateFlow:                    plan.TriggerPowerAutomateFlow.ValueString(),
-		ValidateRule:                                plan.ValidateRule.ValueBool(),
-	}
-	if v := plan.AccessScope.ValueString(); v != "" {
-		p.AccessScope = v
-	}
-	if v := plan.AccessTimeControl.ValueString(); v != "" {
-		p.AccessTimeControl = v
-	}
-	if v := plan.ActivationDate.ValueString(); v != "" {
-		p.ActivationDate = v
-	}
-	if v := plan.AddRecipients.ValueString(); v != "" {
-		p.AddRecipients = v
-	}
-	if v := plan.AlertProperties.ValueString(); v != "" {
-		p.AlertProperties = v
-	}
-	if v := plan.AnyOfRecipientAddressContainsWords.ValueString(); v != "" {
-		p.AnyOfRecipientAddressContainsWords = v
-	}
-	if v := plan.AnyOfRecipientAddressMatchesPatterns.ValueString(); v != "" {
-		p.AnyOfRecipientAddressMatchesPatterns = v
-	}
-	if v := plan.ApplyHtmlDisclaimer.ValueString(); v != "" {
-		p.ApplyHtmlDisclaimer = v
-	}
-	if v := plan.AttachmentCountOver.ValueString(); v != "" {
-		p.AttachmentCountOver = v
-	}
-	if v := plan.BlockAccessScope.ValueString(); v != "" {
-		p.BlockAccessScope = v
-	}
-	if v := plan.ContentCharacterSetContainsWords.ValueString(); v != "" {
-		p.ContentCharacterSetContainsWords = v
-	}
-	if v := plan.ContentExtensionMatchesWords.ValueString(); v != "" {
-		p.ContentExtensionMatchesWords = v
+	var config dlpComplianceRuleModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	p := purview.NewDlpComplianceRuleParams{}
+	if v := config.AccessScope.ValueString(); v != "" {
+		p.AccessScope = objectParam(v)
+	}
+	if v := config.AccessTimeControl.ValueString(); v != "" {
+		p.AccessTimeControl = objectParam(v)
 	}
-	if v := plan.ContentFileTypeMatches.ValueString(); v != "" {
-		p.ContentFileTypeMatches = v
+	if !config.AccessedBy.IsNull() {
+		if v := toStringSlice(ctx, plan.AccessedBy, &resp.Diagnostics); len(v) > 0 {
+			p.AccessedBy = v
+		}
+	}
+	if !config.AccessedByMemberOf.IsNull() {
+		if v := toStringSlice(ctx, plan.AccessedByMemberOf, &resp.Diagnostics); len(v) > 0 {
+			p.AccessedByMemberOf = v
+		}
+	}
+	if v := config.ActivationDate.ValueString(); v != "" {
+		p.ActivationDate = objectParam(v)
+	}
+	if v := config.AddRecipients.ValueString(); v != "" {
+		p.AddRecipients = objectParam(v)
+	}
+	if !config.AdvancedRule.IsNull() {
+		p.AdvancedRule = plan.AdvancedRule.ValueString()
+	}
+	if v := config.AlertProperties.ValueString(); v != "" {
+		p.AlertProperties = objectParam(v)
+	}
+	if !config.AnyOfRecipientAddressContainsWords.IsNull() {
+		if v := toStringSlice(ctx, plan.AnyOfRecipientAddressContainsWords, &resp.Diagnostics); len(v) > 0 {
+			p.AnyOfRecipientAddressContainsWords = v
+		}
+	}
+	if !config.AnyOfRecipientAddressMatchesPatterns.IsNull() {
+		if v := toStringSlice(ctx, plan.AnyOfRecipientAddressMatchesPatterns, &resp.Diagnostics); len(v) > 0 {
+			p.AnyOfRecipientAddressMatchesPatterns = v
+		}
+	}
+	if !config.ApplyBrandingTemplate.IsNull() {
+		p.ApplyBrandingTemplate = plan.ApplyBrandingTemplate.ValueString()
+	}
+	if v := config.ApplyHtmlDisclaimer.ValueString(); v != "" {
+		p.ApplyHtmlDisclaimer = objectParam(v)
+	}
+	if v := config.AttachmentCountOver.ValueString(); v != "" {
+		p.AttachmentCountOver = objectParam(v)
+	}
+	if !config.AttachmentIsNotLabeled.IsNull() {
+		if !plan.AttachmentIsNotLabeled.IsUnknown() {
+			p.AttachmentIsNotLabeled = plan.AttachmentIsNotLabeled.ValueBoolPointer()
+		}
+	}
+	if !config.BlockAccess.IsNull() {
+		if !plan.BlockAccess.IsUnknown() {
+			p.BlockAccess = plan.BlockAccess.ValueBoolPointer()
+		}
+	}
+	if v := config.BlockAccessScope.ValueString(); v != "" {
+		p.BlockAccessScope = objectParam(v)
+	}
+	if !config.Comment.IsNull() {
+		p.Comment = plan.Comment.ValueString()
+	}
+	if !config.ContentCharacterSetContainsWords.IsNull() {
+		if v := toStringSlice(ctx, plan.ContentCharacterSetContainsWords, &resp.Diagnostics); len(v) > 0 {
+			p.ContentCharacterSetContainsWords = v
+		}
+	}
+	if v := config.ContentContainsSensitiveInformation.ValueString(); v != "" {
+		p.ContentContainsSensitiveInformation = objectParam(v)
+	}
+	if !config.ContentExtensionMatchesWords.IsNull() {
+		if v := toStringSlice(ctx, plan.ContentExtensionMatchesWords, &resp.Diagnostics); len(v) > 0 {
+			p.ContentExtensionMatchesWords = v
+		}
+	}
+	if !config.ContentFileTypeMatches.IsNull() {
+		if v := toStringSlice(ctx, plan.ContentFileTypeMatches, &resp.Diagnostics); len(v) > 0 {
+			p.ContentFileTypeMatches = v
+		}
+	}
+	if !config.ContentIsNotLabeled.IsNull() {
+		if !plan.ContentIsNotLabeled.IsUnknown() {
+			p.ContentIsNotLabeled = plan.ContentIsNotLabeled.ValueBoolPointer()
+		}
+	}
+	if !config.ContentIsShared.IsNull() {
+		if !plan.ContentIsShared.IsUnknown() {
+			p.ContentIsShared = plan.ContentIsShared.ValueBoolPointer()
+		}
+	}
+	if v := config.ContentMissingSensitivityLabel.ValueString(); v != "" {
+		p.ContentMissingSensitivityLabel = objectParam(v)
+	}
+	if !config.ContentPropertyContainsWords.IsNull() {
+		if v := toStringSlice(ctx, plan.ContentPropertyContainsWords, &resp.Diagnostics); len(v) > 0 {
+			p.ContentPropertyContainsWords = v
+		}
+	}
+	if v := config.ContextPropertiesContainWords.ValueString(); v != "" {
+		p.ContextPropertiesContainWords = objectParam(v)
+	}
+	if v := config.DeviceManagementType.ValueString(); v != "" {
+		p.DeviceManagementType = objectParam(v)
+	}
+	if !config.Disabled.IsNull() {
+		if !plan.Disabled.IsUnknown() {
+			p.Disabled = plan.Disabled.ValueBoolPointer()
+		}
+	}
+	if !config.DisplayName.IsNull() {
+		p.DisplayName = plan.DisplayName.ValueString()
+	}
+	if !config.DocumentContainsWords.IsNull() {
+		if v := toStringSlice(ctx, plan.DocumentContainsWords, &resp.Diagnostics); len(v) > 0 {
+			p.DocumentContainsWords = v
+		}
+	}
+	if !config.DocumentCreatedBy.IsNull() {
+		if v := toStringSlice(ctx, plan.DocumentCreatedBy, &resp.Diagnostics); len(v) > 0 {
+			p.DocumentCreatedBy = v
+		}
+	}
+	if !config.DocumentCreatedByMemberOf.IsNull() {
+		if v := toStringSlice(ctx, plan.DocumentCreatedByMemberOf, &resp.Diagnostics); len(v) > 0 {
+			p.DocumentCreatedByMemberOf = v
+		}
+	}
+	if !config.DocumentIsPasswordProtected.IsNull() {
+		if !plan.DocumentIsPasswordProtected.IsUnknown() {
+			p.DocumentIsPasswordProtected = plan.DocumentIsPasswordProtected.ValueBoolPointer()
+		}
+	}
+	if !config.DocumentIsUnsupported.IsNull() {
+		if !plan.DocumentIsUnsupported.IsUnknown() {
+			p.DocumentIsUnsupported = plan.DocumentIsUnsupported.ValueBoolPointer()
+		}
+	}
+	if !config.DocumentMatchesPatterns.IsNull() {
+		if v := toStringSlice(ctx, plan.DocumentMatchesPatterns, &resp.Diagnostics); len(v) > 0 {
+			p.DocumentMatchesPatterns = v
+		}
+	}
+	if !config.DocumentNameMatchesPatterns.IsNull() {
+		if v := toStringSlice(ctx, plan.DocumentNameMatchesPatterns, &resp.Diagnostics); len(v) > 0 {
+			p.DocumentNameMatchesPatterns = v
+		}
+	}
+	if !config.DocumentNameMatchesWords.IsNull() {
+		if v := toStringSlice(ctx, plan.DocumentNameMatchesWords, &resp.Diagnostics); len(v) > 0 {
+			p.DocumentNameMatchesWords = v
+		}
+	}
+	if v := config.DocumentSizeOver.ValueString(); v != "" {
+		p.DocumentSizeOver = objectParam(v)
+	}
+	if v := config.EncryptRMSTemplate.ValueString(); v != "" {
+		p.EncryptRMSTemplate = objectParam(v)
+	}
+	if !config.EndpointDlpBrowserRestrictions.IsNull() {
+		if v := toStringSlice(ctx, plan.EndpointDlpBrowserRestrictions, &resp.Diagnostics); len(v) > 0 {
+			p.EndpointDlpBrowserRestrictions = v
+		}
+	}
+	if v := config.EndpointDlpRestrictions.ValueString(); v != "" {
+		p.EndpointDlpRestrictions = objectParam(v)
+	}
+	if !config.EnforcePortalAccess.IsNull() {
+		if !plan.EnforcePortalAccess.IsUnknown() {
+			p.EnforcePortalAccess = plan.EnforcePortalAccess.ValueBoolPointer()
+		}
+	}
+	if !config.EvaluateRulePerComponent.IsNull() {
+		if !plan.EvaluateRulePerComponent.IsUnknown() {
+			p.EvaluateRulePerComponent = plan.EvaluateRulePerComponent.ValueBoolPointer()
+		}
+	}
+	if v := config.ExceptIfAccessScope.ValueString(); v != "" {
+		p.ExceptIfAccessScope = objectParam(v)
+	}
+	if !config.ExceptIfAccessedBy.IsNull() {
+		if v := toStringSlice(ctx, plan.ExceptIfAccessedBy, &resp.Diagnostics); len(v) > 0 {
+			p.ExceptIfAccessedBy = v
+		}
+	}
+	if !config.ExceptIfAccessedByMemberOf.IsNull() {
+		if v := toStringSlice(ctx, plan.ExceptIfAccessedByMemberOf, &resp.Diagnostics); len(v) > 0 {
+			p.ExceptIfAccessedByMemberOf = v
+		}
+	}
+	if !config.ExceptIfAnyOfRecipientAddressContainsWords.IsNull() {
+		if v := toStringSlice(ctx, plan.ExceptIfAnyOfRecipientAddressContainsWords, &resp.Diagnostics); len(v) > 0 {
+			p.ExceptIfAnyOfRecipientAddressContainsWords = v
+		}
+	}
+	if !config.ExceptIfAnyOfRecipientAddressMatchesPatterns.IsNull() {
+		if v := toStringSlice(ctx, plan.ExceptIfAnyOfRecipientAddressMatchesPatterns, &resp.Diagnostics); len(v) > 0 {
+			p.ExceptIfAnyOfRecipientAddressMatchesPatterns = v
+		}
+	}
+	if !config.ExceptIfContentCharacterSetContainsWords.IsNull() {
+		if v := toStringSlice(ctx, plan.ExceptIfContentCharacterSetContainsWords, &resp.Diagnostics); len(v) > 0 {
+			p.ExceptIfContentCharacterSetContainsWords = v
+		}
+	}
+	if v := config.ExceptIfContentContainsSensitiveInformation.ValueString(); v != "" {
+		p.ExceptIfContentContainsSensitiveInformation = objectParam(v)
+	}
+	if !config.ExceptIfContentExtensionMatchesWords.IsNull() {
+		if v := toStringSlice(ctx, plan.ExceptIfContentExtensionMatchesWords, &resp.Diagnostics); len(v) > 0 {
+			p.ExceptIfContentExtensionMatchesWords = v
+		}
+	}
+	if !config.ExceptIfContentFileTypeMatches.IsNull() {
+		if v := toStringSlice(ctx, plan.ExceptIfContentFileTypeMatches, &resp.Diagnostics); len(v) > 0 {
+			p.ExceptIfContentFileTypeMatches = v
+		}
+	}
+	if !config.ExceptIfContentIsShared.IsNull() {
+		if !plan.ExceptIfContentIsShared.IsUnknown() {
+			p.ExceptIfContentIsShared = plan.ExceptIfContentIsShared.ValueBoolPointer()
+		}
+	}
+	if !config.ExceptIfContentPropertyContainsWords.IsNull() {
+		if v := toStringSlice(ctx, plan.ExceptIfContentPropertyContainsWords, &resp.Diagnostics); len(v) > 0 {
+			p.ExceptIfContentPropertyContainsWords = v
+		}
+	}
+	if v := config.ExceptIfContextPropertiesContainWords.ValueString(); v != "" {
+		p.ExceptIfContextPropertiesContainWords = objectParam(v)
+	}
+	if v := config.ExceptIfDeviceManagementType.ValueString(); v != "" {
+		p.ExceptIfDeviceManagementType = objectParam(v)
+	}
+	if !config.ExceptIfDocumentContainsWords.IsNull() {
+		if v := toStringSlice(ctx, plan.ExceptIfDocumentContainsWords, &resp.Diagnostics); len(v) > 0 {
+			p.ExceptIfDocumentContainsWords = v
+		}
+	}
+	if !config.ExceptIfDocumentCreatedBy.IsNull() {
+		if v := toStringSlice(ctx, plan.ExceptIfDocumentCreatedBy, &resp.Diagnostics); len(v) > 0 {
+			p.ExceptIfDocumentCreatedBy = v
+		}
+	}
+	if !config.ExceptIfDocumentCreatedByMemberOf.IsNull() {
+		if v := toStringSlice(ctx, plan.ExceptIfDocumentCreatedByMemberOf, &resp.Diagnostics); len(v) > 0 {
+			p.ExceptIfDocumentCreatedByMemberOf = v
+		}
+	}
+	if !config.ExceptIfDocumentIsPasswordProtected.IsNull() {
+		if !plan.ExceptIfDocumentIsPasswordProtected.IsUnknown() {
+			p.ExceptIfDocumentIsPasswordProtected = plan.ExceptIfDocumentIsPasswordProtected.ValueBoolPointer()
+		}
+	}
+	if !config.ExceptIfDocumentIsUnsupported.IsNull() {
+		if !plan.ExceptIfDocumentIsUnsupported.IsUnknown() {
+			p.ExceptIfDocumentIsUnsupported = plan.ExceptIfDocumentIsUnsupported.ValueBoolPointer()
+		}
+	}
+	if !config.ExceptIfDocumentMatchesPatterns.IsNull() {
+		if v := toStringSlice(ctx, plan.ExceptIfDocumentMatchesPatterns, &resp.Diagnostics); len(v) > 0 {
+			p.ExceptIfDocumentMatchesPatterns = v
+		}
+	}
+	if !config.ExceptIfDocumentNameMatchesPatterns.IsNull() {
+		if v := toStringSlice(ctx, plan.ExceptIfDocumentNameMatchesPatterns, &resp.Diagnostics); len(v) > 0 {
+			p.ExceptIfDocumentNameMatchesPatterns = v
+		}
+	}
+	if !config.ExceptIfDocumentNameMatchesWords.IsNull() {
+		if v := toStringSlice(ctx, plan.ExceptIfDocumentNameMatchesWords, &resp.Diagnostics); len(v) > 0 {
+			p.ExceptIfDocumentNameMatchesWords = v
+		}
+	}
+	if v := config.ExceptIfDocumentSizeOver.ValueString(); v != "" {
+		p.ExceptIfDocumentSizeOver = objectParam(v)
+	}
+	if !config.ExceptIfFrom.IsNull() {
+		if v := toStringSlice(ctx, plan.ExceptIfFrom, &resp.Diagnostics); len(v) > 0 {
+			p.ExceptIfFrom = v
+		}
+	}
+	if !config.ExceptIfFromAddressContainsWords.IsNull() {
+		if v := toStringSlice(ctx, plan.ExceptIfFromAddressContainsWords, &resp.Diagnostics); len(v) > 0 {
+			p.ExceptIfFromAddressContainsWords = v
+		}
+	}
+	if !config.ExceptIfFromAddressMatchesPatterns.IsNull() {
+		if v := toStringSlice(ctx, plan.ExceptIfFromAddressMatchesPatterns, &resp.Diagnostics); len(v) > 0 {
+			p.ExceptIfFromAddressMatchesPatterns = v
+		}
+	}
+	if !config.ExceptIfFromMemberOf.IsNull() {
+		if v := toStringSlice(ctx, plan.ExceptIfFromMemberOf, &resp.Diagnostics); len(v) > 0 {
+			p.ExceptIfFromMemberOf = v
+		}
+	}
+	if v := config.ExceptIfFromScope.ValueString(); v != "" {
+		p.ExceptIfFromScope = objectParam(v)
+	}
+	if !config.ExceptIfHasSenderOverride.IsNull() {
+		if !plan.ExceptIfHasSenderOverride.IsUnknown() {
+			p.ExceptIfHasSenderOverride = plan.ExceptIfHasSenderOverride.ValueBoolPointer()
+		}
+	}
+	if v := config.ExceptIfHeaderContainsTokens.ValueString(); v != "" {
+		p.ExceptIfHeaderContainsTokens = objectParam(v)
+	}
+	if v := config.ExceptIfHeaderContainsWords.ValueString(); v != "" {
+		p.ExceptIfHeaderContainsWords = objectParam(v)
+	}
+	if v := config.ExceptIfHeaderMatchesPatterns.ValueString(); v != "" {
+		p.ExceptIfHeaderMatchesPatterns = objectParam(v)
+	}
+	if v := config.ExceptIfMessageLabelChangeDetected.ValueString(); v != "" {
+		p.ExceptIfMessageLabelChangeDetected = objectParam(v)
+	}
+	if v := config.ExceptIfMessageSizeOver.ValueString(); v != "" {
+		p.ExceptIfMessageSizeOver = objectParam(v)
+	}
+	if v := config.ExceptIfMessageTypeMatches.ValueString(); v != "" {
+		p.ExceptIfMessageTypeMatches = objectParam(v)
+	}
+	if !config.ExceptIfProcessingLimitExceeded.IsNull() {
+		if !plan.ExceptIfProcessingLimitExceeded.IsUnknown() {
+			p.ExceptIfProcessingLimitExceeded = plan.ExceptIfProcessingLimitExceeded.ValueBoolPointer()
+		}
+	}
+	if v := config.ExceptIfRecipientADAttributeContainsWords.ValueString(); v != "" {
+		p.ExceptIfRecipientADAttributeContainsWords = objectParam(v)
+	}
+	if v := config.ExceptIfRecipientADAttributeMatchesPatterns.ValueString(); v != "" {
+		p.ExceptIfRecipientADAttributeMatchesPatterns = objectParam(v)
+	}
+	if !config.ExceptIfRecipientDomainIs.IsNull() {
+		if v := toStringSlice(ctx, plan.ExceptIfRecipientDomainIs, &resp.Diagnostics); len(v) > 0 {
+			p.ExceptIfRecipientDomainIs = v
+		}
+	}
+	if v := config.ExceptIfSenderADAttributeContainsWords.ValueString(); v != "" {
+		p.ExceptIfSenderADAttributeContainsWords = objectParam(v)
+	}
+	if v := config.ExceptIfSenderADAttributeMatchesPatterns.ValueString(); v != "" {
+		p.ExceptIfSenderADAttributeMatchesPatterns = objectParam(v)
+	}
+	if !config.ExceptIfSenderDomainIs.IsNull() {
+		if v := toStringSlice(ctx, plan.ExceptIfSenderDomainIs, &resp.Diagnostics); len(v) > 0 {
+			p.ExceptIfSenderDomainIs = v
+		}
+	}
+	if !config.ExceptIfSenderIPRanges.IsNull() {
+		if v := toStringSlice(ctx, plan.ExceptIfSenderIPRanges, &resp.Diagnostics); len(v) > 0 {
+			p.ExceptIfSenderIPRanges = v
+		}
+	}
+	if !config.ExceptIfSentTo.IsNull() {
+		if v := toStringSlice(ctx, plan.ExceptIfSentTo, &resp.Diagnostics); len(v) > 0 {
+			p.ExceptIfSentTo = v
+		}
+	}
+	if !config.ExceptIfSentToMemberOf.IsNull() {
+		if v := toStringSlice(ctx, plan.ExceptIfSentToMemberOf, &resp.Diagnostics); len(v) > 0 {
+			p.ExceptIfSentToMemberOf = v
+		}
+	}
+	if v := config.ExceptIfSharedWithDomain.ValueString(); v != "" {
+		p.ExceptIfSharedWithDomain = objectParam(v)
+	}
+	if !config.ExceptIfSubjectContainsWords.IsNull() {
+		if v := toStringSlice(ctx, plan.ExceptIfSubjectContainsWords, &resp.Diagnostics); len(v) > 0 {
+			p.ExceptIfSubjectContainsWords = v
+		}
+	}
+	if !config.ExceptIfSubjectMatchesPatterns.IsNull() {
+		if v := toStringSlice(ctx, plan.ExceptIfSubjectMatchesPatterns, &resp.Diagnostics); len(v) > 0 {
+			p.ExceptIfSubjectMatchesPatterns = v
+		}
+	}
+	if !config.ExceptIfSubjectOrBodyContainsWords.IsNull() {
+		if v := toStringSlice(ctx, plan.ExceptIfSubjectOrBodyContainsWords, &resp.Diagnostics); len(v) > 0 {
+			p.ExceptIfSubjectOrBodyContainsWords = v
+		}
+	}
+	if !config.ExceptIfSubjectOrBodyMatchesPatterns.IsNull() {
+		if v := toStringSlice(ctx, plan.ExceptIfSubjectOrBodyMatchesPatterns, &resp.Diagnostics); len(v) > 0 {
+			p.ExceptIfSubjectOrBodyMatchesPatterns = v
+		}
+	}
+	if v := config.ExceptIfTeamsSharedWithParticipantCategory.ValueString(); v != "" {
+		p.ExceptIfTeamsSharedWithParticipantCategory = objectParam(v)
+	}
+	if !config.ExceptIfUnscannableDocumentExtensionIs.IsNull() {
+		if v := toStringSlice(ctx, plan.ExceptIfUnscannableDocumentExtensionIs, &resp.Diagnostics); len(v) > 0 {
+			p.ExceptIfUnscannableDocumentExtensionIs = v
+		}
+	}
+	if v := config.ExceptIfUrlContainsText.ValueString(); v != "" {
+		p.ExceptIfUrlContainsText = objectParam(v)
+	}
+	if v := config.ExceptIfWithImportance.ValueString(); v != "" {
+		p.ExceptIfWithImportance = objectParam(v)
+	}
+	if v := config.ExpiryDate.ValueString(); v != "" {
+		p.ExpiryDate = objectParam(v)
+	}
+	if !config.From.IsNull() {
+		if v := toStringSlice(ctx, plan.From, &resp.Diagnostics); len(v) > 0 {
+			p.From = v
+		}
+	}
+	if !config.FromAddressContainsWords.IsNull() {
+		if v := toStringSlice(ctx, plan.FromAddressContainsWords, &resp.Diagnostics); len(v) > 0 {
+			p.FromAddressContainsWords = v
+		}
+	}
+	if !config.FromAddressMatchesPatterns.IsNull() {
+		if v := toStringSlice(ctx, plan.FromAddressMatchesPatterns, &resp.Diagnostics); len(v) > 0 {
+			p.FromAddressMatchesPatterns = v
+		}
+	}
+	if !config.FromMemberOf.IsNull() {
+		if v := toStringSlice(ctx, plan.FromMemberOf, &resp.Diagnostics); len(v) > 0 {
+			p.FromMemberOf = v
+		}
+	}
+	if v := config.FromScope.ValueString(); v != "" {
+		p.FromScope = objectParam(v)
+	}
+	if !config.GenerateAlert.IsNull() {
+		if v := toStringSlice(ctx, plan.GenerateAlert, &resp.Diagnostics); len(v) > 0 {
+			p.GenerateAlert = v
+		}
+	}
+	if !config.GenerateIncidentReport.IsNull() {
+		if v := toStringSlice(ctx, plan.GenerateIncidentReport, &resp.Diagnostics); len(v) > 0 {
+			p.GenerateIncidentReport = v
+		}
+	}
+	if v := config.HasActivity.ValueString(); v != "" {
+		p.HasActivity = objectParam(v)
+	}
+	if v := config.HasLabelDowngradedFrom.ValueString(); v != "" {
+		p.HasLabelDowngradedFrom = objectParam(v)
+	}
+	if !config.HasSenderOverride.IsNull() {
+		if !plan.HasSenderOverride.IsUnknown() {
+			p.HasSenderOverride = plan.HasSenderOverride.ValueBoolPointer()
+		}
+	}
+	if v := config.HeaderContainsTokens.ValueString(); v != "" {
+		p.HeaderContainsTokens = objectParam(v)
+	}
+	if v := config.HeaderContainsWords.ValueString(); v != "" {
+		p.HeaderContainsWords = objectParam(v)
+	}
+	if v := config.HeaderMatchesPatterns.ValueString(); v != "" {
+		p.HeaderMatchesPatterns = objectParam(v)
+	}
+	if v := config.ImmutableId.ValueString(); v != "" {
+		p.ImmutableId = objectParam(v)
+	}
+	if !config.IncidentReportContent.IsNull() {
+		if v := toStringSlice(ctx, plan.IncidentReportContent, &resp.Diagnostics); len(v) > 0 {
+			p.IncidentReportContent = v
+		}
 	}
-	if v := plan.ContentMissingSensitivityLabel.ValueString(); v != "" {
-		p.ContentMissingSensitivityLabel = v
+	if v := config.MapRecipients.ValueString(); v != "" {
+		p.MapRecipients = objectParam(v)
 	}
-	if v := plan.ContentPropertyContainsWords.ValueString(); v != "" {
-		p.ContentPropertyContainsWords = v
+	if !config.MessageIsNotLabeled.IsNull() {
+		if !plan.MessageIsNotLabeled.IsUnknown() {
+			p.MessageIsNotLabeled = plan.MessageIsNotLabeled.ValueBoolPointer()
+		}
 	}
-	if v := plan.ContextPropertiesContainWords.ValueString(); v != "" {
-		p.ContextPropertiesContainWords = v
+	if v := config.MessageLabelChangeDetected.ValueString(); v != "" {
+		p.MessageLabelChangeDetected = objectParam(v)
 	}
-	if v := plan.DeviceManagementType.ValueString(); v != "" {
-		p.DeviceManagementType = v
+	if v := config.MessageSizeOver.ValueString(); v != "" {
+		p.MessageSizeOver = objectParam(v)
+	}
+	if v := config.MessageTypeMatches.ValueString(); v != "" {
+		p.MessageTypeMatches = objectParam(v)
+	}
+	if v := config.MipRestrictAccess.ValueString(); v != "" {
+		p.MipRestrictAccess = objectParam(v)
+	}
+	if v := config.Moderate.ValueString(); v != "" {
+		p.Moderate = objectParam(v)
+	}
+	if v := config.ModifySubject.ValueString(); v != "" {
+		p.ModifySubject = objectParam(v)
+	}
+	if !config.MoveToQuarantineLocation.IsNull() {
+		if !plan.MoveToQuarantineLocation.IsUnknown() {
+			p.MoveToQuarantineLocation = plan.MoveToQuarantineLocation.ValueBoolPointer()
+		}
+	}
+	if !config.Name.IsNull() {
+		p.Name = plan.Name.ValueString()
+	}
+	if v := config.NonBifurcatingAccessScope.ValueString(); v != "" {
+		p.NonBifurcatingAccessScope = objectParam(v)
+	}
+	if !config.NotifyAllowOverride.IsNull() {
+		if v := toStringSlice(ctx, plan.NotifyAllowOverride, &resp.Diagnostics); len(v) > 0 {
+			p.NotifyAllowOverride = v
+		}
+	}
+	if !config.NotifyEmailCustomSenderDisplayName.IsNull() {
+		p.NotifyEmailCustomSenderDisplayName = plan.NotifyEmailCustomSenderDisplayName.ValueString()
+	}
+	if !config.NotifyEmailCustomSubject.IsNull() {
+		p.NotifyEmailCustomSubject = plan.NotifyEmailCustomSubject.ValueString()
+	}
+	if !config.NotifyEmailCustomText.IsNull() {
+		p.NotifyEmailCustomText = plan.NotifyEmailCustomText.ValueString()
+	}
+	if !config.NotifyEmailExchangeIncludeAttachment.IsNull() {
+		if !plan.NotifyEmailExchangeIncludeAttachment.IsUnknown() {
+			p.NotifyEmailExchangeIncludeAttachment = plan.NotifyEmailExchangeIncludeAttachment.ValueBoolPointer()
+		}
+	}
+	if v := config.NotifyEmailOnedriveRemediationActions.ValueString(); v != "" {
+		p.NotifyEmailOnedriveRemediationActions = objectParam(v)
+	}
+	if v := config.NotifyEndpointUser.ValueString(); v != "" {
+		p.NotifyEndpointUser = objectParam(v)
+	}
+	if !config.NotifyJustificationCustomText.IsNull() {
+		p.NotifyJustificationCustomText = plan.NotifyJustificationCustomText.ValueString()
+	}
+	if v := config.NotifyJustificationCustomTextTranslations.ValueString(); v != "" {
+		p.NotifyJustificationCustomTextTranslations = objectParam(v)
+	}
+	if v := config.NotifyOverrideRequirements.ValueString(); v != "" {
+		p.NotifyOverrideRequirements = objectParam(v)
+	}
+	if !config.NotifyPolicyTipCustomDialog.IsNull() {
+		p.NotifyPolicyTipCustomDialog = plan.NotifyPolicyTipCustomDialog.ValueString()
+	}
+	if !config.NotifyPolicyTipCustomText.IsNull() {
+		p.NotifyPolicyTipCustomText = plan.NotifyPolicyTipCustomText.ValueString()
+	}
+	if !config.NotifyPolicyTipCustomTextTranslations.IsNull() {
+		if v := toStringSlice(ctx, plan.NotifyPolicyTipCustomTextTranslations, &resp.Diagnostics); len(v) > 0 {
+			p.NotifyPolicyTipCustomTextTranslations = v
+		}
+	}
+	if v := config.NotifyPolicyTipDisplayOption.ValueString(); v != "" {
+		p.NotifyPolicyTipDisplayOption = objectParam(v)
+	}
+	if !config.NotifyPolicyTipUrl.IsNull() {
+		p.NotifyPolicyTipUrl = plan.NotifyPolicyTipUrl.ValueString()
 	}
-	if v := plan.DocumentContainsWords.ValueString(); v != "" {
-		p.DocumentContainsWords = v
+	if !config.NotifyUser.IsNull() {
+		if v := toStringSlice(ctx, plan.NotifyUser, &resp.Diagnostics); len(v) > 0 {
+			p.NotifyUser = v
+		}
+	}
+	if v := config.NotifyUserType.ValueString(); v != "" {
+		p.NotifyUserType = objectParam(v)
 	}
-	if v := plan.DocumentCreatedBy.ValueString(); v != "" {
-		p.DocumentCreatedBy = v
+	if v := config.OnPremisesScannerDlpRestrictions.ValueString(); v != "" {
+		p.OnPremisesScannerDlpRestrictions = objectParam(v)
+	}
+	if v := config.Policy.ValueString(); v != "" {
+		p.Policy = objectParam(v)
+	}
+	if !config.PowerBIDlpRestrictions.IsNull() {
+		if v := toStringSlice(ctx, plan.PowerBIDlpRestrictions, &resp.Diagnostics); len(v) > 0 {
+			p.PowerBIDlpRestrictions = v
+		}
+	}
+	if !config.PrependSubject.IsNull() {
+		p.PrependSubject = plan.PrependSubject.ValueString()
+	}
+	if !config.Priority.IsNull() {
+		if !plan.Priority.IsUnknown() {
+			p.Priority = plan.Priority.ValueInt64Pointer()
+		}
+	}
+	if !config.ProcessingLimitExceeded.IsNull() {
+		if !plan.ProcessingLimitExceeded.IsUnknown() {
+			p.ProcessingLimitExceeded = plan.ProcessingLimitExceeded.ValueBoolPointer()
+		}
 	}
-	if v := plan.DocumentMatchesPatterns.ValueString(); v != "" {
-		p.DocumentMatchesPatterns = v
+	if !config.Quarantine.IsNull() {
+		if !plan.Quarantine.IsUnknown() {
+			p.Quarantine = plan.Quarantine.ValueBoolPointer()
+		}
+	}
+	if v := config.RecipientADAttributeContainsWords.ValueString(); v != "" {
+		p.RecipientADAttributeContainsWords = objectParam(v)
 	}
-	if v := plan.DocumentNameMatchesPatterns.ValueString(); v != "" {
-		p.DocumentNameMatchesPatterns = v
+	if v := config.RecipientADAttributeMatchesPatterns.ValueString(); v != "" {
+		p.RecipientADAttributeMatchesPatterns = objectParam(v)
 	}
-	if v := plan.DocumentNameMatchesWords.ValueString(); v != "" {
-		p.DocumentNameMatchesWords = v
+	if !config.RecipientDomainIs.IsNull() {
+		if v := toStringSlice(ctx, plan.RecipientDomainIs, &resp.Diagnostics); len(v) > 0 {
+			p.RecipientDomainIs = v
+		}
 	}
-	if v := plan.DocumentSizeOver.ValueString(); v != "" {
-		p.DocumentSizeOver = v
+	if v := config.RedactSensitiveInfo.ValueString(); v != "" {
+		p.RedactSensitiveInfo = objectParam(v)
 	}
-	if v := plan.EncryptRMSTemplate.ValueString(); v != "" {
-		p.EncryptRMSTemplate = v
+	if !config.RedirectMessageTo.IsNull() {
+		if v := toStringSlice(ctx, plan.RedirectMessageTo, &resp.Diagnostics); len(v) > 0 {
+			p.RedirectMessageTo = v
+		}
 	}
-	if v := plan.ExceptIfAccessScope.ValueString(); v != "" {
-		p.ExceptIfAccessScope = v
-	}
-	if v := plan.ExceptIfAnyOfRecipientAddressContainsWords.ValueString(); v != "" {
-		p.ExceptIfAnyOfRecipientAddressContainsWords = v
-	}
-	if v := plan.ExceptIfAnyOfRecipientAddressMatchesPatterns.ValueString(); v != "" {
-		p.ExceptIfAnyOfRecipientAddressMatchesPatterns = v
-	}
-	if v := plan.ExceptIfContentCharacterSetContainsWords.ValueString(); v != "" {
-		p.ExceptIfContentCharacterSetContainsWords = v
-	}
-	if v := plan.ExceptIfContentExtensionMatchesWords.ValueString(); v != "" {
-		p.ExceptIfContentExtensionMatchesWords = v
-	}
-	if v := plan.ExceptIfContentFileTypeMatches.ValueString(); v != "" {
-		p.ExceptIfContentFileTypeMatches = v
-	}
-	if v := plan.ExceptIfContentPropertyContainsWords.ValueString(); v != "" {
-		p.ExceptIfContentPropertyContainsWords = v
-	}
-	if v := plan.ExceptIfContextPropertiesContainWords.ValueString(); v != "" {
-		p.ExceptIfContextPropertiesContainWords = v
-	}
-	if v := plan.ExceptIfDeviceManagementType.ValueString(); v != "" {
-		p.ExceptIfDeviceManagementType = v
-	}
-	if v := plan.ExceptIfDocumentContainsWords.ValueString(); v != "" {
-		p.ExceptIfDocumentContainsWords = v
-	}
-	if v := plan.ExceptIfDocumentCreatedBy.ValueString(); v != "" {
-		p.ExceptIfDocumentCreatedBy = v
-	}
-	if v := plan.ExceptIfDocumentMatchesPatterns.ValueString(); v != "" {
-		p.ExceptIfDocumentMatchesPatterns = v
-	}
-	if v := plan.ExceptIfDocumentNameMatchesPatterns.ValueString(); v != "" {
-		p.ExceptIfDocumentNameMatchesPatterns = v
-	}
-	if v := plan.ExceptIfDocumentNameMatchesWords.ValueString(); v != "" {
-		p.ExceptIfDocumentNameMatchesWords = v
-	}
-	if v := plan.ExceptIfDocumentSizeOver.ValueString(); v != "" {
-		p.ExceptIfDocumentSizeOver = v
-	}
-	if v := plan.ExceptIfFromAddressContainsWords.ValueString(); v != "" {
-		p.ExceptIfFromAddressContainsWords = v
-	}
-	if v := plan.ExceptIfFromAddressMatchesPatterns.ValueString(); v != "" {
-		p.ExceptIfFromAddressMatchesPatterns = v
-	}
-	if v := plan.ExceptIfFromScope.ValueString(); v != "" {
-		p.ExceptIfFromScope = v
-	}
-	if v := plan.ExceptIfHeaderContainsTokens.ValueString(); v != "" {
-		p.ExceptIfHeaderContainsTokens = v
-	}
-	if v := plan.ExceptIfHeaderContainsWords.ValueString(); v != "" {
-		p.ExceptIfHeaderContainsWords = v
-	}
-	if v := plan.ExceptIfHeaderMatchesPatterns.ValueString(); v != "" {
-		p.ExceptIfHeaderMatchesPatterns = v
-	}
-	if v := plan.ExceptIfMessageLabelChangeDetected.ValueString(); v != "" {
-		p.ExceptIfMessageLabelChangeDetected = v
-	}
-	if v := plan.ExceptIfMessageSizeOver.ValueString(); v != "" {
-		p.ExceptIfMessageSizeOver = v
-	}
-	if v := plan.ExceptIfMessageTypeMatches.ValueString(); v != "" {
-		p.ExceptIfMessageTypeMatches = v
-	}
-	if v := plan.ExceptIfRecipientADAttributeContainsWords.ValueString(); v != "" {
-		p.ExceptIfRecipientADAttributeContainsWords = v
-	}
-	if v := plan.ExceptIfRecipientADAttributeMatchesPatterns.ValueString(); v != "" {
-		p.ExceptIfRecipientADAttributeMatchesPatterns = v
-	}
-	if v := plan.ExceptIfRecipientDomainIs.ValueString(); v != "" {
-		p.ExceptIfRecipientDomainIs = v
-	}
-	if v := plan.ExceptIfSenderADAttributeContainsWords.ValueString(); v != "" {
-		p.ExceptIfSenderADAttributeContainsWords = v
-	}
-	if v := plan.ExceptIfSenderADAttributeMatchesPatterns.ValueString(); v != "" {
-		p.ExceptIfSenderADAttributeMatchesPatterns = v
-	}
-	if v := plan.ExceptIfSenderDomainIs.ValueString(); v != "" {
-		p.ExceptIfSenderDomainIs = v
-	}
-	if v := plan.ExceptIfSenderIPRanges.ValueString(); v != "" {
-		p.ExceptIfSenderIPRanges = v
-	}
-	if v := plan.ExceptIfSentTo.ValueString(); v != "" {
-		p.ExceptIfSentTo = v
-	}
-	if v := plan.ExceptIfSharedWithDomain.ValueString(); v != "" {
-		p.ExceptIfSharedWithDomain = v
-	}
-	if v := plan.ExceptIfSubjectContainsWords.ValueString(); v != "" {
-		p.ExceptIfSubjectContainsWords = v
-	}
-	if v := plan.ExceptIfSubjectMatchesPatterns.ValueString(); v != "" {
-		p.ExceptIfSubjectMatchesPatterns = v
-	}
-	if v := plan.ExceptIfSubjectOrBodyContainsWords.ValueString(); v != "" {
-		p.ExceptIfSubjectOrBodyContainsWords = v
-	}
-	if v := plan.ExceptIfSubjectOrBodyMatchesPatterns.ValueString(); v != "" {
-		p.ExceptIfSubjectOrBodyMatchesPatterns = v
-	}
-	if v := plan.ExceptIfTeamsSharedWithParticipantCategory.ValueString(); v != "" {
-		p.ExceptIfTeamsSharedWithParticipantCategory = v
-	}
-	if v := plan.ExceptIfUnscannableDocumentExtensionIs.ValueString(); v != "" {
-		p.ExceptIfUnscannableDocumentExtensionIs = v
-	}
-	if v := plan.ExceptIfUrlContainsText.ValueString(); v != "" {
-		p.ExceptIfUrlContainsText = v
-	}
-	if v := plan.ExceptIfWithImportance.ValueString(); v != "" {
-		p.ExceptIfWithImportance = v
-	}
-	if v := plan.ExpiryDate.ValueString(); v != "" {
-		p.ExpiryDate = v
-	}
-	if v := plan.FromAddressContainsWords.ValueString(); v != "" {
-		p.FromAddressContainsWords = v
-	}
-	if v := plan.FromAddressMatchesPatterns.ValueString(); v != "" {
-		p.FromAddressMatchesPatterns = v
-	}
-	if v := plan.FromScope.ValueString(); v != "" {
-		p.FromScope = v
-	}
-	if v := plan.GenerateAlert.ValueString(); v != "" {
-		p.GenerateAlert = v
-	}
-	if v := plan.GenerateIncidentReport.ValueString(); v != "" {
-		p.GenerateIncidentReport = v
-	}
-	if v := plan.HasActivity.ValueString(); v != "" {
-		p.HasActivity = v
-	}
-	if v := plan.HasLabelDowngradedFrom.ValueString(); v != "" {
-		p.HasLabelDowngradedFrom = v
-	}
-	if v := plan.HeaderContainsTokens.ValueString(); v != "" {
-		p.HeaderContainsTokens = v
-	}
-	if v := plan.HeaderContainsWords.ValueString(); v != "" {
-		p.HeaderContainsWords = v
-	}
-	if v := plan.HeaderMatchesPatterns.ValueString(); v != "" {
-		p.HeaderMatchesPatterns = v
-	}
-	if v := plan.ImmutableId.ValueString(); v != "" {
-		p.ImmutableId = v
-	}
-	if v := plan.MapRecipients.ValueString(); v != "" {
-		p.MapRecipients = v
-	}
-	if v := plan.MessageLabelChangeDetected.ValueString(); v != "" {
-		p.MessageLabelChangeDetected = v
-	}
-	if v := plan.MessageSizeOver.ValueString(); v != "" {
-		p.MessageSizeOver = v
-	}
-	if v := plan.MessageTypeMatches.ValueString(); v != "" {
-		p.MessageTypeMatches = v
-	}
-	if v := plan.Moderate.ValueString(); v != "" {
-		p.Moderate = v
-	}
-	if v := plan.ModifySubject.ValueString(); v != "" {
-		p.ModifySubject = v
-	}
-	if v := plan.NonBifurcatingAccessScope.ValueString(); v != "" {
-		p.NonBifurcatingAccessScope = v
-	}
-	if v := plan.NotifyEmailOnedriveRemediationActions.ValueString(); v != "" {
-		p.NotifyEmailOnedriveRemediationActions = v
-	}
-	if v := plan.NotifyEndpointUser.ValueString(); v != "" {
-		p.NotifyEndpointUser = v
-	}
-	if v := plan.NotifyJustificationCustomTextTranslations.ValueString(); v != "" {
-		p.NotifyJustificationCustomTextTranslations = v
-	}
-	if v := plan.NotifyOverrideRequirements.ValueString(); v != "" {
-		p.NotifyOverrideRequirements = v
-	}
-	if v := plan.NotifyPolicyTipCustomTextTranslations.ValueString(); v != "" {
-		p.NotifyPolicyTipCustomTextTranslations = v
-	}
-	if v := plan.NotifyPolicyTipDisplayOption.ValueString(); v != "" {
-		p.NotifyPolicyTipDisplayOption = v
-	}
-	if v := plan.NotifyUser.ValueString(); v != "" {
-		p.NotifyUser = v
-	}
-	if v := plan.NotifyUserType.ValueString(); v != "" {
-		p.NotifyUserType = v
-	}
-	if v := plan.Policy.ValueString(); v != "" {
-		p.Policy = v
-	}
-	if v := plan.Priority.ValueString(); v != "" {
-		p.Priority = v
-	}
-	if v := plan.RecipientADAttributeContainsWords.ValueString(); v != "" {
-		p.RecipientADAttributeContainsWords = v
-	}
-	if v := plan.RecipientADAttributeMatchesPatterns.ValueString(); v != "" {
-		p.RecipientADAttributeMatchesPatterns = v
-	}
-	if v := plan.RecipientDomainIs.ValueString(); v != "" {
-		p.RecipientDomainIs = v
-	}
-	if v := plan.RedactSensitiveInfo.ValueString(); v != "" {
-		p.RedactSensitiveInfo = v
-	}
-	if v := plan.RemoveHeader.ValueString(); v != "" {
-		p.RemoveHeader = v
-	}
-	if v := plan.ReportSeverityLevel.ValueString(); v != "" {
-		p.ReportSeverityLevel = v
-	}
-	if v := plan.RuleErrorAction.ValueString(); v != "" {
-		p.RuleErrorAction = v
-	}
-	if v := plan.SenderADAttributeContainsWords.ValueString(); v != "" {
-		p.SenderADAttributeContainsWords = v
-	}
-	if v := plan.SenderADAttributeMatchesPatterns.ValueString(); v != "" {
-		p.SenderADAttributeMatchesPatterns = v
-	}
-	if v := plan.SenderAddressLocation.ValueString(); v != "" {
-		p.SenderAddressLocation = v
-	}
-	if v := plan.SenderDomainIs.ValueString(); v != "" {
-		p.SenderDomainIs = v
-	}
-	if v := plan.SenderIPRanges.ValueString(); v != "" {
-		p.SenderIPRanges = v
-	}
-	if v := plan.SenderType.ValueString(); v != "" {
-		p.SenderType = v
-	}
-	if v := plan.SentTo.ValueString(); v != "" {
-		p.SentTo = v
-	}
-	if v := plan.SetHeader.ValueString(); v != "" {
-		p.SetHeader = v
-	}
-	if v := plan.SharedByIRMAgentRisk.ValueString(); v != "" {
-		p.SharedByIRMAgentRisk = v
-	}
-	if v := plan.SharedByIRMUserRisk.ValueString(); v != "" {
-		p.SharedByIRMUserRisk = v
-	}
-	if v := plan.SharedWithDomain.ValueString(); v != "" {
-		p.SharedWithDomain = v
-	}
-	if v := plan.SharepointBlockDomains.ValueString(); v != "" {
-		p.SharepointBlockDomains = v
-	}
-	if v := plan.SharepointBlockDomainsExcept.ValueString(); v != "" {
-		p.SharepointBlockDomainsExcept = v
-	}
-	if v := plan.SharepointBlockUsers.ValueString(); v != "" {
-		p.SharepointBlockUsers = v
-	}
-	if v := plan.SharepointBlockUsersExcept.ValueString(); v != "" {
-		p.SharepointBlockUsersExcept = v
-	}
-	if v := plan.SubjectContainsWords.ValueString(); v != "" {
-		p.SubjectContainsWords = v
-	}
-	if v := plan.SubjectMatchesPatterns.ValueString(); v != "" {
-		p.SubjectMatchesPatterns = v
-	}
-	if v := plan.SubjectOrBodyContainsWords.ValueString(); v != "" {
-		p.SubjectOrBodyContainsWords = v
-	}
-	if v := plan.SubjectOrBodyMatchesPatterns.ValueString(); v != "" {
-		p.SubjectOrBodyMatchesPatterns = v
-	}
-	if v := plan.TeamsSharedWithParticipantCategory.ValueString(); v != "" {
-		p.TeamsSharedWithParticipantCategory = v
-	}
-	if v := plan.UnscannableDocumentExtensionIs.ValueString(); v != "" {
-		p.UnscannableDocumentExtensionIs = v
-	}
-	if v := plan.UrlContainsText.ValueString(); v != "" {
-		p.UrlContainsText = v
-	}
-	if v := plan.WithImportance.ValueString(); v != "" {
-		p.WithImportance = v
+	if !config.RemoveHeader.IsNull() {
+		if v := toStringSlice(ctx, plan.RemoveHeader, &resp.Diagnostics); len(v) > 0 {
+			p.RemoveHeader = v
+		}
+	}
+	if !config.RemoveRMSTemplate.IsNull() {
+		if !plan.RemoveRMSTemplate.IsUnknown() {
+			p.RemoveRMSTemplate = plan.RemoveRMSTemplate.ValueBoolPointer()
+		}
+	}
+	if v := config.ReportSeverityLevel.ValueString(); v != "" {
+		p.ReportSeverityLevel = objectParam(v)
+	}
+	if v := config.RestrictAccess.ValueString(); v != "" {
+		p.RestrictAccess = objectParam(v)
+	}
+	if !config.RestrictBrowserAccess.IsNull() {
+		if !plan.RestrictBrowserAccess.IsUnknown() {
+			p.RestrictBrowserAccess = plan.RestrictBrowserAccess.ValueBoolPointer()
+		}
+	}
+	if !config.RestrictWebGrounding.IsNull() {
+		if !plan.RestrictWebGrounding.IsUnknown() {
+			p.RestrictWebGrounding = plan.RestrictWebGrounding.ValueBoolPointer()
+		}
+	}
+	if v := config.RuleErrorAction.ValueString(); v != "" {
+		p.RuleErrorAction = objectParam(v)
+	}
+	if v := config.SenderADAttributeContainsWords.ValueString(); v != "" {
+		p.SenderADAttributeContainsWords = objectParam(v)
+	}
+	if v := config.SenderADAttributeMatchesPatterns.ValueString(); v != "" {
+		p.SenderADAttributeMatchesPatterns = objectParam(v)
+	}
+	if v := config.SenderAddressLocation.ValueString(); v != "" {
+		p.SenderAddressLocation = objectParam(v)
+	}
+	if !config.SenderDomainIs.IsNull() {
+		if v := toStringSlice(ctx, plan.SenderDomainIs, &resp.Diagnostics); len(v) > 0 {
+			p.SenderDomainIs = v
+		}
+	}
+	if !config.SenderIPRanges.IsNull() {
+		if v := toStringSlice(ctx, plan.SenderIPRanges, &resp.Diagnostics); len(v) > 0 {
+			p.SenderIPRanges = v
+		}
+	}
+	if v := config.SenderType.ValueString(); v != "" {
+		p.SenderType = objectParam(v)
+	}
+	if !config.SentTo.IsNull() {
+		if v := toStringSlice(ctx, plan.SentTo, &resp.Diagnostics); len(v) > 0 {
+			p.SentTo = v
+		}
+	}
+	if !config.SentToMemberOf.IsNull() {
+		if v := toStringSlice(ctx, plan.SentToMemberOf, &resp.Diagnostics); len(v) > 0 {
+			p.SentToMemberOf = v
+		}
+	}
+	if v := config.SetHeader.ValueString(); v != "" {
+		p.SetHeader = objectParam(v)
+	}
+	if v := config.SharedByIRMAgentRisk.ValueString(); v != "" {
+		p.SharedByIRMAgentRisk = objectParam(v)
+	}
+	if !config.SharedByIRMUserRisk.IsNull() {
+		if v := toStringSlice(ctx, plan.SharedByIRMUserRisk, &resp.Diagnostics); len(v) > 0 {
+			p.SharedByIRMUserRisk = v
+		}
+	}
+	if v := config.SharedWithDomain.ValueString(); v != "" {
+		p.SharedWithDomain = objectParam(v)
+	}
+	if v := config.SharepointBlockDomains.ValueString(); v != "" {
+		p.SharepointBlockDomains = objectParam(v)
+	}
+	if v := config.SharepointBlockDomainsExcept.ValueString(); v != "" {
+		p.SharepointBlockDomainsExcept = objectParam(v)
+	}
+	if !config.SharepointBlockDomainsOrUsers.IsNull() {
+		if !plan.SharepointBlockDomainsOrUsers.IsUnknown() {
+			p.SharepointBlockDomainsOrUsers = plan.SharepointBlockDomainsOrUsers.ValueBoolPointer()
+		}
+	}
+	if v := config.SharepointBlockUsers.ValueString(); v != "" {
+		p.SharepointBlockUsers = objectParam(v)
+	}
+	if v := config.SharepointBlockUsersExcept.ValueString(); v != "" {
+		p.SharepointBlockUsersExcept = objectParam(v)
+	}
+	if !config.SharepointMoveToQuarantineLocation.IsNull() {
+		if !plan.SharepointMoveToQuarantineLocation.IsUnknown() {
+			p.SharepointMoveToQuarantineLocation = plan.SharepointMoveToQuarantineLocation.ValueBoolPointer()
+		}
+	}
+	if !config.StopPolicyProcessing.IsNull() {
+		if !plan.StopPolicyProcessing.IsUnknown() {
+			p.StopPolicyProcessing = plan.StopPolicyProcessing.ValueBoolPointer()
+		}
+	}
+	if !config.SubjectContainsWords.IsNull() {
+		if v := toStringSlice(ctx, plan.SubjectContainsWords, &resp.Diagnostics); len(v) > 0 {
+			p.SubjectContainsWords = v
+		}
+	}
+	if !config.SubjectMatchesPatterns.IsNull() {
+		if v := toStringSlice(ctx, plan.SubjectMatchesPatterns, &resp.Diagnostics); len(v) > 0 {
+			p.SubjectMatchesPatterns = v
+		}
+	}
+	if !config.SubjectOrBodyContainsWords.IsNull() {
+		if v := toStringSlice(ctx, plan.SubjectOrBodyContainsWords, &resp.Diagnostics); len(v) > 0 {
+			p.SubjectOrBodyContainsWords = v
+		}
+	}
+	if !config.SubjectOrBodyMatchesPatterns.IsNull() {
+		if v := toStringSlice(ctx, plan.SubjectOrBodyMatchesPatterns, &resp.Diagnostics); len(v) > 0 {
+			p.SubjectOrBodyMatchesPatterns = v
+		}
+	}
+	if v := config.TeamsSharedWithParticipantCategory.ValueString(); v != "" {
+		p.TeamsSharedWithParticipantCategory = objectParam(v)
+	}
+	if !config.ThirdPartyAppDlpRestrictions.IsNull() {
+		if v := toStringSlice(ctx, plan.ThirdPartyAppDlpRestrictions, &resp.Diagnostics); len(v) > 0 {
+			p.ThirdPartyAppDlpRestrictions = v
+		}
+	}
+	if !config.TriggerPowerAutomateFlow.IsNull() {
+		p.TriggerPowerAutomateFlow = plan.TriggerPowerAutomateFlow.ValueString()
+	}
+	if !config.UnscannableDocumentExtensionIs.IsNull() {
+		if v := toStringSlice(ctx, plan.UnscannableDocumentExtensionIs, &resp.Diagnostics); len(v) > 0 {
+			p.UnscannableDocumentExtensionIs = v
+		}
+	}
+	if v := config.UrlContainsText.ValueString(); v != "" {
+		p.UrlContainsText = objectParam(v)
+	}
+	if !config.ValidateRule.IsNull() {
+		if !plan.ValidateRule.IsUnknown() {
+			p.ValidateRule = plan.ValidateRule.ValueBoolPointer()
+		}
+	}
+	if v := config.WithImportance.ValueString(); v != "" {
+		p.WithImportance = objectParam(v)
 	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	res, err := r.client.SCC.NewDlpComplianceRule(ctx, p)
+	res, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.NewDlpComplianceRule, p, isNotFound)
 	if err != nil {
 		resp.Diagnostics.AddError("New-DlpComplianceRule failed", err.Error())
 		return
@@ -933,573 +1261,1498 @@ func (r *dlpComplianceRuleResource) Update(ctx context.Context, req resource.Upd
 	id := r.identityOf(state)
 	sp := purview.SetDlpComplianceRuleParams{}
 	sp.Identity = id
-	if v := plan.AccessScope.ValueString(); v != "" {
-		sp.AccessScope = v
-	}
-	if v := plan.AccessTimeControl.ValueString(); v != "" {
-		sp.AccessTimeControl = v
-	}
-	sp.AccessedBy = toStringSlice(ctx, plan.AccessedBy, &resp.Diagnostics)
-	sp.AccessedByMemberOf = toStringSlice(ctx, plan.AccessedByMemberOf, &resp.Diagnostics)
-	if v := plan.ActivationDate.ValueString(); v != "" {
-		sp.ActivationDate = v
-	}
-	if v := plan.AddRecipients.ValueString(); v != "" {
-		sp.AddRecipients = v
-	}
-	sp.AdvancedRule = plan.AdvancedRule.ValueString()
-	if v := plan.AlertProperties.ValueString(); v != "" {
-		sp.AlertProperties = v
-	}
-	if v := plan.AnyOfRecipientAddressContainsWords.ValueString(); v != "" {
-		sp.AnyOfRecipientAddressContainsWords = v
-	}
-	if v := plan.AnyOfRecipientAddressMatchesPatterns.ValueString(); v != "" {
-		sp.AnyOfRecipientAddressMatchesPatterns = v
-	}
-	sp.ApplyBrandingTemplate = plan.ApplyBrandingTemplate.ValueString()
-	if v := plan.ApplyHtmlDisclaimer.ValueString(); v != "" {
-		sp.ApplyHtmlDisclaimer = v
-	}
-	if v := plan.AttachmentCountOver.ValueString(); v != "" {
-		sp.AttachmentCountOver = v
-	}
-	sp.AttachmentIsNotLabeled = plan.AttachmentIsNotLabeled.ValueBool()
-	sp.BlockAccess = plan.BlockAccess.ValueBool()
-	if v := plan.BlockAccessScope.ValueString(); v != "" {
-		sp.BlockAccessScope = v
-	}
-	sp.Comment = plan.Comment.ValueString()
-	if v := plan.ContentCharacterSetContainsWords.ValueString(); v != "" {
-		sp.ContentCharacterSetContainsWords = v
-	}
-	sp.ContentContainsSensitiveInformation = toStringSlice(ctx, plan.ContentContainsSensitiveInformation, &resp.Diagnostics)
-	if v := plan.ContentExtensionMatchesWords.ValueString(); v != "" {
-		sp.ContentExtensionMatchesWords = v
-	}
-	if v := plan.ContentFileTypeMatches.ValueString(); v != "" {
-		sp.ContentFileTypeMatches = v
-	}
-	sp.ContentIsNotLabeled = plan.ContentIsNotLabeled.ValueBool()
-	sp.ContentIsShared = plan.ContentIsShared.ValueBool()
-	if v := plan.ContentMissingSensitivityLabel.ValueString(); v != "" {
-		sp.ContentMissingSensitivityLabel = v
-	}
-	if v := plan.ContentPropertyContainsWords.ValueString(); v != "" {
-		sp.ContentPropertyContainsWords = v
-	}
-	if v := plan.ContextPropertiesContainWords.ValueString(); v != "" {
-		sp.ContextPropertiesContainWords = v
-	}
-	if v := plan.DeviceManagementType.ValueString(); v != "" {
-		sp.DeviceManagementType = v
-	}
-	sp.Disabled = plan.Disabled.ValueBool()
-	sp.DisplayName = plan.DisplayName.ValueString()
-	if v := plan.DocumentContainsWords.ValueString(); v != "" {
-		sp.DocumentContainsWords = v
-	}
-	if v := plan.DocumentCreatedBy.ValueString(); v != "" {
-		sp.DocumentCreatedBy = v
-	}
-	sp.DocumentCreatedByMemberOf = toStringSlice(ctx, plan.DocumentCreatedByMemberOf, &resp.Diagnostics)
-	sp.DocumentIsPasswordProtected = plan.DocumentIsPasswordProtected.ValueBool()
-	sp.DocumentIsUnsupported = plan.DocumentIsUnsupported.ValueBool()
-	if v := plan.DocumentMatchesPatterns.ValueString(); v != "" {
-		sp.DocumentMatchesPatterns = v
-	}
-	if v := plan.DocumentNameMatchesPatterns.ValueString(); v != "" {
-		sp.DocumentNameMatchesPatterns = v
-	}
-	if v := plan.DocumentNameMatchesWords.ValueString(); v != "" {
-		sp.DocumentNameMatchesWords = v
-	}
-	if v := plan.DocumentSizeOver.ValueString(); v != "" {
-		sp.DocumentSizeOver = v
-	}
-	if v := plan.EncryptRMSTemplate.ValueString(); v != "" {
-		sp.EncryptRMSTemplate = v
-	}
-	sp.EndpointDlpBrowserRestrictions = toStringSlice(ctx, plan.EndpointDlpBrowserRestrictions, &resp.Diagnostics)
-	sp.EndpointDlpRestrictions = toStringSlice(ctx, plan.EndpointDlpRestrictions, &resp.Diagnostics)
-	sp.EnforcePortalAccess = plan.EnforcePortalAccess.ValueBool()
-	sp.EvaluateRulePerComponent = plan.EvaluateRulePerComponent.ValueBool()
-	if v := plan.ExceptIfAccessScope.ValueString(); v != "" {
-		sp.ExceptIfAccessScope = v
-	}
-	sp.ExceptIfAccessedBy = toStringSlice(ctx, plan.ExceptIfAccessedBy, &resp.Diagnostics)
-	sp.ExceptIfAccessedByMemberOf = toStringSlice(ctx, plan.ExceptIfAccessedByMemberOf, &resp.Diagnostics)
-	if v := plan.ExceptIfAnyOfRecipientAddressContainsWords.ValueString(); v != "" {
-		sp.ExceptIfAnyOfRecipientAddressContainsWords = v
-	}
-	if v := plan.ExceptIfAnyOfRecipientAddressMatchesPatterns.ValueString(); v != "" {
-		sp.ExceptIfAnyOfRecipientAddressMatchesPatterns = v
-	}
-	if v := plan.ExceptIfContentCharacterSetContainsWords.ValueString(); v != "" {
-		sp.ExceptIfContentCharacterSetContainsWords = v
-	}
-	sp.ExceptIfContentContainsSensitiveInformation = toStringSlice(ctx, plan.ExceptIfContentContainsSensitiveInformation, &resp.Diagnostics)
-	if v := plan.ExceptIfContentExtensionMatchesWords.ValueString(); v != "" {
-		sp.ExceptIfContentExtensionMatchesWords = v
-	}
-	if v := plan.ExceptIfContentFileTypeMatches.ValueString(); v != "" {
-		sp.ExceptIfContentFileTypeMatches = v
-	}
-	sp.ExceptIfContentIsShared = plan.ExceptIfContentIsShared.ValueBool()
-	if v := plan.ExceptIfContentPropertyContainsWords.ValueString(); v != "" {
-		sp.ExceptIfContentPropertyContainsWords = v
-	}
-	if v := plan.ExceptIfContextPropertiesContainWords.ValueString(); v != "" {
-		sp.ExceptIfContextPropertiesContainWords = v
-	}
-	if v := plan.ExceptIfDeviceManagementType.ValueString(); v != "" {
-		sp.ExceptIfDeviceManagementType = v
-	}
-	if v := plan.ExceptIfDocumentContainsWords.ValueString(); v != "" {
-		sp.ExceptIfDocumentContainsWords = v
-	}
-	if v := plan.ExceptIfDocumentCreatedBy.ValueString(); v != "" {
-		sp.ExceptIfDocumentCreatedBy = v
-	}
-	sp.ExceptIfDocumentCreatedByMemberOf = toStringSlice(ctx, plan.ExceptIfDocumentCreatedByMemberOf, &resp.Diagnostics)
-	sp.ExceptIfDocumentIsPasswordProtected = plan.ExceptIfDocumentIsPasswordProtected.ValueBool()
-	sp.ExceptIfDocumentIsUnsupported = plan.ExceptIfDocumentIsUnsupported.ValueBool()
-	if v := plan.ExceptIfDocumentMatchesPatterns.ValueString(); v != "" {
-		sp.ExceptIfDocumentMatchesPatterns = v
-	}
-	if v := plan.ExceptIfDocumentNameMatchesPatterns.ValueString(); v != "" {
-		sp.ExceptIfDocumentNameMatchesPatterns = v
-	}
-	if v := plan.ExceptIfDocumentNameMatchesWords.ValueString(); v != "" {
-		sp.ExceptIfDocumentNameMatchesWords = v
-	}
-	if v := plan.ExceptIfDocumentSizeOver.ValueString(); v != "" {
-		sp.ExceptIfDocumentSizeOver = v
-	}
-	sp.ExceptIfFrom = toStringSlice(ctx, plan.ExceptIfFrom, &resp.Diagnostics)
-	if v := plan.ExceptIfFromAddressContainsWords.ValueString(); v != "" {
-		sp.ExceptIfFromAddressContainsWords = v
-	}
-	if v := plan.ExceptIfFromAddressMatchesPatterns.ValueString(); v != "" {
-		sp.ExceptIfFromAddressMatchesPatterns = v
-	}
-	sp.ExceptIfFromMemberOf = toStringSlice(ctx, plan.ExceptIfFromMemberOf, &resp.Diagnostics)
-	if v := plan.ExceptIfFromScope.ValueString(); v != "" {
-		sp.ExceptIfFromScope = v
-	}
-	sp.ExceptIfHasSenderOverride = plan.ExceptIfHasSenderOverride.ValueBool()
-	if v := plan.ExceptIfHeaderContainsTokens.ValueString(); v != "" {
-		sp.ExceptIfHeaderContainsTokens = v
-	}
-	if v := plan.ExceptIfHeaderContainsWords.ValueString(); v != "" {
-		sp.ExceptIfHeaderContainsWords = v
-	}
-	if v := plan.ExceptIfHeaderMatchesPatterns.ValueString(); v != "" {
-		sp.ExceptIfHeaderMatchesPatterns = v
-	}
-	if v := plan.ExceptIfMessageLabelChangeDetected.ValueString(); v != "" {
-		sp.ExceptIfMessageLabelChangeDetected = v
-	}
-	if v := plan.ExceptIfMessageSizeOver.ValueString(); v != "" {
-		sp.ExceptIfMessageSizeOver = v
-	}
-	if v := plan.ExceptIfMessageTypeMatches.ValueString(); v != "" {
-		sp.ExceptIfMessageTypeMatches = v
-	}
-	sp.ExceptIfProcessingLimitExceeded = plan.ExceptIfProcessingLimitExceeded.ValueBool()
-	if v := plan.ExceptIfRecipientADAttributeContainsWords.ValueString(); v != "" {
-		sp.ExceptIfRecipientADAttributeContainsWords = v
-	}
-	if v := plan.ExceptIfRecipientADAttributeMatchesPatterns.ValueString(); v != "" {
-		sp.ExceptIfRecipientADAttributeMatchesPatterns = v
-	}
-	if v := plan.ExceptIfRecipientDomainIs.ValueString(); v != "" {
-		sp.ExceptIfRecipientDomainIs = v
-	}
-	if v := plan.ExceptIfSenderADAttributeContainsWords.ValueString(); v != "" {
-		sp.ExceptIfSenderADAttributeContainsWords = v
-	}
-	if v := plan.ExceptIfSenderADAttributeMatchesPatterns.ValueString(); v != "" {
-		sp.ExceptIfSenderADAttributeMatchesPatterns = v
-	}
-	if v := plan.ExceptIfSenderDomainIs.ValueString(); v != "" {
-		sp.ExceptIfSenderDomainIs = v
-	}
-	if v := plan.ExceptIfSenderIPRanges.ValueString(); v != "" {
-		sp.ExceptIfSenderIPRanges = v
-	}
-	if v := plan.ExceptIfSentTo.ValueString(); v != "" {
-		sp.ExceptIfSentTo = v
-	}
-	sp.ExceptIfSentToMemberOf = toStringSlice(ctx, plan.ExceptIfSentToMemberOf, &resp.Diagnostics)
-	if v := plan.ExceptIfSharedWithDomain.ValueString(); v != "" {
-		sp.ExceptIfSharedWithDomain = v
-	}
-	if v := plan.ExceptIfSubjectContainsWords.ValueString(); v != "" {
-		sp.ExceptIfSubjectContainsWords = v
-	}
-	if v := plan.ExceptIfSubjectMatchesPatterns.ValueString(); v != "" {
-		sp.ExceptIfSubjectMatchesPatterns = v
-	}
-	if v := plan.ExceptIfSubjectOrBodyContainsWords.ValueString(); v != "" {
-		sp.ExceptIfSubjectOrBodyContainsWords = v
-	}
-	if v := plan.ExceptIfSubjectOrBodyMatchesPatterns.ValueString(); v != "" {
-		sp.ExceptIfSubjectOrBodyMatchesPatterns = v
-	}
-	if v := plan.ExceptIfTeamsSharedWithParticipantCategory.ValueString(); v != "" {
-		sp.ExceptIfTeamsSharedWithParticipantCategory = v
-	}
-	if v := plan.ExceptIfUnscannableDocumentExtensionIs.ValueString(); v != "" {
-		sp.ExceptIfUnscannableDocumentExtensionIs = v
-	}
-	if v := plan.ExceptIfWithImportance.ValueString(); v != "" {
-		sp.ExceptIfWithImportance = v
-	}
-	if v := plan.ExpiryDate.ValueString(); v != "" {
-		sp.ExpiryDate = v
-	}
-	sp.From = toStringSlice(ctx, plan.From, &resp.Diagnostics)
-	if v := plan.FromAddressContainsWords.ValueString(); v != "" {
-		sp.FromAddressContainsWords = v
-	}
-	if v := plan.FromAddressMatchesPatterns.ValueString(); v != "" {
-		sp.FromAddressMatchesPatterns = v
-	}
-	sp.FromMemberOf = toStringSlice(ctx, plan.FromMemberOf, &resp.Diagnostics)
-	if v := plan.FromScope.ValueString(); v != "" {
-		sp.FromScope = v
-	}
-	if v := plan.GenerateAlert.ValueString(); v != "" {
-		sp.GenerateAlert = v
-	}
-	if v := plan.GenerateIncidentReport.ValueString(); v != "" {
-		sp.GenerateIncidentReport = v
-	}
-	if v := plan.HasActivity.ValueString(); v != "" {
-		sp.HasActivity = v
-	}
-	if v := plan.HasLabelDowngradedFrom.ValueString(); v != "" {
-		sp.HasLabelDowngradedFrom = v
-	}
-	sp.HasSenderOverride = plan.HasSenderOverride.ValueBool()
-	if v := plan.HeaderContainsTokens.ValueString(); v != "" {
-		sp.HeaderContainsTokens = v
-	}
-	if v := plan.HeaderContainsWords.ValueString(); v != "" {
-		sp.HeaderContainsWords = v
-	}
-	if v := plan.HeaderMatchesPatterns.ValueString(); v != "" {
-		sp.HeaderMatchesPatterns = v
-	}
-	sp.IncidentReportContent = toStringSlice(ctx, plan.IncidentReportContent, &resp.Diagnostics)
-	if v := plan.MapRecipients.ValueString(); v != "" {
-		sp.MapRecipients = v
-	}
-	sp.MessageIsNotLabeled = plan.MessageIsNotLabeled.ValueBool()
-	if v := plan.MessageLabelChangeDetected.ValueString(); v != "" {
-		sp.MessageLabelChangeDetected = v
-	}
-	if v := plan.MessageSizeOver.ValueString(); v != "" {
-		sp.MessageSizeOver = v
-	}
-	if v := plan.MessageTypeMatches.ValueString(); v != "" {
-		sp.MessageTypeMatches = v
-	}
-	sp.MipRestrictAccess = toStringSlice(ctx, plan.MipRestrictAccess, &resp.Diagnostics)
-	if v := plan.Moderate.ValueString(); v != "" {
-		sp.Moderate = v
-	}
-	if v := plan.ModifySubject.ValueString(); v != "" {
-		sp.ModifySubject = v
-	}
-	sp.MoveToQuarantineLocation = plan.MoveToQuarantineLocation.ValueBool()
-	if v := plan.NonBifurcatingAccessScope.ValueString(); v != "" {
-		sp.NonBifurcatingAccessScope = v
-	}
-	sp.NotifyAllowOverride = toStringSlice(ctx, plan.NotifyAllowOverride, &resp.Diagnostics)
-	sp.NotifyEmailCustomSenderDisplayName = plan.NotifyEmailCustomSenderDisplayName.ValueString()
-	sp.NotifyEmailCustomSubject = plan.NotifyEmailCustomSubject.ValueString()
-	sp.NotifyEmailCustomText = plan.NotifyEmailCustomText.ValueString()
-	sp.NotifyEmailExchangeIncludeAttachment = plan.NotifyEmailExchangeIncludeAttachment.ValueBool()
-	if v := plan.NotifyEmailOnedriveRemediationActions.ValueString(); v != "" {
-		sp.NotifyEmailOnedriveRemediationActions = v
-	}
-	if v := plan.NotifyEndpointUser.ValueString(); v != "" {
-		sp.NotifyEndpointUser = v
-	}
-	sp.NotifyJustificationCustomText = plan.NotifyJustificationCustomText.ValueString()
-	if v := plan.NotifyJustificationCustomTextTranslations.ValueString(); v != "" {
-		sp.NotifyJustificationCustomTextTranslations = v
-	}
-	if v := plan.NotifyOverrideRequirements.ValueString(); v != "" {
-		sp.NotifyOverrideRequirements = v
-	}
-	sp.NotifyPolicyTipCustomDialog = plan.NotifyPolicyTipCustomDialog.ValueString()
-	sp.NotifyPolicyTipCustomText = plan.NotifyPolicyTipCustomText.ValueString()
-	if v := plan.NotifyPolicyTipCustomTextTranslations.ValueString(); v != "" {
-		sp.NotifyPolicyTipCustomTextTranslations = v
-	}
-	if v := plan.NotifyPolicyTipDisplayOption.ValueString(); v != "" {
-		sp.NotifyPolicyTipDisplayOption = v
-	}
-	sp.NotifyPolicyTipUrl = plan.NotifyPolicyTipUrl.ValueString()
-	if v := plan.NotifyUser.ValueString(); v != "" {
-		sp.NotifyUser = v
-	}
-	if v := plan.NotifyUserType.ValueString(); v != "" {
-		sp.NotifyUserType = v
-	}
-	sp.OnPremisesScannerDlpRestrictions = toStringSlice(ctx, plan.OnPremisesScannerDlpRestrictions, &resp.Diagnostics)
-	sp.PowerBIDlpRestrictions = toStringSlice(ctx, plan.PowerBIDlpRestrictions, &resp.Diagnostics)
-	sp.PrependSubject = plan.PrependSubject.ValueString()
-	if v := plan.Priority.ValueString(); v != "" {
-		sp.Priority = v
-	}
-	sp.ProcessingLimitExceeded = plan.ProcessingLimitExceeded.ValueBool()
-	sp.Quarantine = plan.Quarantine.ValueBool()
-	if v := plan.RecipientADAttributeContainsWords.ValueString(); v != "" {
-		sp.RecipientADAttributeContainsWords = v
-	}
-	if v := plan.RecipientADAttributeMatchesPatterns.ValueString(); v != "" {
-		sp.RecipientADAttributeMatchesPatterns = v
-	}
-	if v := plan.RecipientDomainIs.ValueString(); v != "" {
-		sp.RecipientDomainIs = v
-	}
-	if v := plan.RedactSensitiveInfo.ValueString(); v != "" {
-		sp.RedactSensitiveInfo = v
-	}
-	sp.RedirectMessageTo = toStringSlice(ctx, plan.RedirectMessageTo, &resp.Diagnostics)
-	if v := plan.RemoveHeader.ValueString(); v != "" {
-		sp.RemoveHeader = v
-	}
-	sp.RemoveRMSTemplate = plan.RemoveRMSTemplate.ValueBool()
-	if v := plan.ReportSeverityLevel.ValueString(); v != "" {
-		sp.ReportSeverityLevel = v
-	}
-	sp.RestrictAccess = toStringSlice(ctx, plan.RestrictAccess, &resp.Diagnostics)
-	sp.RestrictBrowserAccess = plan.RestrictBrowserAccess.ValueBool()
-	sp.RestrictWebGrounding = plan.RestrictWebGrounding.ValueBool()
-	if v := plan.RuleErrorAction.ValueString(); v != "" {
-		sp.RuleErrorAction = v
-	}
-	if v := plan.SenderADAttributeContainsWords.ValueString(); v != "" {
-		sp.SenderADAttributeContainsWords = v
-	}
-	if v := plan.SenderADAttributeMatchesPatterns.ValueString(); v != "" {
-		sp.SenderADAttributeMatchesPatterns = v
-	}
-	if v := plan.SenderAddressLocation.ValueString(); v != "" {
-		sp.SenderAddressLocation = v
-	}
-	if v := plan.SenderDomainIs.ValueString(); v != "" {
-		sp.SenderDomainIs = v
-	}
-	if v := plan.SenderIPRanges.ValueString(); v != "" {
-		sp.SenderIPRanges = v
-	}
-	if v := plan.SenderType.ValueString(); v != "" {
-		sp.SenderType = v
-	}
-	if v := plan.SentTo.ValueString(); v != "" {
-		sp.SentTo = v
-	}
-	sp.SentToMemberOf = toStringSlice(ctx, plan.SentToMemberOf, &resp.Diagnostics)
-	if v := plan.SetHeader.ValueString(); v != "" {
-		sp.SetHeader = v
-	}
-	if v := plan.SharedByIRMAgentRisk.ValueString(); v != "" {
-		sp.SharedByIRMAgentRisk = v
-	}
-	if v := plan.SharedByIRMUserRisk.ValueString(); v != "" {
-		sp.SharedByIRMUserRisk = v
-	}
-	if v := plan.SharedWithDomain.ValueString(); v != "" {
-		sp.SharedWithDomain = v
-	}
-	if v := plan.SharepointBlockDomains.ValueString(); v != "" {
-		sp.SharepointBlockDomains = v
-	}
-	if v := plan.SharepointBlockDomainsExcept.ValueString(); v != "" {
-		sp.SharepointBlockDomainsExcept = v
-	}
-	sp.SharepointBlockDomainsOrUsers = plan.SharepointBlockDomainsOrUsers.ValueBool()
-	if v := plan.SharepointBlockUsers.ValueString(); v != "" {
-		sp.SharepointBlockUsers = v
-	}
-	if v := plan.SharepointBlockUsersExcept.ValueString(); v != "" {
-		sp.SharepointBlockUsersExcept = v
-	}
-	sp.SharepointMoveToQuarantineLocation = plan.SharepointMoveToQuarantineLocation.ValueBool()
-	sp.StopPolicyProcessing = plan.StopPolicyProcessing.ValueBool()
-	if v := plan.SubjectContainsWords.ValueString(); v != "" {
-		sp.SubjectContainsWords = v
-	}
-	if v := plan.SubjectMatchesPatterns.ValueString(); v != "" {
-		sp.SubjectMatchesPatterns = v
-	}
-	if v := plan.SubjectOrBodyContainsWords.ValueString(); v != "" {
-		sp.SubjectOrBodyContainsWords = v
-	}
-	if v := plan.SubjectOrBodyMatchesPatterns.ValueString(); v != "" {
-		sp.SubjectOrBodyMatchesPatterns = v
-	}
-	if v := plan.TeamsSharedWithParticipantCategory.ValueString(); v != "" {
-		sp.TeamsSharedWithParticipantCategory = v
-	}
-	sp.ThirdPartyAppDlpRestrictions = toStringSlice(ctx, plan.ThirdPartyAppDlpRestrictions, &resp.Diagnostics)
-	sp.TriggerPowerAutomateFlow = plan.TriggerPowerAutomateFlow.ValueString()
-	if v := plan.UnscannableDocumentExtensionIs.ValueString(); v != "" {
-		sp.UnscannableDocumentExtensionIs = v
-	}
-	if v := plan.WithImportance.ValueString(); v != "" {
-		sp.WithImportance = v
+	var cur *dlpComplianceRuleModel
+	curRead := false
+	current := func() *dlpComplianceRuleModel {
+		if !curRead {
+			curRead = true
+			var m dlpComplianceRuleModel
+			if r.refresh(ctx, id, &m, &resp.Diagnostics, nil) {
+				cur = &m
+			} else if !resp.Diagnostics.HasError() {
+				resp.Diagnostics.AddError("Get-DlpComplianceRule failed", "the object could not be read to determine the list values to remove; nothing was changed")
+			}
+		}
+		return cur
+	}
+	if !plan.AccessScope.Equal(state.AccessScope) {
+		if v := plan.AccessScope.ValueString(); v != "" {
+			sp.AccessScope = objectParam(v)
+		}
+	}
+	if !plan.AccessTimeControl.Equal(state.AccessTimeControl) {
+		if v := plan.AccessTimeControl.ValueString(); v != "" {
+			sp.AccessTimeControl = objectParam(v)
+		}
+	}
+	if !plan.AccessedBy.Equal(state.AccessedBy) {
+		if !plan.AccessedBy.IsNull() && !plan.AccessedBy.IsUnknown() {
+			sp.AccessedBy = append([]string{}, toStringSlice(ctx, plan.AccessedBy, &resp.Diagnostics)...)
+		}
+	}
+	if !plan.AccessedByMemberOf.Equal(state.AccessedByMemberOf) {
+		if !plan.AccessedByMemberOf.IsNull() && !plan.AccessedByMemberOf.IsUnknown() {
+			sp.AccessedByMemberOf = append([]string{}, toStringSlice(ctx, plan.AccessedByMemberOf, &resp.Diagnostics)...)
+		}
+	}
+	if !plan.ActivationDate.Equal(state.ActivationDate) {
+		if v := plan.ActivationDate.ValueString(); v != "" {
+			sp.ActivationDate = objectParam(v)
+		}
+	}
+	if !plan.AddRecipients.Equal(state.AddRecipients) {
+		if v := plan.AddRecipients.ValueString(); v != "" {
+			sp.AddRecipients = objectParam(v)
+		}
+	}
+	if !plan.AdvancedRule.Equal(state.AdvancedRule) {
+		sp.AdvancedRule = plan.AdvancedRule.ValueString()
+	}
+	if !plan.AlertProperties.Equal(state.AlertProperties) {
+		if v := plan.AlertProperties.ValueString(); v != "" {
+			sp.AlertProperties = objectParam(v)
+		}
+	}
+	if !plan.AnyOfRecipientAddressContainsWords.Equal(state.AnyOfRecipientAddressContainsWords) {
+		if !plan.AnyOfRecipientAddressContainsWords.IsNull() && !plan.AnyOfRecipientAddressContainsWords.IsUnknown() {
+			if v := toStringSlice(ctx, plan.AnyOfRecipientAddressContainsWords, &resp.Diagnostics); len(v) > 0 {
+				sp.AnyOfRecipientAddressContainsWords = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.AnyOfRecipientAddressContainsWords, &resp.Diagnostics); len(rm) > 0 {
+						sp.AnyOfRecipientAddressContainsWordsDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
+	}
+	if !plan.AnyOfRecipientAddressMatchesPatterns.Equal(state.AnyOfRecipientAddressMatchesPatterns) {
+		if !plan.AnyOfRecipientAddressMatchesPatterns.IsNull() && !plan.AnyOfRecipientAddressMatchesPatterns.IsUnknown() {
+			if v := toStringSlice(ctx, plan.AnyOfRecipientAddressMatchesPatterns, &resp.Diagnostics); len(v) > 0 {
+				sp.AnyOfRecipientAddressMatchesPatterns = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.AnyOfRecipientAddressMatchesPatterns, &resp.Diagnostics); len(rm) > 0 {
+						sp.AnyOfRecipientAddressMatchesPatternsDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
+	}
+	if !plan.ApplyBrandingTemplate.Equal(state.ApplyBrandingTemplate) {
+		sp.ApplyBrandingTemplate = plan.ApplyBrandingTemplate.ValueString()
+	}
+	if !plan.ApplyHtmlDisclaimer.Equal(state.ApplyHtmlDisclaimer) {
+		if v := plan.ApplyHtmlDisclaimer.ValueString(); v != "" {
+			sp.ApplyHtmlDisclaimer = objectParam(v)
+		}
+	}
+	if !plan.AttachmentCountOver.Equal(state.AttachmentCountOver) {
+		if v := plan.AttachmentCountOver.ValueString(); v != "" {
+			sp.AttachmentCountOver = objectParam(v)
+		}
+	}
+	if !plan.AttachmentIsNotLabeled.Equal(state.AttachmentIsNotLabeled) {
+		if !plan.AttachmentIsNotLabeled.IsUnknown() {
+			sp.AttachmentIsNotLabeled = plan.AttachmentIsNotLabeled.ValueBoolPointer()
+		}
+	}
+	if !plan.BlockAccess.Equal(state.BlockAccess) {
+		if !plan.BlockAccess.IsUnknown() {
+			sp.BlockAccess = plan.BlockAccess.ValueBoolPointer()
+		}
+	}
+	if !plan.BlockAccessScope.Equal(state.BlockAccessScope) {
+		if v := plan.BlockAccessScope.ValueString(); v != "" {
+			sp.BlockAccessScope = objectParam(v)
+		}
+	}
+	if !plan.Comment.Equal(state.Comment) {
+		sp.Comment = plan.Comment.ValueString()
+	}
+	if !plan.ContentCharacterSetContainsWords.Equal(state.ContentCharacterSetContainsWords) {
+		if !plan.ContentCharacterSetContainsWords.IsNull() && !plan.ContentCharacterSetContainsWords.IsUnknown() {
+			if v := toStringSlice(ctx, plan.ContentCharacterSetContainsWords, &resp.Diagnostics); len(v) > 0 {
+				sp.ContentCharacterSetContainsWords = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.ContentCharacterSetContainsWords, &resp.Diagnostics); len(rm) > 0 {
+						sp.ContentCharacterSetContainsWordsDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
+	}
+	if !plan.ContentContainsSensitiveInformation.Equal(state.ContentContainsSensitiveInformation) {
+		if v := plan.ContentContainsSensitiveInformation.ValueString(); v != "" {
+			sp.ContentContainsSensitiveInformation = objectParam(v)
+		}
+	}
+	if !plan.ContentExtensionMatchesWords.Equal(state.ContentExtensionMatchesWords) {
+		if !plan.ContentExtensionMatchesWords.IsNull() && !plan.ContentExtensionMatchesWords.IsUnknown() {
+			if v := toStringSlice(ctx, plan.ContentExtensionMatchesWords, &resp.Diagnostics); len(v) > 0 {
+				sp.ContentExtensionMatchesWords = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.ContentExtensionMatchesWords, &resp.Diagnostics); len(rm) > 0 {
+						sp.ContentExtensionMatchesWordsDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
+	}
+	if !plan.ContentFileTypeMatches.Equal(state.ContentFileTypeMatches) {
+		if !plan.ContentFileTypeMatches.IsNull() && !plan.ContentFileTypeMatches.IsUnknown() {
+			if v := toStringSlice(ctx, plan.ContentFileTypeMatches, &resp.Diagnostics); len(v) > 0 {
+				sp.ContentFileTypeMatches = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.ContentFileTypeMatches, &resp.Diagnostics); len(rm) > 0 {
+						sp.ContentFileTypeMatchesDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
+	}
+	if !plan.ContentIsNotLabeled.Equal(state.ContentIsNotLabeled) {
+		if !plan.ContentIsNotLabeled.IsUnknown() {
+			sp.ContentIsNotLabeled = plan.ContentIsNotLabeled.ValueBoolPointer()
+		}
+	}
+	if !plan.ContentIsShared.Equal(state.ContentIsShared) {
+		if !plan.ContentIsShared.IsUnknown() {
+			sp.ContentIsShared = plan.ContentIsShared.ValueBoolPointer()
+		}
+	}
+	if !plan.ContentMissingSensitivityLabel.Equal(state.ContentMissingSensitivityLabel) {
+		if v := plan.ContentMissingSensitivityLabel.ValueString(); v != "" {
+			sp.ContentMissingSensitivityLabel = objectParam(v)
+		}
+	}
+	if !plan.ContentPropertyContainsWords.Equal(state.ContentPropertyContainsWords) {
+		if !plan.ContentPropertyContainsWords.IsNull() && !plan.ContentPropertyContainsWords.IsUnknown() {
+			if v := toStringSlice(ctx, plan.ContentPropertyContainsWords, &resp.Diagnostics); len(v) > 0 {
+				sp.ContentPropertyContainsWords = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.ContentPropertyContainsWords, &resp.Diagnostics); len(rm) > 0 {
+						sp.ContentPropertyContainsWordsDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
+	}
+	if !plan.ContextPropertiesContainWords.Equal(state.ContextPropertiesContainWords) {
+		if v := plan.ContextPropertiesContainWords.ValueString(); v != "" {
+			sp.ContextPropertiesContainWords = objectParam(v)
+		}
+	}
+	if !plan.DeviceManagementType.Equal(state.DeviceManagementType) {
+		if v := plan.DeviceManagementType.ValueString(); v != "" {
+			sp.DeviceManagementType = objectParam(v)
+		}
+	}
+	if !plan.Disabled.Equal(state.Disabled) {
+		if !plan.Disabled.IsUnknown() {
+			sp.Disabled = plan.Disabled.ValueBoolPointer()
+		}
+	}
+	if !plan.DisplayName.Equal(state.DisplayName) {
+		sp.DisplayName = plan.DisplayName.ValueString()
+	}
+	if !plan.DocumentContainsWords.Equal(state.DocumentContainsWords) {
+		if !plan.DocumentContainsWords.IsNull() && !plan.DocumentContainsWords.IsUnknown() {
+			if v := toStringSlice(ctx, plan.DocumentContainsWords, &resp.Diagnostics); len(v) > 0 {
+				sp.DocumentContainsWords = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.DocumentContainsWords, &resp.Diagnostics); len(rm) > 0 {
+						sp.DocumentContainsWordsDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
+	}
+	if !plan.DocumentCreatedBy.Equal(state.DocumentCreatedBy) {
+		if !plan.DocumentCreatedBy.IsNull() && !plan.DocumentCreatedBy.IsUnknown() {
+			if v := toStringSlice(ctx, plan.DocumentCreatedBy, &resp.Diagnostics); len(v) > 0 {
+				sp.DocumentCreatedBy = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.DocumentCreatedBy, &resp.Diagnostics); len(rm) > 0 {
+						sp.DocumentCreatedByDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
+	}
+	if !plan.DocumentCreatedByMemberOf.Equal(state.DocumentCreatedByMemberOf) {
+		if !plan.DocumentCreatedByMemberOf.IsNull() && !plan.DocumentCreatedByMemberOf.IsUnknown() {
+			sp.DocumentCreatedByMemberOf = append([]string{}, toStringSlice(ctx, plan.DocumentCreatedByMemberOf, &resp.Diagnostics)...)
+		}
+	}
+	if !plan.DocumentIsPasswordProtected.Equal(state.DocumentIsPasswordProtected) {
+		if !plan.DocumentIsPasswordProtected.IsUnknown() {
+			sp.DocumentIsPasswordProtected = plan.DocumentIsPasswordProtected.ValueBoolPointer()
+		}
+	}
+	if !plan.DocumentIsUnsupported.Equal(state.DocumentIsUnsupported) {
+		if !plan.DocumentIsUnsupported.IsUnknown() {
+			sp.DocumentIsUnsupported = plan.DocumentIsUnsupported.ValueBoolPointer()
+		}
+	}
+	if !plan.DocumentMatchesPatterns.Equal(state.DocumentMatchesPatterns) {
+		if !plan.DocumentMatchesPatterns.IsNull() && !plan.DocumentMatchesPatterns.IsUnknown() {
+			if v := toStringSlice(ctx, plan.DocumentMatchesPatterns, &resp.Diagnostics); len(v) > 0 {
+				sp.DocumentMatchesPatterns = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.DocumentMatchesPatterns, &resp.Diagnostics); len(rm) > 0 {
+						sp.DocumentMatchesPatternsDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
+	}
+	if !plan.DocumentNameMatchesPatterns.Equal(state.DocumentNameMatchesPatterns) {
+		if !plan.DocumentNameMatchesPatterns.IsNull() && !plan.DocumentNameMatchesPatterns.IsUnknown() {
+			if v := toStringSlice(ctx, plan.DocumentNameMatchesPatterns, &resp.Diagnostics); len(v) > 0 {
+				sp.DocumentNameMatchesPatterns = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.DocumentNameMatchesPatterns, &resp.Diagnostics); len(rm) > 0 {
+						sp.DocumentNameMatchesPatternsDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
+	}
+	if !plan.DocumentNameMatchesWords.Equal(state.DocumentNameMatchesWords) {
+		if !plan.DocumentNameMatchesWords.IsNull() && !plan.DocumentNameMatchesWords.IsUnknown() {
+			if v := toStringSlice(ctx, plan.DocumentNameMatchesWords, &resp.Diagnostics); len(v) > 0 {
+				sp.DocumentNameMatchesWords = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.DocumentNameMatchesWords, &resp.Diagnostics); len(rm) > 0 {
+						sp.DocumentNameMatchesWordsDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
+	}
+	if !plan.DocumentSizeOver.Equal(state.DocumentSizeOver) {
+		if v := plan.DocumentSizeOver.ValueString(); v != "" {
+			sp.DocumentSizeOver = objectParam(v)
+		}
+	}
+	if !plan.EncryptRMSTemplate.Equal(state.EncryptRMSTemplate) {
+		if v := plan.EncryptRMSTemplate.ValueString(); v != "" {
+			sp.EncryptRMSTemplate = objectParam(v)
+		}
+	}
+	if !plan.EndpointDlpBrowserRestrictions.Equal(state.EndpointDlpBrowserRestrictions) {
+		if !plan.EndpointDlpBrowserRestrictions.IsNull() && !plan.EndpointDlpBrowserRestrictions.IsUnknown() {
+			sp.EndpointDlpBrowserRestrictions = append([]string{}, toStringSlice(ctx, plan.EndpointDlpBrowserRestrictions, &resp.Diagnostics)...)
+		}
+	}
+	if !plan.EndpointDlpRestrictions.Equal(state.EndpointDlpRestrictions) {
+		if v := plan.EndpointDlpRestrictions.ValueString(); v != "" {
+			sp.EndpointDlpRestrictions = objectParam(v)
+		}
+	}
+	if !plan.EnforcePortalAccess.Equal(state.EnforcePortalAccess) {
+		if !plan.EnforcePortalAccess.IsUnknown() {
+			sp.EnforcePortalAccess = plan.EnforcePortalAccess.ValueBoolPointer()
+		}
+	}
+	if !plan.EvaluateRulePerComponent.Equal(state.EvaluateRulePerComponent) {
+		if !plan.EvaluateRulePerComponent.IsUnknown() {
+			sp.EvaluateRulePerComponent = plan.EvaluateRulePerComponent.ValueBoolPointer()
+		}
+	}
+	if !plan.ExceptIfAccessScope.Equal(state.ExceptIfAccessScope) {
+		if v := plan.ExceptIfAccessScope.ValueString(); v != "" {
+			sp.ExceptIfAccessScope = objectParam(v)
+		}
+	}
+	if !plan.ExceptIfAccessedBy.Equal(state.ExceptIfAccessedBy) {
+		if !plan.ExceptIfAccessedBy.IsNull() && !plan.ExceptIfAccessedBy.IsUnknown() {
+			sp.ExceptIfAccessedBy = append([]string{}, toStringSlice(ctx, plan.ExceptIfAccessedBy, &resp.Diagnostics)...)
+		}
+	}
+	if !plan.ExceptIfAccessedByMemberOf.Equal(state.ExceptIfAccessedByMemberOf) {
+		if !plan.ExceptIfAccessedByMemberOf.IsNull() && !plan.ExceptIfAccessedByMemberOf.IsUnknown() {
+			sp.ExceptIfAccessedByMemberOf = append([]string{}, toStringSlice(ctx, plan.ExceptIfAccessedByMemberOf, &resp.Diagnostics)...)
+		}
+	}
+	if !plan.ExceptIfAnyOfRecipientAddressContainsWords.Equal(state.ExceptIfAnyOfRecipientAddressContainsWords) {
+		if !plan.ExceptIfAnyOfRecipientAddressContainsWords.IsNull() && !plan.ExceptIfAnyOfRecipientAddressContainsWords.IsUnknown() {
+			if v := toStringSlice(ctx, plan.ExceptIfAnyOfRecipientAddressContainsWords, &resp.Diagnostics); len(v) > 0 {
+				sp.ExceptIfAnyOfRecipientAddressContainsWords = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.ExceptIfAnyOfRecipientAddressContainsWords, &resp.Diagnostics); len(rm) > 0 {
+						sp.ExceptIfAnyOfRecipientAddressContainsWordsDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
+	}
+	if !plan.ExceptIfAnyOfRecipientAddressMatchesPatterns.Equal(state.ExceptIfAnyOfRecipientAddressMatchesPatterns) {
+		if !plan.ExceptIfAnyOfRecipientAddressMatchesPatterns.IsNull() && !plan.ExceptIfAnyOfRecipientAddressMatchesPatterns.IsUnknown() {
+			if v := toStringSlice(ctx, plan.ExceptIfAnyOfRecipientAddressMatchesPatterns, &resp.Diagnostics); len(v) > 0 {
+				sp.ExceptIfAnyOfRecipientAddressMatchesPatterns = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.ExceptIfAnyOfRecipientAddressMatchesPatterns, &resp.Diagnostics); len(rm) > 0 {
+						sp.ExceptIfAnyOfRecipientAddressMatchesPatternsDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
+	}
+	if !plan.ExceptIfContentCharacterSetContainsWords.Equal(state.ExceptIfContentCharacterSetContainsWords) {
+		if !plan.ExceptIfContentCharacterSetContainsWords.IsNull() && !plan.ExceptIfContentCharacterSetContainsWords.IsUnknown() {
+			if v := toStringSlice(ctx, plan.ExceptIfContentCharacterSetContainsWords, &resp.Diagnostics); len(v) > 0 {
+				sp.ExceptIfContentCharacterSetContainsWords = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.ExceptIfContentCharacterSetContainsWords, &resp.Diagnostics); len(rm) > 0 {
+						sp.ExceptIfContentCharacterSetContainsWordsDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
+	}
+	if !plan.ExceptIfContentContainsSensitiveInformation.Equal(state.ExceptIfContentContainsSensitiveInformation) {
+		if v := plan.ExceptIfContentContainsSensitiveInformation.ValueString(); v != "" {
+			sp.ExceptIfContentContainsSensitiveInformation = objectParam(v)
+		}
+	}
+	if !plan.ExceptIfContentExtensionMatchesWords.Equal(state.ExceptIfContentExtensionMatchesWords) {
+		if !plan.ExceptIfContentExtensionMatchesWords.IsNull() && !plan.ExceptIfContentExtensionMatchesWords.IsUnknown() {
+			if v := toStringSlice(ctx, plan.ExceptIfContentExtensionMatchesWords, &resp.Diagnostics); len(v) > 0 {
+				sp.ExceptIfContentExtensionMatchesWords = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.ExceptIfContentExtensionMatchesWords, &resp.Diagnostics); len(rm) > 0 {
+						sp.ExceptIfContentExtensionMatchesWordsDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
+	}
+	if !plan.ExceptIfContentFileTypeMatches.Equal(state.ExceptIfContentFileTypeMatches) {
+		if !plan.ExceptIfContentFileTypeMatches.IsNull() && !plan.ExceptIfContentFileTypeMatches.IsUnknown() {
+			if v := toStringSlice(ctx, plan.ExceptIfContentFileTypeMatches, &resp.Diagnostics); len(v) > 0 {
+				sp.ExceptIfContentFileTypeMatches = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.ExceptIfContentFileTypeMatches, &resp.Diagnostics); len(rm) > 0 {
+						sp.ExceptIfContentFileTypeMatchesDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
+	}
+	if !plan.ExceptIfContentIsShared.Equal(state.ExceptIfContentIsShared) {
+		if !plan.ExceptIfContentIsShared.IsUnknown() {
+			sp.ExceptIfContentIsShared = plan.ExceptIfContentIsShared.ValueBoolPointer()
+		}
+	}
+	if !plan.ExceptIfContentPropertyContainsWords.Equal(state.ExceptIfContentPropertyContainsWords) {
+		if !plan.ExceptIfContentPropertyContainsWords.IsNull() && !plan.ExceptIfContentPropertyContainsWords.IsUnknown() {
+			if v := toStringSlice(ctx, plan.ExceptIfContentPropertyContainsWords, &resp.Diagnostics); len(v) > 0 {
+				sp.ExceptIfContentPropertyContainsWords = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.ExceptIfContentPropertyContainsWords, &resp.Diagnostics); len(rm) > 0 {
+						sp.ExceptIfContentPropertyContainsWordsDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
+	}
+	if !plan.ExceptIfContextPropertiesContainWords.Equal(state.ExceptIfContextPropertiesContainWords) {
+		if v := plan.ExceptIfContextPropertiesContainWords.ValueString(); v != "" {
+			sp.ExceptIfContextPropertiesContainWords = objectParam(v)
+		}
+	}
+	if !plan.ExceptIfDeviceManagementType.Equal(state.ExceptIfDeviceManagementType) {
+		if v := plan.ExceptIfDeviceManagementType.ValueString(); v != "" {
+			sp.ExceptIfDeviceManagementType = objectParam(v)
+		}
+	}
+	if !plan.ExceptIfDocumentContainsWords.Equal(state.ExceptIfDocumentContainsWords) {
+		if !plan.ExceptIfDocumentContainsWords.IsNull() && !plan.ExceptIfDocumentContainsWords.IsUnknown() {
+			if v := toStringSlice(ctx, plan.ExceptIfDocumentContainsWords, &resp.Diagnostics); len(v) > 0 {
+				sp.ExceptIfDocumentContainsWords = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.ExceptIfDocumentContainsWords, &resp.Diagnostics); len(rm) > 0 {
+						sp.ExceptIfDocumentContainsWordsDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
+	}
+	if !plan.ExceptIfDocumentCreatedBy.Equal(state.ExceptIfDocumentCreatedBy) {
+		if !plan.ExceptIfDocumentCreatedBy.IsNull() && !plan.ExceptIfDocumentCreatedBy.IsUnknown() {
+			if v := toStringSlice(ctx, plan.ExceptIfDocumentCreatedBy, &resp.Diagnostics); len(v) > 0 {
+				sp.ExceptIfDocumentCreatedBy = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.ExceptIfDocumentCreatedBy, &resp.Diagnostics); len(rm) > 0 {
+						sp.ExceptIfDocumentCreatedByDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
+	}
+	if !plan.ExceptIfDocumentCreatedByMemberOf.Equal(state.ExceptIfDocumentCreatedByMemberOf) {
+		if !plan.ExceptIfDocumentCreatedByMemberOf.IsNull() && !plan.ExceptIfDocumentCreatedByMemberOf.IsUnknown() {
+			sp.ExceptIfDocumentCreatedByMemberOf = append([]string{}, toStringSlice(ctx, plan.ExceptIfDocumentCreatedByMemberOf, &resp.Diagnostics)...)
+		}
+	}
+	if !plan.ExceptIfDocumentIsPasswordProtected.Equal(state.ExceptIfDocumentIsPasswordProtected) {
+		if !plan.ExceptIfDocumentIsPasswordProtected.IsUnknown() {
+			sp.ExceptIfDocumentIsPasswordProtected = plan.ExceptIfDocumentIsPasswordProtected.ValueBoolPointer()
+		}
+	}
+	if !plan.ExceptIfDocumentIsUnsupported.Equal(state.ExceptIfDocumentIsUnsupported) {
+		if !plan.ExceptIfDocumentIsUnsupported.IsUnknown() {
+			sp.ExceptIfDocumentIsUnsupported = plan.ExceptIfDocumentIsUnsupported.ValueBoolPointer()
+		}
+	}
+	if !plan.ExceptIfDocumentMatchesPatterns.Equal(state.ExceptIfDocumentMatchesPatterns) {
+		if !plan.ExceptIfDocumentMatchesPatterns.IsNull() && !plan.ExceptIfDocumentMatchesPatterns.IsUnknown() {
+			if v := toStringSlice(ctx, plan.ExceptIfDocumentMatchesPatterns, &resp.Diagnostics); len(v) > 0 {
+				sp.ExceptIfDocumentMatchesPatterns = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.ExceptIfDocumentMatchesPatterns, &resp.Diagnostics); len(rm) > 0 {
+						sp.ExceptIfDocumentMatchesPatternsDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
+	}
+	if !plan.ExceptIfDocumentNameMatchesPatterns.Equal(state.ExceptIfDocumentNameMatchesPatterns) {
+		if !plan.ExceptIfDocumentNameMatchesPatterns.IsNull() && !plan.ExceptIfDocumentNameMatchesPatterns.IsUnknown() {
+			if v := toStringSlice(ctx, plan.ExceptIfDocumentNameMatchesPatterns, &resp.Diagnostics); len(v) > 0 {
+				sp.ExceptIfDocumentNameMatchesPatterns = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.ExceptIfDocumentNameMatchesPatterns, &resp.Diagnostics); len(rm) > 0 {
+						sp.ExceptIfDocumentNameMatchesPatternsDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
+	}
+	if !plan.ExceptIfDocumentNameMatchesWords.Equal(state.ExceptIfDocumentNameMatchesWords) {
+		if !plan.ExceptIfDocumentNameMatchesWords.IsNull() && !plan.ExceptIfDocumentNameMatchesWords.IsUnknown() {
+			if v := toStringSlice(ctx, plan.ExceptIfDocumentNameMatchesWords, &resp.Diagnostics); len(v) > 0 {
+				sp.ExceptIfDocumentNameMatchesWords = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.ExceptIfDocumentNameMatchesWords, &resp.Diagnostics); len(rm) > 0 {
+						sp.ExceptIfDocumentNameMatchesWordsDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
+	}
+	if !plan.ExceptIfDocumentSizeOver.Equal(state.ExceptIfDocumentSizeOver) {
+		if v := plan.ExceptIfDocumentSizeOver.ValueString(); v != "" {
+			sp.ExceptIfDocumentSizeOver = objectParam(v)
+		}
+	}
+	if !plan.ExceptIfFrom.Equal(state.ExceptIfFrom) {
+		if !plan.ExceptIfFrom.IsNull() && !plan.ExceptIfFrom.IsUnknown() {
+			sp.ExceptIfFrom = append([]string{}, toStringSlice(ctx, plan.ExceptIfFrom, &resp.Diagnostics)...)
+		}
+	}
+	if !plan.ExceptIfFromAddressContainsWords.Equal(state.ExceptIfFromAddressContainsWords) {
+		if !plan.ExceptIfFromAddressContainsWords.IsNull() && !plan.ExceptIfFromAddressContainsWords.IsUnknown() {
+			if v := toStringSlice(ctx, plan.ExceptIfFromAddressContainsWords, &resp.Diagnostics); len(v) > 0 {
+				sp.ExceptIfFromAddressContainsWords = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.ExceptIfFromAddressContainsWords, &resp.Diagnostics); len(rm) > 0 {
+						sp.ExceptIfFromAddressContainsWordsDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
+	}
+	if !plan.ExceptIfFromAddressMatchesPatterns.Equal(state.ExceptIfFromAddressMatchesPatterns) {
+		if !plan.ExceptIfFromAddressMatchesPatterns.IsNull() && !plan.ExceptIfFromAddressMatchesPatterns.IsUnknown() {
+			if v := toStringSlice(ctx, plan.ExceptIfFromAddressMatchesPatterns, &resp.Diagnostics); len(v) > 0 {
+				sp.ExceptIfFromAddressMatchesPatterns = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.ExceptIfFromAddressMatchesPatterns, &resp.Diagnostics); len(rm) > 0 {
+						sp.ExceptIfFromAddressMatchesPatternsDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
+	}
+	if !plan.ExceptIfFromMemberOf.Equal(state.ExceptIfFromMemberOf) {
+		if !plan.ExceptIfFromMemberOf.IsNull() && !plan.ExceptIfFromMemberOf.IsUnknown() {
+			sp.ExceptIfFromMemberOf = append([]string{}, toStringSlice(ctx, plan.ExceptIfFromMemberOf, &resp.Diagnostics)...)
+		}
+	}
+	if !plan.ExceptIfFromScope.Equal(state.ExceptIfFromScope) {
+		if v := plan.ExceptIfFromScope.ValueString(); v != "" {
+			sp.ExceptIfFromScope = objectParam(v)
+		}
+	}
+	if !plan.ExceptIfHasSenderOverride.Equal(state.ExceptIfHasSenderOverride) {
+		if !plan.ExceptIfHasSenderOverride.IsUnknown() {
+			sp.ExceptIfHasSenderOverride = plan.ExceptIfHasSenderOverride.ValueBoolPointer()
+		}
+	}
+	if !plan.ExceptIfHeaderContainsTokens.Equal(state.ExceptIfHeaderContainsTokens) {
+		if v := plan.ExceptIfHeaderContainsTokens.ValueString(); v != "" {
+			sp.ExceptIfHeaderContainsTokens = objectParam(v)
+		}
+	}
+	if !plan.ExceptIfHeaderContainsWords.Equal(state.ExceptIfHeaderContainsWords) {
+		if v := plan.ExceptIfHeaderContainsWords.ValueString(); v != "" {
+			sp.ExceptIfHeaderContainsWords = objectParam(v)
+		}
+	}
+	if !plan.ExceptIfHeaderMatchesPatterns.Equal(state.ExceptIfHeaderMatchesPatterns) {
+		if v := plan.ExceptIfHeaderMatchesPatterns.ValueString(); v != "" {
+			sp.ExceptIfHeaderMatchesPatterns = objectParam(v)
+		}
+	}
+	if !plan.ExceptIfMessageLabelChangeDetected.Equal(state.ExceptIfMessageLabelChangeDetected) {
+		if v := plan.ExceptIfMessageLabelChangeDetected.ValueString(); v != "" {
+			sp.ExceptIfMessageLabelChangeDetected = objectParam(v)
+		}
+	}
+	if !plan.ExceptIfMessageSizeOver.Equal(state.ExceptIfMessageSizeOver) {
+		if v := plan.ExceptIfMessageSizeOver.ValueString(); v != "" {
+			sp.ExceptIfMessageSizeOver = objectParam(v)
+		}
+	}
+	if !plan.ExceptIfMessageTypeMatches.Equal(state.ExceptIfMessageTypeMatches) {
+		if v := plan.ExceptIfMessageTypeMatches.ValueString(); v != "" {
+			sp.ExceptIfMessageTypeMatches = objectParam(v)
+		}
+	}
+	if !plan.ExceptIfProcessingLimitExceeded.Equal(state.ExceptIfProcessingLimitExceeded) {
+		if !plan.ExceptIfProcessingLimitExceeded.IsUnknown() {
+			sp.ExceptIfProcessingLimitExceeded = plan.ExceptIfProcessingLimitExceeded.ValueBoolPointer()
+		}
+	}
+	if !plan.ExceptIfRecipientADAttributeContainsWords.Equal(state.ExceptIfRecipientADAttributeContainsWords) {
+		if v := plan.ExceptIfRecipientADAttributeContainsWords.ValueString(); v != "" {
+			sp.ExceptIfRecipientADAttributeContainsWords = objectParam(v)
+		}
+	}
+	if !plan.ExceptIfRecipientADAttributeMatchesPatterns.Equal(state.ExceptIfRecipientADAttributeMatchesPatterns) {
+		if v := plan.ExceptIfRecipientADAttributeMatchesPatterns.ValueString(); v != "" {
+			sp.ExceptIfRecipientADAttributeMatchesPatterns = objectParam(v)
+		}
+	}
+	if !plan.ExceptIfRecipientDomainIs.Equal(state.ExceptIfRecipientDomainIs) {
+		if !plan.ExceptIfRecipientDomainIs.IsNull() && !plan.ExceptIfRecipientDomainIs.IsUnknown() {
+			if v := toStringSlice(ctx, plan.ExceptIfRecipientDomainIs, &resp.Diagnostics); len(v) > 0 {
+				sp.ExceptIfRecipientDomainIs = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.ExceptIfRecipientDomainIs, &resp.Diagnostics); len(rm) > 0 {
+						sp.ExceptIfRecipientDomainIsDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
+	}
+	if !plan.ExceptIfSenderADAttributeContainsWords.Equal(state.ExceptIfSenderADAttributeContainsWords) {
+		if v := plan.ExceptIfSenderADAttributeContainsWords.ValueString(); v != "" {
+			sp.ExceptIfSenderADAttributeContainsWords = objectParam(v)
+		}
+	}
+	if !plan.ExceptIfSenderADAttributeMatchesPatterns.Equal(state.ExceptIfSenderADAttributeMatchesPatterns) {
+		if v := plan.ExceptIfSenderADAttributeMatchesPatterns.ValueString(); v != "" {
+			sp.ExceptIfSenderADAttributeMatchesPatterns = objectParam(v)
+		}
+	}
+	if !plan.ExceptIfSenderDomainIs.Equal(state.ExceptIfSenderDomainIs) {
+		if !plan.ExceptIfSenderDomainIs.IsNull() && !plan.ExceptIfSenderDomainIs.IsUnknown() {
+			if v := toStringSlice(ctx, plan.ExceptIfSenderDomainIs, &resp.Diagnostics); len(v) > 0 {
+				sp.ExceptIfSenderDomainIs = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.ExceptIfSenderDomainIs, &resp.Diagnostics); len(rm) > 0 {
+						sp.ExceptIfSenderDomainIsDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
+	}
+	if !plan.ExceptIfSenderIPRanges.Equal(state.ExceptIfSenderIPRanges) {
+		if !plan.ExceptIfSenderIPRanges.IsNull() && !plan.ExceptIfSenderIPRanges.IsUnknown() {
+			if v := toStringSlice(ctx, plan.ExceptIfSenderIPRanges, &resp.Diagnostics); len(v) > 0 {
+				sp.ExceptIfSenderIPRanges = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.ExceptIfSenderIPRanges, &resp.Diagnostics); len(rm) > 0 {
+						sp.ExceptIfSenderIPRangesDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
+	}
+	if !plan.ExceptIfSentTo.Equal(state.ExceptIfSentTo) {
+		if !plan.ExceptIfSentTo.IsNull() && !plan.ExceptIfSentTo.IsUnknown() {
+			if v := toStringSlice(ctx, plan.ExceptIfSentTo, &resp.Diagnostics); len(v) > 0 {
+				sp.ExceptIfSentTo = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.ExceptIfSentTo, &resp.Diagnostics); len(rm) > 0 {
+						sp.ExceptIfSentToDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
+	}
+	if !plan.ExceptIfSentToMemberOf.Equal(state.ExceptIfSentToMemberOf) {
+		if !plan.ExceptIfSentToMemberOf.IsNull() && !plan.ExceptIfSentToMemberOf.IsUnknown() {
+			sp.ExceptIfSentToMemberOf = append([]string{}, toStringSlice(ctx, plan.ExceptIfSentToMemberOf, &resp.Diagnostics)...)
+		}
+	}
+	if !plan.ExceptIfSharedWithDomain.Equal(state.ExceptIfSharedWithDomain) {
+		if v := plan.ExceptIfSharedWithDomain.ValueString(); v != "" {
+			sp.ExceptIfSharedWithDomain = objectParam(v)
+		}
+	}
+	if !plan.ExceptIfSubjectContainsWords.Equal(state.ExceptIfSubjectContainsWords) {
+		if !plan.ExceptIfSubjectContainsWords.IsNull() && !plan.ExceptIfSubjectContainsWords.IsUnknown() {
+			if v := toStringSlice(ctx, plan.ExceptIfSubjectContainsWords, &resp.Diagnostics); len(v) > 0 {
+				sp.ExceptIfSubjectContainsWords = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.ExceptIfSubjectContainsWords, &resp.Diagnostics); len(rm) > 0 {
+						sp.ExceptIfSubjectContainsWordsDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
+	}
+	if !plan.ExceptIfSubjectMatchesPatterns.Equal(state.ExceptIfSubjectMatchesPatterns) {
+		if !plan.ExceptIfSubjectMatchesPatterns.IsNull() && !plan.ExceptIfSubjectMatchesPatterns.IsUnknown() {
+			if v := toStringSlice(ctx, plan.ExceptIfSubjectMatchesPatterns, &resp.Diagnostics); len(v) > 0 {
+				sp.ExceptIfSubjectMatchesPatterns = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.ExceptIfSubjectMatchesPatterns, &resp.Diagnostics); len(rm) > 0 {
+						sp.ExceptIfSubjectMatchesPatternsDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
+	}
+	if !plan.ExceptIfSubjectOrBodyContainsWords.Equal(state.ExceptIfSubjectOrBodyContainsWords) {
+		if !plan.ExceptIfSubjectOrBodyContainsWords.IsNull() && !plan.ExceptIfSubjectOrBodyContainsWords.IsUnknown() {
+			if v := toStringSlice(ctx, plan.ExceptIfSubjectOrBodyContainsWords, &resp.Diagnostics); len(v) > 0 {
+				sp.ExceptIfSubjectOrBodyContainsWords = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.ExceptIfSubjectOrBodyContainsWords, &resp.Diagnostics); len(rm) > 0 {
+						sp.ExceptIfSubjectOrBodyContainsWordsDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
+	}
+	if !plan.ExceptIfSubjectOrBodyMatchesPatterns.Equal(state.ExceptIfSubjectOrBodyMatchesPatterns) {
+		if !plan.ExceptIfSubjectOrBodyMatchesPatterns.IsNull() && !plan.ExceptIfSubjectOrBodyMatchesPatterns.IsUnknown() {
+			if v := toStringSlice(ctx, plan.ExceptIfSubjectOrBodyMatchesPatterns, &resp.Diagnostics); len(v) > 0 {
+				sp.ExceptIfSubjectOrBodyMatchesPatterns = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.ExceptIfSubjectOrBodyMatchesPatterns, &resp.Diagnostics); len(rm) > 0 {
+						sp.ExceptIfSubjectOrBodyMatchesPatternsDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
+	}
+	if !plan.ExceptIfTeamsSharedWithParticipantCategory.Equal(state.ExceptIfTeamsSharedWithParticipantCategory) {
+		if v := plan.ExceptIfTeamsSharedWithParticipantCategory.ValueString(); v != "" {
+			sp.ExceptIfTeamsSharedWithParticipantCategory = objectParam(v)
+		}
+	}
+	if !plan.ExceptIfUnscannableDocumentExtensionIs.Equal(state.ExceptIfUnscannableDocumentExtensionIs) {
+		if !plan.ExceptIfUnscannableDocumentExtensionIs.IsNull() && !plan.ExceptIfUnscannableDocumentExtensionIs.IsUnknown() {
+			if v := toStringSlice(ctx, plan.ExceptIfUnscannableDocumentExtensionIs, &resp.Diagnostics); len(v) > 0 {
+				sp.ExceptIfUnscannableDocumentExtensionIs = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.ExceptIfUnscannableDocumentExtensionIs, &resp.Diagnostics); len(rm) > 0 {
+						sp.ExceptIfUnscannableDocumentExtensionIsDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
+	}
+	if !plan.ExceptIfWithImportance.Equal(state.ExceptIfWithImportance) {
+		if v := plan.ExceptIfWithImportance.ValueString(); v != "" {
+			sp.ExceptIfWithImportance = objectParam(v)
+		}
+	}
+	if !plan.ExpiryDate.Equal(state.ExpiryDate) {
+		if v := plan.ExpiryDate.ValueString(); v != "" {
+			sp.ExpiryDate = objectParam(v)
+		}
+	}
+	if !plan.From.Equal(state.From) {
+		if !plan.From.IsNull() && !plan.From.IsUnknown() {
+			sp.From = append([]string{}, toStringSlice(ctx, plan.From, &resp.Diagnostics)...)
+		}
+	}
+	if !plan.FromAddressContainsWords.Equal(state.FromAddressContainsWords) {
+		if !plan.FromAddressContainsWords.IsNull() && !plan.FromAddressContainsWords.IsUnknown() {
+			if v := toStringSlice(ctx, plan.FromAddressContainsWords, &resp.Diagnostics); len(v) > 0 {
+				sp.FromAddressContainsWords = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.FromAddressContainsWords, &resp.Diagnostics); len(rm) > 0 {
+						sp.FromAddressContainsWordsDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
+	}
+	if !plan.FromAddressMatchesPatterns.Equal(state.FromAddressMatchesPatterns) {
+		if !plan.FromAddressMatchesPatterns.IsNull() && !plan.FromAddressMatchesPatterns.IsUnknown() {
+			if v := toStringSlice(ctx, plan.FromAddressMatchesPatterns, &resp.Diagnostics); len(v) > 0 {
+				sp.FromAddressMatchesPatterns = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.FromAddressMatchesPatterns, &resp.Diagnostics); len(rm) > 0 {
+						sp.FromAddressMatchesPatternsDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
+	}
+	if !plan.FromMemberOf.Equal(state.FromMemberOf) {
+		if !plan.FromMemberOf.IsNull() && !plan.FromMemberOf.IsUnknown() {
+			sp.FromMemberOf = append([]string{}, toStringSlice(ctx, plan.FromMemberOf, &resp.Diagnostics)...)
+		}
+	}
+	if !plan.FromScope.Equal(state.FromScope) {
+		if v := plan.FromScope.ValueString(); v != "" {
+			sp.FromScope = objectParam(v)
+		}
+	}
+	if !plan.GenerateAlert.Equal(state.GenerateAlert) {
+		if !plan.GenerateAlert.IsNull() && !plan.GenerateAlert.IsUnknown() {
+			if v := toStringSlice(ctx, plan.GenerateAlert, &resp.Diagnostics); len(v) > 0 {
+				sp.GenerateAlert = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.GenerateAlert, &resp.Diagnostics); len(rm) > 0 {
+						sp.GenerateAlertDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
+	}
+	if !plan.GenerateIncidentReport.Equal(state.GenerateIncidentReport) {
+		if !plan.GenerateIncidentReport.IsNull() && !plan.GenerateIncidentReport.IsUnknown() {
+			if v := toStringSlice(ctx, plan.GenerateIncidentReport, &resp.Diagnostics); len(v) > 0 {
+				sp.GenerateIncidentReport = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.GenerateIncidentReport, &resp.Diagnostics); len(rm) > 0 {
+						sp.GenerateIncidentReportDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
+	}
+	if !plan.HasActivity.Equal(state.HasActivity) {
+		if v := plan.HasActivity.ValueString(); v != "" {
+			sp.HasActivity = objectParam(v)
+		}
+	}
+	if !plan.HasLabelDowngradedFrom.Equal(state.HasLabelDowngradedFrom) {
+		if v := plan.HasLabelDowngradedFrom.ValueString(); v != "" {
+			sp.HasLabelDowngradedFrom = objectParam(v)
+		}
+	}
+	if !plan.HasSenderOverride.Equal(state.HasSenderOverride) {
+		if !plan.HasSenderOverride.IsUnknown() {
+			sp.HasSenderOverride = plan.HasSenderOverride.ValueBoolPointer()
+		}
+	}
+	if !plan.HeaderContainsTokens.Equal(state.HeaderContainsTokens) {
+		if v := plan.HeaderContainsTokens.ValueString(); v != "" {
+			sp.HeaderContainsTokens = objectParam(v)
+		}
+	}
+	if !plan.HeaderContainsWords.Equal(state.HeaderContainsWords) {
+		if v := plan.HeaderContainsWords.ValueString(); v != "" {
+			sp.HeaderContainsWords = objectParam(v)
+		}
+	}
+	if !plan.HeaderMatchesPatterns.Equal(state.HeaderMatchesPatterns) {
+		if v := plan.HeaderMatchesPatterns.ValueString(); v != "" {
+			sp.HeaderMatchesPatterns = objectParam(v)
+		}
+	}
+	if !plan.IncidentReportContent.Equal(state.IncidentReportContent) {
+		if !plan.IncidentReportContent.IsNull() && !plan.IncidentReportContent.IsUnknown() {
+			sp.IncidentReportContent = append([]string{}, toStringSlice(ctx, plan.IncidentReportContent, &resp.Diagnostics)...)
+		}
+	}
+	if !plan.MapRecipients.Equal(state.MapRecipients) {
+		if v := plan.MapRecipients.ValueString(); v != "" {
+			sp.MapRecipients = objectParam(v)
+		}
+	}
+	if !plan.MessageIsNotLabeled.Equal(state.MessageIsNotLabeled) {
+		if !plan.MessageIsNotLabeled.IsUnknown() {
+			sp.MessageIsNotLabeled = plan.MessageIsNotLabeled.ValueBoolPointer()
+		}
+	}
+	if !plan.MessageLabelChangeDetected.Equal(state.MessageLabelChangeDetected) {
+		if v := plan.MessageLabelChangeDetected.ValueString(); v != "" {
+			sp.MessageLabelChangeDetected = objectParam(v)
+		}
+	}
+	if !plan.MessageSizeOver.Equal(state.MessageSizeOver) {
+		if v := plan.MessageSizeOver.ValueString(); v != "" {
+			sp.MessageSizeOver = objectParam(v)
+		}
+	}
+	if !plan.MessageTypeMatches.Equal(state.MessageTypeMatches) {
+		if v := plan.MessageTypeMatches.ValueString(); v != "" {
+			sp.MessageTypeMatches = objectParam(v)
+		}
+	}
+	if !plan.MipRestrictAccess.Equal(state.MipRestrictAccess) {
+		if v := plan.MipRestrictAccess.ValueString(); v != "" {
+			sp.MipRestrictAccess = objectParam(v)
+		}
+	}
+	if !plan.Moderate.Equal(state.Moderate) {
+		if v := plan.Moderate.ValueString(); v != "" {
+			sp.Moderate = objectParam(v)
+		}
+	}
+	if !plan.ModifySubject.Equal(state.ModifySubject) {
+		if v := plan.ModifySubject.ValueString(); v != "" {
+			sp.ModifySubject = objectParam(v)
+		}
+	}
+	if !plan.MoveToQuarantineLocation.Equal(state.MoveToQuarantineLocation) {
+		if !plan.MoveToQuarantineLocation.IsUnknown() {
+			sp.MoveToQuarantineLocation = plan.MoveToQuarantineLocation.ValueBoolPointer()
+		}
+	}
+	if !plan.NonBifurcatingAccessScope.Equal(state.NonBifurcatingAccessScope) {
+		if v := plan.NonBifurcatingAccessScope.ValueString(); v != "" {
+			sp.NonBifurcatingAccessScope = objectParam(v)
+		}
+	}
+	if !plan.NotifyAllowOverride.Equal(state.NotifyAllowOverride) {
+		if !plan.NotifyAllowOverride.IsNull() && !plan.NotifyAllowOverride.IsUnknown() {
+			sp.NotifyAllowOverride = append([]string{}, toStringSlice(ctx, plan.NotifyAllowOverride, &resp.Diagnostics)...)
+		}
+	}
+	if !plan.NotifyEmailCustomSenderDisplayName.Equal(state.NotifyEmailCustomSenderDisplayName) {
+		sp.NotifyEmailCustomSenderDisplayName = plan.NotifyEmailCustomSenderDisplayName.ValueString()
+	}
+	if !plan.NotifyEmailCustomSubject.Equal(state.NotifyEmailCustomSubject) {
+		sp.NotifyEmailCustomSubject = plan.NotifyEmailCustomSubject.ValueString()
+	}
+	if !plan.NotifyEmailCustomText.Equal(state.NotifyEmailCustomText) {
+		sp.NotifyEmailCustomText = plan.NotifyEmailCustomText.ValueString()
+	}
+	if !plan.NotifyEmailExchangeIncludeAttachment.Equal(state.NotifyEmailExchangeIncludeAttachment) {
+		if !plan.NotifyEmailExchangeIncludeAttachment.IsUnknown() {
+			sp.NotifyEmailExchangeIncludeAttachment = plan.NotifyEmailExchangeIncludeAttachment.ValueBoolPointer()
+		}
+	}
+	if !plan.NotifyEmailOnedriveRemediationActions.Equal(state.NotifyEmailOnedriveRemediationActions) {
+		if v := plan.NotifyEmailOnedriveRemediationActions.ValueString(); v != "" {
+			sp.NotifyEmailOnedriveRemediationActions = objectParam(v)
+		}
+	}
+	if !plan.NotifyEndpointUser.Equal(state.NotifyEndpointUser) {
+		if v := plan.NotifyEndpointUser.ValueString(); v != "" {
+			sp.NotifyEndpointUser = objectParam(v)
+		}
+	}
+	if !plan.NotifyJustificationCustomText.Equal(state.NotifyJustificationCustomText) {
+		sp.NotifyJustificationCustomText = plan.NotifyJustificationCustomText.ValueString()
+	}
+	if !plan.NotifyJustificationCustomTextTranslations.Equal(state.NotifyJustificationCustomTextTranslations) {
+		if v := plan.NotifyJustificationCustomTextTranslations.ValueString(); v != "" {
+			sp.NotifyJustificationCustomTextTranslations = objectParam(v)
+		}
+	}
+	if !plan.NotifyOverrideRequirements.Equal(state.NotifyOverrideRequirements) {
+		if v := plan.NotifyOverrideRequirements.ValueString(); v != "" {
+			sp.NotifyOverrideRequirements = objectParam(v)
+		}
+	}
+	if !plan.NotifyPolicyTipCustomDialog.Equal(state.NotifyPolicyTipCustomDialog) {
+		sp.NotifyPolicyTipCustomDialog = plan.NotifyPolicyTipCustomDialog.ValueString()
+	}
+	if !plan.NotifyPolicyTipCustomText.Equal(state.NotifyPolicyTipCustomText) {
+		sp.NotifyPolicyTipCustomText = plan.NotifyPolicyTipCustomText.ValueString()
+	}
+	if !plan.NotifyPolicyTipCustomTextTranslations.Equal(state.NotifyPolicyTipCustomTextTranslations) {
+		if !plan.NotifyPolicyTipCustomTextTranslations.IsNull() && !plan.NotifyPolicyTipCustomTextTranslations.IsUnknown() {
+			if v := toStringSlice(ctx, plan.NotifyPolicyTipCustomTextTranslations, &resp.Diagnostics); len(v) > 0 {
+				sp.NotifyPolicyTipCustomTextTranslations = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.NotifyPolicyTipCustomTextTranslations, &resp.Diagnostics); len(rm) > 0 {
+						sp.NotifyPolicyTipCustomTextTranslationsDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
+	}
+	if !plan.NotifyPolicyTipDisplayOption.Equal(state.NotifyPolicyTipDisplayOption) {
+		if v := plan.NotifyPolicyTipDisplayOption.ValueString(); v != "" {
+			sp.NotifyPolicyTipDisplayOption = objectParam(v)
+		}
+	}
+	if !plan.NotifyPolicyTipUrl.Equal(state.NotifyPolicyTipUrl) {
+		sp.NotifyPolicyTipUrl = plan.NotifyPolicyTipUrl.ValueString()
+	}
+	if !plan.NotifyUser.Equal(state.NotifyUser) {
+		if !plan.NotifyUser.IsNull() && !plan.NotifyUser.IsUnknown() {
+			if v := toStringSlice(ctx, plan.NotifyUser, &resp.Diagnostics); len(v) > 0 {
+				sp.NotifyUser = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.NotifyUser, &resp.Diagnostics); len(rm) > 0 {
+						sp.NotifyUserDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
+	}
+	if !plan.NotifyUserType.Equal(state.NotifyUserType) {
+		if v := plan.NotifyUserType.ValueString(); v != "" {
+			sp.NotifyUserType = objectParam(v)
+		}
+	}
+	if !plan.OnPremisesScannerDlpRestrictions.Equal(state.OnPremisesScannerDlpRestrictions) {
+		if v := plan.OnPremisesScannerDlpRestrictions.ValueString(); v != "" {
+			sp.OnPremisesScannerDlpRestrictions = objectParam(v)
+		}
+	}
+	if !plan.PowerBIDlpRestrictions.Equal(state.PowerBIDlpRestrictions) {
+		if !plan.PowerBIDlpRestrictions.IsNull() && !plan.PowerBIDlpRestrictions.IsUnknown() {
+			sp.PowerBIDlpRestrictions = append([]string{}, toStringSlice(ctx, plan.PowerBIDlpRestrictions, &resp.Diagnostics)...)
+		}
+	}
+	if !plan.PrependSubject.Equal(state.PrependSubject) {
+		sp.PrependSubject = plan.PrependSubject.ValueString()
+	}
+	if !plan.Priority.Equal(state.Priority) {
+		if !plan.Priority.IsUnknown() {
+			sp.Priority = plan.Priority.ValueInt64Pointer()
+		}
+	}
+	if !plan.ProcessingLimitExceeded.Equal(state.ProcessingLimitExceeded) {
+		if !plan.ProcessingLimitExceeded.IsUnknown() {
+			sp.ProcessingLimitExceeded = plan.ProcessingLimitExceeded.ValueBoolPointer()
+		}
+	}
+	if !plan.Quarantine.Equal(state.Quarantine) {
+		if !plan.Quarantine.IsUnknown() {
+			sp.Quarantine = plan.Quarantine.ValueBoolPointer()
+		}
+	}
+	if !plan.RecipientADAttributeContainsWords.Equal(state.RecipientADAttributeContainsWords) {
+		if v := plan.RecipientADAttributeContainsWords.ValueString(); v != "" {
+			sp.RecipientADAttributeContainsWords = objectParam(v)
+		}
+	}
+	if !plan.RecipientADAttributeMatchesPatterns.Equal(state.RecipientADAttributeMatchesPatterns) {
+		if v := plan.RecipientADAttributeMatchesPatterns.ValueString(); v != "" {
+			sp.RecipientADAttributeMatchesPatterns = objectParam(v)
+		}
+	}
+	if !plan.RecipientDomainIs.Equal(state.RecipientDomainIs) {
+		if !plan.RecipientDomainIs.IsNull() && !plan.RecipientDomainIs.IsUnknown() {
+			if v := toStringSlice(ctx, plan.RecipientDomainIs, &resp.Diagnostics); len(v) > 0 {
+				sp.RecipientDomainIs = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.RecipientDomainIs, &resp.Diagnostics); len(rm) > 0 {
+						sp.RecipientDomainIsDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
+	}
+	if !plan.RedactSensitiveInfo.Equal(state.RedactSensitiveInfo) {
+		if v := plan.RedactSensitiveInfo.ValueString(); v != "" {
+			sp.RedactSensitiveInfo = objectParam(v)
+		}
+	}
+	if !plan.RedirectMessageTo.Equal(state.RedirectMessageTo) {
+		if !plan.RedirectMessageTo.IsNull() && !plan.RedirectMessageTo.IsUnknown() {
+			sp.RedirectMessageTo = append([]string{}, toStringSlice(ctx, plan.RedirectMessageTo, &resp.Diagnostics)...)
+		}
+	}
+	if !plan.RemoveHeader.Equal(state.RemoveHeader) {
+		if !plan.RemoveHeader.IsNull() && !plan.RemoveHeader.IsUnknown() {
+			if v := toStringSlice(ctx, plan.RemoveHeader, &resp.Diagnostics); len(v) > 0 {
+				sp.RemoveHeader = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.RemoveHeader, &resp.Diagnostics); len(rm) > 0 {
+						sp.RemoveHeaderDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
+	}
+	if !plan.RemoveRMSTemplate.Equal(state.RemoveRMSTemplate) {
+		if !plan.RemoveRMSTemplate.IsUnknown() {
+			sp.RemoveRMSTemplate = plan.RemoveRMSTemplate.ValueBoolPointer()
+		}
+	}
+	if !plan.ReportSeverityLevel.Equal(state.ReportSeverityLevel) {
+		if v := plan.ReportSeverityLevel.ValueString(); v != "" {
+			sp.ReportSeverityLevel = objectParam(v)
+		}
+	}
+	if !plan.RestrictAccess.Equal(state.RestrictAccess) {
+		if v := plan.RestrictAccess.ValueString(); v != "" {
+			sp.RestrictAccess = objectParam(v)
+		}
+	}
+	if !plan.RestrictBrowserAccess.Equal(state.RestrictBrowserAccess) {
+		if !plan.RestrictBrowserAccess.IsUnknown() {
+			sp.RestrictBrowserAccess = plan.RestrictBrowserAccess.ValueBoolPointer()
+		}
+	}
+	if !plan.RestrictWebGrounding.Equal(state.RestrictWebGrounding) {
+		if !plan.RestrictWebGrounding.IsUnknown() {
+			sp.RestrictWebGrounding = plan.RestrictWebGrounding.ValueBoolPointer()
+		}
+	}
+	if !plan.RuleErrorAction.Equal(state.RuleErrorAction) {
+		if v := plan.RuleErrorAction.ValueString(); v != "" {
+			sp.RuleErrorAction = objectParam(v)
+		}
+	}
+	if !plan.SenderADAttributeContainsWords.Equal(state.SenderADAttributeContainsWords) {
+		if v := plan.SenderADAttributeContainsWords.ValueString(); v != "" {
+			sp.SenderADAttributeContainsWords = objectParam(v)
+		}
+	}
+	if !plan.SenderADAttributeMatchesPatterns.Equal(state.SenderADAttributeMatchesPatterns) {
+		if v := plan.SenderADAttributeMatchesPatterns.ValueString(); v != "" {
+			sp.SenderADAttributeMatchesPatterns = objectParam(v)
+		}
+	}
+	if !plan.SenderAddressLocation.Equal(state.SenderAddressLocation) {
+		if v := plan.SenderAddressLocation.ValueString(); v != "" {
+			sp.SenderAddressLocation = objectParam(v)
+		}
+	}
+	if !plan.SenderDomainIs.Equal(state.SenderDomainIs) {
+		if !plan.SenderDomainIs.IsNull() && !plan.SenderDomainIs.IsUnknown() {
+			if v := toStringSlice(ctx, plan.SenderDomainIs, &resp.Diagnostics); len(v) > 0 {
+				sp.SenderDomainIs = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.SenderDomainIs, &resp.Diagnostics); len(rm) > 0 {
+						sp.SenderDomainIsDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
+	}
+	if !plan.SenderIPRanges.Equal(state.SenderIPRanges) {
+		if !plan.SenderIPRanges.IsNull() && !plan.SenderIPRanges.IsUnknown() {
+			if v := toStringSlice(ctx, plan.SenderIPRanges, &resp.Diagnostics); len(v) > 0 {
+				sp.SenderIPRanges = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.SenderIPRanges, &resp.Diagnostics); len(rm) > 0 {
+						sp.SenderIPRangesDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
+	}
+	if !plan.SenderType.Equal(state.SenderType) {
+		if v := plan.SenderType.ValueString(); v != "" {
+			sp.SenderType = objectParam(v)
+		}
+	}
+	if !plan.SentTo.Equal(state.SentTo) {
+		if !plan.SentTo.IsNull() && !plan.SentTo.IsUnknown() {
+			if v := toStringSlice(ctx, plan.SentTo, &resp.Diagnostics); len(v) > 0 {
+				sp.SentTo = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.SentTo, &resp.Diagnostics); len(rm) > 0 {
+						sp.SentToDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
+	}
+	if !plan.SentToMemberOf.Equal(state.SentToMemberOf) {
+		if !plan.SentToMemberOf.IsNull() && !plan.SentToMemberOf.IsUnknown() {
+			sp.SentToMemberOf = append([]string{}, toStringSlice(ctx, plan.SentToMemberOf, &resp.Diagnostics)...)
+		}
+	}
+	if !plan.SetHeader.Equal(state.SetHeader) {
+		if v := plan.SetHeader.ValueString(); v != "" {
+			sp.SetHeader = objectParam(v)
+		}
+	}
+	if !plan.SharedByIRMAgentRisk.Equal(state.SharedByIRMAgentRisk) {
+		if v := plan.SharedByIRMAgentRisk.ValueString(); v != "" {
+			sp.SharedByIRMAgentRisk = objectParam(v)
+		}
+	}
+	if !plan.SharedByIRMUserRisk.Equal(state.SharedByIRMUserRisk) {
+		if !plan.SharedByIRMUserRisk.IsNull() && !plan.SharedByIRMUserRisk.IsUnknown() {
+			if v := toStringSlice(ctx, plan.SharedByIRMUserRisk, &resp.Diagnostics); len(v) > 0 {
+				sp.SharedByIRMUserRisk = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.SharedByIRMUserRisk, &resp.Diagnostics); len(rm) > 0 {
+						sp.SharedByIRMUserRiskDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
+	}
+	if !plan.SharedWithDomain.Equal(state.SharedWithDomain) {
+		if v := plan.SharedWithDomain.ValueString(); v != "" {
+			sp.SharedWithDomain = objectParam(v)
+		}
+	}
+	if !plan.SharepointBlockDomains.Equal(state.SharepointBlockDomains) {
+		if v := plan.SharepointBlockDomains.ValueString(); v != "" {
+			sp.SharepointBlockDomains = objectParam(v)
+		}
+	}
+	if !plan.SharepointBlockDomainsExcept.Equal(state.SharepointBlockDomainsExcept) {
+		if v := plan.SharepointBlockDomainsExcept.ValueString(); v != "" {
+			sp.SharepointBlockDomainsExcept = objectParam(v)
+		}
+	}
+	if !plan.SharepointBlockDomainsOrUsers.Equal(state.SharepointBlockDomainsOrUsers) {
+		if !plan.SharepointBlockDomainsOrUsers.IsUnknown() {
+			sp.SharepointBlockDomainsOrUsers = plan.SharepointBlockDomainsOrUsers.ValueBoolPointer()
+		}
+	}
+	if !plan.SharepointBlockUsers.Equal(state.SharepointBlockUsers) {
+		if v := plan.SharepointBlockUsers.ValueString(); v != "" {
+			sp.SharepointBlockUsers = objectParam(v)
+		}
+	}
+	if !plan.SharepointBlockUsersExcept.Equal(state.SharepointBlockUsersExcept) {
+		if v := plan.SharepointBlockUsersExcept.ValueString(); v != "" {
+			sp.SharepointBlockUsersExcept = objectParam(v)
+		}
+	}
+	if !plan.SharepointMoveToQuarantineLocation.Equal(state.SharepointMoveToQuarantineLocation) {
+		if !plan.SharepointMoveToQuarantineLocation.IsUnknown() {
+			sp.SharepointMoveToQuarantineLocation = plan.SharepointMoveToQuarantineLocation.ValueBoolPointer()
+		}
+	}
+	if !plan.StopPolicyProcessing.Equal(state.StopPolicyProcessing) {
+		if !plan.StopPolicyProcessing.IsUnknown() {
+			sp.StopPolicyProcessing = plan.StopPolicyProcessing.ValueBoolPointer()
+		}
+	}
+	if !plan.SubjectContainsWords.Equal(state.SubjectContainsWords) {
+		if !plan.SubjectContainsWords.IsNull() && !plan.SubjectContainsWords.IsUnknown() {
+			if v := toStringSlice(ctx, plan.SubjectContainsWords, &resp.Diagnostics); len(v) > 0 {
+				sp.SubjectContainsWords = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.SubjectContainsWords, &resp.Diagnostics); len(rm) > 0 {
+						sp.SubjectContainsWordsDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
+	}
+	if !plan.SubjectMatchesPatterns.Equal(state.SubjectMatchesPatterns) {
+		if !plan.SubjectMatchesPatterns.IsNull() && !plan.SubjectMatchesPatterns.IsUnknown() {
+			if v := toStringSlice(ctx, plan.SubjectMatchesPatterns, &resp.Diagnostics); len(v) > 0 {
+				sp.SubjectMatchesPatterns = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.SubjectMatchesPatterns, &resp.Diagnostics); len(rm) > 0 {
+						sp.SubjectMatchesPatternsDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
+	}
+	if !plan.SubjectOrBodyContainsWords.Equal(state.SubjectOrBodyContainsWords) {
+		if !plan.SubjectOrBodyContainsWords.IsNull() && !plan.SubjectOrBodyContainsWords.IsUnknown() {
+			if v := toStringSlice(ctx, plan.SubjectOrBodyContainsWords, &resp.Diagnostics); len(v) > 0 {
+				sp.SubjectOrBodyContainsWords = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.SubjectOrBodyContainsWords, &resp.Diagnostics); len(rm) > 0 {
+						sp.SubjectOrBodyContainsWordsDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
+	}
+	if !plan.SubjectOrBodyMatchesPatterns.Equal(state.SubjectOrBodyMatchesPatterns) {
+		if !plan.SubjectOrBodyMatchesPatterns.IsNull() && !plan.SubjectOrBodyMatchesPatterns.IsUnknown() {
+			if v := toStringSlice(ctx, plan.SubjectOrBodyMatchesPatterns, &resp.Diagnostics); len(v) > 0 {
+				sp.SubjectOrBodyMatchesPatterns = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.SubjectOrBodyMatchesPatterns, &resp.Diagnostics); len(rm) > 0 {
+						sp.SubjectOrBodyMatchesPatternsDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
+	}
+	if !plan.TeamsSharedWithParticipantCategory.Equal(state.TeamsSharedWithParticipantCategory) {
+		if v := plan.TeamsSharedWithParticipantCategory.ValueString(); v != "" {
+			sp.TeamsSharedWithParticipantCategory = objectParam(v)
+		}
+	}
+	if !plan.ThirdPartyAppDlpRestrictions.Equal(state.ThirdPartyAppDlpRestrictions) {
+		if !plan.ThirdPartyAppDlpRestrictions.IsNull() && !plan.ThirdPartyAppDlpRestrictions.IsUnknown() {
+			sp.ThirdPartyAppDlpRestrictions = append([]string{}, toStringSlice(ctx, plan.ThirdPartyAppDlpRestrictions, &resp.Diagnostics)...)
+		}
+	}
+	if !plan.TriggerPowerAutomateFlow.Equal(state.TriggerPowerAutomateFlow) {
+		sp.TriggerPowerAutomateFlow = plan.TriggerPowerAutomateFlow.ValueString()
+	}
+	if !plan.UnscannableDocumentExtensionIs.Equal(state.UnscannableDocumentExtensionIs) {
+		if !plan.UnscannableDocumentExtensionIs.IsNull() && !plan.UnscannableDocumentExtensionIs.IsUnknown() {
+			if v := toStringSlice(ctx, plan.UnscannableDocumentExtensionIs, &resp.Diagnostics); len(v) > 0 {
+				sp.UnscannableDocumentExtensionIs = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.UnscannableDocumentExtensionIs, &resp.Diagnostics); len(rm) > 0 {
+						sp.UnscannableDocumentExtensionIsDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
+	}
+	if !plan.WithImportance.Equal(state.WithImportance) {
+		if v := plan.WithImportance.ValueString(); v != "" {
+			sp.WithImportance = objectParam(v)
+		}
 	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	if _, err := r.client.SCC.SetDlpComplianceRule(ctx, sp); err != nil {
+	if _, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.SetDlpComplianceRule, sp, isNotFound); err != nil {
 		resp.Diagnostics.AddError("Set-DlpComplianceRule failed", err.Error())
 		return
 	}
 	cfg := plan
 	reflected := reconcile.ReflectsFields(map[string]types.String{
-		"AccessScope":                                  cfg.AccessScope,
-		"AccessTimeControl":                            cfg.AccessTimeControl,
-		"ActivationDate":                               cfg.ActivationDate,
-		"AddRecipients":                                cfg.AddRecipients,
-		"AdvancedRule":                                 cfg.AdvancedRule,
-		"AlertProperties":                              cfg.AlertProperties,
-		"AnyOfRecipientAddressContainsWords":           cfg.AnyOfRecipientAddressContainsWords,
-		"AnyOfRecipientAddressMatchesPatterns":         cfg.AnyOfRecipientAddressMatchesPatterns,
-		"ApplyBrandingTemplate":                        cfg.ApplyBrandingTemplate,
-		"ApplyHtmlDisclaimer":                          cfg.ApplyHtmlDisclaimer,
-		"AttachmentCountOver":                          cfg.AttachmentCountOver,
-		"BlockAccessScope":                             cfg.BlockAccessScope,
-		"Comment":                                      cfg.Comment,
-		"ContentCharacterSetContainsWords":             cfg.ContentCharacterSetContainsWords,
-		"ContentExtensionMatchesWords":                 cfg.ContentExtensionMatchesWords,
-		"ContentFileTypeMatches":                       cfg.ContentFileTypeMatches,
-		"ContentMissingSensitivityLabel":               cfg.ContentMissingSensitivityLabel,
-		"ContentPropertyContainsWords":                 cfg.ContentPropertyContainsWords,
-		"ContextPropertiesContainWords":                cfg.ContextPropertiesContainWords,
-		"DeviceManagementType":                         cfg.DeviceManagementType,
-		"DisplayName":                                  cfg.DisplayName,
-		"DocumentContainsWords":                        cfg.DocumentContainsWords,
-		"DocumentCreatedBy":                            cfg.DocumentCreatedBy,
-		"DocumentMatchesPatterns":                      cfg.DocumentMatchesPatterns,
-		"DocumentNameMatchesPatterns":                  cfg.DocumentNameMatchesPatterns,
-		"DocumentNameMatchesWords":                     cfg.DocumentNameMatchesWords,
-		"DocumentSizeOver":                             cfg.DocumentSizeOver,
-		"EncryptRMSTemplate":                           cfg.EncryptRMSTemplate,
-		"ExceptIfAccessScope":                          cfg.ExceptIfAccessScope,
-		"ExceptIfAnyOfRecipientAddressContainsWords":   cfg.ExceptIfAnyOfRecipientAddressContainsWords,
-		"ExceptIfAnyOfRecipientAddressMatchesPatterns": cfg.ExceptIfAnyOfRecipientAddressMatchesPatterns,
-		"ExceptIfContentCharacterSetContainsWords":     cfg.ExceptIfContentCharacterSetContainsWords,
-		"ExceptIfContentExtensionMatchesWords":         cfg.ExceptIfContentExtensionMatchesWords,
-		"ExceptIfContentFileTypeMatches":               cfg.ExceptIfContentFileTypeMatches,
-		"ExceptIfContentPropertyContainsWords":         cfg.ExceptIfContentPropertyContainsWords,
-		"ExceptIfContextPropertiesContainWords":        cfg.ExceptIfContextPropertiesContainWords,
-		"ExceptIfDeviceManagementType":                 cfg.ExceptIfDeviceManagementType,
-		"ExceptIfDocumentContainsWords":                cfg.ExceptIfDocumentContainsWords,
-		"ExceptIfDocumentCreatedBy":                    cfg.ExceptIfDocumentCreatedBy,
-		"ExceptIfDocumentMatchesPatterns":              cfg.ExceptIfDocumentMatchesPatterns,
-		"ExceptIfDocumentNameMatchesPatterns":          cfg.ExceptIfDocumentNameMatchesPatterns,
-		"ExceptIfDocumentNameMatchesWords":             cfg.ExceptIfDocumentNameMatchesWords,
-		"ExceptIfDocumentSizeOver":                     cfg.ExceptIfDocumentSizeOver,
-		"ExceptIfFromAddressContainsWords":             cfg.ExceptIfFromAddressContainsWords,
-		"ExceptIfFromAddressMatchesPatterns":           cfg.ExceptIfFromAddressMatchesPatterns,
-		"ExceptIfFromScope":                            cfg.ExceptIfFromScope,
-		"ExceptIfHeaderContainsTokens":                 cfg.ExceptIfHeaderContainsTokens,
-		"ExceptIfHeaderContainsWords":                  cfg.ExceptIfHeaderContainsWords,
-		"ExceptIfHeaderMatchesPatterns":                cfg.ExceptIfHeaderMatchesPatterns,
-		"ExceptIfMessageLabelChangeDetected":           cfg.ExceptIfMessageLabelChangeDetected,
-		"ExceptIfMessageSizeOver":                      cfg.ExceptIfMessageSizeOver,
-		"ExceptIfMessageTypeMatches":                   cfg.ExceptIfMessageTypeMatches,
-		"ExceptIfRecipientADAttributeContainsWords":    cfg.ExceptIfRecipientADAttributeContainsWords,
-		"ExceptIfRecipientADAttributeMatchesPatterns":  cfg.ExceptIfRecipientADAttributeMatchesPatterns,
-		"ExceptIfRecipientDomainIs":                    cfg.ExceptIfRecipientDomainIs,
-		"ExceptIfSenderADAttributeContainsWords":       cfg.ExceptIfSenderADAttributeContainsWords,
-		"ExceptIfSenderADAttributeMatchesPatterns":     cfg.ExceptIfSenderADAttributeMatchesPatterns,
-		"ExceptIfSenderDomainIs":                       cfg.ExceptIfSenderDomainIs,
-		"ExceptIfSenderIPRanges":                       cfg.ExceptIfSenderIPRanges,
-		"ExceptIfSentTo":                               cfg.ExceptIfSentTo,
-		"ExceptIfSharedWithDomain":                     cfg.ExceptIfSharedWithDomain,
-		"ExceptIfSubjectContainsWords":                 cfg.ExceptIfSubjectContainsWords,
-		"ExceptIfSubjectMatchesPatterns":               cfg.ExceptIfSubjectMatchesPatterns,
-		"ExceptIfSubjectOrBodyContainsWords":           cfg.ExceptIfSubjectOrBodyContainsWords,
-		"ExceptIfSubjectOrBodyMatchesPatterns":         cfg.ExceptIfSubjectOrBodyMatchesPatterns,
-		"ExceptIfTeamsSharedWithParticipantCategory":   cfg.ExceptIfTeamsSharedWithParticipantCategory,
-		"ExceptIfUnscannableDocumentExtensionIs":       cfg.ExceptIfUnscannableDocumentExtensionIs,
-		"ExceptIfWithImportance":                       cfg.ExceptIfWithImportance,
-		"ExpiryDate":                                   cfg.ExpiryDate,
-		"FromAddressContainsWords":                     cfg.FromAddressContainsWords,
-		"FromAddressMatchesPatterns":                   cfg.FromAddressMatchesPatterns,
-		"FromScope":                                    cfg.FromScope,
-		"GenerateAlert":                                cfg.GenerateAlert,
-		"GenerateIncidentReport":                       cfg.GenerateIncidentReport,
-		"HasActivity":                                  cfg.HasActivity,
-		"HasLabelDowngradedFrom":                       cfg.HasLabelDowngradedFrom,
-		"HeaderContainsTokens":                         cfg.HeaderContainsTokens,
-		"HeaderContainsWords":                          cfg.HeaderContainsWords,
-		"HeaderMatchesPatterns":                        cfg.HeaderMatchesPatterns,
-		"MapRecipients":                                cfg.MapRecipients,
-		"MessageLabelChangeDetected":                   cfg.MessageLabelChangeDetected,
-		"MessageSizeOver":                              cfg.MessageSizeOver,
-		"MessageTypeMatches":                           cfg.MessageTypeMatches,
-		"Moderate":                                     cfg.Moderate,
-		"ModifySubject":                                cfg.ModifySubject,
-		"NonBifurcatingAccessScope":                    cfg.NonBifurcatingAccessScope,
-		"NotifyEmailCustomSenderDisplayName":           cfg.NotifyEmailCustomSenderDisplayName,
-		"NotifyEmailCustomSubject":                     cfg.NotifyEmailCustomSubject,
-		"NotifyEmailCustomText":                        cfg.NotifyEmailCustomText,
-		"NotifyEmailOnedriveRemediationActions":        cfg.NotifyEmailOnedriveRemediationActions,
-		"NotifyEndpointUser":                           cfg.NotifyEndpointUser,
-		"NotifyJustificationCustomText":                cfg.NotifyJustificationCustomText,
-		"NotifyJustificationCustomTextTranslations":    cfg.NotifyJustificationCustomTextTranslations,
-		"NotifyOverrideRequirements":                   cfg.NotifyOverrideRequirements,
-		"NotifyPolicyTipCustomDialog":                  cfg.NotifyPolicyTipCustomDialog,
-		"NotifyPolicyTipCustomText":                    cfg.NotifyPolicyTipCustomText,
-		"NotifyPolicyTipCustomTextTranslations":        cfg.NotifyPolicyTipCustomTextTranslations,
-		"NotifyPolicyTipDisplayOption":                 cfg.NotifyPolicyTipDisplayOption,
-		"NotifyPolicyTipUrl":                           cfg.NotifyPolicyTipUrl,
-		"NotifyUser":                                   cfg.NotifyUser,
-		"NotifyUserType":                               cfg.NotifyUserType,
-		"PrependSubject":                               cfg.PrependSubject,
-		"Priority":                                     cfg.Priority,
-		"RecipientADAttributeContainsWords":            cfg.RecipientADAttributeContainsWords,
-		"RecipientADAttributeMatchesPatterns":          cfg.RecipientADAttributeMatchesPatterns,
-		"RecipientDomainIs":                            cfg.RecipientDomainIs,
-		"RedactSensitiveInfo":                          cfg.RedactSensitiveInfo,
-		"RemoveHeader":                                 cfg.RemoveHeader,
-		"ReportSeverityLevel":                          cfg.ReportSeverityLevel,
-		"RuleErrorAction":                              cfg.RuleErrorAction,
-		"SenderADAttributeContainsWords":               cfg.SenderADAttributeContainsWords,
-		"SenderADAttributeMatchesPatterns":             cfg.SenderADAttributeMatchesPatterns,
-		"SenderAddressLocation":                        cfg.SenderAddressLocation,
-		"SenderDomainIs":                               cfg.SenderDomainIs,
-		"SenderIPRanges":                               cfg.SenderIPRanges,
-		"SenderType":                                   cfg.SenderType,
-		"SentTo":                                       cfg.SentTo,
-		"SetHeader":                                    cfg.SetHeader,
-		"SharedByIRMAgentRisk":                         cfg.SharedByIRMAgentRisk,
-		"SharedByIRMUserRisk":                          cfg.SharedByIRMUserRisk,
-		"SharedWithDomain":                             cfg.SharedWithDomain,
-		"SharepointBlockDomains":                       cfg.SharepointBlockDomains,
-		"SharepointBlockDomainsExcept":                 cfg.SharepointBlockDomainsExcept,
-		"SharepointBlockUsers":                         cfg.SharepointBlockUsers,
-		"SharepointBlockUsersExcept":                   cfg.SharepointBlockUsersExcept,
-		"SubjectContainsWords":                         cfg.SubjectContainsWords,
-		"SubjectMatchesPatterns":                       cfg.SubjectMatchesPatterns,
-		"SubjectOrBodyContainsWords":                   cfg.SubjectOrBodyContainsWords,
-		"SubjectOrBodyMatchesPatterns":                 cfg.SubjectOrBodyMatchesPatterns,
-		"TeamsSharedWithParticipantCategory":           cfg.TeamsSharedWithParticipantCategory,
-		"TriggerPowerAutomateFlow":                     cfg.TriggerPowerAutomateFlow,
-		"UnscannableDocumentExtensionIs":               cfg.UnscannableDocumentExtensionIs,
-		"WithImportance":                               cfg.WithImportance,
+		"AdvancedRule":                       cfg.AdvancedRule,
+		"ApplyBrandingTemplate":              cfg.ApplyBrandingTemplate,
+		"Comment":                            cfg.Comment,
+		"DisplayName":                        cfg.DisplayName,
+		"NotifyEmailCustomSenderDisplayName": cfg.NotifyEmailCustomSenderDisplayName,
+		"NotifyEmailCustomSubject":           cfg.NotifyEmailCustomSubject,
+		"NotifyEmailCustomText":              cfg.NotifyEmailCustomText,
+		"NotifyJustificationCustomText":      cfg.NotifyJustificationCustomText,
+		"NotifyPolicyTipCustomDialog":        cfg.NotifyPolicyTipCustomDialog,
+		"NotifyPolicyTipCustomText":          cfg.NotifyPolicyTipCustomText,
+		"NotifyPolicyTipUrl":                 cfg.NotifyPolicyTipUrl,
+		"PrependSubject":                     cfg.PrependSubject,
+		"TriggerPowerAutomateFlow":           cfg.TriggerPowerAutomateFlow,
 	}, getString)
+	if !cfg.AttachmentIsNotLabeled.IsUnknown() && !cfg.AttachmentIsNotLabeled.IsNull() && !cfg.AttachmentIsNotLabeled.Equal(state.AttachmentIsNotLabeled) {
+		prev, want := reflected, cfg.AttachmentIsNotLabeled.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["AttachmentIsNotLabeled"] == nil || getBool(obj, "AttachmentIsNotLabeled") == want)
+		}
+	}
+	if !cfg.BlockAccess.IsUnknown() && !cfg.BlockAccess.IsNull() && !cfg.BlockAccess.Equal(state.BlockAccess) {
+		prev, want := reflected, cfg.BlockAccess.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["BlockAccess"] == nil || getBool(obj, "BlockAccess") == want)
+		}
+	}
+	if !cfg.ContentIsNotLabeled.IsUnknown() && !cfg.ContentIsNotLabeled.IsNull() && !cfg.ContentIsNotLabeled.Equal(state.ContentIsNotLabeled) {
+		prev, want := reflected, cfg.ContentIsNotLabeled.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["ContentIsNotLabeled"] == nil || getBool(obj, "ContentIsNotLabeled") == want)
+		}
+	}
+	if !cfg.ContentIsShared.IsUnknown() && !cfg.ContentIsShared.IsNull() && !cfg.ContentIsShared.Equal(state.ContentIsShared) {
+		prev, want := reflected, cfg.ContentIsShared.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["ContentIsShared"] == nil || getBool(obj, "ContentIsShared") == want)
+		}
+	}
+	if !cfg.Disabled.IsUnknown() && !cfg.Disabled.IsNull() && !cfg.Disabled.Equal(state.Disabled) {
+		prev, want := reflected, cfg.Disabled.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["Disabled"] == nil || getBool(obj, "Disabled") == want)
+		}
+	}
+	if !cfg.DocumentIsPasswordProtected.IsUnknown() && !cfg.DocumentIsPasswordProtected.IsNull() && !cfg.DocumentIsPasswordProtected.Equal(state.DocumentIsPasswordProtected) {
+		prev, want := reflected, cfg.DocumentIsPasswordProtected.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["DocumentIsPasswordProtected"] == nil || getBool(obj, "DocumentIsPasswordProtected") == want)
+		}
+	}
+	if !cfg.DocumentIsUnsupported.IsUnknown() && !cfg.DocumentIsUnsupported.IsNull() && !cfg.DocumentIsUnsupported.Equal(state.DocumentIsUnsupported) {
+		prev, want := reflected, cfg.DocumentIsUnsupported.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["DocumentIsUnsupported"] == nil || getBool(obj, "DocumentIsUnsupported") == want)
+		}
+	}
+	if !cfg.EnforcePortalAccess.IsUnknown() && !cfg.EnforcePortalAccess.IsNull() && !cfg.EnforcePortalAccess.Equal(state.EnforcePortalAccess) {
+		prev, want := reflected, cfg.EnforcePortalAccess.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["EnforcePortalAccess"] == nil || getBool(obj, "EnforcePortalAccess") == want)
+		}
+	}
+	if !cfg.EvaluateRulePerComponent.IsUnknown() && !cfg.EvaluateRulePerComponent.IsNull() && !cfg.EvaluateRulePerComponent.Equal(state.EvaluateRulePerComponent) {
+		prev, want := reflected, cfg.EvaluateRulePerComponent.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["EvaluateRulePerComponent"] == nil || getBool(obj, "EvaluateRulePerComponent") == want)
+		}
+	}
+	if !cfg.ExceptIfContentIsShared.IsUnknown() && !cfg.ExceptIfContentIsShared.IsNull() && !cfg.ExceptIfContentIsShared.Equal(state.ExceptIfContentIsShared) {
+		prev, want := reflected, cfg.ExceptIfContentIsShared.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["ExceptIfContentIsShared"] == nil || getBool(obj, "ExceptIfContentIsShared") == want)
+		}
+	}
+	if !cfg.ExceptIfDocumentIsPasswordProtected.IsUnknown() && !cfg.ExceptIfDocumentIsPasswordProtected.IsNull() && !cfg.ExceptIfDocumentIsPasswordProtected.Equal(state.ExceptIfDocumentIsPasswordProtected) {
+		prev, want := reflected, cfg.ExceptIfDocumentIsPasswordProtected.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["ExceptIfDocumentIsPasswordProtected"] == nil || getBool(obj, "ExceptIfDocumentIsPasswordProtected") == want)
+		}
+	}
+	if !cfg.ExceptIfDocumentIsUnsupported.IsUnknown() && !cfg.ExceptIfDocumentIsUnsupported.IsNull() && !cfg.ExceptIfDocumentIsUnsupported.Equal(state.ExceptIfDocumentIsUnsupported) {
+		prev, want := reflected, cfg.ExceptIfDocumentIsUnsupported.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["ExceptIfDocumentIsUnsupported"] == nil || getBool(obj, "ExceptIfDocumentIsUnsupported") == want)
+		}
+	}
+	if !cfg.ExceptIfHasSenderOverride.IsUnknown() && !cfg.ExceptIfHasSenderOverride.IsNull() && !cfg.ExceptIfHasSenderOverride.Equal(state.ExceptIfHasSenderOverride) {
+		prev, want := reflected, cfg.ExceptIfHasSenderOverride.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["ExceptIfHasSenderOverride"] == nil || getBool(obj, "ExceptIfHasSenderOverride") == want)
+		}
+	}
+	if !cfg.ExceptIfProcessingLimitExceeded.IsUnknown() && !cfg.ExceptIfProcessingLimitExceeded.IsNull() && !cfg.ExceptIfProcessingLimitExceeded.Equal(state.ExceptIfProcessingLimitExceeded) {
+		prev, want := reflected, cfg.ExceptIfProcessingLimitExceeded.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["ExceptIfProcessingLimitExceeded"] == nil || getBool(obj, "ExceptIfProcessingLimitExceeded") == want)
+		}
+	}
+	if !cfg.HasSenderOverride.IsUnknown() && !cfg.HasSenderOverride.IsNull() && !cfg.HasSenderOverride.Equal(state.HasSenderOverride) {
+		prev, want := reflected, cfg.HasSenderOverride.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["HasSenderOverride"] == nil || getBool(obj, "HasSenderOverride") == want)
+		}
+	}
+	if !cfg.MessageIsNotLabeled.IsUnknown() && !cfg.MessageIsNotLabeled.IsNull() && !cfg.MessageIsNotLabeled.Equal(state.MessageIsNotLabeled) {
+		prev, want := reflected, cfg.MessageIsNotLabeled.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["MessageIsNotLabeled"] == nil || getBool(obj, "MessageIsNotLabeled") == want)
+		}
+	}
+	if !cfg.MoveToQuarantineLocation.IsUnknown() && !cfg.MoveToQuarantineLocation.IsNull() && !cfg.MoveToQuarantineLocation.Equal(state.MoveToQuarantineLocation) {
+		prev, want := reflected, cfg.MoveToQuarantineLocation.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["MoveToQuarantineLocation"] == nil || getBool(obj, "MoveToQuarantineLocation") == want)
+		}
+	}
+	if !cfg.NotifyEmailExchangeIncludeAttachment.IsUnknown() && !cfg.NotifyEmailExchangeIncludeAttachment.IsNull() && !cfg.NotifyEmailExchangeIncludeAttachment.Equal(state.NotifyEmailExchangeIncludeAttachment) {
+		prev, want := reflected, cfg.NotifyEmailExchangeIncludeAttachment.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["NotifyEmailExchangeIncludeAttachment"] == nil || getBool(obj, "NotifyEmailExchangeIncludeAttachment") == want)
+		}
+	}
+	if !cfg.Priority.IsUnknown() && !cfg.Priority.IsNull() && !cfg.Priority.Equal(state.Priority) {
+		prev, want := reflected, cfg.Priority.ValueInt64()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["Priority"] == nil || getInt(obj, "Priority") == want)
+		}
+	}
+	if !cfg.ProcessingLimitExceeded.IsUnknown() && !cfg.ProcessingLimitExceeded.IsNull() && !cfg.ProcessingLimitExceeded.Equal(state.ProcessingLimitExceeded) {
+		prev, want := reflected, cfg.ProcessingLimitExceeded.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["ProcessingLimitExceeded"] == nil || getBool(obj, "ProcessingLimitExceeded") == want)
+		}
+	}
+	if !cfg.Quarantine.IsUnknown() && !cfg.Quarantine.IsNull() && !cfg.Quarantine.Equal(state.Quarantine) {
+		prev, want := reflected, cfg.Quarantine.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["Quarantine"] == nil || getBool(obj, "Quarantine") == want)
+		}
+	}
+	if !cfg.RemoveRMSTemplate.IsUnknown() && !cfg.RemoveRMSTemplate.IsNull() && !cfg.RemoveRMSTemplate.Equal(state.RemoveRMSTemplate) {
+		prev, want := reflected, cfg.RemoveRMSTemplate.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["RemoveRMSTemplate"] == nil || getBool(obj, "RemoveRMSTemplate") == want)
+		}
+	}
+	if !cfg.RestrictBrowserAccess.IsUnknown() && !cfg.RestrictBrowserAccess.IsNull() && !cfg.RestrictBrowserAccess.Equal(state.RestrictBrowserAccess) {
+		prev, want := reflected, cfg.RestrictBrowserAccess.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["RestrictBrowserAccess"] == nil || getBool(obj, "RestrictBrowserAccess") == want)
+		}
+	}
+	if !cfg.RestrictWebGrounding.IsUnknown() && !cfg.RestrictWebGrounding.IsNull() && !cfg.RestrictWebGrounding.Equal(state.RestrictWebGrounding) {
+		prev, want := reflected, cfg.RestrictWebGrounding.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["RestrictWebGrounding"] == nil || getBool(obj, "RestrictWebGrounding") == want)
+		}
+	}
+	if !cfg.SharepointBlockDomainsOrUsers.IsUnknown() && !cfg.SharepointBlockDomainsOrUsers.IsNull() && !cfg.SharepointBlockDomainsOrUsers.Equal(state.SharepointBlockDomainsOrUsers) {
+		prev, want := reflected, cfg.SharepointBlockDomainsOrUsers.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["SharepointBlockDomainsOrUsers"] == nil || getBool(obj, "SharepointBlockDomainsOrUsers") == want)
+		}
+	}
+	if !cfg.SharepointMoveToQuarantineLocation.IsUnknown() && !cfg.SharepointMoveToQuarantineLocation.IsNull() && !cfg.SharepointMoveToQuarantineLocation.Equal(state.SharepointMoveToQuarantineLocation) {
+		prev, want := reflected, cfg.SharepointMoveToQuarantineLocation.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["SharepointMoveToQuarantineLocation"] == nil || getBool(obj, "SharepointMoveToQuarantineLocation") == want)
+		}
+	}
+	if !cfg.StopPolicyProcessing.IsUnknown() && !cfg.StopPolicyProcessing.IsNull() && !cfg.StopPolicyProcessing.Equal(state.StopPolicyProcessing) {
+		prev, want := reflected, cfg.StopPolicyProcessing.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["StopPolicyProcessing"] == nil || getBool(obj, "StopPolicyProcessing") == want)
+		}
+	}
 	r.refresh(ctx, id, &plan, &resp.Diagnostics, reflected)
+	if !cfg.ID.IsUnknown() && !cfg.ID.IsNull() {
+		plan.ID = cfg.ID
+	}
 	r.reconcileState(&cfg, &plan)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
@@ -1559,195 +2812,195 @@ func (r *dlpComplianceRuleResource) refresh(ctx context.Context, identity string
 func readDlpComplianceRule(ctx context.Context, obj map[string]any, m *dlpComplianceRuleModel) {
 	m.ID = types.StringValue(firstNonEmptyStr(getString(obj, "Guid"), getString(obj, "Id"), getString(obj, "Identity")))
 	m.Identity = types.StringValue(firstNonEmptyStr(getString(obj, "Identity"), getString(obj, "Guid"), getString(obj, "Name")))
-	m.AccessScope = types.StringValue(getString(obj, "AccessScope"))
-	m.AccessTimeControl = types.StringValue(getString(obj, "AccessTimeControl"))
+	m.AccessScope = types.StringValue(getObjectJSON(obj, "AccessScope"))
+	m.AccessTimeControl = types.StringValue(getObjectJSON(obj, "AccessTimeControl"))
 	m.AccessedBy = stringSetValue(ctx, getStringSlice(obj, "AccessedBy"))
 	m.AccessedByMemberOf = stringSetValue(ctx, getStringSlice(obj, "AccessedByMemberOf"))
-	m.ActivationDate = types.StringValue(getString(obj, "ActivationDate"))
-	m.AddRecipients = types.StringValue(getString(obj, "AddRecipients"))
+	m.ActivationDate = types.StringValue(getObjectJSON(obj, "ActivationDate"))
+	m.AddRecipients = types.StringValue(getObjectJSON(obj, "AddRecipients"))
 	m.AdvancedRule = types.StringValue(getString(obj, "AdvancedRule"))
-	m.AlertProperties = types.StringValue(getString(obj, "AlertProperties"))
-	m.AnyOfRecipientAddressContainsWords = types.StringValue(getString(obj, "AnyOfRecipientAddressContainsWords"))
-	m.AnyOfRecipientAddressMatchesPatterns = types.StringValue(getString(obj, "AnyOfRecipientAddressMatchesPatterns"))
+	m.AlertProperties = types.StringValue(getObjectJSON(obj, "AlertProperties"))
+	m.AnyOfRecipientAddressContainsWords = stringSetValue(ctx, getStringSlice(obj, "AnyOfRecipientAddressContainsWords"))
+	m.AnyOfRecipientAddressMatchesPatterns = stringSetValue(ctx, getStringSlice(obj, "AnyOfRecipientAddressMatchesPatterns"))
 	m.ApplyBrandingTemplate = types.StringValue(getString(obj, "ApplyBrandingTemplate"))
-	m.ApplyHtmlDisclaimer = types.StringValue(getString(obj, "ApplyHtmlDisclaimer"))
-	m.AttachmentCountOver = types.StringValue(getString(obj, "AttachmentCountOver"))
+	m.ApplyHtmlDisclaimer = types.StringValue(getObjectJSON(obj, "ApplyHtmlDisclaimer"))
+	m.AttachmentCountOver = types.StringValue(getObjectJSON(obj, "AttachmentCountOver"))
 	m.AttachmentIsNotLabeled = types.BoolValue(getBool(obj, "AttachmentIsNotLabeled"))
 	m.BlockAccess = types.BoolValue(getBool(obj, "BlockAccess"))
-	m.BlockAccessScope = types.StringValue(getString(obj, "BlockAccessScope"))
+	m.BlockAccessScope = types.StringValue(getObjectJSON(obj, "BlockAccessScope"))
 	m.Comment = types.StringValue(getString(obj, "Comment"))
-	m.ContentCharacterSetContainsWords = types.StringValue(getString(obj, "ContentCharacterSetContainsWords"))
-	m.ContentContainsSensitiveInformation = stringSetValue(ctx, getStringSlice(obj, "ContentContainsSensitiveInformation"))
-	m.ContentExtensionMatchesWords = types.StringValue(getString(obj, "ContentExtensionMatchesWords"))
-	m.ContentFileTypeMatches = types.StringValue(getString(obj, "ContentFileTypeMatches"))
+	m.ContentCharacterSetContainsWords = stringSetValue(ctx, getStringSlice(obj, "ContentCharacterSetContainsWords"))
+	m.ContentContainsSensitiveInformation = types.StringValue(getObjectJSON(obj, "ContentContainsSensitiveInformation"))
+	m.ContentExtensionMatchesWords = stringSetValue(ctx, getStringSlice(obj, "ContentExtensionMatchesWords"))
+	m.ContentFileTypeMatches = stringSetValue(ctx, getStringSlice(obj, "ContentFileTypeMatches"))
 	m.ContentIsNotLabeled = types.BoolValue(getBool(obj, "ContentIsNotLabeled"))
 	m.ContentIsShared = types.BoolValue(getBool(obj, "ContentIsShared"))
-	m.ContentMissingSensitivityLabel = types.StringValue(getString(obj, "ContentMissingSensitivityLabel"))
-	m.ContentPropertyContainsWords = types.StringValue(getString(obj, "ContentPropertyContainsWords"))
-	m.ContextPropertiesContainWords = types.StringValue(getString(obj, "ContextPropertiesContainWords"))
-	m.DeviceManagementType = types.StringValue(getString(obj, "DeviceManagementType"))
+	m.ContentMissingSensitivityLabel = types.StringValue(getObjectJSON(obj, "ContentMissingSensitivityLabel"))
+	m.ContentPropertyContainsWords = stringSetValue(ctx, getStringSlice(obj, "ContentPropertyContainsWords"))
+	m.ContextPropertiesContainWords = types.StringValue(getObjectJSON(obj, "ContextPropertiesContainWords"))
+	m.DeviceManagementType = types.StringValue(getObjectJSON(obj, "DeviceManagementType"))
 	m.Disabled = types.BoolValue(getBool(obj, "Disabled"))
 	m.DisplayName = types.StringValue(getString(obj, "DisplayName"))
-	m.DocumentContainsWords = types.StringValue(getString(obj, "DocumentContainsWords"))
-	m.DocumentCreatedBy = types.StringValue(getString(obj, "DocumentCreatedBy"))
+	m.DocumentContainsWords = stringSetValue(ctx, getStringSlice(obj, "DocumentContainsWords"))
+	m.DocumentCreatedBy = stringSetValue(ctx, getStringSlice(obj, "DocumentCreatedBy"))
 	m.DocumentCreatedByMemberOf = stringSetValue(ctx, getStringSlice(obj, "DocumentCreatedByMemberOf"))
 	m.DocumentIsPasswordProtected = types.BoolValue(getBool(obj, "DocumentIsPasswordProtected"))
 	m.DocumentIsUnsupported = types.BoolValue(getBool(obj, "DocumentIsUnsupported"))
-	m.DocumentMatchesPatterns = types.StringValue(getString(obj, "DocumentMatchesPatterns"))
-	m.DocumentNameMatchesPatterns = types.StringValue(getString(obj, "DocumentNameMatchesPatterns"))
-	m.DocumentNameMatchesWords = types.StringValue(getString(obj, "DocumentNameMatchesWords"))
-	m.DocumentSizeOver = types.StringValue(getString(obj, "DocumentSizeOver"))
-	m.EncryptRMSTemplate = types.StringValue(getString(obj, "EncryptRMSTemplate"))
+	m.DocumentMatchesPatterns = stringSetValue(ctx, getStringSlice(obj, "DocumentMatchesPatterns"))
+	m.DocumentNameMatchesPatterns = stringSetValue(ctx, getStringSlice(obj, "DocumentNameMatchesPatterns"))
+	m.DocumentNameMatchesWords = stringSetValue(ctx, getStringSlice(obj, "DocumentNameMatchesWords"))
+	m.DocumentSizeOver = types.StringValue(getObjectJSON(obj, "DocumentSizeOver"))
+	m.EncryptRMSTemplate = types.StringValue(getObjectJSON(obj, "EncryptRMSTemplate"))
 	m.EndpointDlpBrowserRestrictions = stringSetValue(ctx, getStringSlice(obj, "EndpointDlpBrowserRestrictions"))
-	m.EndpointDlpRestrictions = stringSetValue(ctx, getStringSlice(obj, "EndpointDlpRestrictions"))
+	m.EndpointDlpRestrictions = types.StringValue(getObjectJSON(obj, "EndpointDlpRestrictions"))
 	m.EnforcePortalAccess = types.BoolValue(getBool(obj, "EnforcePortalAccess"))
 	m.EvaluateRulePerComponent = types.BoolValue(getBool(obj, "EvaluateRulePerComponent"))
-	m.ExceptIfAccessScope = types.StringValue(getString(obj, "ExceptIfAccessScope"))
+	m.ExceptIfAccessScope = types.StringValue(getObjectJSON(obj, "ExceptIfAccessScope"))
 	m.ExceptIfAccessedBy = stringSetValue(ctx, getStringSlice(obj, "ExceptIfAccessedBy"))
 	m.ExceptIfAccessedByMemberOf = stringSetValue(ctx, getStringSlice(obj, "ExceptIfAccessedByMemberOf"))
-	m.ExceptIfAnyOfRecipientAddressContainsWords = types.StringValue(getString(obj, "ExceptIfAnyOfRecipientAddressContainsWords"))
-	m.ExceptIfAnyOfRecipientAddressMatchesPatterns = types.StringValue(getString(obj, "ExceptIfAnyOfRecipientAddressMatchesPatterns"))
-	m.ExceptIfContentCharacterSetContainsWords = types.StringValue(getString(obj, "ExceptIfContentCharacterSetContainsWords"))
-	m.ExceptIfContentContainsSensitiveInformation = stringSetValue(ctx, getStringSlice(obj, "ExceptIfContentContainsSensitiveInformation"))
-	m.ExceptIfContentExtensionMatchesWords = types.StringValue(getString(obj, "ExceptIfContentExtensionMatchesWords"))
-	m.ExceptIfContentFileTypeMatches = types.StringValue(getString(obj, "ExceptIfContentFileTypeMatches"))
+	m.ExceptIfAnyOfRecipientAddressContainsWords = stringSetValue(ctx, getStringSlice(obj, "ExceptIfAnyOfRecipientAddressContainsWords"))
+	m.ExceptIfAnyOfRecipientAddressMatchesPatterns = stringSetValue(ctx, getStringSlice(obj, "ExceptIfAnyOfRecipientAddressMatchesPatterns"))
+	m.ExceptIfContentCharacterSetContainsWords = stringSetValue(ctx, getStringSlice(obj, "ExceptIfContentCharacterSetContainsWords"))
+	m.ExceptIfContentContainsSensitiveInformation = types.StringValue(getObjectJSON(obj, "ExceptIfContentContainsSensitiveInformation"))
+	m.ExceptIfContentExtensionMatchesWords = stringSetValue(ctx, getStringSlice(obj, "ExceptIfContentExtensionMatchesWords"))
+	m.ExceptIfContentFileTypeMatches = stringSetValue(ctx, getStringSlice(obj, "ExceptIfContentFileTypeMatches"))
 	m.ExceptIfContentIsShared = types.BoolValue(getBool(obj, "ExceptIfContentIsShared"))
-	m.ExceptIfContentPropertyContainsWords = types.StringValue(getString(obj, "ExceptIfContentPropertyContainsWords"))
-	m.ExceptIfContextPropertiesContainWords = types.StringValue(getString(obj, "ExceptIfContextPropertiesContainWords"))
-	m.ExceptIfDeviceManagementType = types.StringValue(getString(obj, "ExceptIfDeviceManagementType"))
-	m.ExceptIfDocumentContainsWords = types.StringValue(getString(obj, "ExceptIfDocumentContainsWords"))
-	m.ExceptIfDocumentCreatedBy = types.StringValue(getString(obj, "ExceptIfDocumentCreatedBy"))
+	m.ExceptIfContentPropertyContainsWords = stringSetValue(ctx, getStringSlice(obj, "ExceptIfContentPropertyContainsWords"))
+	m.ExceptIfContextPropertiesContainWords = types.StringValue(getObjectJSON(obj, "ExceptIfContextPropertiesContainWords"))
+	m.ExceptIfDeviceManagementType = types.StringValue(getObjectJSON(obj, "ExceptIfDeviceManagementType"))
+	m.ExceptIfDocumentContainsWords = stringSetValue(ctx, getStringSlice(obj, "ExceptIfDocumentContainsWords"))
+	m.ExceptIfDocumentCreatedBy = stringSetValue(ctx, getStringSlice(obj, "ExceptIfDocumentCreatedBy"))
 	m.ExceptIfDocumentCreatedByMemberOf = stringSetValue(ctx, getStringSlice(obj, "ExceptIfDocumentCreatedByMemberOf"))
 	m.ExceptIfDocumentIsPasswordProtected = types.BoolValue(getBool(obj, "ExceptIfDocumentIsPasswordProtected"))
 	m.ExceptIfDocumentIsUnsupported = types.BoolValue(getBool(obj, "ExceptIfDocumentIsUnsupported"))
-	m.ExceptIfDocumentMatchesPatterns = types.StringValue(getString(obj, "ExceptIfDocumentMatchesPatterns"))
-	m.ExceptIfDocumentNameMatchesPatterns = types.StringValue(getString(obj, "ExceptIfDocumentNameMatchesPatterns"))
-	m.ExceptIfDocumentNameMatchesWords = types.StringValue(getString(obj, "ExceptIfDocumentNameMatchesWords"))
-	m.ExceptIfDocumentSizeOver = types.StringValue(getString(obj, "ExceptIfDocumentSizeOver"))
+	m.ExceptIfDocumentMatchesPatterns = stringSetValue(ctx, getStringSlice(obj, "ExceptIfDocumentMatchesPatterns"))
+	m.ExceptIfDocumentNameMatchesPatterns = stringSetValue(ctx, getStringSlice(obj, "ExceptIfDocumentNameMatchesPatterns"))
+	m.ExceptIfDocumentNameMatchesWords = stringSetValue(ctx, getStringSlice(obj, "ExceptIfDocumentNameMatchesWords"))
+	m.ExceptIfDocumentSizeOver = types.StringValue(getObjectJSON(obj, "ExceptIfDocumentSizeOver"))
 	m.ExceptIfFrom = stringSetValue(ctx, getStringSlice(obj, "ExceptIfFrom"))
-	m.ExceptIfFromAddressContainsWords = types.StringValue(getString(obj, "ExceptIfFromAddressContainsWords"))
-	m.ExceptIfFromAddressMatchesPatterns = types.StringValue(getString(obj, "ExceptIfFromAddressMatchesPatterns"))
+	m.ExceptIfFromAddressContainsWords = stringSetValue(ctx, getStringSlice(obj, "ExceptIfFromAddressContainsWords"))
+	m.ExceptIfFromAddressMatchesPatterns = stringSetValue(ctx, getStringSlice(obj, "ExceptIfFromAddressMatchesPatterns"))
 	m.ExceptIfFromMemberOf = stringSetValue(ctx, getStringSlice(obj, "ExceptIfFromMemberOf"))
-	m.ExceptIfFromScope = types.StringValue(getString(obj, "ExceptIfFromScope"))
+	m.ExceptIfFromScope = types.StringValue(getObjectJSON(obj, "ExceptIfFromScope"))
 	m.ExceptIfHasSenderOverride = types.BoolValue(getBool(obj, "ExceptIfHasSenderOverride"))
-	m.ExceptIfHeaderContainsTokens = types.StringValue(getString(obj, "ExceptIfHeaderContainsTokens"))
-	m.ExceptIfHeaderContainsWords = types.StringValue(getString(obj, "ExceptIfHeaderContainsWords"))
-	m.ExceptIfHeaderMatchesPatterns = types.StringValue(getString(obj, "ExceptIfHeaderMatchesPatterns"))
-	m.ExceptIfMessageLabelChangeDetected = types.StringValue(getString(obj, "ExceptIfMessageLabelChangeDetected"))
-	m.ExceptIfMessageSizeOver = types.StringValue(getString(obj, "ExceptIfMessageSizeOver"))
-	m.ExceptIfMessageTypeMatches = types.StringValue(getString(obj, "ExceptIfMessageTypeMatches"))
+	m.ExceptIfHeaderContainsTokens = types.StringValue(getObjectJSON(obj, "ExceptIfHeaderContainsTokens"))
+	m.ExceptIfHeaderContainsWords = types.StringValue(getObjectJSON(obj, "ExceptIfHeaderContainsWords"))
+	m.ExceptIfHeaderMatchesPatterns = types.StringValue(getObjectJSON(obj, "ExceptIfHeaderMatchesPatterns"))
+	m.ExceptIfMessageLabelChangeDetected = types.StringValue(getObjectJSON(obj, "ExceptIfMessageLabelChangeDetected"))
+	m.ExceptIfMessageSizeOver = types.StringValue(getObjectJSON(obj, "ExceptIfMessageSizeOver"))
+	m.ExceptIfMessageTypeMatches = types.StringValue(getObjectJSON(obj, "ExceptIfMessageTypeMatches"))
 	m.ExceptIfProcessingLimitExceeded = types.BoolValue(getBool(obj, "ExceptIfProcessingLimitExceeded"))
-	m.ExceptIfRecipientADAttributeContainsWords = types.StringValue(getString(obj, "ExceptIfRecipientADAttributeContainsWords"))
-	m.ExceptIfRecipientADAttributeMatchesPatterns = types.StringValue(getString(obj, "ExceptIfRecipientADAttributeMatchesPatterns"))
-	m.ExceptIfRecipientDomainIs = types.StringValue(getString(obj, "ExceptIfRecipientDomainIs"))
-	m.ExceptIfSenderADAttributeContainsWords = types.StringValue(getString(obj, "ExceptIfSenderADAttributeContainsWords"))
-	m.ExceptIfSenderADAttributeMatchesPatterns = types.StringValue(getString(obj, "ExceptIfSenderADAttributeMatchesPatterns"))
-	m.ExceptIfSenderDomainIs = types.StringValue(getString(obj, "ExceptIfSenderDomainIs"))
-	m.ExceptIfSenderIPRanges = types.StringValue(getString(obj, "ExceptIfSenderIPRanges"))
-	m.ExceptIfSentTo = types.StringValue(getString(obj, "ExceptIfSentTo"))
+	m.ExceptIfRecipientADAttributeContainsWords = types.StringValue(getObjectJSON(obj, "ExceptIfRecipientADAttributeContainsWords"))
+	m.ExceptIfRecipientADAttributeMatchesPatterns = types.StringValue(getObjectJSON(obj, "ExceptIfRecipientADAttributeMatchesPatterns"))
+	m.ExceptIfRecipientDomainIs = stringSetValue(ctx, getStringSlice(obj, "ExceptIfRecipientDomainIs"))
+	m.ExceptIfSenderADAttributeContainsWords = types.StringValue(getObjectJSON(obj, "ExceptIfSenderADAttributeContainsWords"))
+	m.ExceptIfSenderADAttributeMatchesPatterns = types.StringValue(getObjectJSON(obj, "ExceptIfSenderADAttributeMatchesPatterns"))
+	m.ExceptIfSenderDomainIs = stringSetValue(ctx, getStringSlice(obj, "ExceptIfSenderDomainIs"))
+	m.ExceptIfSenderIPRanges = stringSetValue(ctx, getStringSlice(obj, "ExceptIfSenderIPRanges"))
+	m.ExceptIfSentTo = stringSetValue(ctx, getStringSlice(obj, "ExceptIfSentTo"))
 	m.ExceptIfSentToMemberOf = stringSetValue(ctx, getStringSlice(obj, "ExceptIfSentToMemberOf"))
-	m.ExceptIfSharedWithDomain = types.StringValue(getString(obj, "ExceptIfSharedWithDomain"))
-	m.ExceptIfSubjectContainsWords = types.StringValue(getString(obj, "ExceptIfSubjectContainsWords"))
-	m.ExceptIfSubjectMatchesPatterns = types.StringValue(getString(obj, "ExceptIfSubjectMatchesPatterns"))
-	m.ExceptIfSubjectOrBodyContainsWords = types.StringValue(getString(obj, "ExceptIfSubjectOrBodyContainsWords"))
-	m.ExceptIfSubjectOrBodyMatchesPatterns = types.StringValue(getString(obj, "ExceptIfSubjectOrBodyMatchesPatterns"))
-	m.ExceptIfTeamsSharedWithParticipantCategory = types.StringValue(getString(obj, "ExceptIfTeamsSharedWithParticipantCategory"))
-	m.ExceptIfUnscannableDocumentExtensionIs = types.StringValue(getString(obj, "ExceptIfUnscannableDocumentExtensionIs"))
-	m.ExceptIfUrlContainsText = types.StringValue(getString(obj, "ExceptIfUrlContainsText"))
-	m.ExceptIfWithImportance = types.StringValue(getString(obj, "ExceptIfWithImportance"))
-	m.ExpiryDate = types.StringValue(getString(obj, "ExpiryDate"))
+	m.ExceptIfSharedWithDomain = types.StringValue(getObjectJSON(obj, "ExceptIfSharedWithDomain"))
+	m.ExceptIfSubjectContainsWords = stringSetValue(ctx, getStringSlice(obj, "ExceptIfSubjectContainsWords"))
+	m.ExceptIfSubjectMatchesPatterns = stringSetValue(ctx, getStringSlice(obj, "ExceptIfSubjectMatchesPatterns"))
+	m.ExceptIfSubjectOrBodyContainsWords = stringSetValue(ctx, getStringSlice(obj, "ExceptIfSubjectOrBodyContainsWords"))
+	m.ExceptIfSubjectOrBodyMatchesPatterns = stringSetValue(ctx, getStringSlice(obj, "ExceptIfSubjectOrBodyMatchesPatterns"))
+	m.ExceptIfTeamsSharedWithParticipantCategory = types.StringValue(getObjectJSON(obj, "ExceptIfTeamsSharedWithParticipantCategory"))
+	m.ExceptIfUnscannableDocumentExtensionIs = stringSetValue(ctx, getStringSlice(obj, "ExceptIfUnscannableDocumentExtensionIs"))
+	m.ExceptIfUrlContainsText = types.StringValue(getObjectJSON(obj, "ExceptIfUrlContainsText"))
+	m.ExceptIfWithImportance = types.StringValue(getObjectJSON(obj, "ExceptIfWithImportance"))
+	m.ExpiryDate = types.StringValue(getObjectJSON(obj, "ExpiryDate"))
 	m.From = stringSetValue(ctx, getStringSlice(obj, "From"))
-	m.FromAddressContainsWords = types.StringValue(getString(obj, "FromAddressContainsWords"))
-	m.FromAddressMatchesPatterns = types.StringValue(getString(obj, "FromAddressMatchesPatterns"))
+	m.FromAddressContainsWords = stringSetValue(ctx, getStringSlice(obj, "FromAddressContainsWords"))
+	m.FromAddressMatchesPatterns = stringSetValue(ctx, getStringSlice(obj, "FromAddressMatchesPatterns"))
 	m.FromMemberOf = stringSetValue(ctx, getStringSlice(obj, "FromMemberOf"))
-	m.FromScope = types.StringValue(getString(obj, "FromScope"))
-	m.GenerateAlert = types.StringValue(getString(obj, "GenerateAlert"))
-	m.GenerateIncidentReport = types.StringValue(getString(obj, "GenerateIncidentReport"))
-	m.HasActivity = types.StringValue(getString(obj, "HasActivity"))
-	m.HasLabelDowngradedFrom = types.StringValue(getString(obj, "HasLabelDowngradedFrom"))
+	m.FromScope = types.StringValue(getObjectJSON(obj, "FromScope"))
+	m.GenerateAlert = stringSetValue(ctx, getStringSlice(obj, "GenerateAlert"))
+	m.GenerateIncidentReport = stringSetValue(ctx, getStringSlice(obj, "GenerateIncidentReport"))
+	m.HasActivity = types.StringValue(getObjectJSON(obj, "HasActivity"))
+	m.HasLabelDowngradedFrom = types.StringValue(getObjectJSON(obj, "HasLabelDowngradedFrom"))
 	m.HasSenderOverride = types.BoolValue(getBool(obj, "HasSenderOverride"))
-	m.HeaderContainsTokens = types.StringValue(getString(obj, "HeaderContainsTokens"))
-	m.HeaderContainsWords = types.StringValue(getString(obj, "HeaderContainsWords"))
-	m.HeaderMatchesPatterns = types.StringValue(getString(obj, "HeaderMatchesPatterns"))
-	m.ImmutableId = types.StringValue(getString(obj, "ImmutableId"))
+	m.HeaderContainsTokens = types.StringValue(getObjectJSON(obj, "HeaderContainsTokens"))
+	m.HeaderContainsWords = types.StringValue(getObjectJSON(obj, "HeaderContainsWords"))
+	m.HeaderMatchesPatterns = types.StringValue(getObjectJSON(obj, "HeaderMatchesPatterns"))
+	m.ImmutableId = types.StringValue(getObjectJSON(obj, "ImmutableId"))
 	m.IncidentReportContent = stringSetValue(ctx, getStringSlice(obj, "IncidentReportContent"))
-	m.MapRecipients = types.StringValue(getString(obj, "MapRecipients"))
+	m.MapRecipients = types.StringValue(getObjectJSON(obj, "MapRecipients"))
 	m.MessageIsNotLabeled = types.BoolValue(getBool(obj, "MessageIsNotLabeled"))
-	m.MessageLabelChangeDetected = types.StringValue(getString(obj, "MessageLabelChangeDetected"))
-	m.MessageSizeOver = types.StringValue(getString(obj, "MessageSizeOver"))
-	m.MessageTypeMatches = types.StringValue(getString(obj, "MessageTypeMatches"))
-	m.MipRestrictAccess = stringSetValue(ctx, getStringSlice(obj, "MipRestrictAccess"))
-	m.Moderate = types.StringValue(getString(obj, "Moderate"))
-	m.ModifySubject = types.StringValue(getString(obj, "ModifySubject"))
+	m.MessageLabelChangeDetected = types.StringValue(getObjectJSON(obj, "MessageLabelChangeDetected"))
+	m.MessageSizeOver = types.StringValue(getObjectJSON(obj, "MessageSizeOver"))
+	m.MessageTypeMatches = types.StringValue(getObjectJSON(obj, "MessageTypeMatches"))
+	m.MipRestrictAccess = types.StringValue(getObjectJSON(obj, "MipRestrictAccess"))
+	m.Moderate = types.StringValue(getObjectJSON(obj, "Moderate"))
+	m.ModifySubject = types.StringValue(getObjectJSON(obj, "ModifySubject"))
 	m.MoveToQuarantineLocation = types.BoolValue(getBool(obj, "MoveToQuarantineLocation"))
 	m.Name = types.StringValue(getString(obj, "Name"))
-	m.NonBifurcatingAccessScope = types.StringValue(getString(obj, "NonBifurcatingAccessScope"))
+	m.NonBifurcatingAccessScope = types.StringValue(getObjectJSON(obj, "NonBifurcatingAccessScope"))
 	m.NotifyAllowOverride = stringSetValue(ctx, getStringSlice(obj, "NotifyAllowOverride"))
 	m.NotifyEmailCustomSenderDisplayName = types.StringValue(getString(obj, "NotifyEmailCustomSenderDisplayName"))
 	m.NotifyEmailCustomSubject = types.StringValue(getString(obj, "NotifyEmailCustomSubject"))
 	m.NotifyEmailCustomText = types.StringValue(getString(obj, "NotifyEmailCustomText"))
 	m.NotifyEmailExchangeIncludeAttachment = types.BoolValue(getBool(obj, "NotifyEmailExchangeIncludeAttachment"))
-	m.NotifyEmailOnedriveRemediationActions = types.StringValue(getString(obj, "NotifyEmailOnedriveRemediationActions"))
-	m.NotifyEndpointUser = types.StringValue(getString(obj, "NotifyEndpointUser"))
+	m.NotifyEmailOnedriveRemediationActions = types.StringValue(getObjectJSON(obj, "NotifyEmailOnedriveRemediationActions"))
+	m.NotifyEndpointUser = types.StringValue(getObjectJSON(obj, "NotifyEndpointUser"))
 	m.NotifyJustificationCustomText = types.StringValue(getString(obj, "NotifyJustificationCustomText"))
-	m.NotifyJustificationCustomTextTranslations = types.StringValue(getString(obj, "NotifyJustificationCustomTextTranslations"))
-	m.NotifyOverrideRequirements = types.StringValue(getString(obj, "NotifyOverrideRequirements"))
+	m.NotifyJustificationCustomTextTranslations = types.StringValue(getObjectJSON(obj, "NotifyJustificationCustomTextTranslations"))
+	m.NotifyOverrideRequirements = types.StringValue(getObjectJSON(obj, "NotifyOverrideRequirements"))
 	m.NotifyPolicyTipCustomDialog = types.StringValue(getString(obj, "NotifyPolicyTipCustomDialog"))
 	m.NotifyPolicyTipCustomText = types.StringValue(getString(obj, "NotifyPolicyTipCustomText"))
-	m.NotifyPolicyTipCustomTextTranslations = types.StringValue(getString(obj, "NotifyPolicyTipCustomTextTranslations"))
-	m.NotifyPolicyTipDisplayOption = types.StringValue(getString(obj, "NotifyPolicyTipDisplayOption"))
+	m.NotifyPolicyTipCustomTextTranslations = stringSetValue(ctx, getStringSlice(obj, "NotifyPolicyTipCustomTextTranslations"))
+	m.NotifyPolicyTipDisplayOption = types.StringValue(getObjectJSON(obj, "NotifyPolicyTipDisplayOption"))
 	m.NotifyPolicyTipUrl = types.StringValue(getString(obj, "NotifyPolicyTipUrl"))
-	m.NotifyUser = types.StringValue(getString(obj, "NotifyUser"))
-	m.NotifyUserType = types.StringValue(getString(obj, "NotifyUserType"))
-	m.OnPremisesScannerDlpRestrictions = stringSetValue(ctx, getStringSlice(obj, "OnPremisesScannerDlpRestrictions"))
-	m.Policy = types.StringValue(getString(obj, "Policy"))
+	m.NotifyUser = stringSetValue(ctx, getStringSlice(obj, "NotifyUser"))
+	m.NotifyUserType = types.StringValue(getObjectJSON(obj, "NotifyUserType"))
+	m.OnPremisesScannerDlpRestrictions = types.StringValue(getObjectJSON(obj, "OnPremisesScannerDlpRestrictions"))
+	m.Policy = types.StringValue(getObjectJSON(obj, "Policy"))
 	m.PowerBIDlpRestrictions = stringSetValue(ctx, getStringSlice(obj, "PowerBIDlpRestrictions"))
 	m.PrependSubject = types.StringValue(getString(obj, "PrependSubject"))
-	m.Priority = types.StringValue(getString(obj, "Priority"))
+	m.Priority = types.Int64Value(getInt(obj, "Priority"))
 	m.ProcessingLimitExceeded = types.BoolValue(getBool(obj, "ProcessingLimitExceeded"))
 	m.Quarantine = types.BoolValue(getBool(obj, "Quarantine"))
-	m.RecipientADAttributeContainsWords = types.StringValue(getString(obj, "RecipientADAttributeContainsWords"))
-	m.RecipientADAttributeMatchesPatterns = types.StringValue(getString(obj, "RecipientADAttributeMatchesPatterns"))
-	m.RecipientDomainIs = types.StringValue(getString(obj, "RecipientDomainIs"))
-	m.RedactSensitiveInfo = types.StringValue(getString(obj, "RedactSensitiveInfo"))
+	m.RecipientADAttributeContainsWords = types.StringValue(getObjectJSON(obj, "RecipientADAttributeContainsWords"))
+	m.RecipientADAttributeMatchesPatterns = types.StringValue(getObjectJSON(obj, "RecipientADAttributeMatchesPatterns"))
+	m.RecipientDomainIs = stringSetValue(ctx, getStringSlice(obj, "RecipientDomainIs"))
+	m.RedactSensitiveInfo = types.StringValue(getObjectJSON(obj, "RedactSensitiveInfo"))
 	m.RedirectMessageTo = stringSetValue(ctx, getStringSlice(obj, "RedirectMessageTo"))
-	m.RemoveHeader = types.StringValue(getString(obj, "RemoveHeader"))
+	m.RemoveHeader = stringSetValue(ctx, getStringSlice(obj, "RemoveHeader"))
 	m.RemoveRMSTemplate = types.BoolValue(getBool(obj, "RemoveRMSTemplate"))
-	m.ReportSeverityLevel = types.StringValue(getString(obj, "ReportSeverityLevel"))
-	m.RestrictAccess = stringSetValue(ctx, getStringSlice(obj, "RestrictAccess"))
+	m.ReportSeverityLevel = types.StringValue(getObjectJSON(obj, "ReportSeverityLevel"))
+	m.RestrictAccess = types.StringValue(getObjectJSON(obj, "RestrictAccess"))
 	m.RestrictBrowserAccess = types.BoolValue(getBool(obj, "RestrictBrowserAccess"))
 	m.RestrictWebGrounding = types.BoolValue(getBool(obj, "RestrictWebGrounding"))
-	m.RuleErrorAction = types.StringValue(getString(obj, "RuleErrorAction"))
-	m.SenderADAttributeContainsWords = types.StringValue(getString(obj, "SenderADAttributeContainsWords"))
-	m.SenderADAttributeMatchesPatterns = types.StringValue(getString(obj, "SenderADAttributeMatchesPatterns"))
-	m.SenderAddressLocation = types.StringValue(getString(obj, "SenderAddressLocation"))
-	m.SenderDomainIs = types.StringValue(getString(obj, "SenderDomainIs"))
-	m.SenderIPRanges = types.StringValue(getString(obj, "SenderIPRanges"))
-	m.SenderType = types.StringValue(getString(obj, "SenderType"))
-	m.SentTo = types.StringValue(getString(obj, "SentTo"))
+	m.RuleErrorAction = types.StringValue(getObjectJSON(obj, "RuleErrorAction"))
+	m.SenderADAttributeContainsWords = types.StringValue(getObjectJSON(obj, "SenderADAttributeContainsWords"))
+	m.SenderADAttributeMatchesPatterns = types.StringValue(getObjectJSON(obj, "SenderADAttributeMatchesPatterns"))
+	m.SenderAddressLocation = types.StringValue(getObjectJSON(obj, "SenderAddressLocation"))
+	m.SenderDomainIs = stringSetValue(ctx, getStringSlice(obj, "SenderDomainIs"))
+	m.SenderIPRanges = stringSetValue(ctx, getStringSlice(obj, "SenderIPRanges"))
+	m.SenderType = types.StringValue(getObjectJSON(obj, "SenderType"))
+	m.SentTo = stringSetValue(ctx, getStringSlice(obj, "SentTo"))
 	m.SentToMemberOf = stringSetValue(ctx, getStringSlice(obj, "SentToMemberOf"))
-	m.SetHeader = types.StringValue(getString(obj, "SetHeader"))
-	m.SharedByIRMAgentRisk = types.StringValue(getString(obj, "SharedByIRMAgentRisk"))
-	m.SharedByIRMUserRisk = types.StringValue(getString(obj, "SharedByIRMUserRisk"))
-	m.SharedWithDomain = types.StringValue(getString(obj, "SharedWithDomain"))
-	m.SharepointBlockDomains = types.StringValue(getString(obj, "SharepointBlockDomains"))
-	m.SharepointBlockDomainsExcept = types.StringValue(getString(obj, "SharepointBlockDomainsExcept"))
+	m.SetHeader = types.StringValue(getObjectJSON(obj, "SetHeader"))
+	m.SharedByIRMAgentRisk = types.StringValue(getObjectJSON(obj, "SharedByIRMAgentRisk"))
+	m.SharedByIRMUserRisk = stringSetValue(ctx, getStringSlice(obj, "SharedByIRMUserRisk"))
+	m.SharedWithDomain = types.StringValue(getObjectJSON(obj, "SharedWithDomain"))
+	m.SharepointBlockDomains = types.StringValue(getObjectJSON(obj, "SharepointBlockDomains"))
+	m.SharepointBlockDomainsExcept = types.StringValue(getObjectJSON(obj, "SharepointBlockDomainsExcept"))
 	m.SharepointBlockDomainsOrUsers = types.BoolValue(getBool(obj, "SharepointBlockDomainsOrUsers"))
-	m.SharepointBlockUsers = types.StringValue(getString(obj, "SharepointBlockUsers"))
-	m.SharepointBlockUsersExcept = types.StringValue(getString(obj, "SharepointBlockUsersExcept"))
+	m.SharepointBlockUsers = types.StringValue(getObjectJSON(obj, "SharepointBlockUsers"))
+	m.SharepointBlockUsersExcept = types.StringValue(getObjectJSON(obj, "SharepointBlockUsersExcept"))
 	m.SharepointMoveToQuarantineLocation = types.BoolValue(getBool(obj, "SharepointMoveToQuarantineLocation"))
 	m.StopPolicyProcessing = types.BoolValue(getBool(obj, "StopPolicyProcessing"))
-	m.SubjectContainsWords = types.StringValue(getString(obj, "SubjectContainsWords"))
-	m.SubjectMatchesPatterns = types.StringValue(getString(obj, "SubjectMatchesPatterns"))
-	m.SubjectOrBodyContainsWords = types.StringValue(getString(obj, "SubjectOrBodyContainsWords"))
-	m.SubjectOrBodyMatchesPatterns = types.StringValue(getString(obj, "SubjectOrBodyMatchesPatterns"))
-	m.TeamsSharedWithParticipantCategory = types.StringValue(getString(obj, "TeamsSharedWithParticipantCategory"))
+	m.SubjectContainsWords = stringSetValue(ctx, getStringSlice(obj, "SubjectContainsWords"))
+	m.SubjectMatchesPatterns = stringSetValue(ctx, getStringSlice(obj, "SubjectMatchesPatterns"))
+	m.SubjectOrBodyContainsWords = stringSetValue(ctx, getStringSlice(obj, "SubjectOrBodyContainsWords"))
+	m.SubjectOrBodyMatchesPatterns = stringSetValue(ctx, getStringSlice(obj, "SubjectOrBodyMatchesPatterns"))
+	m.TeamsSharedWithParticipantCategory = types.StringValue(getObjectJSON(obj, "TeamsSharedWithParticipantCategory"))
 	m.ThirdPartyAppDlpRestrictions = stringSetValue(ctx, getStringSlice(obj, "ThirdPartyAppDlpRestrictions"))
 	m.TriggerPowerAutomateFlow = types.StringValue(getString(obj, "TriggerPowerAutomateFlow"))
-	m.UnscannableDocumentExtensionIs = types.StringValue(getString(obj, "UnscannableDocumentExtensionIs"))
-	m.UrlContainsText = types.StringValue(getString(obj, "UrlContainsText"))
+	m.UnscannableDocumentExtensionIs = stringSetValue(ctx, getStringSlice(obj, "UnscannableDocumentExtensionIs"))
+	m.UrlContainsText = types.StringValue(getObjectJSON(obj, "UrlContainsText"))
 	m.ValidateRule = types.BoolValue(getBool(obj, "ValidateRule"))
-	m.WithImportance = types.StringValue(getString(obj, "WithImportance"))
+	m.WithImportance = types.StringValue(getObjectJSON(obj, "WithImportance"))
 	_ = ctx
 }
 
@@ -1760,8 +3013,8 @@ func (r *dlpComplianceRuleResource) reconcileState(cfg, read *dlpComplianceRuleM
 	read.AddRecipients = reconcile.KeepStr(cfg.AddRecipients, read.AddRecipients)
 	read.AdvancedRule = reconcile.KeepStr(cfg.AdvancedRule, read.AdvancedRule)
 	read.AlertProperties = reconcile.KeepStr(cfg.AlertProperties, read.AlertProperties)
-	read.AnyOfRecipientAddressContainsWords = reconcile.KeepStr(cfg.AnyOfRecipientAddressContainsWords, read.AnyOfRecipientAddressContainsWords)
-	read.AnyOfRecipientAddressMatchesPatterns = reconcile.KeepStr(cfg.AnyOfRecipientAddressMatchesPatterns, read.AnyOfRecipientAddressMatchesPatterns)
+	read.AnyOfRecipientAddressContainsWords = reconcile.KeepSet(cfg.AnyOfRecipientAddressContainsWords, read.AnyOfRecipientAddressContainsWords)
+	read.AnyOfRecipientAddressMatchesPatterns = reconcile.KeepSet(cfg.AnyOfRecipientAddressMatchesPatterns, read.AnyOfRecipientAddressMatchesPatterns)
 	read.ApplyBrandingTemplate = reconcile.KeepStr(cfg.ApplyBrandingTemplate, read.ApplyBrandingTemplate)
 	read.ApplyHtmlDisclaimer = reconcile.KeepStr(cfg.ApplyHtmlDisclaimer, read.ApplyHtmlDisclaimer)
 	read.AttachmentCountOver = reconcile.KeepStr(cfg.AttachmentCountOver, read.AttachmentCountOver)
@@ -1769,57 +3022,57 @@ func (r *dlpComplianceRuleResource) reconcileState(cfg, read *dlpComplianceRuleM
 	read.BlockAccess = reconcile.KeepBool(cfg.BlockAccess, read.BlockAccess)
 	read.BlockAccessScope = reconcile.KeepStr(cfg.BlockAccessScope, read.BlockAccessScope)
 	read.Comment = reconcile.KeepStr(cfg.Comment, read.Comment)
-	read.ContentCharacterSetContainsWords = reconcile.KeepStr(cfg.ContentCharacterSetContainsWords, read.ContentCharacterSetContainsWords)
-	read.ContentContainsSensitiveInformation = reconcile.KeepSet(cfg.ContentContainsSensitiveInformation, read.ContentContainsSensitiveInformation)
-	read.ContentExtensionMatchesWords = reconcile.KeepStr(cfg.ContentExtensionMatchesWords, read.ContentExtensionMatchesWords)
-	read.ContentFileTypeMatches = reconcile.KeepStr(cfg.ContentFileTypeMatches, read.ContentFileTypeMatches)
+	read.ContentCharacterSetContainsWords = reconcile.KeepSet(cfg.ContentCharacterSetContainsWords, read.ContentCharacterSetContainsWords)
+	read.ContentContainsSensitiveInformation = reconcile.KeepStr(cfg.ContentContainsSensitiveInformation, read.ContentContainsSensitiveInformation)
+	read.ContentExtensionMatchesWords = reconcile.KeepSet(cfg.ContentExtensionMatchesWords, read.ContentExtensionMatchesWords)
+	read.ContentFileTypeMatches = reconcile.KeepSet(cfg.ContentFileTypeMatches, read.ContentFileTypeMatches)
 	read.ContentIsNotLabeled = reconcile.KeepBool(cfg.ContentIsNotLabeled, read.ContentIsNotLabeled)
 	read.ContentIsShared = reconcile.KeepBool(cfg.ContentIsShared, read.ContentIsShared)
 	read.ContentMissingSensitivityLabel = reconcile.KeepStr(cfg.ContentMissingSensitivityLabel, read.ContentMissingSensitivityLabel)
-	read.ContentPropertyContainsWords = reconcile.KeepStr(cfg.ContentPropertyContainsWords, read.ContentPropertyContainsWords)
+	read.ContentPropertyContainsWords = reconcile.KeepSet(cfg.ContentPropertyContainsWords, read.ContentPropertyContainsWords)
 	read.ContextPropertiesContainWords = reconcile.KeepStr(cfg.ContextPropertiesContainWords, read.ContextPropertiesContainWords)
 	read.DeviceManagementType = reconcile.KeepStr(cfg.DeviceManagementType, read.DeviceManagementType)
 	read.Disabled = reconcile.KeepBool(cfg.Disabled, read.Disabled)
 	read.DisplayName = reconcile.KeepStr(cfg.DisplayName, read.DisplayName)
-	read.DocumentContainsWords = reconcile.KeepStr(cfg.DocumentContainsWords, read.DocumentContainsWords)
-	read.DocumentCreatedBy = reconcile.KeepStr(cfg.DocumentCreatedBy, read.DocumentCreatedBy)
+	read.DocumentContainsWords = reconcile.KeepSet(cfg.DocumentContainsWords, read.DocumentContainsWords)
+	read.DocumentCreatedBy = reconcile.KeepSet(cfg.DocumentCreatedBy, read.DocumentCreatedBy)
 	read.DocumentCreatedByMemberOf = reconcile.KeepSet(cfg.DocumentCreatedByMemberOf, read.DocumentCreatedByMemberOf)
 	read.DocumentIsPasswordProtected = reconcile.KeepBool(cfg.DocumentIsPasswordProtected, read.DocumentIsPasswordProtected)
 	read.DocumentIsUnsupported = reconcile.KeepBool(cfg.DocumentIsUnsupported, read.DocumentIsUnsupported)
-	read.DocumentMatchesPatterns = reconcile.KeepStr(cfg.DocumentMatchesPatterns, read.DocumentMatchesPatterns)
-	read.DocumentNameMatchesPatterns = reconcile.KeepStr(cfg.DocumentNameMatchesPatterns, read.DocumentNameMatchesPatterns)
-	read.DocumentNameMatchesWords = reconcile.KeepStr(cfg.DocumentNameMatchesWords, read.DocumentNameMatchesWords)
+	read.DocumentMatchesPatterns = reconcile.KeepSet(cfg.DocumentMatchesPatterns, read.DocumentMatchesPatterns)
+	read.DocumentNameMatchesPatterns = reconcile.KeepSet(cfg.DocumentNameMatchesPatterns, read.DocumentNameMatchesPatterns)
+	read.DocumentNameMatchesWords = reconcile.KeepSet(cfg.DocumentNameMatchesWords, read.DocumentNameMatchesWords)
 	read.DocumentSizeOver = reconcile.KeepStr(cfg.DocumentSizeOver, read.DocumentSizeOver)
 	read.EncryptRMSTemplate = reconcile.KeepStr(cfg.EncryptRMSTemplate, read.EncryptRMSTemplate)
 	read.EndpointDlpBrowserRestrictions = reconcile.KeepSet(cfg.EndpointDlpBrowserRestrictions, read.EndpointDlpBrowserRestrictions)
-	read.EndpointDlpRestrictions = reconcile.KeepSet(cfg.EndpointDlpRestrictions, read.EndpointDlpRestrictions)
+	read.EndpointDlpRestrictions = reconcile.KeepStr(cfg.EndpointDlpRestrictions, read.EndpointDlpRestrictions)
 	read.EnforcePortalAccess = reconcile.KeepBool(cfg.EnforcePortalAccess, read.EnforcePortalAccess)
 	read.EvaluateRulePerComponent = reconcile.KeepBool(cfg.EvaluateRulePerComponent, read.EvaluateRulePerComponent)
 	read.ExceptIfAccessScope = reconcile.KeepStr(cfg.ExceptIfAccessScope, read.ExceptIfAccessScope)
 	read.ExceptIfAccessedBy = reconcile.KeepSet(cfg.ExceptIfAccessedBy, read.ExceptIfAccessedBy)
 	read.ExceptIfAccessedByMemberOf = reconcile.KeepSet(cfg.ExceptIfAccessedByMemberOf, read.ExceptIfAccessedByMemberOf)
-	read.ExceptIfAnyOfRecipientAddressContainsWords = reconcile.KeepStr(cfg.ExceptIfAnyOfRecipientAddressContainsWords, read.ExceptIfAnyOfRecipientAddressContainsWords)
-	read.ExceptIfAnyOfRecipientAddressMatchesPatterns = reconcile.KeepStr(cfg.ExceptIfAnyOfRecipientAddressMatchesPatterns, read.ExceptIfAnyOfRecipientAddressMatchesPatterns)
-	read.ExceptIfContentCharacterSetContainsWords = reconcile.KeepStr(cfg.ExceptIfContentCharacterSetContainsWords, read.ExceptIfContentCharacterSetContainsWords)
-	read.ExceptIfContentContainsSensitiveInformation = reconcile.KeepSet(cfg.ExceptIfContentContainsSensitiveInformation, read.ExceptIfContentContainsSensitiveInformation)
-	read.ExceptIfContentExtensionMatchesWords = reconcile.KeepStr(cfg.ExceptIfContentExtensionMatchesWords, read.ExceptIfContentExtensionMatchesWords)
-	read.ExceptIfContentFileTypeMatches = reconcile.KeepStr(cfg.ExceptIfContentFileTypeMatches, read.ExceptIfContentFileTypeMatches)
+	read.ExceptIfAnyOfRecipientAddressContainsWords = reconcile.KeepSet(cfg.ExceptIfAnyOfRecipientAddressContainsWords, read.ExceptIfAnyOfRecipientAddressContainsWords)
+	read.ExceptIfAnyOfRecipientAddressMatchesPatterns = reconcile.KeepSet(cfg.ExceptIfAnyOfRecipientAddressMatchesPatterns, read.ExceptIfAnyOfRecipientAddressMatchesPatterns)
+	read.ExceptIfContentCharacterSetContainsWords = reconcile.KeepSet(cfg.ExceptIfContentCharacterSetContainsWords, read.ExceptIfContentCharacterSetContainsWords)
+	read.ExceptIfContentContainsSensitiveInformation = reconcile.KeepStr(cfg.ExceptIfContentContainsSensitiveInformation, read.ExceptIfContentContainsSensitiveInformation)
+	read.ExceptIfContentExtensionMatchesWords = reconcile.KeepSet(cfg.ExceptIfContentExtensionMatchesWords, read.ExceptIfContentExtensionMatchesWords)
+	read.ExceptIfContentFileTypeMatches = reconcile.KeepSet(cfg.ExceptIfContentFileTypeMatches, read.ExceptIfContentFileTypeMatches)
 	read.ExceptIfContentIsShared = reconcile.KeepBool(cfg.ExceptIfContentIsShared, read.ExceptIfContentIsShared)
-	read.ExceptIfContentPropertyContainsWords = reconcile.KeepStr(cfg.ExceptIfContentPropertyContainsWords, read.ExceptIfContentPropertyContainsWords)
+	read.ExceptIfContentPropertyContainsWords = reconcile.KeepSet(cfg.ExceptIfContentPropertyContainsWords, read.ExceptIfContentPropertyContainsWords)
 	read.ExceptIfContextPropertiesContainWords = reconcile.KeepStr(cfg.ExceptIfContextPropertiesContainWords, read.ExceptIfContextPropertiesContainWords)
 	read.ExceptIfDeviceManagementType = reconcile.KeepStr(cfg.ExceptIfDeviceManagementType, read.ExceptIfDeviceManagementType)
-	read.ExceptIfDocumentContainsWords = reconcile.KeepStr(cfg.ExceptIfDocumentContainsWords, read.ExceptIfDocumentContainsWords)
-	read.ExceptIfDocumentCreatedBy = reconcile.KeepStr(cfg.ExceptIfDocumentCreatedBy, read.ExceptIfDocumentCreatedBy)
+	read.ExceptIfDocumentContainsWords = reconcile.KeepSet(cfg.ExceptIfDocumentContainsWords, read.ExceptIfDocumentContainsWords)
+	read.ExceptIfDocumentCreatedBy = reconcile.KeepSet(cfg.ExceptIfDocumentCreatedBy, read.ExceptIfDocumentCreatedBy)
 	read.ExceptIfDocumentCreatedByMemberOf = reconcile.KeepSet(cfg.ExceptIfDocumentCreatedByMemberOf, read.ExceptIfDocumentCreatedByMemberOf)
 	read.ExceptIfDocumentIsPasswordProtected = reconcile.KeepBool(cfg.ExceptIfDocumentIsPasswordProtected, read.ExceptIfDocumentIsPasswordProtected)
 	read.ExceptIfDocumentIsUnsupported = reconcile.KeepBool(cfg.ExceptIfDocumentIsUnsupported, read.ExceptIfDocumentIsUnsupported)
-	read.ExceptIfDocumentMatchesPatterns = reconcile.KeepStr(cfg.ExceptIfDocumentMatchesPatterns, read.ExceptIfDocumentMatchesPatterns)
-	read.ExceptIfDocumentNameMatchesPatterns = reconcile.KeepStr(cfg.ExceptIfDocumentNameMatchesPatterns, read.ExceptIfDocumentNameMatchesPatterns)
-	read.ExceptIfDocumentNameMatchesWords = reconcile.KeepStr(cfg.ExceptIfDocumentNameMatchesWords, read.ExceptIfDocumentNameMatchesWords)
+	read.ExceptIfDocumentMatchesPatterns = reconcile.KeepSet(cfg.ExceptIfDocumentMatchesPatterns, read.ExceptIfDocumentMatchesPatterns)
+	read.ExceptIfDocumentNameMatchesPatterns = reconcile.KeepSet(cfg.ExceptIfDocumentNameMatchesPatterns, read.ExceptIfDocumentNameMatchesPatterns)
+	read.ExceptIfDocumentNameMatchesWords = reconcile.KeepSet(cfg.ExceptIfDocumentNameMatchesWords, read.ExceptIfDocumentNameMatchesWords)
 	read.ExceptIfDocumentSizeOver = reconcile.KeepStr(cfg.ExceptIfDocumentSizeOver, read.ExceptIfDocumentSizeOver)
 	read.ExceptIfFrom = reconcile.KeepSet(cfg.ExceptIfFrom, read.ExceptIfFrom)
-	read.ExceptIfFromAddressContainsWords = reconcile.KeepStr(cfg.ExceptIfFromAddressContainsWords, read.ExceptIfFromAddressContainsWords)
-	read.ExceptIfFromAddressMatchesPatterns = reconcile.KeepStr(cfg.ExceptIfFromAddressMatchesPatterns, read.ExceptIfFromAddressMatchesPatterns)
+	read.ExceptIfFromAddressContainsWords = reconcile.KeepSet(cfg.ExceptIfFromAddressContainsWords, read.ExceptIfFromAddressContainsWords)
+	read.ExceptIfFromAddressMatchesPatterns = reconcile.KeepSet(cfg.ExceptIfFromAddressMatchesPatterns, read.ExceptIfFromAddressMatchesPatterns)
 	read.ExceptIfFromMemberOf = reconcile.KeepSet(cfg.ExceptIfFromMemberOf, read.ExceptIfFromMemberOf)
 	read.ExceptIfFromScope = reconcile.KeepStr(cfg.ExceptIfFromScope, read.ExceptIfFromScope)
 	read.ExceptIfHasSenderOverride = reconcile.KeepBool(cfg.ExceptIfHasSenderOverride, read.ExceptIfHasSenderOverride)
@@ -1832,30 +3085,30 @@ func (r *dlpComplianceRuleResource) reconcileState(cfg, read *dlpComplianceRuleM
 	read.ExceptIfProcessingLimitExceeded = reconcile.KeepBool(cfg.ExceptIfProcessingLimitExceeded, read.ExceptIfProcessingLimitExceeded)
 	read.ExceptIfRecipientADAttributeContainsWords = reconcile.KeepStr(cfg.ExceptIfRecipientADAttributeContainsWords, read.ExceptIfRecipientADAttributeContainsWords)
 	read.ExceptIfRecipientADAttributeMatchesPatterns = reconcile.KeepStr(cfg.ExceptIfRecipientADAttributeMatchesPatterns, read.ExceptIfRecipientADAttributeMatchesPatterns)
-	read.ExceptIfRecipientDomainIs = reconcile.KeepStr(cfg.ExceptIfRecipientDomainIs, read.ExceptIfRecipientDomainIs)
+	read.ExceptIfRecipientDomainIs = reconcile.KeepSet(cfg.ExceptIfRecipientDomainIs, read.ExceptIfRecipientDomainIs)
 	read.ExceptIfSenderADAttributeContainsWords = reconcile.KeepStr(cfg.ExceptIfSenderADAttributeContainsWords, read.ExceptIfSenderADAttributeContainsWords)
 	read.ExceptIfSenderADAttributeMatchesPatterns = reconcile.KeepStr(cfg.ExceptIfSenderADAttributeMatchesPatterns, read.ExceptIfSenderADAttributeMatchesPatterns)
-	read.ExceptIfSenderDomainIs = reconcile.KeepStr(cfg.ExceptIfSenderDomainIs, read.ExceptIfSenderDomainIs)
-	read.ExceptIfSenderIPRanges = reconcile.KeepStr(cfg.ExceptIfSenderIPRanges, read.ExceptIfSenderIPRanges)
-	read.ExceptIfSentTo = reconcile.KeepStr(cfg.ExceptIfSentTo, read.ExceptIfSentTo)
+	read.ExceptIfSenderDomainIs = reconcile.KeepSet(cfg.ExceptIfSenderDomainIs, read.ExceptIfSenderDomainIs)
+	read.ExceptIfSenderIPRanges = reconcile.KeepSet(cfg.ExceptIfSenderIPRanges, read.ExceptIfSenderIPRanges)
+	read.ExceptIfSentTo = reconcile.KeepSet(cfg.ExceptIfSentTo, read.ExceptIfSentTo)
 	read.ExceptIfSentToMemberOf = reconcile.KeepSet(cfg.ExceptIfSentToMemberOf, read.ExceptIfSentToMemberOf)
 	read.ExceptIfSharedWithDomain = reconcile.KeepStr(cfg.ExceptIfSharedWithDomain, read.ExceptIfSharedWithDomain)
-	read.ExceptIfSubjectContainsWords = reconcile.KeepStr(cfg.ExceptIfSubjectContainsWords, read.ExceptIfSubjectContainsWords)
-	read.ExceptIfSubjectMatchesPatterns = reconcile.KeepStr(cfg.ExceptIfSubjectMatchesPatterns, read.ExceptIfSubjectMatchesPatterns)
-	read.ExceptIfSubjectOrBodyContainsWords = reconcile.KeepStr(cfg.ExceptIfSubjectOrBodyContainsWords, read.ExceptIfSubjectOrBodyContainsWords)
-	read.ExceptIfSubjectOrBodyMatchesPatterns = reconcile.KeepStr(cfg.ExceptIfSubjectOrBodyMatchesPatterns, read.ExceptIfSubjectOrBodyMatchesPatterns)
+	read.ExceptIfSubjectContainsWords = reconcile.KeepSet(cfg.ExceptIfSubjectContainsWords, read.ExceptIfSubjectContainsWords)
+	read.ExceptIfSubjectMatchesPatterns = reconcile.KeepSet(cfg.ExceptIfSubjectMatchesPatterns, read.ExceptIfSubjectMatchesPatterns)
+	read.ExceptIfSubjectOrBodyContainsWords = reconcile.KeepSet(cfg.ExceptIfSubjectOrBodyContainsWords, read.ExceptIfSubjectOrBodyContainsWords)
+	read.ExceptIfSubjectOrBodyMatchesPatterns = reconcile.KeepSet(cfg.ExceptIfSubjectOrBodyMatchesPatterns, read.ExceptIfSubjectOrBodyMatchesPatterns)
 	read.ExceptIfTeamsSharedWithParticipantCategory = reconcile.KeepStr(cfg.ExceptIfTeamsSharedWithParticipantCategory, read.ExceptIfTeamsSharedWithParticipantCategory)
-	read.ExceptIfUnscannableDocumentExtensionIs = reconcile.KeepStr(cfg.ExceptIfUnscannableDocumentExtensionIs, read.ExceptIfUnscannableDocumentExtensionIs)
+	read.ExceptIfUnscannableDocumentExtensionIs = reconcile.KeepSet(cfg.ExceptIfUnscannableDocumentExtensionIs, read.ExceptIfUnscannableDocumentExtensionIs)
 	read.ExceptIfUrlContainsText = reconcile.KeepStr(cfg.ExceptIfUrlContainsText, read.ExceptIfUrlContainsText)
 	read.ExceptIfWithImportance = reconcile.KeepStr(cfg.ExceptIfWithImportance, read.ExceptIfWithImportance)
 	read.ExpiryDate = reconcile.KeepStr(cfg.ExpiryDate, read.ExpiryDate)
 	read.From = reconcile.KeepSet(cfg.From, read.From)
-	read.FromAddressContainsWords = reconcile.KeepStr(cfg.FromAddressContainsWords, read.FromAddressContainsWords)
-	read.FromAddressMatchesPatterns = reconcile.KeepStr(cfg.FromAddressMatchesPatterns, read.FromAddressMatchesPatterns)
+	read.FromAddressContainsWords = reconcile.KeepSet(cfg.FromAddressContainsWords, read.FromAddressContainsWords)
+	read.FromAddressMatchesPatterns = reconcile.KeepSet(cfg.FromAddressMatchesPatterns, read.FromAddressMatchesPatterns)
 	read.FromMemberOf = reconcile.KeepSet(cfg.FromMemberOf, read.FromMemberOf)
 	read.FromScope = reconcile.KeepStr(cfg.FromScope, read.FromScope)
-	read.GenerateAlert = reconcile.KeepStr(cfg.GenerateAlert, read.GenerateAlert)
-	read.GenerateIncidentReport = reconcile.KeepStr(cfg.GenerateIncidentReport, read.GenerateIncidentReport)
+	read.GenerateAlert = reconcile.KeepSet(cfg.GenerateAlert, read.GenerateAlert)
+	read.GenerateIncidentReport = reconcile.KeepSet(cfg.GenerateIncidentReport, read.GenerateIncidentReport)
 	read.HasActivity = reconcile.KeepStr(cfg.HasActivity, read.HasActivity)
 	read.HasLabelDowngradedFrom = reconcile.KeepStr(cfg.HasLabelDowngradedFrom, read.HasLabelDowngradedFrom)
 	read.HasSenderOverride = reconcile.KeepBool(cfg.HasSenderOverride, read.HasSenderOverride)
@@ -1869,7 +3122,7 @@ func (r *dlpComplianceRuleResource) reconcileState(cfg, read *dlpComplianceRuleM
 	read.MessageLabelChangeDetected = reconcile.KeepStr(cfg.MessageLabelChangeDetected, read.MessageLabelChangeDetected)
 	read.MessageSizeOver = reconcile.KeepStr(cfg.MessageSizeOver, read.MessageSizeOver)
 	read.MessageTypeMatches = reconcile.KeepStr(cfg.MessageTypeMatches, read.MessageTypeMatches)
-	read.MipRestrictAccess = reconcile.KeepSet(cfg.MipRestrictAccess, read.MipRestrictAccess)
+	read.MipRestrictAccess = reconcile.KeepStr(cfg.MipRestrictAccess, read.MipRestrictAccess)
 	read.Moderate = reconcile.KeepStr(cfg.Moderate, read.Moderate)
 	read.ModifySubject = reconcile.KeepStr(cfg.ModifySubject, read.ModifySubject)
 	read.MoveToQuarantineLocation = reconcile.KeepBool(cfg.MoveToQuarantineLocation, read.MoveToQuarantineLocation)
@@ -1887,41 +3140,41 @@ func (r *dlpComplianceRuleResource) reconcileState(cfg, read *dlpComplianceRuleM
 	read.NotifyOverrideRequirements = reconcile.KeepStr(cfg.NotifyOverrideRequirements, read.NotifyOverrideRequirements)
 	read.NotifyPolicyTipCustomDialog = reconcile.KeepStr(cfg.NotifyPolicyTipCustomDialog, read.NotifyPolicyTipCustomDialog)
 	read.NotifyPolicyTipCustomText = reconcile.KeepStr(cfg.NotifyPolicyTipCustomText, read.NotifyPolicyTipCustomText)
-	read.NotifyPolicyTipCustomTextTranslations = reconcile.KeepStr(cfg.NotifyPolicyTipCustomTextTranslations, read.NotifyPolicyTipCustomTextTranslations)
+	read.NotifyPolicyTipCustomTextTranslations = reconcile.KeepSet(cfg.NotifyPolicyTipCustomTextTranslations, read.NotifyPolicyTipCustomTextTranslations)
 	read.NotifyPolicyTipDisplayOption = reconcile.KeepStr(cfg.NotifyPolicyTipDisplayOption, read.NotifyPolicyTipDisplayOption)
 	read.NotifyPolicyTipUrl = reconcile.KeepStr(cfg.NotifyPolicyTipUrl, read.NotifyPolicyTipUrl)
-	read.NotifyUser = reconcile.KeepStr(cfg.NotifyUser, read.NotifyUser)
+	read.NotifyUser = reconcile.KeepSet(cfg.NotifyUser, read.NotifyUser)
 	read.NotifyUserType = reconcile.KeepStr(cfg.NotifyUserType, read.NotifyUserType)
-	read.OnPremisesScannerDlpRestrictions = reconcile.KeepSet(cfg.OnPremisesScannerDlpRestrictions, read.OnPremisesScannerDlpRestrictions)
+	read.OnPremisesScannerDlpRestrictions = reconcile.KeepStr(cfg.OnPremisesScannerDlpRestrictions, read.OnPremisesScannerDlpRestrictions)
 	read.Policy = reconcile.KeepStr(cfg.Policy, read.Policy)
 	read.PowerBIDlpRestrictions = reconcile.KeepSet(cfg.PowerBIDlpRestrictions, read.PowerBIDlpRestrictions)
 	read.PrependSubject = reconcile.KeepStr(cfg.PrependSubject, read.PrependSubject)
-	read.Priority = reconcile.KeepStr(cfg.Priority, read.Priority)
+	read.Priority = reconcile.KeepInt64(cfg.Priority, read.Priority)
 	read.ProcessingLimitExceeded = reconcile.KeepBool(cfg.ProcessingLimitExceeded, read.ProcessingLimitExceeded)
 	read.Quarantine = reconcile.KeepBool(cfg.Quarantine, read.Quarantine)
 	read.RecipientADAttributeContainsWords = reconcile.KeepStr(cfg.RecipientADAttributeContainsWords, read.RecipientADAttributeContainsWords)
 	read.RecipientADAttributeMatchesPatterns = reconcile.KeepStr(cfg.RecipientADAttributeMatchesPatterns, read.RecipientADAttributeMatchesPatterns)
-	read.RecipientDomainIs = reconcile.KeepStr(cfg.RecipientDomainIs, read.RecipientDomainIs)
+	read.RecipientDomainIs = reconcile.KeepSet(cfg.RecipientDomainIs, read.RecipientDomainIs)
 	read.RedactSensitiveInfo = reconcile.KeepStr(cfg.RedactSensitiveInfo, read.RedactSensitiveInfo)
 	read.RedirectMessageTo = reconcile.KeepSet(cfg.RedirectMessageTo, read.RedirectMessageTo)
-	read.RemoveHeader = reconcile.KeepStr(cfg.RemoveHeader, read.RemoveHeader)
+	read.RemoveHeader = reconcile.KeepSet(cfg.RemoveHeader, read.RemoveHeader)
 	read.RemoveRMSTemplate = reconcile.KeepBool(cfg.RemoveRMSTemplate, read.RemoveRMSTemplate)
 	read.ReportSeverityLevel = reconcile.KeepStr(cfg.ReportSeverityLevel, read.ReportSeverityLevel)
-	read.RestrictAccess = reconcile.KeepSet(cfg.RestrictAccess, read.RestrictAccess)
+	read.RestrictAccess = reconcile.KeepStr(cfg.RestrictAccess, read.RestrictAccess)
 	read.RestrictBrowserAccess = reconcile.KeepBool(cfg.RestrictBrowserAccess, read.RestrictBrowserAccess)
 	read.RestrictWebGrounding = reconcile.KeepBool(cfg.RestrictWebGrounding, read.RestrictWebGrounding)
 	read.RuleErrorAction = reconcile.KeepStr(cfg.RuleErrorAction, read.RuleErrorAction)
 	read.SenderADAttributeContainsWords = reconcile.KeepStr(cfg.SenderADAttributeContainsWords, read.SenderADAttributeContainsWords)
 	read.SenderADAttributeMatchesPatterns = reconcile.KeepStr(cfg.SenderADAttributeMatchesPatterns, read.SenderADAttributeMatchesPatterns)
 	read.SenderAddressLocation = reconcile.KeepStr(cfg.SenderAddressLocation, read.SenderAddressLocation)
-	read.SenderDomainIs = reconcile.KeepStr(cfg.SenderDomainIs, read.SenderDomainIs)
-	read.SenderIPRanges = reconcile.KeepStr(cfg.SenderIPRanges, read.SenderIPRanges)
+	read.SenderDomainIs = reconcile.KeepSet(cfg.SenderDomainIs, read.SenderDomainIs)
+	read.SenderIPRanges = reconcile.KeepSet(cfg.SenderIPRanges, read.SenderIPRanges)
 	read.SenderType = reconcile.KeepStr(cfg.SenderType, read.SenderType)
-	read.SentTo = reconcile.KeepStr(cfg.SentTo, read.SentTo)
+	read.SentTo = reconcile.KeepSet(cfg.SentTo, read.SentTo)
 	read.SentToMemberOf = reconcile.KeepSet(cfg.SentToMemberOf, read.SentToMemberOf)
 	read.SetHeader = reconcile.KeepStr(cfg.SetHeader, read.SetHeader)
 	read.SharedByIRMAgentRisk = reconcile.KeepStr(cfg.SharedByIRMAgentRisk, read.SharedByIRMAgentRisk)
-	read.SharedByIRMUserRisk = reconcile.KeepStr(cfg.SharedByIRMUserRisk, read.SharedByIRMUserRisk)
+	read.SharedByIRMUserRisk = reconcile.KeepSet(cfg.SharedByIRMUserRisk, read.SharedByIRMUserRisk)
 	read.SharedWithDomain = reconcile.KeepStr(cfg.SharedWithDomain, read.SharedWithDomain)
 	read.SharepointBlockDomains = reconcile.KeepStr(cfg.SharepointBlockDomains, read.SharepointBlockDomains)
 	read.SharepointBlockDomainsExcept = reconcile.KeepStr(cfg.SharepointBlockDomainsExcept, read.SharepointBlockDomainsExcept)
@@ -1930,14 +3183,14 @@ func (r *dlpComplianceRuleResource) reconcileState(cfg, read *dlpComplianceRuleM
 	read.SharepointBlockUsersExcept = reconcile.KeepStr(cfg.SharepointBlockUsersExcept, read.SharepointBlockUsersExcept)
 	read.SharepointMoveToQuarantineLocation = reconcile.KeepBool(cfg.SharepointMoveToQuarantineLocation, read.SharepointMoveToQuarantineLocation)
 	read.StopPolicyProcessing = reconcile.KeepBool(cfg.StopPolicyProcessing, read.StopPolicyProcessing)
-	read.SubjectContainsWords = reconcile.KeepStr(cfg.SubjectContainsWords, read.SubjectContainsWords)
-	read.SubjectMatchesPatterns = reconcile.KeepStr(cfg.SubjectMatchesPatterns, read.SubjectMatchesPatterns)
-	read.SubjectOrBodyContainsWords = reconcile.KeepStr(cfg.SubjectOrBodyContainsWords, read.SubjectOrBodyContainsWords)
-	read.SubjectOrBodyMatchesPatterns = reconcile.KeepStr(cfg.SubjectOrBodyMatchesPatterns, read.SubjectOrBodyMatchesPatterns)
+	read.SubjectContainsWords = reconcile.KeepSet(cfg.SubjectContainsWords, read.SubjectContainsWords)
+	read.SubjectMatchesPatterns = reconcile.KeepSet(cfg.SubjectMatchesPatterns, read.SubjectMatchesPatterns)
+	read.SubjectOrBodyContainsWords = reconcile.KeepSet(cfg.SubjectOrBodyContainsWords, read.SubjectOrBodyContainsWords)
+	read.SubjectOrBodyMatchesPatterns = reconcile.KeepSet(cfg.SubjectOrBodyMatchesPatterns, read.SubjectOrBodyMatchesPatterns)
 	read.TeamsSharedWithParticipantCategory = reconcile.KeepStr(cfg.TeamsSharedWithParticipantCategory, read.TeamsSharedWithParticipantCategory)
 	read.ThirdPartyAppDlpRestrictions = reconcile.KeepSet(cfg.ThirdPartyAppDlpRestrictions, read.ThirdPartyAppDlpRestrictions)
 	read.TriggerPowerAutomateFlow = reconcile.KeepStr(cfg.TriggerPowerAutomateFlow, read.TriggerPowerAutomateFlow)
-	read.UnscannableDocumentExtensionIs = reconcile.KeepStr(cfg.UnscannableDocumentExtensionIs, read.UnscannableDocumentExtensionIs)
+	read.UnscannableDocumentExtensionIs = reconcile.KeepSet(cfg.UnscannableDocumentExtensionIs, read.UnscannableDocumentExtensionIs)
 	read.UrlContainsText = reconcile.KeepStr(cfg.UrlContainsText, read.UrlContainsText)
 	read.ValidateRule = reconcile.KeepBool(cfg.ValidateRule, read.ValidateRule)
 	read.WithImportance = reconcile.KeepStr(cfg.WithImportance, read.WithImportance)

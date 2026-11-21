@@ -3,12 +3,12 @@
 page_title: "scc_retention_compliance_policy Resource - scc"
 subcategory: ""
 description: |-
-  Manages the RetentionCompliancePolicy object via New-RetentionCompliancePolicy / Get-RetentionCompliancePolicy / Set-RetentionCompliancePolicy / Remove-RetentionCompliancePolicy.
+  Manages the RetentionCompliancePolicy object via New-RetentionCompliancePolicy / Get-RetentionCompliancePolicy / Set-RetentionCompliancePolicy / Remove-RetentionCompliancePolicy. List attributes that only New-RetentionCompliancePolicy takes (adaptive_scope_location, exchange_location, exchange_location_exception, modern_group_location, modern_group_location_exception, one_drive_location, one_drive_location_exception, public_folder_location, share_point_location, share_point_location_exception, skype_location, skype_location_exception, teams_channel_location, teams_channel_location_exception, teams_chat_location, teams_chat_location_exception) are updated in place through Set-RetentionCompliancePolicy -Add/-Remove. deleted_resources, enforce_simulation_policy, force_bypass_scope_check, force_start_simulation, start_simulation can only be set by Set-RetentionCompliancePolicy; on create they are applied right after New-RetentionCompliancePolicy. A refresh keeps the configured value when the service returns an equivalent one: JSON values compare by content, ignoring formatting, key order and (except advanced_rule) keys the service adds; lists and enumerations case-insensitively, locations by any of their identities.
 ---
 
 # scc_retention_compliance_policy (Resource)
 
-Manages the RetentionCompliancePolicy object via New-RetentionCompliancePolicy / Get-RetentionCompliancePolicy / Set-RetentionCompliancePolicy / Remove-RetentionCompliancePolicy.
+Manages the RetentionCompliancePolicy object via New-RetentionCompliancePolicy / Get-RetentionCompliancePolicy / Set-RetentionCompliancePolicy / Remove-RetentionCompliancePolicy. List attributes that only New-RetentionCompliancePolicy takes (adaptive_scope_location, exchange_location, exchange_location_exception, modern_group_location, modern_group_location_exception, one_drive_location, one_drive_location_exception, public_folder_location, share_point_location, share_point_location_exception, skype_location, skype_location_exception, teams_channel_location, teams_channel_location_exception, teams_chat_location, teams_chat_location_exception) are updated in place through Set-RetentionCompliancePolicy -Add<X>/-Remove<X>. deleted_resources, enforce_simulation_policy, force_bypass_scope_check, force_start_simulation, start_simulation can only be set by Set-RetentionCompliancePolicy; on create they are applied right after New-RetentionCompliancePolicy. A refresh keeps the configured value when the service returns an equivalent one: JSON values compare by content, ignoring formatting, key order and (except advanced_rule) keys the service adds; lists and enumerations case-insensitively, locations by any of their identities.
 
 
 
@@ -17,74 +17,41 @@ Manages the RetentionCompliancePolicy object via New-RetentionCompliancePolicy /
 
 ### Required
 
-- `adaptive_scope_location` (String) Maps to the -AdaptiveScopeLocation parameter.
 - `name` (String) Maps to the -Name parameter.
 
 ### Optional
 
-- `add_adaptive_scope_location` (String) Maps to the -AddAdaptiveScopeLocation parameter.
-- `add_exchange_location` (String) Maps to the -AddExchangeLocation parameter.
-- `add_exchange_location_exception` (String) Maps to the -AddExchangeLocationException parameter.
-- `add_modern_group_location` (String) Maps to the -AddModernGroupLocation parameter.
-- `add_modern_group_location_exception` (String) Maps to the -AddModernGroupLocationException parameter.
-- `add_one_drive_location` (String) Maps to the -AddOneDriveLocation parameter.
-- `add_one_drive_location_exception` (String) Maps to the -AddOneDriveLocationException parameter.
-- `add_public_folder_location` (String) Maps to the -AddPublicFolderLocation parameter.
-- `add_share_point_location` (String) Maps to the -AddSharePointLocation parameter.
-- `add_share_point_location_exception` (String) Maps to the -AddSharePointLocationException parameter.
-- `add_skype_location` (String) Maps to the -AddSkypeLocation parameter.
-- `add_skype_location_exception` (String) Maps to the -AddSkypeLocationException parameter.
-- `add_teams_channel_location` (String) Maps to the -AddTeamsChannelLocation parameter.
-- `add_teams_channel_location_exception` (String) Maps to the -AddTeamsChannelLocationException parameter.
-- `add_teams_chat_location` (String) Maps to the -AddTeamsChatLocation parameter.
-- `add_teams_chat_location_exception` (String) Maps to the -AddTeamsChatLocationException parameter.
-- `applications` (String) Maps to the -Applications parameter.
+- `adaptive_scope_location` (Set of String) Maps to the -AdaptiveScopeLocation parameter.
+- `applications` (Set of String) Maps to the -Applications parameter.
 - `comment` (String) Maps to the -Comment parameter.
 - `deleted_resources` (String) Maps to the -DeletedResources parameter.
 - `enabled` (Boolean) Maps to the -Enabled parameter.
 - `enforce_simulation_policy` (Boolean) Maps to the -EnforceSimulationPolicy parameter.
-- `exchange_location` (String) Maps to the -ExchangeLocation parameter.
-- `exchange_location_exception` (String) Maps to the -ExchangeLocationException parameter.
+- `exchange_location` (Set of String) Maps to the -ExchangeLocation parameter.
+- `exchange_location_exception` (Set of String) Maps to the -ExchangeLocationException parameter.
 - `exclude_spe` (Boolean) Maps to the -ExcludeSPE parameter.
 - `force_bypass_scope_check` (Boolean) Maps to the -ForceBypassScopeCheck parameter.
 - `force_start_simulation` (Boolean) Maps to the -ForceStartSimulation parameter.
 - `include_user_owned_containers` (Boolean) Maps to the -IncludeUserOwnedContainers parameter.
 - `is_simulation` (Boolean) Maps to the -IsSimulation parameter.
-- `modern_group_location` (String) Maps to the -ModernGroupLocation parameter.
-- `modern_group_location_exception` (String) Maps to the -ModernGroupLocationException parameter.
-- `one_drive_location` (String) Maps to the -OneDriveLocation parameter.
-- `one_drive_location_exception` (String) Maps to the -OneDriveLocationException parameter.
-- `policy_rbac_scopes` (String) Maps to the -PolicyRBACScopes parameter.
+- `modern_group_location` (Set of String) Maps to the -ModernGroupLocation parameter.
+- `modern_group_location_exception` (Set of String) Maps to the -ModernGroupLocationException parameter.
+- `one_drive_location` (Set of String) Maps to the -OneDriveLocation parameter.
+- `one_drive_location_exception` (Set of String) Maps to the -OneDriveLocationException parameter.
+- `policy_rbac_scopes` (Set of String) Maps to the -PolicyRBACScopes parameter.
 - `policy_template_info` (String) Maps to the -PolicyTemplateInfo parameter.
-- `public_folder_location` (String) Maps to the -PublicFolderLocation parameter.
-- `remove_adaptive_scope_location` (String) Maps to the -RemoveAdaptiveScopeLocation parameter.
-- `remove_exchange_location` (String) Maps to the -RemoveExchangeLocation parameter.
-- `remove_exchange_location_exception` (String) Maps to the -RemoveExchangeLocationException parameter.
-- `remove_modern_group_location` (String) Maps to the -RemoveModernGroupLocation parameter.
-- `remove_modern_group_location_exception` (String) Maps to the -RemoveModernGroupLocationException parameter.
-- `remove_one_drive_location` (String) Maps to the -RemoveOneDriveLocation parameter.
-- `remove_one_drive_location_exception` (String) Maps to the -RemoveOneDriveLocationException parameter.
-- `remove_public_folder_location` (String) Maps to the -RemovePublicFolderLocation parameter.
-- `remove_share_point_location` (String) Maps to the -RemoveSharePointLocation parameter.
-- `remove_share_point_location_exception` (String) Maps to the -RemoveSharePointLocationException parameter.
-- `remove_skype_location` (String) Maps to the -RemoveSkypeLocation parameter.
-- `remove_skype_location_exception` (String) Maps to the -RemoveSkypeLocationException parameter.
-- `remove_teams_channel_location` (String) Maps to the -RemoveTeamsChannelLocation parameter.
-- `remove_teams_channel_location_exception` (String) Maps to the -RemoveTeamsChannelLocationException parameter.
-- `remove_teams_chat_location` (String) Maps to the -RemoveTeamsChatLocation parameter.
-- `remove_teams_chat_location_exception` (String) Maps to the -RemoveTeamsChatLocationException parameter.
+- `public_folder_location` (Set of String) Maps to the -PublicFolderLocation parameter.
 - `restrictive_retention` (Boolean) Maps to the -RestrictiveRetention parameter.
 - `retain_cloud_attachment` (Boolean) Maps to the -RetainCloudAttachment parameter.
-- `retry_distribution` (Boolean) Maps to the -RetryDistribution parameter.
-- `share_point_location` (String) Maps to the -SharePointLocation parameter.
-- `share_point_location_exception` (String) Maps to the -SharePointLocationException parameter.
-- `skype_location` (String) Maps to the -SkypeLocation parameter.
-- `skype_location_exception` (String) Maps to the -SkypeLocationException parameter.
+- `share_point_location` (Set of String) Maps to the -SharePointLocation parameter.
+- `share_point_location_exception` (Set of String) Maps to the -SharePointLocationException parameter.
+- `skype_location` (Set of String) Maps to the -SkypeLocation parameter.
+- `skype_location_exception` (Set of String) Maps to the -SkypeLocationException parameter.
 - `start_simulation` (Boolean) Maps to the -StartSimulation parameter.
-- `teams_channel_location` (String) Maps to the -TeamsChannelLocation parameter.
-- `teams_channel_location_exception` (String) Maps to the -TeamsChannelLocationException parameter.
-- `teams_chat_location` (String) Maps to the -TeamsChatLocation parameter.
-- `teams_chat_location_exception` (String) Maps to the -TeamsChatLocationException parameter.
+- `teams_channel_location` (Set of String) Maps to the -TeamsChannelLocation parameter.
+- `teams_channel_location_exception` (Set of String) Maps to the -TeamsChannelLocationException parameter.
+- `teams_chat_location` (Set of String) Maps to the -TeamsChatLocation parameter.
+- `teams_chat_location_exception` (Set of String) Maps to the -TeamsChatLocationException parameter.
 
 ### Read-Only
 

@@ -9,6 +9,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -38,53 +40,53 @@ type deviceConditionalAccessRuleModel struct {
 	Identity                      types.String `tfsdk:"identity"`
 	AccountName                   types.String `tfsdk:"account_name"`
 	AccountUserName               types.String `tfsdk:"account_user_name"`
-	AllowAppStore                 types.String `tfsdk:"allow_app_store"`
-	AllowAssistantWhileLocked     types.String `tfsdk:"allow_assistant_while_locked"`
-	AllowConvenienceLogon         types.String `tfsdk:"allow_convenience_logon"`
-	AllowDiagnosticSubmission     types.String `tfsdk:"allow_diagnostic_submission"`
-	AllowJailbroken               types.String `tfsdk:"allow_jailbroken"`
-	AllowPassbookWhileLocked      types.String `tfsdk:"allow_passbook_while_locked"`
-	AllowScreenshot               types.String `tfsdk:"allow_screenshot"`
-	AllowSimplePassword           types.String `tfsdk:"allow_simple_password"`
-	AllowVideoConferencing        types.String `tfsdk:"allow_video_conferencing"`
-	AllowVoiceAssistant           types.String `tfsdk:"allow_voice_assistant"`
-	AllowVoiceDialing             types.String `tfsdk:"allow_voice_dialing"`
-	AllowiCloudBackup             types.String `tfsdk:"allowi_cloud_backup"`
-	AllowiCloudDocSync            types.String `tfsdk:"allowi_cloud_doc_sync"`
-	AllowiCloudPhotoSync          types.String `tfsdk:"allowi_cloud_photo_sync"`
-	AntiVirusSignatureStatus      types.String `tfsdk:"anti_virus_signature_status"`
-	AntiVirusStatus               types.String `tfsdk:"anti_virus_status"`
+	AllowAppStore                 types.Bool   `tfsdk:"allow_app_store"`
+	AllowAssistantWhileLocked     types.Bool   `tfsdk:"allow_assistant_while_locked"`
+	AllowConvenienceLogon         types.Bool   `tfsdk:"allow_convenience_logon"`
+	AllowDiagnosticSubmission     types.Bool   `tfsdk:"allow_diagnostic_submission"`
+	AllowJailbroken               types.Bool   `tfsdk:"allow_jailbroken"`
+	AllowPassbookWhileLocked      types.Bool   `tfsdk:"allow_passbook_while_locked"`
+	AllowScreenshot               types.Bool   `tfsdk:"allow_screenshot"`
+	AllowSimplePassword           types.Bool   `tfsdk:"allow_simple_password"`
+	AllowVideoConferencing        types.Bool   `tfsdk:"allow_video_conferencing"`
+	AllowVoiceAssistant           types.Bool   `tfsdk:"allow_voice_assistant"`
+	AllowVoiceDialing             types.Bool   `tfsdk:"allow_voice_dialing"`
+	AllowiCloudBackup             types.Bool   `tfsdk:"allowi_cloud_backup"`
+	AllowiCloudDocSync            types.Bool   `tfsdk:"allowi_cloud_doc_sync"`
+	AllowiCloudPhotoSync          types.Bool   `tfsdk:"allowi_cloud_photo_sync"`
+	AntiVirusSignatureStatus      types.Int64  `tfsdk:"anti_virus_signature_status"`
+	AntiVirusStatus               types.Int64  `tfsdk:"anti_virus_status"`
 	AppsRating                    types.String `tfsdk:"apps_rating"`
 	AutoUpdateStatus              types.String `tfsdk:"auto_update_status"`
-	BluetoothEnabled              types.String `tfsdk:"bluetooth_enabled"`
-	CameraEnabled                 types.String `tfsdk:"camera_enabled"`
+	BluetoothEnabled              types.Bool   `tfsdk:"bluetooth_enabled"`
+	CameraEnabled                 types.Bool   `tfsdk:"camera_enabled"`
 	EmailAddress                  types.String `tfsdk:"email_address"`
-	EnableRemovableStorage        types.String `tfsdk:"enable_removable_storage"`
+	EnableRemovableStorage        types.Bool   `tfsdk:"enable_removable_storage"`
 	ExchangeActiveSyncHost        types.String `tfsdk:"exchange_active_sync_host"`
 	FirewallStatus                types.String `tfsdk:"firewall_status"`
-	ForceAppStorePassword         types.String `tfsdk:"force_app_store_password"`
-	ForceEncryptedBackup          types.String `tfsdk:"force_encrypted_backup"`
-	MaxPasswordAttemptsBeforeWipe types.String `tfsdk:"max_password_attempts_before_wipe"`
+	ForceAppStorePassword         types.Bool   `tfsdk:"force_app_store_password"`
+	ForceEncryptedBackup          types.Bool   `tfsdk:"force_encrypted_backup"`
+	MaxPasswordAttemptsBeforeWipe types.Int64  `tfsdk:"max_password_attempts_before_wipe"`
 	MaxPasswordGracePeriod        types.String `tfsdk:"max_password_grace_period"`
 	MoviesRating                  types.String `tfsdk:"movies_rating"`
-	PasswordComplexity            types.String `tfsdk:"password_complexity"`
-	PasswordExpirationDays        types.String `tfsdk:"password_expiration_days"`
-	PasswordHistoryCount          types.String `tfsdk:"password_history_count"`
-	PasswordMinComplexChars       types.String `tfsdk:"password_min_complex_chars"`
-	PasswordMinimumLength         types.String `tfsdk:"password_minimum_length"`
-	PasswordQuality               types.String `tfsdk:"password_quality"`
-	PasswordRequired              types.String `tfsdk:"password_required"`
+	PasswordComplexity            types.Int64  `tfsdk:"password_complexity"`
+	PasswordExpirationDays        types.Int64  `tfsdk:"password_expiration_days"`
+	PasswordHistoryCount          types.Int64  `tfsdk:"password_history_count"`
+	PasswordMinComplexChars       types.Int64  `tfsdk:"password_min_complex_chars"`
+	PasswordMinimumLength         types.Int64  `tfsdk:"password_minimum_length"`
+	PasswordQuality               types.Int64  `tfsdk:"password_quality"`
+	PasswordRequired              types.Bool   `tfsdk:"password_required"`
 	PasswordTimeout               types.String `tfsdk:"password_timeout"`
-	PhoneMemoryEncrypted          types.String `tfsdk:"phone_memory_encrypted"`
+	PhoneMemoryEncrypted          types.Bool   `tfsdk:"phone_memory_encrypted"`
 	Policy                        types.String `tfsdk:"policy"`
 	RegionRatings                 types.String `tfsdk:"region_ratings"`
-	RequireEmailProfile           types.String `tfsdk:"require_email_profile"`
-	SmartScreenEnabled            types.String `tfsdk:"smart_screen_enabled"`
-	SystemSecurityTLS             types.String `tfsdk:"system_security_tls"`
+	RequireEmailProfile           types.Bool   `tfsdk:"require_email_profile"`
+	SmartScreenEnabled            types.Bool   `tfsdk:"smart_screen_enabled"`
+	SystemSecurityTLS             types.Bool   `tfsdk:"system_security_tls"`
 	TVShowsRating                 types.String `tfsdk:"tv_shows_rating"`
-	TargetGroups                  types.String `tfsdk:"target_groups"`
+	TargetGroups                  types.Set    `tfsdk:"target_groups"`
 	UserAccountControlStatus      types.String `tfsdk:"user_account_control_status"`
-	WLANEnabled                   types.String `tfsdk:"wlan_enabled"`
+	WLANEnabled                   types.Bool   `tfsdk:"wlan_enabled"`
 	WorkFoldersSyncUrl            types.String `tfsdk:"work_folders_sync_url"`
 }
 
@@ -97,56 +99,56 @@ func (r *deviceConditionalAccessRuleResource) Schema(_ context.Context, _ resour
 		Description: "Manages the DeviceConditionalAccessRule object via New-DeviceConditionalAccessRule / Get-DeviceConditionalAccessRule / Set-DeviceConditionalAccessRule / Remove-DeviceConditionalAccessRule.",
 		Attributes: map[string]schema.Attribute{
 			"id":                                schema.StringAttribute{Computed: true, Description: "Object identifier (GUID).", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"identity":                          schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets."},
+			"identity":                          schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"account_name":                      schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AccountName parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"account_user_name":                 schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AccountUserName parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"allow_app_store":                   schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AllowAppStore parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"allow_assistant_while_locked":      schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AllowAssistantWhileLocked parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"allow_convenience_logon":           schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AllowConvenienceLogon parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"allow_diagnostic_submission":       schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AllowDiagnosticSubmission parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"allow_jailbroken":                  schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AllowJailbroken parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"allow_passbook_while_locked":       schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AllowPassbookWhileLocked parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"allow_screenshot":                  schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AllowScreenshot parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"allow_simple_password":             schema.StringAttribute{Optional: true, Computed: true, Sensitive: true, Description: "Maps to the -AllowSimplePassword parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"allow_video_conferencing":          schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AllowVideoConferencing parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"allow_voice_assistant":             schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AllowVoiceAssistant parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"allow_voice_dialing":               schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AllowVoiceDialing parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"allowi_cloud_backup":               schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AllowiCloudBackup parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"allowi_cloud_doc_sync":             schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AllowiCloudDocSync parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"allowi_cloud_photo_sync":           schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AllowiCloudPhotoSync parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"anti_virus_signature_status":       schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AntiVirusSignatureStatus parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"anti_virus_status":                 schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AntiVirusStatus parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"allow_app_store":                   schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -AllowAppStore parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
+			"allow_assistant_while_locked":      schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -AllowAssistantWhileLocked parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
+			"allow_convenience_logon":           schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -AllowConvenienceLogon parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
+			"allow_diagnostic_submission":       schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -AllowDiagnosticSubmission parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
+			"allow_jailbroken":                  schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -AllowJailbroken parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
+			"allow_passbook_while_locked":       schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -AllowPassbookWhileLocked parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
+			"allow_screenshot":                  schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -AllowScreenshot parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
+			"allow_simple_password":             schema.BoolAttribute{Optional: true, Computed: true, Sensitive: true, Description: "Maps to the -AllowSimplePassword parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
+			"allow_video_conferencing":          schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -AllowVideoConferencing parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
+			"allow_voice_assistant":             schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -AllowVoiceAssistant parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
+			"allow_voice_dialing":               schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -AllowVoiceDialing parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
+			"allowi_cloud_backup":               schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -AllowiCloudBackup parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
+			"allowi_cloud_doc_sync":             schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -AllowiCloudDocSync parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
+			"allowi_cloud_photo_sync":           schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -AllowiCloudPhotoSync parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
+			"anti_virus_signature_status":       schema.Int64Attribute{Optional: true, Computed: true, Description: "Maps to the -AntiVirusSignatureStatus parameter.", PlanModifiers: []planmodifier.Int64{int64planmodifier.UseStateForUnknown()}},
+			"anti_virus_status":                 schema.Int64Attribute{Optional: true, Computed: true, Description: "Maps to the -AntiVirusStatus parameter.", PlanModifiers: []planmodifier.Int64{int64planmodifier.UseStateForUnknown()}},
 			"apps_rating":                       schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AppsRating parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"auto_update_status":                schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -AutoUpdateStatus parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"bluetooth_enabled":                 schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -BluetoothEnabled parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"camera_enabled":                    schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -CameraEnabled parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"bluetooth_enabled":                 schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -BluetoothEnabled parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
+			"camera_enabled":                    schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -CameraEnabled parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
 			"email_address":                     schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -EmailAddress parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"enable_removable_storage":          schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -EnableRemovableStorage parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"enable_removable_storage":          schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -EnableRemovableStorage parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
 			"exchange_active_sync_host":         schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ExchangeActiveSyncHost parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"firewall_status":                   schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -FirewallStatus parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"force_app_store_password":          schema.StringAttribute{Optional: true, Computed: true, Sensitive: true, Description: "Maps to the -ForceAppStorePassword parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"force_encrypted_backup":            schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -ForceEncryptedBackup parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"max_password_attempts_before_wipe": schema.StringAttribute{Optional: true, Computed: true, Sensitive: true, Description: "Maps to the -MaxPasswordAttemptsBeforeWipe parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"force_app_store_password":          schema.BoolAttribute{Optional: true, Computed: true, Sensitive: true, Description: "Maps to the -ForceAppStorePassword parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
+			"force_encrypted_backup":            schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -ForceEncryptedBackup parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
+			"max_password_attempts_before_wipe": schema.Int64Attribute{Optional: true, Computed: true, Sensitive: true, Description: "Maps to the -MaxPasswordAttemptsBeforeWipe parameter.", PlanModifiers: []planmodifier.Int64{int64planmodifier.UseStateForUnknown()}},
 			"max_password_grace_period":         schema.StringAttribute{Optional: true, Computed: true, Sensitive: true, Description: "Maps to the -MaxPasswordGracePeriod parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"movies_rating":                     schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -MoviesRating parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"password_complexity":               schema.StringAttribute{Optional: true, Computed: true, Sensitive: true, Description: "Maps to the -PasswordComplexity parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"password_expiration_days":          schema.StringAttribute{Optional: true, Computed: true, Sensitive: true, Description: "Maps to the -PasswordExpirationDays parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"password_history_count":            schema.StringAttribute{Optional: true, Computed: true, Sensitive: true, Description: "Maps to the -PasswordHistoryCount parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"password_min_complex_chars":        schema.StringAttribute{Optional: true, Computed: true, Sensitive: true, Description: "Maps to the -PasswordMinComplexChars parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"password_minimum_length":           schema.StringAttribute{Optional: true, Computed: true, Sensitive: true, Description: "Maps to the -PasswordMinimumLength parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"password_quality":                  schema.StringAttribute{Optional: true, Computed: true, Sensitive: true, Description: "Maps to the -PasswordQuality parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"password_required":                 schema.StringAttribute{Optional: true, Computed: true, Sensitive: true, Description: "Maps to the -PasswordRequired parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"password_complexity":               schema.Int64Attribute{Optional: true, Computed: true, Sensitive: true, Description: "Maps to the -PasswordComplexity parameter.", PlanModifiers: []planmodifier.Int64{int64planmodifier.UseStateForUnknown()}},
+			"password_expiration_days":          schema.Int64Attribute{Optional: true, Computed: true, Sensitive: true, Description: "Maps to the -PasswordExpirationDays parameter.", PlanModifiers: []planmodifier.Int64{int64planmodifier.UseStateForUnknown()}},
+			"password_history_count":            schema.Int64Attribute{Optional: true, Computed: true, Sensitive: true, Description: "Maps to the -PasswordHistoryCount parameter.", PlanModifiers: []planmodifier.Int64{int64planmodifier.UseStateForUnknown()}},
+			"password_min_complex_chars":        schema.Int64Attribute{Optional: true, Computed: true, Sensitive: true, Description: "Maps to the -PasswordMinComplexChars parameter.", PlanModifiers: []planmodifier.Int64{int64planmodifier.UseStateForUnknown()}},
+			"password_minimum_length":           schema.Int64Attribute{Optional: true, Computed: true, Sensitive: true, Description: "Maps to the -PasswordMinimumLength parameter.", PlanModifiers: []planmodifier.Int64{int64planmodifier.UseStateForUnknown()}},
+			"password_quality":                  schema.Int64Attribute{Optional: true, Computed: true, Sensitive: true, Description: "Maps to the -PasswordQuality parameter.", PlanModifiers: []planmodifier.Int64{int64planmodifier.UseStateForUnknown()}},
+			"password_required":                 schema.BoolAttribute{Optional: true, Computed: true, Sensitive: true, Description: "Maps to the -PasswordRequired parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
 			"password_timeout":                  schema.StringAttribute{Optional: true, Computed: true, Sensitive: true, Description: "Maps to the -PasswordTimeout parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"phone_memory_encrypted":            schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -PhoneMemoryEncrypted parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"phone_memory_encrypted":            schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -PhoneMemoryEncrypted parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
 			"policy":                            schema.StringAttribute{Required: true, Description: "Maps to the -Policy parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
 			"region_ratings":                    schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -RegionRatings parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"require_email_profile":             schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -RequireEmailProfile parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"smart_screen_enabled":              schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -SmartScreenEnabled parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"system_security_tls":               schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -SystemSecurityTLS parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"require_email_profile":             schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -RequireEmailProfile parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
+			"smart_screen_enabled":              schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -SmartScreenEnabled parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
+			"system_security_tls":               schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -SystemSecurityTLS parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
 			"tv_shows_rating":                   schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -TVShowsRating parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"target_groups":                     schema.StringAttribute{Required: true, Description: "Maps to the -TargetGroups parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
+			"target_groups":                     schema.SetAttribute{ElementType: types.StringType, Required: true, Description: "Maps to the -TargetGroups parameter."},
 			"user_account_control_status":       schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -UserAccountControlStatus parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"wlan_enabled":                      schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -WLANEnabled parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
+			"wlan_enabled":                      schema.BoolAttribute{Optional: true, Computed: true, Description: "Maps to the -WLANEnabled parameter.", PlanModifiers: []planmodifier.Bool{boolplanmodifier.UseStateForUnknown()}},
 			"work_folders_sync_url":             schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -WorkFoldersSyncUrl parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 		},
 	}
@@ -166,152 +168,237 @@ func (r *deviceConditionalAccessRuleResource) Create(ctx context.Context, req re
 		return
 	}
 
-	p := purview.NewDeviceConditionalAccessRuleParams{
-		AccountName:            plan.AccountName.ValueString(),
-		AccountUserName:        plan.AccountUserName.ValueString(),
-		EmailAddress:           plan.EmailAddress.ValueString(),
-		ExchangeActiveSyncHost: plan.ExchangeActiveSyncHost.ValueString(),
-		WorkFoldersSyncUrl:     plan.WorkFoldersSyncUrl.ValueString(),
+	var config deviceConditionalAccessRuleModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
+	if resp.Diagnostics.HasError() {
+		return
 	}
-	if v := plan.AllowAppStore.ValueString(); v != "" {
-		p.AllowAppStore = v
+
+	p := purview.NewDeviceConditionalAccessRuleParams{}
+	if !config.AccountName.IsNull() {
+		p.AccountName = plan.AccountName.ValueString()
 	}
-	if v := plan.AllowAssistantWhileLocked.ValueString(); v != "" {
-		p.AllowAssistantWhileLocked = v
+	if !config.AccountUserName.IsNull() {
+		p.AccountUserName = plan.AccountUserName.ValueString()
 	}
-	if v := plan.AllowConvenienceLogon.ValueString(); v != "" {
-		p.AllowConvenienceLogon = v
+	if !config.AllowAppStore.IsNull() {
+		if !plan.AllowAppStore.IsUnknown() {
+			p.AllowAppStore = plan.AllowAppStore.ValueBoolPointer()
+		}
 	}
-	if v := plan.AllowDiagnosticSubmission.ValueString(); v != "" {
-		p.AllowDiagnosticSubmission = v
+	if !config.AllowAssistantWhileLocked.IsNull() {
+		if !plan.AllowAssistantWhileLocked.IsUnknown() {
+			p.AllowAssistantWhileLocked = plan.AllowAssistantWhileLocked.ValueBoolPointer()
+		}
 	}
-	if v := plan.AllowJailbroken.ValueString(); v != "" {
-		p.AllowJailbroken = v
+	if !config.AllowConvenienceLogon.IsNull() {
+		if !plan.AllowConvenienceLogon.IsUnknown() {
+			p.AllowConvenienceLogon = plan.AllowConvenienceLogon.ValueBoolPointer()
+		}
 	}
-	if v := plan.AllowPassbookWhileLocked.ValueString(); v != "" {
-		p.AllowPassbookWhileLocked = v
+	if !config.AllowDiagnosticSubmission.IsNull() {
+		if !plan.AllowDiagnosticSubmission.IsUnknown() {
+			p.AllowDiagnosticSubmission = plan.AllowDiagnosticSubmission.ValueBoolPointer()
+		}
 	}
-	if v := plan.AllowScreenshot.ValueString(); v != "" {
-		p.AllowScreenshot = v
+	if !config.AllowJailbroken.IsNull() {
+		if !plan.AllowJailbroken.IsUnknown() {
+			p.AllowJailbroken = plan.AllowJailbroken.ValueBoolPointer()
+		}
 	}
-	if v := plan.AllowSimplePassword.ValueString(); v != "" {
-		p.AllowSimplePassword = v
+	if !config.AllowPassbookWhileLocked.IsNull() {
+		if !plan.AllowPassbookWhileLocked.IsUnknown() {
+			p.AllowPassbookWhileLocked = plan.AllowPassbookWhileLocked.ValueBoolPointer()
+		}
 	}
-	if v := plan.AllowVideoConferencing.ValueString(); v != "" {
-		p.AllowVideoConferencing = v
+	if !config.AllowScreenshot.IsNull() {
+		if !plan.AllowScreenshot.IsUnknown() {
+			p.AllowScreenshot = plan.AllowScreenshot.ValueBoolPointer()
+		}
 	}
-	if v := plan.AllowVoiceAssistant.ValueString(); v != "" {
-		p.AllowVoiceAssistant = v
+	if !config.AllowSimplePassword.IsNull() {
+		if !plan.AllowSimplePassword.IsUnknown() {
+			p.AllowSimplePassword = plan.AllowSimplePassword.ValueBoolPointer()
+		}
 	}
-	if v := plan.AllowVoiceDialing.ValueString(); v != "" {
-		p.AllowVoiceDialing = v
+	if !config.AllowVideoConferencing.IsNull() {
+		if !plan.AllowVideoConferencing.IsUnknown() {
+			p.AllowVideoConferencing = plan.AllowVideoConferencing.ValueBoolPointer()
+		}
 	}
-	if v := plan.AllowiCloudBackup.ValueString(); v != "" {
-		p.AllowiCloudBackup = v
+	if !config.AllowVoiceAssistant.IsNull() {
+		if !plan.AllowVoiceAssistant.IsUnknown() {
+			p.AllowVoiceAssistant = plan.AllowVoiceAssistant.ValueBoolPointer()
+		}
 	}
-	if v := plan.AllowiCloudDocSync.ValueString(); v != "" {
-		p.AllowiCloudDocSync = v
+	if !config.AllowVoiceDialing.IsNull() {
+		if !plan.AllowVoiceDialing.IsUnknown() {
+			p.AllowVoiceDialing = plan.AllowVoiceDialing.ValueBoolPointer()
+		}
 	}
-	if v := plan.AllowiCloudPhotoSync.ValueString(); v != "" {
-		p.AllowiCloudPhotoSync = v
+	if !config.AllowiCloudBackup.IsNull() {
+		if !plan.AllowiCloudBackup.IsUnknown() {
+			p.AllowiCloudBackup = plan.AllowiCloudBackup.ValueBoolPointer()
+		}
 	}
-	if v := plan.AntiVirusSignatureStatus.ValueString(); v != "" {
-		p.AntiVirusSignatureStatus = v
+	if !config.AllowiCloudDocSync.IsNull() {
+		if !plan.AllowiCloudDocSync.IsUnknown() {
+			p.AllowiCloudDocSync = plan.AllowiCloudDocSync.ValueBoolPointer()
+		}
 	}
-	if v := plan.AntiVirusStatus.ValueString(); v != "" {
-		p.AntiVirusStatus = v
+	if !config.AllowiCloudPhotoSync.IsNull() {
+		if !plan.AllowiCloudPhotoSync.IsUnknown() {
+			p.AllowiCloudPhotoSync = plan.AllowiCloudPhotoSync.ValueBoolPointer()
+		}
 	}
-	if v := plan.AppsRating.ValueString(); v != "" {
-		p.AppsRating = v
+	if !config.AntiVirusSignatureStatus.IsNull() {
+		if !plan.AntiVirusSignatureStatus.IsUnknown() {
+			p.AntiVirusSignatureStatus = plan.AntiVirusSignatureStatus.ValueInt64Pointer()
+		}
 	}
-	if v := plan.AutoUpdateStatus.ValueString(); v != "" {
-		p.AutoUpdateStatus = v
+	if !config.AntiVirusStatus.IsNull() {
+		if !plan.AntiVirusStatus.IsUnknown() {
+			p.AntiVirusStatus = plan.AntiVirusStatus.ValueInt64Pointer()
+		}
 	}
-	if v := plan.BluetoothEnabled.ValueString(); v != "" {
-		p.BluetoothEnabled = v
+	if v := config.AppsRating.ValueString(); v != "" {
+		p.AppsRating = objectParam(v)
 	}
-	if v := plan.CameraEnabled.ValueString(); v != "" {
-		p.CameraEnabled = v
+	if v := config.AutoUpdateStatus.ValueString(); v != "" {
+		p.AutoUpdateStatus = objectParam(v)
 	}
-	if v := plan.EnableRemovableStorage.ValueString(); v != "" {
-		p.EnableRemovableStorage = v
+	if !config.BluetoothEnabled.IsNull() {
+		if !plan.BluetoothEnabled.IsUnknown() {
+			p.BluetoothEnabled = plan.BluetoothEnabled.ValueBoolPointer()
+		}
 	}
-	if v := plan.FirewallStatus.ValueString(); v != "" {
-		p.FirewallStatus = v
+	if !config.CameraEnabled.IsNull() {
+		if !plan.CameraEnabled.IsUnknown() {
+			p.CameraEnabled = plan.CameraEnabled.ValueBoolPointer()
+		}
 	}
-	if v := plan.ForceAppStorePassword.ValueString(); v != "" {
-		p.ForceAppStorePassword = v
+	if !config.EmailAddress.IsNull() {
+		p.EmailAddress = plan.EmailAddress.ValueString()
 	}
-	if v := plan.ForceEncryptedBackup.ValueString(); v != "" {
-		p.ForceEncryptedBackup = v
+	if !config.EnableRemovableStorage.IsNull() {
+		if !plan.EnableRemovableStorage.IsUnknown() {
+			p.EnableRemovableStorage = plan.EnableRemovableStorage.ValueBoolPointer()
+		}
 	}
-	if v := plan.MaxPasswordAttemptsBeforeWipe.ValueString(); v != "" {
-		p.MaxPasswordAttemptsBeforeWipe = v
+	if !config.ExchangeActiveSyncHost.IsNull() {
+		p.ExchangeActiveSyncHost = plan.ExchangeActiveSyncHost.ValueString()
 	}
-	if v := plan.MaxPasswordGracePeriod.ValueString(); v != "" {
-		p.MaxPasswordGracePeriod = v
+	if v := config.FirewallStatus.ValueString(); v != "" {
+		p.FirewallStatus = objectParam(v)
 	}
-	if v := plan.MoviesRating.ValueString(); v != "" {
-		p.MoviesRating = v
+	if !config.ForceAppStorePassword.IsNull() {
+		if !plan.ForceAppStorePassword.IsUnknown() {
+			p.ForceAppStorePassword = plan.ForceAppStorePassword.ValueBoolPointer()
+		}
 	}
-	if v := plan.PasswordComplexity.ValueString(); v != "" {
-		p.PasswordComplexity = v
+	if !config.ForceEncryptedBackup.IsNull() {
+		if !plan.ForceEncryptedBackup.IsUnknown() {
+			p.ForceEncryptedBackup = plan.ForceEncryptedBackup.ValueBoolPointer()
+		}
 	}
-	if v := plan.PasswordExpirationDays.ValueString(); v != "" {
-		p.PasswordExpirationDays = v
+	if !config.MaxPasswordAttemptsBeforeWipe.IsNull() {
+		if !plan.MaxPasswordAttemptsBeforeWipe.IsUnknown() {
+			p.MaxPasswordAttemptsBeforeWipe = plan.MaxPasswordAttemptsBeforeWipe.ValueInt64Pointer()
+		}
 	}
-	if v := plan.PasswordHistoryCount.ValueString(); v != "" {
-		p.PasswordHistoryCount = v
+	if v := config.MaxPasswordGracePeriod.ValueString(); v != "" {
+		p.MaxPasswordGracePeriod = objectParam(v)
 	}
-	if v := plan.PasswordMinComplexChars.ValueString(); v != "" {
-		p.PasswordMinComplexChars = v
+	if v := config.MoviesRating.ValueString(); v != "" {
+		p.MoviesRating = objectParam(v)
 	}
-	if v := plan.PasswordMinimumLength.ValueString(); v != "" {
-		p.PasswordMinimumLength = v
+	if !config.PasswordComplexity.IsNull() {
+		if !plan.PasswordComplexity.IsUnknown() {
+			p.PasswordComplexity = plan.PasswordComplexity.ValueInt64Pointer()
+		}
 	}
-	if v := plan.PasswordQuality.ValueString(); v != "" {
-		p.PasswordQuality = v
+	if !config.PasswordExpirationDays.IsNull() {
+		if !plan.PasswordExpirationDays.IsUnknown() {
+			p.PasswordExpirationDays = plan.PasswordExpirationDays.ValueInt64Pointer()
+		}
 	}
-	if v := plan.PasswordRequired.ValueString(); v != "" {
-		p.PasswordRequired = v
+	if !config.PasswordHistoryCount.IsNull() {
+		if !plan.PasswordHistoryCount.IsUnknown() {
+			p.PasswordHistoryCount = plan.PasswordHistoryCount.ValueInt64Pointer()
+		}
 	}
-	if v := plan.PasswordTimeout.ValueString(); v != "" {
-		p.PasswordTimeout = v
+	if !config.PasswordMinComplexChars.IsNull() {
+		if !plan.PasswordMinComplexChars.IsUnknown() {
+			p.PasswordMinComplexChars = plan.PasswordMinComplexChars.ValueInt64Pointer()
+		}
 	}
-	if v := plan.PhoneMemoryEncrypted.ValueString(); v != "" {
-		p.PhoneMemoryEncrypted = v
+	if !config.PasswordMinimumLength.IsNull() {
+		if !plan.PasswordMinimumLength.IsUnknown() {
+			p.PasswordMinimumLength = plan.PasswordMinimumLength.ValueInt64Pointer()
+		}
 	}
-	if v := plan.Policy.ValueString(); v != "" {
-		p.Policy = v
+	if !config.PasswordQuality.IsNull() {
+		if !plan.PasswordQuality.IsUnknown() {
+			p.PasswordQuality = plan.PasswordQuality.ValueInt64Pointer()
+		}
 	}
-	if v := plan.RegionRatings.ValueString(); v != "" {
-		p.RegionRatings = v
+	if !config.PasswordRequired.IsNull() {
+		if !plan.PasswordRequired.IsUnknown() {
+			p.PasswordRequired = plan.PasswordRequired.ValueBoolPointer()
+		}
 	}
-	if v := plan.RequireEmailProfile.ValueString(); v != "" {
-		p.RequireEmailProfile = v
+	if v := config.PasswordTimeout.ValueString(); v != "" {
+		p.PasswordTimeout = objectParam(v)
 	}
-	if v := plan.SmartScreenEnabled.ValueString(); v != "" {
-		p.SmartScreenEnabled = v
+	if !config.PhoneMemoryEncrypted.IsNull() {
+		if !plan.PhoneMemoryEncrypted.IsUnknown() {
+			p.PhoneMemoryEncrypted = plan.PhoneMemoryEncrypted.ValueBoolPointer()
+		}
 	}
-	if v := plan.SystemSecurityTLS.ValueString(); v != "" {
-		p.SystemSecurityTLS = v
+	if v := config.Policy.ValueString(); v != "" {
+		p.Policy = objectParam(v)
 	}
-	if v := plan.TVShowsRating.ValueString(); v != "" {
-		p.TVShowsRating = v
+	if v := config.RegionRatings.ValueString(); v != "" {
+		p.RegionRatings = objectParam(v)
 	}
-	if v := plan.TargetGroups.ValueString(); v != "" {
-		p.TargetGroups = v
+	if !config.RequireEmailProfile.IsNull() {
+		if !plan.RequireEmailProfile.IsUnknown() {
+			p.RequireEmailProfile = plan.RequireEmailProfile.ValueBoolPointer()
+		}
 	}
-	if v := plan.UserAccountControlStatus.ValueString(); v != "" {
-		p.UserAccountControlStatus = v
+	if !config.SmartScreenEnabled.IsNull() {
+		if !plan.SmartScreenEnabled.IsUnknown() {
+			p.SmartScreenEnabled = plan.SmartScreenEnabled.ValueBoolPointer()
+		}
 	}
-	if v := plan.WLANEnabled.ValueString(); v != "" {
-		p.WLANEnabled = v
+	if !config.SystemSecurityTLS.IsNull() {
+		if !plan.SystemSecurityTLS.IsUnknown() {
+			p.SystemSecurityTLS = plan.SystemSecurityTLS.ValueBoolPointer()
+		}
+	}
+	if v := config.TVShowsRating.ValueString(); v != "" {
+		p.TVShowsRating = objectParam(v)
+	}
+	if !config.TargetGroups.IsNull() {
+		if v := toStringSlice(ctx, plan.TargetGroups, &resp.Diagnostics); len(v) > 0 {
+			p.TargetGroups = v
+		}
+	}
+	if v := config.UserAccountControlStatus.ValueString(); v != "" {
+		p.UserAccountControlStatus = objectParam(v)
+	}
+	if !config.WLANEnabled.IsNull() {
+		if !plan.WLANEnabled.IsUnknown() {
+			p.WLANEnabled = plan.WLANEnabled.ValueBoolPointer()
+		}
+	}
+	if !config.WorkFoldersSyncUrl.IsNull() {
+		p.WorkFoldersSyncUrl = plan.WorkFoldersSyncUrl.ValueString()
 	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	res, err := r.client.SCC.NewDeviceConditionalAccessRule(ctx, p)
+	res, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.NewDeviceConditionalAccessRule, p, isNotFound)
 	if err != nil {
 		resp.Diagnostics.AddError("New-DeviceConditionalAccessRule failed", err.Error())
 		return
@@ -358,199 +445,486 @@ func (r *deviceConditionalAccessRuleResource) Update(ctx context.Context, req re
 	id := r.identityOf(state)
 	sp := purview.SetDeviceConditionalAccessRuleParams{}
 	sp.Identity = id
-	sp.AccountName = plan.AccountName.ValueString()
-	sp.AccountUserName = plan.AccountUserName.ValueString()
-	if v := plan.AllowAppStore.ValueString(); v != "" {
-		sp.AllowAppStore = v
+	var cur *deviceConditionalAccessRuleModel
+	curRead := false
+	current := func() *deviceConditionalAccessRuleModel {
+		if !curRead {
+			curRead = true
+			var m deviceConditionalAccessRuleModel
+			if r.refresh(ctx, id, &m, &resp.Diagnostics, nil) {
+				cur = &m
+			} else if !resp.Diagnostics.HasError() {
+				resp.Diagnostics.AddError("Get-DeviceConditionalAccessRule failed", "the object could not be read to determine the list values to remove; nothing was changed")
+			}
+		}
+		return cur
 	}
-	if v := plan.AllowAssistantWhileLocked.ValueString(); v != "" {
-		sp.AllowAssistantWhileLocked = v
+	if !plan.AccountName.Equal(state.AccountName) {
+		sp.AccountName = plan.AccountName.ValueString()
 	}
-	if v := plan.AllowConvenienceLogon.ValueString(); v != "" {
-		sp.AllowConvenienceLogon = v
+	if !plan.AccountUserName.Equal(state.AccountUserName) {
+		sp.AccountUserName = plan.AccountUserName.ValueString()
 	}
-	if v := plan.AllowDiagnosticSubmission.ValueString(); v != "" {
-		sp.AllowDiagnosticSubmission = v
+	if !plan.AllowAppStore.Equal(state.AllowAppStore) {
+		if !plan.AllowAppStore.IsUnknown() {
+			sp.AllowAppStore = plan.AllowAppStore.ValueBoolPointer()
+		}
 	}
-	if v := plan.AllowJailbroken.ValueString(); v != "" {
-		sp.AllowJailbroken = v
+	if !plan.AllowAssistantWhileLocked.Equal(state.AllowAssistantWhileLocked) {
+		if !plan.AllowAssistantWhileLocked.IsUnknown() {
+			sp.AllowAssistantWhileLocked = plan.AllowAssistantWhileLocked.ValueBoolPointer()
+		}
 	}
-	if v := plan.AllowPassbookWhileLocked.ValueString(); v != "" {
-		sp.AllowPassbookWhileLocked = v
+	if !plan.AllowConvenienceLogon.Equal(state.AllowConvenienceLogon) {
+		if !plan.AllowConvenienceLogon.IsUnknown() {
+			sp.AllowConvenienceLogon = plan.AllowConvenienceLogon.ValueBoolPointer()
+		}
 	}
-	if v := plan.AllowScreenshot.ValueString(); v != "" {
-		sp.AllowScreenshot = v
+	if !plan.AllowDiagnosticSubmission.Equal(state.AllowDiagnosticSubmission) {
+		if !plan.AllowDiagnosticSubmission.IsUnknown() {
+			sp.AllowDiagnosticSubmission = plan.AllowDiagnosticSubmission.ValueBoolPointer()
+		}
 	}
-	if v := plan.AllowSimplePassword.ValueString(); v != "" {
-		sp.AllowSimplePassword = v
+	if !plan.AllowJailbroken.Equal(state.AllowJailbroken) {
+		if !plan.AllowJailbroken.IsUnknown() {
+			sp.AllowJailbroken = plan.AllowJailbroken.ValueBoolPointer()
+		}
 	}
-	if v := plan.AllowVideoConferencing.ValueString(); v != "" {
-		sp.AllowVideoConferencing = v
+	if !plan.AllowPassbookWhileLocked.Equal(state.AllowPassbookWhileLocked) {
+		if !plan.AllowPassbookWhileLocked.IsUnknown() {
+			sp.AllowPassbookWhileLocked = plan.AllowPassbookWhileLocked.ValueBoolPointer()
+		}
 	}
-	if v := plan.AllowVoiceAssistant.ValueString(); v != "" {
-		sp.AllowVoiceAssistant = v
+	if !plan.AllowScreenshot.Equal(state.AllowScreenshot) {
+		if !plan.AllowScreenshot.IsUnknown() {
+			sp.AllowScreenshot = plan.AllowScreenshot.ValueBoolPointer()
+		}
 	}
-	if v := plan.AllowVoiceDialing.ValueString(); v != "" {
-		sp.AllowVoiceDialing = v
+	if !plan.AllowSimplePassword.Equal(state.AllowSimplePassword) {
+		if !plan.AllowSimplePassword.IsUnknown() {
+			sp.AllowSimplePassword = plan.AllowSimplePassword.ValueBoolPointer()
+		}
 	}
-	if v := plan.AllowiCloudBackup.ValueString(); v != "" {
-		sp.AllowiCloudBackup = v
+	if !plan.AllowVideoConferencing.Equal(state.AllowVideoConferencing) {
+		if !plan.AllowVideoConferencing.IsUnknown() {
+			sp.AllowVideoConferencing = plan.AllowVideoConferencing.ValueBoolPointer()
+		}
 	}
-	if v := plan.AllowiCloudDocSync.ValueString(); v != "" {
-		sp.AllowiCloudDocSync = v
+	if !plan.AllowVoiceAssistant.Equal(state.AllowVoiceAssistant) {
+		if !plan.AllowVoiceAssistant.IsUnknown() {
+			sp.AllowVoiceAssistant = plan.AllowVoiceAssistant.ValueBoolPointer()
+		}
 	}
-	if v := plan.AllowiCloudPhotoSync.ValueString(); v != "" {
-		sp.AllowiCloudPhotoSync = v
+	if !plan.AllowVoiceDialing.Equal(state.AllowVoiceDialing) {
+		if !plan.AllowVoiceDialing.IsUnknown() {
+			sp.AllowVoiceDialing = plan.AllowVoiceDialing.ValueBoolPointer()
+		}
 	}
-	if v := plan.AntiVirusSignatureStatus.ValueString(); v != "" {
-		sp.AntiVirusSignatureStatus = v
+	if !plan.AllowiCloudBackup.Equal(state.AllowiCloudBackup) {
+		if !plan.AllowiCloudBackup.IsUnknown() {
+			sp.AllowiCloudBackup = plan.AllowiCloudBackup.ValueBoolPointer()
+		}
 	}
-	if v := plan.AntiVirusStatus.ValueString(); v != "" {
-		sp.AntiVirusStatus = v
+	if !plan.AllowiCloudDocSync.Equal(state.AllowiCloudDocSync) {
+		if !plan.AllowiCloudDocSync.IsUnknown() {
+			sp.AllowiCloudDocSync = plan.AllowiCloudDocSync.ValueBoolPointer()
+		}
 	}
-	if v := plan.AppsRating.ValueString(); v != "" {
-		sp.AppsRating = v
+	if !plan.AllowiCloudPhotoSync.Equal(state.AllowiCloudPhotoSync) {
+		if !plan.AllowiCloudPhotoSync.IsUnknown() {
+			sp.AllowiCloudPhotoSync = plan.AllowiCloudPhotoSync.ValueBoolPointer()
+		}
 	}
-	if v := plan.AutoUpdateStatus.ValueString(); v != "" {
-		sp.AutoUpdateStatus = v
+	if !plan.AntiVirusSignatureStatus.Equal(state.AntiVirusSignatureStatus) {
+		if !plan.AntiVirusSignatureStatus.IsUnknown() {
+			sp.AntiVirusSignatureStatus = plan.AntiVirusSignatureStatus.ValueInt64Pointer()
+		}
 	}
-	if v := plan.BluetoothEnabled.ValueString(); v != "" {
-		sp.BluetoothEnabled = v
+	if !plan.AntiVirusStatus.Equal(state.AntiVirusStatus) {
+		if !plan.AntiVirusStatus.IsUnknown() {
+			sp.AntiVirusStatus = plan.AntiVirusStatus.ValueInt64Pointer()
+		}
 	}
-	if v := plan.CameraEnabled.ValueString(); v != "" {
-		sp.CameraEnabled = v
+	if !plan.AppsRating.Equal(state.AppsRating) {
+		if v := plan.AppsRating.ValueString(); v != "" {
+			sp.AppsRating = objectParam(v)
+		}
 	}
-	sp.EmailAddress = plan.EmailAddress.ValueString()
-	if v := plan.EnableRemovableStorage.ValueString(); v != "" {
-		sp.EnableRemovableStorage = v
+	if !plan.AutoUpdateStatus.Equal(state.AutoUpdateStatus) {
+		if v := plan.AutoUpdateStatus.ValueString(); v != "" {
+			sp.AutoUpdateStatus = objectParam(v)
+		}
 	}
-	sp.ExchangeActiveSyncHost = plan.ExchangeActiveSyncHost.ValueString()
-	if v := plan.FirewallStatus.ValueString(); v != "" {
-		sp.FirewallStatus = v
+	if !plan.BluetoothEnabled.Equal(state.BluetoothEnabled) {
+		if !plan.BluetoothEnabled.IsUnknown() {
+			sp.BluetoothEnabled = plan.BluetoothEnabled.ValueBoolPointer()
+		}
 	}
-	if v := plan.ForceAppStorePassword.ValueString(); v != "" {
-		sp.ForceAppStorePassword = v
+	if !plan.CameraEnabled.Equal(state.CameraEnabled) {
+		if !plan.CameraEnabled.IsUnknown() {
+			sp.CameraEnabled = plan.CameraEnabled.ValueBoolPointer()
+		}
 	}
-	if v := plan.ForceEncryptedBackup.ValueString(); v != "" {
-		sp.ForceEncryptedBackup = v
+	if !plan.EmailAddress.Equal(state.EmailAddress) {
+		sp.EmailAddress = plan.EmailAddress.ValueString()
 	}
-	if v := plan.MaxPasswordAttemptsBeforeWipe.ValueString(); v != "" {
-		sp.MaxPasswordAttemptsBeforeWipe = v
+	if !plan.EnableRemovableStorage.Equal(state.EnableRemovableStorage) {
+		if !plan.EnableRemovableStorage.IsUnknown() {
+			sp.EnableRemovableStorage = plan.EnableRemovableStorage.ValueBoolPointer()
+		}
 	}
-	if v := plan.MaxPasswordGracePeriod.ValueString(); v != "" {
-		sp.MaxPasswordGracePeriod = v
+	if !plan.ExchangeActiveSyncHost.Equal(state.ExchangeActiveSyncHost) {
+		sp.ExchangeActiveSyncHost = plan.ExchangeActiveSyncHost.ValueString()
 	}
-	if v := plan.MoviesRating.ValueString(); v != "" {
-		sp.MoviesRating = v
+	if !plan.FirewallStatus.Equal(state.FirewallStatus) {
+		if v := plan.FirewallStatus.ValueString(); v != "" {
+			sp.FirewallStatus = objectParam(v)
+		}
 	}
-	if v := plan.PasswordComplexity.ValueString(); v != "" {
-		sp.PasswordComplexity = v
+	if !plan.ForceAppStorePassword.Equal(state.ForceAppStorePassword) {
+		if !plan.ForceAppStorePassword.IsUnknown() {
+			sp.ForceAppStorePassword = plan.ForceAppStorePassword.ValueBoolPointer()
+		}
 	}
-	if v := plan.PasswordExpirationDays.ValueString(); v != "" {
-		sp.PasswordExpirationDays = v
+	if !plan.ForceEncryptedBackup.Equal(state.ForceEncryptedBackup) {
+		if !plan.ForceEncryptedBackup.IsUnknown() {
+			sp.ForceEncryptedBackup = plan.ForceEncryptedBackup.ValueBoolPointer()
+		}
 	}
-	if v := plan.PasswordHistoryCount.ValueString(); v != "" {
-		sp.PasswordHistoryCount = v
+	if !plan.MaxPasswordAttemptsBeforeWipe.Equal(state.MaxPasswordAttemptsBeforeWipe) {
+		if !plan.MaxPasswordAttemptsBeforeWipe.IsUnknown() {
+			sp.MaxPasswordAttemptsBeforeWipe = plan.MaxPasswordAttemptsBeforeWipe.ValueInt64Pointer()
+		}
 	}
-	if v := plan.PasswordMinComplexChars.ValueString(); v != "" {
-		sp.PasswordMinComplexChars = v
+	if !plan.MaxPasswordGracePeriod.Equal(state.MaxPasswordGracePeriod) {
+		if v := plan.MaxPasswordGracePeriod.ValueString(); v != "" {
+			sp.MaxPasswordGracePeriod = objectParam(v)
+		}
 	}
-	if v := plan.PasswordMinimumLength.ValueString(); v != "" {
-		sp.PasswordMinimumLength = v
+	if !plan.MoviesRating.Equal(state.MoviesRating) {
+		if v := plan.MoviesRating.ValueString(); v != "" {
+			sp.MoviesRating = objectParam(v)
+		}
 	}
-	if v := plan.PasswordQuality.ValueString(); v != "" {
-		sp.PasswordQuality = v
+	if !plan.PasswordComplexity.Equal(state.PasswordComplexity) {
+		if !plan.PasswordComplexity.IsUnknown() {
+			sp.PasswordComplexity = plan.PasswordComplexity.ValueInt64Pointer()
+		}
 	}
-	if v := plan.PasswordRequired.ValueString(); v != "" {
-		sp.PasswordRequired = v
+	if !plan.PasswordExpirationDays.Equal(state.PasswordExpirationDays) {
+		if !plan.PasswordExpirationDays.IsUnknown() {
+			sp.PasswordExpirationDays = plan.PasswordExpirationDays.ValueInt64Pointer()
+		}
 	}
-	if v := plan.PasswordTimeout.ValueString(); v != "" {
-		sp.PasswordTimeout = v
+	if !plan.PasswordHistoryCount.Equal(state.PasswordHistoryCount) {
+		if !plan.PasswordHistoryCount.IsUnknown() {
+			sp.PasswordHistoryCount = plan.PasswordHistoryCount.ValueInt64Pointer()
+		}
 	}
-	if v := plan.PhoneMemoryEncrypted.ValueString(); v != "" {
-		sp.PhoneMemoryEncrypted = v
+	if !plan.PasswordMinComplexChars.Equal(state.PasswordMinComplexChars) {
+		if !plan.PasswordMinComplexChars.IsUnknown() {
+			sp.PasswordMinComplexChars = plan.PasswordMinComplexChars.ValueInt64Pointer()
+		}
 	}
-	if v := plan.RegionRatings.ValueString(); v != "" {
-		sp.RegionRatings = v
+	if !plan.PasswordMinimumLength.Equal(state.PasswordMinimumLength) {
+		if !plan.PasswordMinimumLength.IsUnknown() {
+			sp.PasswordMinimumLength = plan.PasswordMinimumLength.ValueInt64Pointer()
+		}
 	}
-	if v := plan.RequireEmailProfile.ValueString(); v != "" {
-		sp.RequireEmailProfile = v
+	if !plan.PasswordQuality.Equal(state.PasswordQuality) {
+		if !plan.PasswordQuality.IsUnknown() {
+			sp.PasswordQuality = plan.PasswordQuality.ValueInt64Pointer()
+		}
 	}
-	if v := plan.SmartScreenEnabled.ValueString(); v != "" {
-		sp.SmartScreenEnabled = v
+	if !plan.PasswordRequired.Equal(state.PasswordRequired) {
+		if !plan.PasswordRequired.IsUnknown() {
+			sp.PasswordRequired = plan.PasswordRequired.ValueBoolPointer()
+		}
 	}
-	if v := plan.SystemSecurityTLS.ValueString(); v != "" {
-		sp.SystemSecurityTLS = v
+	if !plan.PasswordTimeout.Equal(state.PasswordTimeout) {
+		if v := plan.PasswordTimeout.ValueString(); v != "" {
+			sp.PasswordTimeout = objectParam(v)
+		}
 	}
-	if v := plan.TVShowsRating.ValueString(); v != "" {
-		sp.TVShowsRating = v
+	if !plan.PhoneMemoryEncrypted.Equal(state.PhoneMemoryEncrypted) {
+		if !plan.PhoneMemoryEncrypted.IsUnknown() {
+			sp.PhoneMemoryEncrypted = plan.PhoneMemoryEncrypted.ValueBoolPointer()
+		}
 	}
-	if v := plan.UserAccountControlStatus.ValueString(); v != "" {
-		sp.UserAccountControlStatus = v
+	if !plan.RegionRatings.Equal(state.RegionRatings) {
+		if v := plan.RegionRatings.ValueString(); v != "" {
+			sp.RegionRatings = objectParam(v)
+		}
 	}
-	if v := plan.WLANEnabled.ValueString(); v != "" {
-		sp.WLANEnabled = v
+	if !plan.RequireEmailProfile.Equal(state.RequireEmailProfile) {
+		if !plan.RequireEmailProfile.IsUnknown() {
+			sp.RequireEmailProfile = plan.RequireEmailProfile.ValueBoolPointer()
+		}
 	}
-	sp.WorkFoldersSyncUrl = plan.WorkFoldersSyncUrl.ValueString()
+	if !plan.SmartScreenEnabled.Equal(state.SmartScreenEnabled) {
+		if !plan.SmartScreenEnabled.IsUnknown() {
+			sp.SmartScreenEnabled = plan.SmartScreenEnabled.ValueBoolPointer()
+		}
+	}
+	if !plan.SystemSecurityTLS.Equal(state.SystemSecurityTLS) {
+		if !plan.SystemSecurityTLS.IsUnknown() {
+			sp.SystemSecurityTLS = plan.SystemSecurityTLS.ValueBoolPointer()
+		}
+	}
+	if !plan.TVShowsRating.Equal(state.TVShowsRating) {
+		if v := plan.TVShowsRating.ValueString(); v != "" {
+			sp.TVShowsRating = objectParam(v)
+		}
+	}
+	if !plan.TargetGroups.Equal(state.TargetGroups) {
+		if !plan.TargetGroups.IsNull() && !plan.TargetGroups.IsUnknown() {
+			if v := toStringSlice(ctx, plan.TargetGroups, &resp.Diagnostics); len(v) > 0 {
+				sp.TargetGroups = v
+			} else {
+				if c := current(); c != nil {
+					if rm := toStringSlice(ctx, c.TargetGroups, &resp.Diagnostics); len(rm) > 0 {
+						sp.TargetGroupsDelta = listRemoveDelta(rm)
+					}
+				}
+			}
+		}
+	}
+	if !plan.UserAccountControlStatus.Equal(state.UserAccountControlStatus) {
+		if v := plan.UserAccountControlStatus.ValueString(); v != "" {
+			sp.UserAccountControlStatus = objectParam(v)
+		}
+	}
+	if !plan.WLANEnabled.Equal(state.WLANEnabled) {
+		if !plan.WLANEnabled.IsUnknown() {
+			sp.WLANEnabled = plan.WLANEnabled.ValueBoolPointer()
+		}
+	}
+	if !plan.WorkFoldersSyncUrl.Equal(state.WorkFoldersSyncUrl) {
+		sp.WorkFoldersSyncUrl = plan.WorkFoldersSyncUrl.ValueString()
+	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	if _, err := r.client.SCC.SetDeviceConditionalAccessRule(ctx, sp); err != nil {
+	if _, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.SetDeviceConditionalAccessRule, sp, isNotFound); err != nil {
 		resp.Diagnostics.AddError("Set-DeviceConditionalAccessRule failed", err.Error())
 		return
 	}
 	cfg := plan
 	reflected := reconcile.ReflectsFields(map[string]types.String{
-		"AccountName":                   cfg.AccountName,
-		"AccountUserName":               cfg.AccountUserName,
-		"AllowAppStore":                 cfg.AllowAppStore,
-		"AllowAssistantWhileLocked":     cfg.AllowAssistantWhileLocked,
-		"AllowConvenienceLogon":         cfg.AllowConvenienceLogon,
-		"AllowDiagnosticSubmission":     cfg.AllowDiagnosticSubmission,
-		"AllowJailbroken":               cfg.AllowJailbroken,
-		"AllowPassbookWhileLocked":      cfg.AllowPassbookWhileLocked,
-		"AllowScreenshot":               cfg.AllowScreenshot,
-		"AllowSimplePassword":           cfg.AllowSimplePassword,
-		"AllowVideoConferencing":        cfg.AllowVideoConferencing,
-		"AllowVoiceAssistant":           cfg.AllowVoiceAssistant,
-		"AllowVoiceDialing":             cfg.AllowVoiceDialing,
-		"AllowiCloudBackup":             cfg.AllowiCloudBackup,
-		"AllowiCloudDocSync":            cfg.AllowiCloudDocSync,
-		"AllowiCloudPhotoSync":          cfg.AllowiCloudPhotoSync,
-		"AntiVirusSignatureStatus":      cfg.AntiVirusSignatureStatus,
-		"AntiVirusStatus":               cfg.AntiVirusStatus,
-		"AppsRating":                    cfg.AppsRating,
-		"AutoUpdateStatus":              cfg.AutoUpdateStatus,
-		"BluetoothEnabled":              cfg.BluetoothEnabled,
-		"CameraEnabled":                 cfg.CameraEnabled,
-		"EmailAddress":                  cfg.EmailAddress,
-		"EnableRemovableStorage":        cfg.EnableRemovableStorage,
-		"ExchangeActiveSyncHost":        cfg.ExchangeActiveSyncHost,
-		"FirewallStatus":                cfg.FirewallStatus,
-		"ForceAppStorePassword":         cfg.ForceAppStorePassword,
-		"ForceEncryptedBackup":          cfg.ForceEncryptedBackup,
-		"MaxPasswordAttemptsBeforeWipe": cfg.MaxPasswordAttemptsBeforeWipe,
-		"MaxPasswordGracePeriod":        cfg.MaxPasswordGracePeriod,
-		"MoviesRating":                  cfg.MoviesRating,
-		"PasswordComplexity":            cfg.PasswordComplexity,
-		"PasswordExpirationDays":        cfg.PasswordExpirationDays,
-		"PasswordHistoryCount":          cfg.PasswordHistoryCount,
-		"PasswordMinComplexChars":       cfg.PasswordMinComplexChars,
-		"PasswordMinimumLength":         cfg.PasswordMinimumLength,
-		"PasswordQuality":               cfg.PasswordQuality,
-		"PasswordRequired":              cfg.PasswordRequired,
-		"PasswordTimeout":               cfg.PasswordTimeout,
-		"PhoneMemoryEncrypted":          cfg.PhoneMemoryEncrypted,
-		"RegionRatings":                 cfg.RegionRatings,
-		"RequireEmailProfile":           cfg.RequireEmailProfile,
-		"SmartScreenEnabled":            cfg.SmartScreenEnabled,
-		"SystemSecurityTLS":             cfg.SystemSecurityTLS,
-		"TVShowsRating":                 cfg.TVShowsRating,
-		"UserAccountControlStatus":      cfg.UserAccountControlStatus,
-		"WLANEnabled":                   cfg.WLANEnabled,
-		"WorkFoldersSyncUrl":            cfg.WorkFoldersSyncUrl,
+		"AccountName":            cfg.AccountName,
+		"AccountUserName":        cfg.AccountUserName,
+		"EmailAddress":           cfg.EmailAddress,
+		"ExchangeActiveSyncHost": cfg.ExchangeActiveSyncHost,
+		"WorkFoldersSyncUrl":     cfg.WorkFoldersSyncUrl,
 	}, getString)
+	if !cfg.AllowAppStore.IsUnknown() && !cfg.AllowAppStore.IsNull() && !cfg.AllowAppStore.Equal(state.AllowAppStore) {
+		prev, want := reflected, cfg.AllowAppStore.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["AllowAppStore"] == nil || getBool(obj, "AllowAppStore") == want)
+		}
+	}
+	if !cfg.AllowAssistantWhileLocked.IsUnknown() && !cfg.AllowAssistantWhileLocked.IsNull() && !cfg.AllowAssistantWhileLocked.Equal(state.AllowAssistantWhileLocked) {
+		prev, want := reflected, cfg.AllowAssistantWhileLocked.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["AllowAssistantWhileLocked"] == nil || getBool(obj, "AllowAssistantWhileLocked") == want)
+		}
+	}
+	if !cfg.AllowConvenienceLogon.IsUnknown() && !cfg.AllowConvenienceLogon.IsNull() && !cfg.AllowConvenienceLogon.Equal(state.AllowConvenienceLogon) {
+		prev, want := reflected, cfg.AllowConvenienceLogon.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["AllowConvenienceLogon"] == nil || getBool(obj, "AllowConvenienceLogon") == want)
+		}
+	}
+	if !cfg.AllowDiagnosticSubmission.IsUnknown() && !cfg.AllowDiagnosticSubmission.IsNull() && !cfg.AllowDiagnosticSubmission.Equal(state.AllowDiagnosticSubmission) {
+		prev, want := reflected, cfg.AllowDiagnosticSubmission.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["AllowDiagnosticSubmission"] == nil || getBool(obj, "AllowDiagnosticSubmission") == want)
+		}
+	}
+	if !cfg.AllowJailbroken.IsUnknown() && !cfg.AllowJailbroken.IsNull() && !cfg.AllowJailbroken.Equal(state.AllowJailbroken) {
+		prev, want := reflected, cfg.AllowJailbroken.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["AllowJailbroken"] == nil || getBool(obj, "AllowJailbroken") == want)
+		}
+	}
+	if !cfg.AllowPassbookWhileLocked.IsUnknown() && !cfg.AllowPassbookWhileLocked.IsNull() && !cfg.AllowPassbookWhileLocked.Equal(state.AllowPassbookWhileLocked) {
+		prev, want := reflected, cfg.AllowPassbookWhileLocked.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["AllowPassbookWhileLocked"] == nil || getBool(obj, "AllowPassbookWhileLocked") == want)
+		}
+	}
+	if !cfg.AllowScreenshot.IsUnknown() && !cfg.AllowScreenshot.IsNull() && !cfg.AllowScreenshot.Equal(state.AllowScreenshot) {
+		prev, want := reflected, cfg.AllowScreenshot.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["AllowScreenshot"] == nil || getBool(obj, "AllowScreenshot") == want)
+		}
+	}
+	if !cfg.AllowSimplePassword.IsUnknown() && !cfg.AllowSimplePassword.IsNull() && !cfg.AllowSimplePassword.Equal(state.AllowSimplePassword) {
+		prev, want := reflected, cfg.AllowSimplePassword.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["AllowSimplePassword"] == nil || getBool(obj, "AllowSimplePassword") == want)
+		}
+	}
+	if !cfg.AllowVideoConferencing.IsUnknown() && !cfg.AllowVideoConferencing.IsNull() && !cfg.AllowVideoConferencing.Equal(state.AllowVideoConferencing) {
+		prev, want := reflected, cfg.AllowVideoConferencing.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["AllowVideoConferencing"] == nil || getBool(obj, "AllowVideoConferencing") == want)
+		}
+	}
+	if !cfg.AllowVoiceAssistant.IsUnknown() && !cfg.AllowVoiceAssistant.IsNull() && !cfg.AllowVoiceAssistant.Equal(state.AllowVoiceAssistant) {
+		prev, want := reflected, cfg.AllowVoiceAssistant.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["AllowVoiceAssistant"] == nil || getBool(obj, "AllowVoiceAssistant") == want)
+		}
+	}
+	if !cfg.AllowVoiceDialing.IsUnknown() && !cfg.AllowVoiceDialing.IsNull() && !cfg.AllowVoiceDialing.Equal(state.AllowVoiceDialing) {
+		prev, want := reflected, cfg.AllowVoiceDialing.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["AllowVoiceDialing"] == nil || getBool(obj, "AllowVoiceDialing") == want)
+		}
+	}
+	if !cfg.AllowiCloudBackup.IsUnknown() && !cfg.AllowiCloudBackup.IsNull() && !cfg.AllowiCloudBackup.Equal(state.AllowiCloudBackup) {
+		prev, want := reflected, cfg.AllowiCloudBackup.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["AllowiCloudBackup"] == nil || getBool(obj, "AllowiCloudBackup") == want)
+		}
+	}
+	if !cfg.AllowiCloudDocSync.IsUnknown() && !cfg.AllowiCloudDocSync.IsNull() && !cfg.AllowiCloudDocSync.Equal(state.AllowiCloudDocSync) {
+		prev, want := reflected, cfg.AllowiCloudDocSync.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["AllowiCloudDocSync"] == nil || getBool(obj, "AllowiCloudDocSync") == want)
+		}
+	}
+	if !cfg.AllowiCloudPhotoSync.IsUnknown() && !cfg.AllowiCloudPhotoSync.IsNull() && !cfg.AllowiCloudPhotoSync.Equal(state.AllowiCloudPhotoSync) {
+		prev, want := reflected, cfg.AllowiCloudPhotoSync.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["AllowiCloudPhotoSync"] == nil || getBool(obj, "AllowiCloudPhotoSync") == want)
+		}
+	}
+	if !cfg.AntiVirusSignatureStatus.IsUnknown() && !cfg.AntiVirusSignatureStatus.IsNull() && !cfg.AntiVirusSignatureStatus.Equal(state.AntiVirusSignatureStatus) {
+		prev, want := reflected, cfg.AntiVirusSignatureStatus.ValueInt64()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["AntiVirusSignatureStatus"] == nil || getInt(obj, "AntiVirusSignatureStatus") == want)
+		}
+	}
+	if !cfg.AntiVirusStatus.IsUnknown() && !cfg.AntiVirusStatus.IsNull() && !cfg.AntiVirusStatus.Equal(state.AntiVirusStatus) {
+		prev, want := reflected, cfg.AntiVirusStatus.ValueInt64()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["AntiVirusStatus"] == nil || getInt(obj, "AntiVirusStatus") == want)
+		}
+	}
+	if !cfg.BluetoothEnabled.IsUnknown() && !cfg.BluetoothEnabled.IsNull() && !cfg.BluetoothEnabled.Equal(state.BluetoothEnabled) {
+		prev, want := reflected, cfg.BluetoothEnabled.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["BluetoothEnabled"] == nil || getBool(obj, "BluetoothEnabled") == want)
+		}
+	}
+	if !cfg.CameraEnabled.IsUnknown() && !cfg.CameraEnabled.IsNull() && !cfg.CameraEnabled.Equal(state.CameraEnabled) {
+		prev, want := reflected, cfg.CameraEnabled.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["CameraEnabled"] == nil || getBool(obj, "CameraEnabled") == want)
+		}
+	}
+	if !cfg.EnableRemovableStorage.IsUnknown() && !cfg.EnableRemovableStorage.IsNull() && !cfg.EnableRemovableStorage.Equal(state.EnableRemovableStorage) {
+		prev, want := reflected, cfg.EnableRemovableStorage.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["EnableRemovableStorage"] == nil || getBool(obj, "EnableRemovableStorage") == want)
+		}
+	}
+	if !cfg.ForceAppStorePassword.IsUnknown() && !cfg.ForceAppStorePassword.IsNull() && !cfg.ForceAppStorePassword.Equal(state.ForceAppStorePassword) {
+		prev, want := reflected, cfg.ForceAppStorePassword.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["ForceAppStorePassword"] == nil || getBool(obj, "ForceAppStorePassword") == want)
+		}
+	}
+	if !cfg.ForceEncryptedBackup.IsUnknown() && !cfg.ForceEncryptedBackup.IsNull() && !cfg.ForceEncryptedBackup.Equal(state.ForceEncryptedBackup) {
+		prev, want := reflected, cfg.ForceEncryptedBackup.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["ForceEncryptedBackup"] == nil || getBool(obj, "ForceEncryptedBackup") == want)
+		}
+	}
+	if !cfg.MaxPasswordAttemptsBeforeWipe.IsUnknown() && !cfg.MaxPasswordAttemptsBeforeWipe.IsNull() && !cfg.MaxPasswordAttemptsBeforeWipe.Equal(state.MaxPasswordAttemptsBeforeWipe) {
+		prev, want := reflected, cfg.MaxPasswordAttemptsBeforeWipe.ValueInt64()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["MaxPasswordAttemptsBeforeWipe"] == nil || getInt(obj, "MaxPasswordAttemptsBeforeWipe") == want)
+		}
+	}
+	if !cfg.PasswordComplexity.IsUnknown() && !cfg.PasswordComplexity.IsNull() && !cfg.PasswordComplexity.Equal(state.PasswordComplexity) {
+		prev, want := reflected, cfg.PasswordComplexity.ValueInt64()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["PasswordComplexity"] == nil || getInt(obj, "PasswordComplexity") == want)
+		}
+	}
+	if !cfg.PasswordExpirationDays.IsUnknown() && !cfg.PasswordExpirationDays.IsNull() && !cfg.PasswordExpirationDays.Equal(state.PasswordExpirationDays) {
+		prev, want := reflected, cfg.PasswordExpirationDays.ValueInt64()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["PasswordExpirationDays"] == nil || getInt(obj, "PasswordExpirationDays") == want)
+		}
+	}
+	if !cfg.PasswordHistoryCount.IsUnknown() && !cfg.PasswordHistoryCount.IsNull() && !cfg.PasswordHistoryCount.Equal(state.PasswordHistoryCount) {
+		prev, want := reflected, cfg.PasswordHistoryCount.ValueInt64()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["PasswordHistoryCount"] == nil || getInt(obj, "PasswordHistoryCount") == want)
+		}
+	}
+	if !cfg.PasswordMinComplexChars.IsUnknown() && !cfg.PasswordMinComplexChars.IsNull() && !cfg.PasswordMinComplexChars.Equal(state.PasswordMinComplexChars) {
+		prev, want := reflected, cfg.PasswordMinComplexChars.ValueInt64()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["PasswordMinComplexChars"] == nil || getInt(obj, "PasswordMinComplexChars") == want)
+		}
+	}
+	if !cfg.PasswordMinimumLength.IsUnknown() && !cfg.PasswordMinimumLength.IsNull() && !cfg.PasswordMinimumLength.Equal(state.PasswordMinimumLength) {
+		prev, want := reflected, cfg.PasswordMinimumLength.ValueInt64()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["PasswordMinimumLength"] == nil || getInt(obj, "PasswordMinimumLength") == want)
+		}
+	}
+	if !cfg.PasswordQuality.IsUnknown() && !cfg.PasswordQuality.IsNull() && !cfg.PasswordQuality.Equal(state.PasswordQuality) {
+		prev, want := reflected, cfg.PasswordQuality.ValueInt64()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["PasswordQuality"] == nil || getInt(obj, "PasswordQuality") == want)
+		}
+	}
+	if !cfg.PasswordRequired.IsUnknown() && !cfg.PasswordRequired.IsNull() && !cfg.PasswordRequired.Equal(state.PasswordRequired) {
+		prev, want := reflected, cfg.PasswordRequired.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["PasswordRequired"] == nil || getBool(obj, "PasswordRequired") == want)
+		}
+	}
+	if !cfg.PhoneMemoryEncrypted.IsUnknown() && !cfg.PhoneMemoryEncrypted.IsNull() && !cfg.PhoneMemoryEncrypted.Equal(state.PhoneMemoryEncrypted) {
+		prev, want := reflected, cfg.PhoneMemoryEncrypted.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["PhoneMemoryEncrypted"] == nil || getBool(obj, "PhoneMemoryEncrypted") == want)
+		}
+	}
+	if !cfg.RequireEmailProfile.IsUnknown() && !cfg.RequireEmailProfile.IsNull() && !cfg.RequireEmailProfile.Equal(state.RequireEmailProfile) {
+		prev, want := reflected, cfg.RequireEmailProfile.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["RequireEmailProfile"] == nil || getBool(obj, "RequireEmailProfile") == want)
+		}
+	}
+	if !cfg.SmartScreenEnabled.IsUnknown() && !cfg.SmartScreenEnabled.IsNull() && !cfg.SmartScreenEnabled.Equal(state.SmartScreenEnabled) {
+		prev, want := reflected, cfg.SmartScreenEnabled.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["SmartScreenEnabled"] == nil || getBool(obj, "SmartScreenEnabled") == want)
+		}
+	}
+	if !cfg.SystemSecurityTLS.IsUnknown() && !cfg.SystemSecurityTLS.IsNull() && !cfg.SystemSecurityTLS.Equal(state.SystemSecurityTLS) {
+		prev, want := reflected, cfg.SystemSecurityTLS.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["SystemSecurityTLS"] == nil || getBool(obj, "SystemSecurityTLS") == want)
+		}
+	}
+	if !cfg.WLANEnabled.IsUnknown() && !cfg.WLANEnabled.IsNull() && !cfg.WLANEnabled.Equal(state.WLANEnabled) {
+		prev, want := reflected, cfg.WLANEnabled.ValueBool()
+		reflected = func(obj map[string]any) bool {
+			return prev(obj) && (obj["WLANEnabled"] == nil || getBool(obj, "WLANEnabled") == want)
+		}
+	}
 	r.refresh(ctx, id, &plan, &resp.Diagnostics, reflected)
+	if !cfg.ID.IsUnknown() && !cfg.ID.IsNull() {
+		plan.ID = cfg.ID
+	}
 	r.reconcileState(&cfg, &plan)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
@@ -612,53 +986,53 @@ func readDeviceConditionalAccessRule(ctx context.Context, obj map[string]any, m 
 	m.Identity = types.StringValue(firstNonEmptyStr(getString(obj, "Identity"), getString(obj, "Guid"), getString(obj, "Name")))
 	m.AccountName = types.StringValue(getString(obj, "AccountName"))
 	m.AccountUserName = types.StringValue(getString(obj, "AccountUserName"))
-	m.AllowAppStore = types.StringValue(getString(obj, "AllowAppStore"))
-	m.AllowAssistantWhileLocked = types.StringValue(getString(obj, "AllowAssistantWhileLocked"))
-	m.AllowConvenienceLogon = types.StringValue(getString(obj, "AllowConvenienceLogon"))
-	m.AllowDiagnosticSubmission = types.StringValue(getString(obj, "AllowDiagnosticSubmission"))
-	m.AllowJailbroken = types.StringValue(getString(obj, "AllowJailbroken"))
-	m.AllowPassbookWhileLocked = types.StringValue(getString(obj, "AllowPassbookWhileLocked"))
-	m.AllowScreenshot = types.StringValue(getString(obj, "AllowScreenshot"))
-	m.AllowSimplePassword = types.StringValue(getString(obj, "AllowSimplePassword"))
-	m.AllowVideoConferencing = types.StringValue(getString(obj, "AllowVideoConferencing"))
-	m.AllowVoiceAssistant = types.StringValue(getString(obj, "AllowVoiceAssistant"))
-	m.AllowVoiceDialing = types.StringValue(getString(obj, "AllowVoiceDialing"))
-	m.AllowiCloudBackup = types.StringValue(getString(obj, "AllowiCloudBackup"))
-	m.AllowiCloudDocSync = types.StringValue(getString(obj, "AllowiCloudDocSync"))
-	m.AllowiCloudPhotoSync = types.StringValue(getString(obj, "AllowiCloudPhotoSync"))
-	m.AntiVirusSignatureStatus = types.StringValue(getString(obj, "AntiVirusSignatureStatus"))
-	m.AntiVirusStatus = types.StringValue(getString(obj, "AntiVirusStatus"))
-	m.AppsRating = types.StringValue(getString(obj, "AppsRating"))
-	m.AutoUpdateStatus = types.StringValue(getString(obj, "AutoUpdateStatus"))
-	m.BluetoothEnabled = types.StringValue(getString(obj, "BluetoothEnabled"))
-	m.CameraEnabled = types.StringValue(getString(obj, "CameraEnabled"))
+	m.AllowAppStore = types.BoolValue(getBool(obj, "AllowAppStore"))
+	m.AllowAssistantWhileLocked = types.BoolValue(getBool(obj, "AllowAssistantWhileLocked"))
+	m.AllowConvenienceLogon = types.BoolValue(getBool(obj, "AllowConvenienceLogon"))
+	m.AllowDiagnosticSubmission = types.BoolValue(getBool(obj, "AllowDiagnosticSubmission"))
+	m.AllowJailbroken = types.BoolValue(getBool(obj, "AllowJailbroken"))
+	m.AllowPassbookWhileLocked = types.BoolValue(getBool(obj, "AllowPassbookWhileLocked"))
+	m.AllowScreenshot = types.BoolValue(getBool(obj, "AllowScreenshot"))
+	m.AllowSimplePassword = types.BoolValue(getBool(obj, "AllowSimplePassword"))
+	m.AllowVideoConferencing = types.BoolValue(getBool(obj, "AllowVideoConferencing"))
+	m.AllowVoiceAssistant = types.BoolValue(getBool(obj, "AllowVoiceAssistant"))
+	m.AllowVoiceDialing = types.BoolValue(getBool(obj, "AllowVoiceDialing"))
+	m.AllowiCloudBackup = types.BoolValue(getBool(obj, "AllowiCloudBackup"))
+	m.AllowiCloudDocSync = types.BoolValue(getBool(obj, "AllowiCloudDocSync"))
+	m.AllowiCloudPhotoSync = types.BoolValue(getBool(obj, "AllowiCloudPhotoSync"))
+	m.AntiVirusSignatureStatus = types.Int64Value(getInt(obj, "AntiVirusSignatureStatus"))
+	m.AntiVirusStatus = types.Int64Value(getInt(obj, "AntiVirusStatus"))
+	m.AppsRating = types.StringValue(getObjectJSON(obj, "AppsRating"))
+	m.AutoUpdateStatus = types.StringValue(getObjectJSON(obj, "AutoUpdateStatus"))
+	m.BluetoothEnabled = types.BoolValue(getBool(obj, "BluetoothEnabled"))
+	m.CameraEnabled = types.BoolValue(getBool(obj, "CameraEnabled"))
 	m.EmailAddress = types.StringValue(getString(obj, "EmailAddress"))
-	m.EnableRemovableStorage = types.StringValue(getString(obj, "EnableRemovableStorage"))
+	m.EnableRemovableStorage = types.BoolValue(getBool(obj, "EnableRemovableStorage"))
 	m.ExchangeActiveSyncHost = types.StringValue(getString(obj, "ExchangeActiveSyncHost"))
-	m.FirewallStatus = types.StringValue(getString(obj, "FirewallStatus"))
-	m.ForceAppStorePassword = types.StringValue(getString(obj, "ForceAppStorePassword"))
-	m.ForceEncryptedBackup = types.StringValue(getString(obj, "ForceEncryptedBackup"))
-	m.MaxPasswordAttemptsBeforeWipe = types.StringValue(getString(obj, "MaxPasswordAttemptsBeforeWipe"))
-	m.MaxPasswordGracePeriod = types.StringValue(getString(obj, "MaxPasswordGracePeriod"))
-	m.MoviesRating = types.StringValue(getString(obj, "MoviesRating"))
-	m.PasswordComplexity = types.StringValue(getString(obj, "PasswordComplexity"))
-	m.PasswordExpirationDays = types.StringValue(getString(obj, "PasswordExpirationDays"))
-	m.PasswordHistoryCount = types.StringValue(getString(obj, "PasswordHistoryCount"))
-	m.PasswordMinComplexChars = types.StringValue(getString(obj, "PasswordMinComplexChars"))
-	m.PasswordMinimumLength = types.StringValue(getString(obj, "PasswordMinimumLength"))
-	m.PasswordQuality = types.StringValue(getString(obj, "PasswordQuality"))
-	m.PasswordRequired = types.StringValue(getString(obj, "PasswordRequired"))
-	m.PasswordTimeout = types.StringValue(getString(obj, "PasswordTimeout"))
-	m.PhoneMemoryEncrypted = types.StringValue(getString(obj, "PhoneMemoryEncrypted"))
-	m.Policy = types.StringValue(getString(obj, "Policy"))
-	m.RegionRatings = types.StringValue(getString(obj, "RegionRatings"))
-	m.RequireEmailProfile = types.StringValue(getString(obj, "RequireEmailProfile"))
-	m.SmartScreenEnabled = types.StringValue(getString(obj, "SmartScreenEnabled"))
-	m.SystemSecurityTLS = types.StringValue(getString(obj, "SystemSecurityTLS"))
-	m.TVShowsRating = types.StringValue(getString(obj, "TVShowsRating"))
-	m.TargetGroups = types.StringValue(getString(obj, "TargetGroups"))
-	m.UserAccountControlStatus = types.StringValue(getString(obj, "UserAccountControlStatus"))
-	m.WLANEnabled = types.StringValue(getString(obj, "WLANEnabled"))
+	m.FirewallStatus = types.StringValue(getObjectJSON(obj, "FirewallStatus"))
+	m.ForceAppStorePassword = types.BoolValue(getBool(obj, "ForceAppStorePassword"))
+	m.ForceEncryptedBackup = types.BoolValue(getBool(obj, "ForceEncryptedBackup"))
+	m.MaxPasswordAttemptsBeforeWipe = types.Int64Value(getInt(obj, "MaxPasswordAttemptsBeforeWipe"))
+	m.MaxPasswordGracePeriod = types.StringValue(getObjectJSON(obj, "MaxPasswordGracePeriod"))
+	m.MoviesRating = types.StringValue(getObjectJSON(obj, "MoviesRating"))
+	m.PasswordComplexity = types.Int64Value(getInt(obj, "PasswordComplexity"))
+	m.PasswordExpirationDays = types.Int64Value(getInt(obj, "PasswordExpirationDays"))
+	m.PasswordHistoryCount = types.Int64Value(getInt(obj, "PasswordHistoryCount"))
+	m.PasswordMinComplexChars = types.Int64Value(getInt(obj, "PasswordMinComplexChars"))
+	m.PasswordMinimumLength = types.Int64Value(getInt(obj, "PasswordMinimumLength"))
+	m.PasswordQuality = types.Int64Value(getInt(obj, "PasswordQuality"))
+	m.PasswordRequired = types.BoolValue(getBool(obj, "PasswordRequired"))
+	m.PasswordTimeout = types.StringValue(getObjectJSON(obj, "PasswordTimeout"))
+	m.PhoneMemoryEncrypted = types.BoolValue(getBool(obj, "PhoneMemoryEncrypted"))
+	m.Policy = types.StringValue(getObjectJSON(obj, "Policy"))
+	m.RegionRatings = types.StringValue(getObjectJSON(obj, "RegionRatings"))
+	m.RequireEmailProfile = types.BoolValue(getBool(obj, "RequireEmailProfile"))
+	m.SmartScreenEnabled = types.BoolValue(getBool(obj, "SmartScreenEnabled"))
+	m.SystemSecurityTLS = types.BoolValue(getBool(obj, "SystemSecurityTLS"))
+	m.TVShowsRating = types.StringValue(getObjectJSON(obj, "TVShowsRating"))
+	m.TargetGroups = stringSetValue(ctx, getStringSlice(obj, "TargetGroups"))
+	m.UserAccountControlStatus = types.StringValue(getObjectJSON(obj, "UserAccountControlStatus"))
+	m.WLANEnabled = types.BoolValue(getBool(obj, "WLANEnabled"))
 	m.WorkFoldersSyncUrl = types.StringValue(getString(obj, "WorkFoldersSyncUrl"))
 	_ = ctx
 }
@@ -666,52 +1040,52 @@ func readDeviceConditionalAccessRule(ctx context.Context, obj map[string]any, m 
 func (r *deviceConditionalAccessRuleResource) reconcileState(cfg, read *deviceConditionalAccessRuleModel) {
 	read.AccountName = reconcile.KeepStr(cfg.AccountName, read.AccountName)
 	read.AccountUserName = reconcile.KeepStr(cfg.AccountUserName, read.AccountUserName)
-	read.AllowAppStore = reconcile.KeepStr(cfg.AllowAppStore, read.AllowAppStore)
-	read.AllowAssistantWhileLocked = reconcile.KeepStr(cfg.AllowAssistantWhileLocked, read.AllowAssistantWhileLocked)
-	read.AllowConvenienceLogon = reconcile.KeepStr(cfg.AllowConvenienceLogon, read.AllowConvenienceLogon)
-	read.AllowDiagnosticSubmission = reconcile.KeepStr(cfg.AllowDiagnosticSubmission, read.AllowDiagnosticSubmission)
-	read.AllowJailbroken = reconcile.KeepStr(cfg.AllowJailbroken, read.AllowJailbroken)
-	read.AllowPassbookWhileLocked = reconcile.KeepStr(cfg.AllowPassbookWhileLocked, read.AllowPassbookWhileLocked)
-	read.AllowScreenshot = reconcile.KeepStr(cfg.AllowScreenshot, read.AllowScreenshot)
-	read.AllowSimplePassword = reconcile.KeepStr(cfg.AllowSimplePassword, read.AllowSimplePassword)
-	read.AllowVideoConferencing = reconcile.KeepStr(cfg.AllowVideoConferencing, read.AllowVideoConferencing)
-	read.AllowVoiceAssistant = reconcile.KeepStr(cfg.AllowVoiceAssistant, read.AllowVoiceAssistant)
-	read.AllowVoiceDialing = reconcile.KeepStr(cfg.AllowVoiceDialing, read.AllowVoiceDialing)
-	read.AllowiCloudBackup = reconcile.KeepStr(cfg.AllowiCloudBackup, read.AllowiCloudBackup)
-	read.AllowiCloudDocSync = reconcile.KeepStr(cfg.AllowiCloudDocSync, read.AllowiCloudDocSync)
-	read.AllowiCloudPhotoSync = reconcile.KeepStr(cfg.AllowiCloudPhotoSync, read.AllowiCloudPhotoSync)
-	read.AntiVirusSignatureStatus = reconcile.KeepStr(cfg.AntiVirusSignatureStatus, read.AntiVirusSignatureStatus)
-	read.AntiVirusStatus = reconcile.KeepStr(cfg.AntiVirusStatus, read.AntiVirusStatus)
+	read.AllowAppStore = reconcile.KeepBool(cfg.AllowAppStore, read.AllowAppStore)
+	read.AllowAssistantWhileLocked = reconcile.KeepBool(cfg.AllowAssistantWhileLocked, read.AllowAssistantWhileLocked)
+	read.AllowConvenienceLogon = reconcile.KeepBool(cfg.AllowConvenienceLogon, read.AllowConvenienceLogon)
+	read.AllowDiagnosticSubmission = reconcile.KeepBool(cfg.AllowDiagnosticSubmission, read.AllowDiagnosticSubmission)
+	read.AllowJailbroken = reconcile.KeepBool(cfg.AllowJailbroken, read.AllowJailbroken)
+	read.AllowPassbookWhileLocked = reconcile.KeepBool(cfg.AllowPassbookWhileLocked, read.AllowPassbookWhileLocked)
+	read.AllowScreenshot = reconcile.KeepBool(cfg.AllowScreenshot, read.AllowScreenshot)
+	read.AllowSimplePassword = reconcile.KeepBool(cfg.AllowSimplePassword, read.AllowSimplePassword)
+	read.AllowVideoConferencing = reconcile.KeepBool(cfg.AllowVideoConferencing, read.AllowVideoConferencing)
+	read.AllowVoiceAssistant = reconcile.KeepBool(cfg.AllowVoiceAssistant, read.AllowVoiceAssistant)
+	read.AllowVoiceDialing = reconcile.KeepBool(cfg.AllowVoiceDialing, read.AllowVoiceDialing)
+	read.AllowiCloudBackup = reconcile.KeepBool(cfg.AllowiCloudBackup, read.AllowiCloudBackup)
+	read.AllowiCloudDocSync = reconcile.KeepBool(cfg.AllowiCloudDocSync, read.AllowiCloudDocSync)
+	read.AllowiCloudPhotoSync = reconcile.KeepBool(cfg.AllowiCloudPhotoSync, read.AllowiCloudPhotoSync)
+	read.AntiVirusSignatureStatus = reconcile.KeepInt64(cfg.AntiVirusSignatureStatus, read.AntiVirusSignatureStatus)
+	read.AntiVirusStatus = reconcile.KeepInt64(cfg.AntiVirusStatus, read.AntiVirusStatus)
 	read.AppsRating = reconcile.KeepStr(cfg.AppsRating, read.AppsRating)
 	read.AutoUpdateStatus = reconcile.KeepStr(cfg.AutoUpdateStatus, read.AutoUpdateStatus)
-	read.BluetoothEnabled = reconcile.KeepStr(cfg.BluetoothEnabled, read.BluetoothEnabled)
-	read.CameraEnabled = reconcile.KeepStr(cfg.CameraEnabled, read.CameraEnabled)
+	read.BluetoothEnabled = reconcile.KeepBool(cfg.BluetoothEnabled, read.BluetoothEnabled)
+	read.CameraEnabled = reconcile.KeepBool(cfg.CameraEnabled, read.CameraEnabled)
 	read.EmailAddress = reconcile.KeepStr(cfg.EmailAddress, read.EmailAddress)
-	read.EnableRemovableStorage = reconcile.KeepStr(cfg.EnableRemovableStorage, read.EnableRemovableStorage)
+	read.EnableRemovableStorage = reconcile.KeepBool(cfg.EnableRemovableStorage, read.EnableRemovableStorage)
 	read.ExchangeActiveSyncHost = reconcile.KeepStr(cfg.ExchangeActiveSyncHost, read.ExchangeActiveSyncHost)
 	read.FirewallStatus = reconcile.KeepStr(cfg.FirewallStatus, read.FirewallStatus)
-	read.ForceAppStorePassword = reconcile.KeepStr(cfg.ForceAppStorePassword, read.ForceAppStorePassword)
-	read.ForceEncryptedBackup = reconcile.KeepStr(cfg.ForceEncryptedBackup, read.ForceEncryptedBackup)
-	read.MaxPasswordAttemptsBeforeWipe = reconcile.KeepStr(cfg.MaxPasswordAttemptsBeforeWipe, read.MaxPasswordAttemptsBeforeWipe)
+	read.ForceAppStorePassword = reconcile.KeepBool(cfg.ForceAppStorePassword, read.ForceAppStorePassword)
+	read.ForceEncryptedBackup = reconcile.KeepBool(cfg.ForceEncryptedBackup, read.ForceEncryptedBackup)
+	read.MaxPasswordAttemptsBeforeWipe = reconcile.KeepInt64(cfg.MaxPasswordAttemptsBeforeWipe, read.MaxPasswordAttemptsBeforeWipe)
 	read.MaxPasswordGracePeriod = reconcile.KeepStr(cfg.MaxPasswordGracePeriod, read.MaxPasswordGracePeriod)
 	read.MoviesRating = reconcile.KeepStr(cfg.MoviesRating, read.MoviesRating)
-	read.PasswordComplexity = reconcile.KeepStr(cfg.PasswordComplexity, read.PasswordComplexity)
-	read.PasswordExpirationDays = reconcile.KeepStr(cfg.PasswordExpirationDays, read.PasswordExpirationDays)
-	read.PasswordHistoryCount = reconcile.KeepStr(cfg.PasswordHistoryCount, read.PasswordHistoryCount)
-	read.PasswordMinComplexChars = reconcile.KeepStr(cfg.PasswordMinComplexChars, read.PasswordMinComplexChars)
-	read.PasswordMinimumLength = reconcile.KeepStr(cfg.PasswordMinimumLength, read.PasswordMinimumLength)
-	read.PasswordQuality = reconcile.KeepStr(cfg.PasswordQuality, read.PasswordQuality)
-	read.PasswordRequired = reconcile.KeepStr(cfg.PasswordRequired, read.PasswordRequired)
+	read.PasswordComplexity = reconcile.KeepInt64(cfg.PasswordComplexity, read.PasswordComplexity)
+	read.PasswordExpirationDays = reconcile.KeepInt64(cfg.PasswordExpirationDays, read.PasswordExpirationDays)
+	read.PasswordHistoryCount = reconcile.KeepInt64(cfg.PasswordHistoryCount, read.PasswordHistoryCount)
+	read.PasswordMinComplexChars = reconcile.KeepInt64(cfg.PasswordMinComplexChars, read.PasswordMinComplexChars)
+	read.PasswordMinimumLength = reconcile.KeepInt64(cfg.PasswordMinimumLength, read.PasswordMinimumLength)
+	read.PasswordQuality = reconcile.KeepInt64(cfg.PasswordQuality, read.PasswordQuality)
+	read.PasswordRequired = reconcile.KeepBool(cfg.PasswordRequired, read.PasswordRequired)
 	read.PasswordTimeout = reconcile.KeepStr(cfg.PasswordTimeout, read.PasswordTimeout)
-	read.PhoneMemoryEncrypted = reconcile.KeepStr(cfg.PhoneMemoryEncrypted, read.PhoneMemoryEncrypted)
+	read.PhoneMemoryEncrypted = reconcile.KeepBool(cfg.PhoneMemoryEncrypted, read.PhoneMemoryEncrypted)
 	read.Policy = reconcile.KeepStr(cfg.Policy, read.Policy)
 	read.RegionRatings = reconcile.KeepStr(cfg.RegionRatings, read.RegionRatings)
-	read.RequireEmailProfile = reconcile.KeepStr(cfg.RequireEmailProfile, read.RequireEmailProfile)
-	read.SmartScreenEnabled = reconcile.KeepStr(cfg.SmartScreenEnabled, read.SmartScreenEnabled)
-	read.SystemSecurityTLS = reconcile.KeepStr(cfg.SystemSecurityTLS, read.SystemSecurityTLS)
+	read.RequireEmailProfile = reconcile.KeepBool(cfg.RequireEmailProfile, read.RequireEmailProfile)
+	read.SmartScreenEnabled = reconcile.KeepBool(cfg.SmartScreenEnabled, read.SmartScreenEnabled)
+	read.SystemSecurityTLS = reconcile.KeepBool(cfg.SystemSecurityTLS, read.SystemSecurityTLS)
 	read.TVShowsRating = reconcile.KeepStr(cfg.TVShowsRating, read.TVShowsRating)
-	read.TargetGroups = reconcile.KeepStr(cfg.TargetGroups, read.TargetGroups)
+	read.TargetGroups = reconcile.KeepSet(cfg.TargetGroups, read.TargetGroups)
 	read.UserAccountControlStatus = reconcile.KeepStr(cfg.UserAccountControlStatus, read.UserAccountControlStatus)
-	read.WLANEnabled = reconcile.KeepStr(cfg.WLANEnabled, read.WLANEnabled)
+	read.WLANEnabled = reconcile.KeepBool(cfg.WLANEnabled, read.WLANEnabled)
 	read.WorkFoldersSyncUrl = reconcile.KeepStr(cfg.WorkFoldersSyncUrl, read.WorkFoldersSyncUrl)
 }

@@ -24,18 +24,18 @@ List every HoldCompliancePolicy object (Get-HoldCompliancePolicy).
 
 Read-Only:
 
-- `add_exchange_location` (String) Maps to the -AddExchangeLocation parameter.
-- `add_public_folder_location` (String) Maps to the -AddPublicFolderLocation parameter.
-- `add_share_point_location` (String) Maps to the -AddSharePointLocation parameter.
+- `add_exchange_location` (Set of String) Maps to the -AddExchangeLocation parameter.
+- `add_public_folder_location` (Set of String) Maps to the -AddPublicFolderLocation parameter.
+- `add_share_point_location` (Set of String) Maps to the -AddSharePointLocation parameter.
 - `comment` (String) Maps to the -Comment parameter.
 - `enabled` (Boolean) Maps to the -Enabled parameter.
-- `exchange_location` (String) Maps to the -ExchangeLocation parameter.
+- `exchange_location` (Set of String) Maps to the -ExchangeLocation parameter.
 - `id` (String) Object identifier (GUID).
 - `identity` (String) Identity used to target the object.
 - `name` (String) Maps to the -Name parameter.
-- `public_folder_location` (String) Maps to the -PublicFolderLocation parameter.
-- `remove_exchange_location` (String) Maps to the -RemoveExchangeLocation parameter.
-- `remove_public_folder_location` (String) Maps to the -RemovePublicFolderLocation parameter.
-- `remove_share_point_location` (String) Maps to the -RemoveSharePointLocation parameter.
+- `public_folder_location` (Set of String) Maps to the -PublicFolderLocation parameter.
+- `remove_exchange_location` (Set of String) Maps to the -RemoveExchangeLocation parameter.
+- `remove_public_folder_location` (Set of String) Maps to the -RemovePublicFolderLocation parameter.
+- `remove_share_point_location` (Set of String) Maps to the -RemoveSharePointLocation parameter.
 - `retry_distribution` (Boolean) Maps to the -RetryDistribution parameter.
-- `share_point_location` (String) Maps to the -SharePointLocation parameter.
+- `share_point_location` (Set of String) Maps to the -SharePointLocation parameter.

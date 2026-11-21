@@ -3,12 +3,12 @@
 page_title: "scc_label Resource - scc"
 subcategory: ""
 description: |-
-  Manages the Label object via New-Label / Get-Label / Set-Label / Remove-Label.
+  Manages the Label object via New-Label / Get-Label / Set-Label / Remove-Label. next_label, previous_label, priority, remove_parent_link can only be set by Set-Label; on create they are applied right after New-Label. A refresh keeps the configured value when the service returns an equivalent one: JSON values compare by content, ignoring formatting, key order and (except advanced_rule) keys the service adds; lists and enumerations case-insensitively, locations by any of their identities.
 ---
 
 # scc_label (Resource)
 
-Manages the Label object via New-Label / Get-Label / Set-Label / Remove-Label.
+Manages the Label object via New-Label / Get-Label / Set-Label / Remove-Label. next_label, previous_label, priority, remove_parent_link can only be set by Set-Label; on create they are applied right after New-Label. A refresh keeps the configured value when the service returns an equivalent one: JSON values compare by content, ignoring formatting, key order and (except advanced_rule) keys the service adds; lists and enumerations case-insensitively, locations by any of their identities.
 
 
 
@@ -26,32 +26,32 @@ Manages the Label object via New-Label / Get-Label / Set-Label / Remove-Label.
 - `abac_enabled` (String) Maps to the -AbacEnabled parameter.
 - `advanced_settings` (String) Maps to the -AdvancedSettings parameter.
 - `apply_content_marking_footer_alignment` (String) Maps to the -ApplyContentMarkingFooterAlignment parameter.
-- `apply_content_marking_footer_enabled` (String) Maps to the -ApplyContentMarkingFooterEnabled parameter.
+- `apply_content_marking_footer_enabled` (Boolean) Maps to the -ApplyContentMarkingFooterEnabled parameter.
 - `apply_content_marking_footer_font_color` (String) Maps to the -ApplyContentMarkingFooterFontColor parameter.
 - `apply_content_marking_footer_font_name` (String) Maps to the -ApplyContentMarkingFooterFontName parameter.
-- `apply_content_marking_footer_font_size` (String) Maps to the -ApplyContentMarkingFooterFontSize parameter.
-- `apply_content_marking_footer_margin` (String) Maps to the -ApplyContentMarkingFooterMargin parameter.
+- `apply_content_marking_footer_font_size` (Number) Maps to the -ApplyContentMarkingFooterFontSize parameter.
+- `apply_content_marking_footer_margin` (Number) Maps to the -ApplyContentMarkingFooterMargin parameter.
 - `apply_content_marking_footer_text` (String) Maps to the -ApplyContentMarkingFooterText parameter.
 - `apply_content_marking_header_alignment` (String) Maps to the -ApplyContentMarkingHeaderAlignment parameter.
-- `apply_content_marking_header_enabled` (String) Maps to the -ApplyContentMarkingHeaderEnabled parameter.
+- `apply_content_marking_header_enabled` (Boolean) Maps to the -ApplyContentMarkingHeaderEnabled parameter.
 - `apply_content_marking_header_font_color` (String) Maps to the -ApplyContentMarkingHeaderFontColor parameter.
 - `apply_content_marking_header_font_name` (String) Maps to the -ApplyContentMarkingHeaderFontName parameter.
-- `apply_content_marking_header_font_size` (String) Maps to the -ApplyContentMarkingHeaderFontSize parameter.
-- `apply_content_marking_header_margin` (String) Maps to the -ApplyContentMarkingHeaderMargin parameter.
+- `apply_content_marking_header_font_size` (Number) Maps to the -ApplyContentMarkingHeaderFontSize parameter.
+- `apply_content_marking_header_margin` (Number) Maps to the -ApplyContentMarkingHeaderMargin parameter.
 - `apply_content_marking_header_text` (String) Maps to the -ApplyContentMarkingHeaderText parameter.
-- `apply_dynamic_watermarking_enabled` (String) Maps to the -ApplyDynamicWatermarkingEnabled parameter.
+- `apply_dynamic_watermarking_enabled` (Boolean) Maps to the -ApplyDynamicWatermarkingEnabled parameter.
 - `apply_message_meta_data` (String) Maps to the -ApplyMessageMetaData parameter.
 - `apply_message_meta_data_enabled` (String) Maps to the -ApplyMessageMetaDataEnabled parameter.
-- `apply_water_marking_enabled` (String) Maps to the -ApplyWaterMarkingEnabled parameter.
+- `apply_water_marking_enabled` (Boolean) Maps to the -ApplyWaterMarkingEnabled parameter.
 - `apply_water_marking_font_color` (String) Maps to the -ApplyWaterMarkingFontColor parameter.
 - `apply_water_marking_font_name` (String) Maps to the -ApplyWaterMarkingFontName parameter.
-- `apply_water_marking_font_size` (String) Maps to the -ApplyWaterMarkingFontSize parameter.
+- `apply_water_marking_font_size` (Number) Maps to the -ApplyWaterMarkingFontSize parameter.
 - `apply_water_marking_layout` (String) Maps to the -ApplyWaterMarkingLayout parameter.
 - `apply_water_marking_text` (String) Maps to the -ApplyWaterMarkingText parameter.
 - `column_asset_condition` (String) Maps to the -ColumnAssetCondition parameter.
 - `comment` (String) Maps to the -Comment parameter.
 - `conditional_access_auth_context` (String) Maps to the -ConditionalAccessAuthContext parameter.
-- `conditions` (String) Maps to the -Conditions parameter.
+- `conditions` (Set of String) Maps to the -Conditions parameter.
 - `content_type` (String) Maps to the -ContentType parameter.
 - `default_content_label` (String) Maps to the -DefaultContentLabel parameter.
 - `deny_access_enabled` (String) Maps to the -DenyAccessEnabled parameter.
@@ -63,13 +63,13 @@ Manages the Label object via New-Label / Get-Label / Set-Label / Remove-Label.
 - `encryption_aip_template_scopes` (String) Maps to the -EncryptionAipTemplateScopes parameter.
 - `encryption_content_expired_on_date_in_days_or_never` (String) Maps to the -EncryptionContentExpiredOnDateInDaysOrNever parameter.
 - `encryption_disable_automatic_owner_rights` (String) Maps to the -EncryptionDisableAutomaticOwnerRights parameter.
-- `encryption_do_not_forward` (String) Maps to the -EncryptionDoNotForward parameter.
+- `encryption_do_not_forward` (Boolean) Maps to the -EncryptionDoNotForward parameter.
 - `encryption_double_key_encryption_url` (String) Maps to the -EncryptionDoubleKeyEncryptionUrl parameter.
-- `encryption_enabled` (String) Maps to the -EncryptionEnabled parameter.
-- `encryption_encrypt_only` (String) Maps to the -EncryptionEncryptOnly parameter.
+- `encryption_enabled` (Boolean) Maps to the -EncryptionEnabled parameter.
+- `encryption_encrypt_only` (Boolean) Maps to the -EncryptionEncryptOnly parameter.
 - `encryption_linked_template_id` (String) Maps to the -EncryptionLinkedTemplateId parameter.
-- `encryption_offline_access_days` (String) Maps to the -EncryptionOfflineAccessDays parameter.
-- `encryption_prompt_user` (String) Maps to the -EncryptionPromptUser parameter.
+- `encryption_offline_access_days` (Number) Maps to the -EncryptionOfflineAccessDays parameter.
+- `encryption_prompt_user` (Boolean) Maps to the -EncryptionPromptUser parameter.
 - `encryption_protection_type` (String) Maps to the -EncryptionProtectionType parameter.
 - `encryption_rights_definitions` (String) Maps to the -EncryptionRightsDefinitions parameter.
 - `encryption_rights_url` (String) Maps to the -EncryptionRightsUrl parameter.
@@ -77,44 +77,44 @@ Manages the Label object via New-Label / Get-Label / Set-Label / Remove-Label.
 - `information_protection_attribute_required` (String) Maps to the -InformationProtectionAttributeRequired parameter.
 - `inherit_to_child_items` (String) Maps to the -InheritToChildItems parameter.
 - `is_label_group` (Boolean) Maps to the -IsLabelGroup parameter.
-- `label_actions` (String) Maps to the -LabelActions parameter.
-- `locale_settings` (String) Maps to the -LocaleSettings parameter.
+- `label_actions` (Set of String) Maps to the -LabelActions parameter.
+- `locale_settings` (Set of String) Maps to the -LocaleSettings parameter.
 - `migration_id` (String) Maps to the -MigrationId parameter.
 - `next_label` (String) Maps to the -NextLabel parameter.
 - `parent_id` (String) Maps to the -ParentId parameter.
 - `previous_label` (String) Maps to the -PreviousLabel parameter.
-- `priority` (String) Maps to the -Priority parameter.
+- `priority` (Number) Maps to the -Priority parameter.
 - `remove_parent_link` (Boolean) Maps to the -RemoveParentLink parameter.
 - `rule_blob` (String) Maps to the -RuleBlob parameter.
 - `schematized_data_condition` (String) Maps to the -SchematizedDataCondition parameter.
 - `setting` (String) Maps to the -Setting parameter.
 - `settings` (String) Maps to the -Settings parameter.
-- `site_and_group_protection_allow_access_to_guest_users` (String) Maps to the -SiteAndGroupProtectionAllowAccessToGuestUsers parameter.
-- `site_and_group_protection_allow_email_from_guest_users` (String) Maps to the -SiteAndGroupProtectionAllowEmailFromGuestUsers parameter.
-- `site_and_group_protection_allow_full_access` (String) Maps to the -SiteAndGroupProtectionAllowFullAccess parameter.
-- `site_and_group_protection_allow_limited_access` (String) Maps to the -SiteAndGroupProtectionAllowLimitedAccess parameter.
-- `site_and_group_protection_block_access` (String) Maps to the -SiteAndGroupProtectionBlockAccess parameter.
-- `site_and_group_protection_enabled` (String) Maps to the -SiteAndGroupProtectionEnabled parameter.
+- `site_and_group_protection_allow_access_to_guest_users` (Boolean) Maps to the -SiteAndGroupProtectionAllowAccessToGuestUsers parameter.
+- `site_and_group_protection_allow_email_from_guest_users` (Boolean) Maps to the -SiteAndGroupProtectionAllowEmailFromGuestUsers parameter.
+- `site_and_group_protection_allow_full_access` (Boolean) Maps to the -SiteAndGroupProtectionAllowFullAccess parameter.
+- `site_and_group_protection_allow_limited_access` (Boolean) Maps to the -SiteAndGroupProtectionAllowLimitedAccess parameter.
+- `site_and_group_protection_block_access` (Boolean) Maps to the -SiteAndGroupProtectionBlockAccess parameter.
+- `site_and_group_protection_enabled` (Boolean) Maps to the -SiteAndGroupProtectionEnabled parameter.
 - `site_and_group_protection_level` (String) Maps to the -SiteAndGroupProtectionLevel parameter.
 - `site_and_group_protection_privacy` (String) Maps to the -SiteAndGroupProtectionPrivacy parameter.
 - `site_external_sharing_control_type` (String) Maps to the -SiteExternalSharingControlType parameter.
 - `teams_allow_meeting_chat` (String) Maps to the -TeamsAllowMeetingChat parameter.
-- `teams_allow_private_teams_to_be_discoverable_using_search` (String) Maps to the -TeamsAllowPrivateTeamsToBeDiscoverableUsingSearch parameter.
+- `teams_allow_private_teams_to_be_discoverable_using_search` (Boolean) Maps to the -TeamsAllowPrivateTeamsToBeDiscoverableUsingSearch parameter.
 - `teams_allowed_presenters` (String) Maps to the -TeamsAllowedPresenters parameter.
-- `teams_bypass_lobby_for_dial_in_users` (String) Maps to the -TeamsBypassLobbyForDialInUsers parameter.
-- `teams_channel_protection_enabled` (String) Maps to the -TeamsChannelProtectionEnabled parameter.
-- `teams_channel_shared_with_external_tenants` (String) Maps to the -TeamsChannelSharedWithExternalTenants parameter.
-- `teams_channel_shared_with_private_teams_only` (String) Maps to the -TeamsChannelSharedWithPrivateTeamsOnly parameter.
-- `teams_channel_shared_with_same_label_only` (String) Maps to the -TeamsChannelSharedWithSameLabelOnly parameter.
-- `teams_copy_restriction_enforced` (String) Maps to the -TeamsCopyRestrictionEnforced parameter.
-- `teams_detect_sensitive_content_during_screen_sharing_enabled` (String) Maps to the -TeamsDetectSensitiveContentDuringScreenSharingEnabled parameter.
-- `teams_disable_lobby` (String) Maps to the -TeamsDisableLobby parameter.
-- `teams_end_to_end_encryption_enabled` (String) Maps to the -TeamsEndToEndEncryptionEnabled parameter.
+- `teams_bypass_lobby_for_dial_in_users` (Boolean) Maps to the -TeamsBypassLobbyForDialInUsers parameter.
+- `teams_channel_protection_enabled` (Boolean) Maps to the -TeamsChannelProtectionEnabled parameter.
+- `teams_channel_shared_with_external_tenants` (Boolean) Maps to the -TeamsChannelSharedWithExternalTenants parameter.
+- `teams_channel_shared_with_private_teams_only` (Boolean) Maps to the -TeamsChannelSharedWithPrivateTeamsOnly parameter.
+- `teams_channel_shared_with_same_label_only` (Boolean) Maps to the -TeamsChannelSharedWithSameLabelOnly parameter.
+- `teams_copy_restriction_enforced` (Boolean) Maps to the -TeamsCopyRestrictionEnforced parameter.
+- `teams_detect_sensitive_content_during_screen_sharing_enabled` (Boolean) Maps to the -TeamsDetectSensitiveContentDuringScreenSharingEnabled parameter.
+- `teams_disable_lobby` (Boolean) Maps to the -TeamsDisableLobby parameter.
+- `teams_end_to_end_encryption_enabled` (Boolean) Maps to the -TeamsEndToEndEncryptionEnabled parameter.
 - `teams_lobby_bypass_scope` (String) Maps to the -TeamsLobbyBypassScope parameter.
-- `teams_lobby_restriction_enforced` (String) Maps to the -TeamsLobbyRestrictionEnforced parameter.
-- `teams_presenters_restriction_enforced` (String) Maps to the -TeamsPresentersRestrictionEnforced parameter.
-- `teams_protection_enabled` (String) Maps to the -TeamsProtectionEnabled parameter.
-- `teams_record_automatically` (String) Maps to the -TeamsRecordAutomatically parameter.
+- `teams_lobby_restriction_enforced` (Boolean) Maps to the -TeamsLobbyRestrictionEnforced parameter.
+- `teams_presenters_restriction_enforced` (Boolean) Maps to the -TeamsPresentersRestrictionEnforced parameter.
+- `teams_protection_enabled` (Boolean) Maps to the -TeamsProtectionEnabled parameter.
+- `teams_record_automatically` (Boolean) Maps to the -TeamsRecordAutomatically parameter.
 - `teams_video_watermark` (String) Maps to the -TeamsVideoWatermark parameter.
 - `teams_who_can_record` (String) Maps to the -TeamsWhoCanRecord parameter.
 

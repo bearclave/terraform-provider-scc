@@ -52,12 +52,12 @@ func (r *teamsRetentionComplianceRuleResource) Schema(_ context.Context, _ resou
 		Description: "Manages the TeamsRetentionComplianceRule object via New-TeamsRetentionComplianceRule / Get-TeamsRetentionComplianceRule / Set-TeamsRetentionComplianceRule / Remove-TeamsRetentionComplianceRule.",
 		Attributes: map[string]schema.Attribute{
 			"id":                          schema.StringAttribute{Computed: true, Description: "Object identifier (GUID).", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
-			"identity":                    schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets."},
+			"identity":                    schema.StringAttribute{Computed: true, Description: "Identity used to target the object in cmdlets.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"comment":                     schema.StringAttribute{Optional: true, Computed: true, Description: "Maps to the -Comment parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.UseStateForUnknown()}},
 			"name":                        schema.StringAttribute{Required: true, Description: "Maps to the -Name parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
 			"policy":                      schema.StringAttribute{Required: true, Description: "Maps to the -Policy parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
-			"retention_compliance_action": schema.StringAttribute{Required: true, Description: "Maps to the -RetentionComplianceAction parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
-			"retention_duration":          schema.StringAttribute{Required: true, Description: "Maps to the -RetentionDuration parameter.", PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()}},
+			"retention_compliance_action": schema.StringAttribute{Required: true, Description: "Maps to the -RetentionComplianceAction parameter."},
+			"retention_duration":          schema.StringAttribute{Required: true, Description: "Maps to the -RetentionDuration parameter."},
 		},
 	}
 }
@@ -76,21 +76,32 @@ func (r *teamsRetentionComplianceRuleResource) Create(ctx context.Context, req r
 		return
 	}
 
-	p := purview.NewTeamsRetentionComplianceRuleParams{
-		Comment:                   plan.Comment.ValueString(),
-		Name:                      plan.Name.ValueString(),
-		RetentionComplianceAction: plan.RetentionComplianceAction.ValueString(),
+	var config teamsRetentionComplianceRuleModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
+	if resp.Diagnostics.HasError() {
+		return
 	}
-	if v := plan.Policy.ValueString(); v != "" {
-		p.Policy = v
+
+	p := purview.NewTeamsRetentionComplianceRuleParams{}
+	if !config.Comment.IsNull() {
+		p.Comment = plan.Comment.ValueString()
 	}
-	if v := plan.RetentionDuration.ValueString(); v != "" {
-		p.RetentionDuration = v
+	if !config.Name.IsNull() {
+		p.Name = plan.Name.ValueString()
+	}
+	if v := config.Policy.ValueString(); v != "" {
+		p.Policy = objectParam(v)
+	}
+	if !config.RetentionComplianceAction.IsNull() {
+		p.RetentionComplianceAction = plan.RetentionComplianceAction.ValueString()
+	}
+	if v := config.RetentionDuration.ValueString(); v != "" {
+		p.RetentionDuration = objectParam(v)
 	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	res, err := r.client.SCC.NewTeamsRetentionComplianceRule(ctx, p)
+	res, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.NewTeamsRetentionComplianceRule, p, isNotFound)
 	if err != nil {
 		resp.Diagnostics.AddError("New-TeamsRetentionComplianceRule failed", err.Error())
 		return
@@ -137,19 +148,33 @@ func (r *teamsRetentionComplianceRuleResource) Update(ctx context.Context, req r
 	id := r.identityOf(state)
 	sp := purview.SetTeamsRetentionComplianceRuleParams{}
 	sp.Identity = id
-	sp.Comment = plan.Comment.ValueString()
+	if !plan.Comment.Equal(state.Comment) {
+		sp.Comment = plan.Comment.ValueString()
+	}
+	if !plan.RetentionComplianceAction.Equal(state.RetentionComplianceAction) {
+		sp.RetentionComplianceAction = plan.RetentionComplianceAction.ValueString()
+	}
+	if !plan.RetentionDuration.Equal(state.RetentionDuration) {
+		if v := plan.RetentionDuration.ValueString(); v != "" {
+			sp.RetentionDuration = objectParam(v)
+		}
+	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	if _, err := r.client.SCC.SetTeamsRetentionComplianceRule(ctx, sp); err != nil {
+	if _, err := resourcex.RetryWriteCall(ctx, consistency.Config{}, r.client.SCC.SetTeamsRetentionComplianceRule, sp, isNotFound); err != nil {
 		resp.Diagnostics.AddError("Set-TeamsRetentionComplianceRule failed", err.Error())
 		return
 	}
 	cfg := plan
 	reflected := reconcile.ReflectsFields(map[string]types.String{
-		"Comment": cfg.Comment,
+		"Comment":                   cfg.Comment,
+		"RetentionComplianceAction": cfg.RetentionComplianceAction,
 	}, getString)
 	r.refresh(ctx, id, &plan, &resp.Diagnostics, reflected)
+	if !cfg.ID.IsUnknown() && !cfg.ID.IsNull() {
+		plan.ID = cfg.ID
+	}
 	r.reconcileState(&cfg, &plan)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
@@ -211,9 +236,9 @@ func readTeamsRetentionComplianceRule(ctx context.Context, obj map[string]any, m
 	m.Identity = types.StringValue(firstNonEmptyStr(getString(obj, "Identity"), getString(obj, "Guid"), getString(obj, "Name")))
 	m.Comment = types.StringValue(getString(obj, "Comment"))
 	m.Name = types.StringValue(getString(obj, "Name"))
-	m.Policy = types.StringValue(getString(obj, "Policy"))
+	m.Policy = types.StringValue(getObjectJSON(obj, "Policy"))
 	m.RetentionComplianceAction = types.StringValue(getString(obj, "RetentionComplianceAction"))
-	m.RetentionDuration = types.StringValue(getString(obj, "RetentionDuration"))
+	m.RetentionDuration = types.StringValue(getObjectJSON(obj, "RetentionDuration"))
 	_ = ctx
 }
 
