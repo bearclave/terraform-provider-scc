@@ -183,3 +183,33 @@ func TestKeepEquivalentDlpRule(t *testing.T) {
 		t.Errorf("drift on notify_user hidden: %v", read.NotifyUser)
 	}
 }
+
+func TestPlanEquivalentAfterImport(t *testing.T) {
+	obj := firstFixtureObject(t, "get-dlp-compliance-rule.json", nil)
+	var state dlpComplianceRuleModel
+	readDlpComplianceRule(context.Background(), obj, &state)
+
+	plan := state
+	plan.AdvancedRule = types.StringValue(compactAdvancedRule)
+	cmp := plan
+	if !planEquivalent(&cmp, &state, dlpRuleSemantic) || changedExcept(&cmp, &state, nil) {
+		t.Error("a reformatted AdvancedRule still counts as a change")
+	}
+
+	plan.Comment = types.StringValue("changed")
+	cmp = plan
+	planEquivalent(&cmp, &state, dlpRuleSemantic)
+	if !changedExcept(&cmp, &state, nil) {
+		t.Error("a changed comment is hidden")
+	}
+
+	// Containment does not apply at plan time: a key dropped from the
+	// configuration is a change.
+	plan = state
+	plan.ContentContainsSensitiveInformation = types.StringValue(`[{"operator":"And"}]`)
+	cmp = plan
+	planEquivalent(&cmp, &state, dlpRuleSemantic)
+	if !changedExcept(&cmp, &state, nil) {
+		t.Error("a configured subset of the read-back JSON is hidden")
+	}
+}

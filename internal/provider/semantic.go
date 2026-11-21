@@ -353,3 +353,35 @@ func parseRights(s string) map[string]string {
 	}
 	return out
 }
+
+// planEquivalent replaces each string field of plan (a *model) with the state
+// value when the two are equivalent by the field's comparator, or as the same
+// JSON document, and reports whether it replaced any. After an import the
+// state holds the service's spelling and the configuration another one;
+// Terraform plans that as an update, which then needs no call. Containment is
+// not used here: a key removed from the configuration must stay a change.
+func planEquivalent(plan, state any, semantic map[string]equalFunc) bool {
+	pv, sv := reflect.ValueOf(plan).Elem(), reflect.ValueOf(state).Elem()
+	t := pv.Type()
+	changed := false
+	for i := 0; i < t.NumField(); i++ {
+		name := t.Field(i).Name
+		if name == "ID" || name == "Identity" {
+			continue
+		}
+		p, ok1 := pv.Field(i).Interface().(types.String)
+		s, ok2 := sv.Field(i).Interface().(types.String)
+		if !ok1 || !ok2 || p.IsNull() || p.IsUnknown() || s.IsNull() || s.IsUnknown() || p.Equal(s) {
+			continue
+		}
+		eq := semantic[name]
+		if eq == nil {
+			eq = jsonEqual
+		}
+		if eq(p.ValueString(), s.ValueString()) {
+			pv.Field(i).Set(sv.Field(i))
+			changed = true
+		}
+	}
+	return changed
+}

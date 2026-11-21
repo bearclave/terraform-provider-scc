@@ -10,6 +10,9 @@ package provider
 //     a cosmetic difference into a plan diff. See semantic.go.
 //   - Update applies DeltaLists (lists only New-* takes) through Set-*
 //     -Add<X>/-Remove<X> instead of replacing the object.
+//   - Update writes nothing when the plan differs from the state only in an
+//     equivalent spelling (the first apply after an import), see
+//     planEquivalent.
 //   - Create applies SetOnly parameters (only Set-* takes them) right after
 //     New-*.
 //
@@ -175,6 +178,13 @@ func (o *override[M]) Update(ctx context.Context, req resource.UpdateRequest, re
 	}
 	id := o.identityOf(state)
 	deltas := o.meta().DeltaLists
+
+	cmp := plan
+	planEquivalent(&cmp, &state, o.semantic)
+	if !changedExcept(&cmp, &state, nil) {
+		resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
+		return
+	}
 
 	if changedExcept(&plan, &state, deltas) {
 		o.generatedResource.Update(ctx, req, resp)
