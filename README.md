@@ -9,7 +9,8 @@ Changes go back upstream; once upstream releases them, the fork is archived.
 
 | Trigger | What runs | Identity |
 |---|---|---|
-| Pull request, push to `main` | `ci.yml`: `security.yml` and `checks.yml` of `bearclave/ci` (`go vet`, `go test`) | none |
+| Pull request, push to `main` | `ci.yml`: `security.yml` and `checks.yml`, local copies of `bearclave/ci` v2.9.1 (`go vet`, `go test`) | none |
+| Pull request | `pr.yml`: title, branch and description sections (`pr / check`) | none |
 | Release | `tools/release.sh` on the owner's Mac: tag, goreleaser, signed with the key from `kv-tech-sec-weu-001` | the owner |
 
 > Branch protection, required checks, merge settings and labels are
