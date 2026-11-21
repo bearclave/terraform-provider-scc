@@ -3,7 +3,7 @@
 # checksums with the key from kv-tech-sec-weu-001, the Terraform Registry
 # picks the GitHub release up. Run by the owner from a clean main:
 #   az-bearclave-matej && tools/release.sh v1.0.0
-# Needs goreleaser, gpg, az (an account that reads kv-tech) and gh.
+# Needs go, goreleaser, gpg, az (an account that reads kv-tech) and gh.
 set -euo pipefail
 version=${1:?usage: tools/release.sh vX.Y.Z}
 [[ $version =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "not vX.Y.Z: $version" >&2; exit 1; }
@@ -11,10 +11,19 @@ version=${1:?usage: tools/release.sh vX.Y.Z}
 git fetch -q origin && [ "$(git rev-parse HEAD)" = "$(git rev-parse origin/main)" ] || { echo "main is not origin/main" >&2; exit 1; }
 [ -z "$(git status --porcelain)" ] || { echo "working tree not clean" >&2; exit 1; }
 
+for tool in go goreleaser gpg az gh; do
+  command -v "$tool" >/dev/null || { echo "missing: $tool (brew install $tool)" >&2; exit 1; }
+done
+
 # The tag is signed with the owner's own git key (versioning.md#tags),
-# before the throwaway keyring below replaces his.
-git tag -s "$version" -m "$version"
-git push origin "$version"
+# before the throwaway keyring below replaces his. A rerun after a failed
+# build finds the tag on HEAD and goes on.
+if git rev-parse -q --verify "refs/tags/$version" >/dev/null; then
+  [ "$(git rev-parse "$version^{commit}")" = "$(git rev-parse HEAD)" ] || { echo "$version exists on another commit" >&2; exit 1; }
+else
+  git tag -s "$version" -m "$version"
+  git push origin "$version"
+fi
 
 # A throwaway keyring: the signing key never stays on the Mac.
 GNUPGHOME=$(mktemp -d /tmp/gpg.XXXXXX); export GNUPGHOME

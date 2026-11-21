@@ -48,7 +48,19 @@ func newReadbackTransport(next http.RoundTripper) http.RoundTripper {
 	return &readbackTransport{next: next}
 }
 
+// readbackParams adds parameters to a Get-* of one object (a request with
+// -Identity) whose read-back is incomplete without them: Get-RetentionCompliancePolicy
+// returns empty locations unless asked for -DistributionDetail.
+var readbackParams = map[string]map[string]any{
+	"Get-RetentionCompliancePolicy": {"DistributionDetail": true},
+}
+
 func (t *readbackTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	if extra := readbackParams[req.Header.Get("X-CmdletName")]; extra != nil && req.Body != nil {
+		if err := addParams(req, extra); err != nil {
+			return nil, err
+		}
+	}
 	resp, err := t.next.RoundTrip(req)
 	if err != nil || resp == nil {
 		return resp, err
@@ -393,4 +405,35 @@ func parseSettings(v any) map[string]any {
 		return nil
 	}
 	return out
+}
+
+// addParams merges extra into CmdletInput.Parameters of a request that targets
+// one object (has Identity). Any other body is sent unchanged.
+func addParams(req *http.Request, extra map[string]any) error {
+	raw, err := io.ReadAll(req.Body)
+	_ = req.Body.Close()
+	if err != nil {
+		return err
+	}
+	body := raw
+	var env map[string]any
+	if json.Unmarshal(raw, &env) == nil {
+		if in, ok := env["CmdletInput"].(map[string]any); ok {
+			if params, ok := in["Parameters"].(map[string]any); ok && params["Identity"] != nil {
+				for k, v := range extra {
+					if _, set := params[k]; !set {
+						params[k] = v
+					}
+				}
+				if out, err := json.Marshal(env); err == nil {
+					body = out
+				}
+			}
+		}
+	}
+	req.Body = io.NopCloser(bytes.NewReader(body))
+	req.GetBody = func() (io.ReadCloser, error) { return io.NopCloser(bytes.NewReader(body)), nil }
+	req.ContentLength = int64(len(body))
+	req.Header.Set("Content-Length", strconv.Itoa(len(body)))
+	return nil
 }

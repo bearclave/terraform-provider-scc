@@ -14,6 +14,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -239,5 +240,38 @@ func TestReadbackTransportFailsOpen(t *testing.T) {
 		if string(out) != body {
 			t.Errorf("body %q rewritten to %q", body, out)
 		}
+	}
+}
+
+func TestReadbackTransportAddsDistributionDetail(t *testing.T) {
+	var sent map[string]any
+	next := roundTripFunc(func(r *http.Request) (*http.Response, error) {
+		raw, _ := io.ReadAll(r.Body)
+		_ = json.Unmarshal(raw, &sent)
+		return &http.Response{StatusCode: 200, Header: http.Header{}, Body: io.NopCloser(bytes.NewReader([]byte(`{"value":[]}`))), Request: r}, nil
+	})
+	tr := newReadbackTransport(next)
+	params := func() map[string]any {
+		return sent["CmdletInput"].(map[string]any)["Parameters"].(map[string]any)
+	}
+	send := func(cmdlet, body string) {
+		req, _ := http.NewRequest(http.MethodPost, "https://example.invalid/adminapi/beta/t/InvokeCommand", strings.NewReader(body))
+		req.Header.Set("X-CmdletName", cmdlet)
+		if _, err := tr.RoundTrip(req); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	send("Get-RetentionCompliancePolicy", `{"CmdletInput":{"CmdletName":"Get-RetentionCompliancePolicy","Parameters":{"Identity":"Retence Mail"}}}`)
+	if params()["DistributionDetail"] != true {
+		t.Errorf("one policy read without DistributionDetail: %v", params())
+	}
+	send("Get-RetentionCompliancePolicy", `{"CmdletInput":{"CmdletName":"Get-RetentionCompliancePolicy","Parameters":{}}}`)
+	if _, set := params()["DistributionDetail"]; set {
+		t.Error("a list read got DistributionDetail")
+	}
+	send("Get-Label", `{"CmdletInput":{"CmdletName":"Get-Label","Parameters":{"Identity":"x"}}}`)
+	if _, set := params()["DistributionDetail"]; set {
+		t.Error("another cmdlet got DistributionDetail")
 	}
 }
