@@ -24,11 +24,9 @@ customer: [customers.md](https://github.com/bearclave/governance/blob/main/stand
 One exception: a fork of a Terraform provider is named
 `terraform-provider-<name>` and is public, because the Terraform Registry
 publishes a provider only from such a repository
-(`terraform-provider-scc`, group `app`). A public repository cannot call a
-reusable workflow of the private `bearclave/ci`, so the fork carries local
-copies of the workflows it runs (`security.yml`, `checks.yml`, with the ci
-release they come from) and its own `pr.yml` reporting `pr / check`;
-`tools/sync.py` leaves its `pr.yml` alone.
+(`terraform-provider-scc`, group `app`). It calls the workflows of
+`bearclave/ci` like any other repository: `ci` is public so that a public
+repository can call it.
 
 An IaC repository of the Microsoft cloud is named after the product or
 security domain it manages, in the singular, the way an administrator looks
