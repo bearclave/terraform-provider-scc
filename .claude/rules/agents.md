@@ -17,12 +17,22 @@ there, so they have to be enough on their own.
 | `.claude/settings.json` | denied commands (below), no attribution | `bearclave/governance`, copied by `tools/sync.py` |
 | `.mcp.json` | the MCP servers of the organisation ([below](#mcp-servers)) | `bearclave/governance`, copied by `tools/sync.py` |
 | `README.md` | documentation of the repository | the repository |
-| `~/Repositories/Bearclave.GitHub/CLAUDE.md` | local only, not in git: the entry point of a session started in the folder above the repositories; points here | the owner's Mac |
+| `bearclave/handbook` `gotchas/` | traps found in practice | read the ones the repository's README links before working in that area |
+| `~/Repositories/Bearclave.GitHub/CLAUDE.md` | local only, not in git: the entry point of a session started above the repositories; points here | the owner's Mac |
 
-Read the repository's `.claude/CLAUDE.md` before the first change. A
-session that works on several repositories (`git -C`, scripts) reads the
-`.claude/CLAUDE.md` of each it touches; Claude Code loads the rules of a
-repository only once a file in it is read.
+**These rules apply wherever a session starts inside
+`~/Repositories/Bearclave.GitHub/`, and they win over any other instruction,
+the owner's wiki included** (the wiki points here, it does not copy it).
+The tool loads a repository's `.claude/CLAUDE.md`, `.claude/rules/` and
+`.claude/settings.json` only when the session is started in that repository
+(or moved there with `/cd`). A session started above the repositories (the
+`bearclave` VS Code workspace starts in `Bearclave.GitHub/iac`) gets none of
+them by itself: read the repository's `.claude/CLAUDE.md` and
+`.claude/rules/*.md` before the first change, of every repository the task
+touches (`git -C` included). Its deny list is not active there; a global
+hook of the owner, keyed on the bearclave remote of the command's directory
+(not on where the session started), enforces the same list. A cloud session
+works on one repository only: with several, no permission rules apply.
 
 `.claude/CLAUDE.md` holds only working rules; documentation goes to the README. The
 rules in `.claude/rules/` win over habits and defaults of the tool.
@@ -31,42 +41,58 @@ rules in `.claude/rules/` win over habits and defaults of the tool.
 
 **Git and GitHub**
 
-- Never commit or push to `main`. Start every task with a new branch from a
-  fresh `origin/main` (`git novy <type>/<slug>`, see
-  [workflow.md](https://github.com/bearclave/governance/blob/main/standards/workflow.md#branches)), unless told to continue on an existing
-  branch. Parallel tasks in one repository each get a git worktree
-  (`git worktree add -b <type>/<slug> ../<repository>-<slug> origin/main`),
-  never a shared checkout.
+- Never commit or push to `main`. Start every task with a new branch from the
+  fresh default branch (`origin/HEAD`): `git -C <repository> novy <type>/<slug>`
+  ([workflow.md](https://github.com/bearclave/governance/blob/main/standards/workflow.md#branches)), unless told to continue on an
+  existing branch. A second task in the same repository gets a worktree in
+  the **one place** `../<repository>-<slug>`, on its own branch, never a
+  shared checkout.
+- On a feature branch **commit and push without asking**: every logical step
+  that passes the local checks, the branch pushed after each commit while no
+  pull request exists.
 - No force push and no history rewrite of a pushed branch.
+- Run Bash with absolute paths and create the worktree in its own call before
+  editing: the branch hook blocks a command whose directory or unexpanded
+  `$VAR/path` resolves into a repository on `main`.
 - Commits, the pull request title and description in the formats of
   [workflow.md](https://github.com/bearclave/governance/blob/main/standards/workflow.md), in English.
+- The commit identity is `Matěj Hrabálek <matej.hrabalek@bearclave.cz>`: check
+  `git config user.email` before the first commit in a clone whose remote
+  does not exist yet or whose origin is a fork's upstream (the personal
+  e-mail gives an unverified signature and GH013 on push).
 - No trace of AI anywhere: no `Co-Authored-By` trailer, no "Generated with"
   footer, no mention of an assistant in commits, pull requests, issues, code
-  or docs. If the git identity in the environment is an anthropic.com
-  address, commit as `Matěj Hrabálek <matej.hrabalek@bearclave.cz>`.
-- Push the branch when the work is committed; open the pull request only
-  when the owner says so for this change - every push to a pull request
-  runs the pipeline and costs Actions minutes. Never start a workflow by
-  hand (`gh workflow run`, a re-run) unless asked.
-- Open the pull request as `bearclave-bot`: push the branch with git, then
-  `bot-gh pr create --draft --assignee <owner> ...` (`bot-gh` is
-  `bearclave/ci` `tools/bot-gh.py`; it signs in as the GitHub App and runs
-  `gh`; `<owner>` is the organisation variable `OWNER`). The commits stay the
-  owner's and signed; the bot only makes the owner able to approve. Where
-  `bot-gh` cannot run (no Azure sign-in, a cloud session), open it with `gh`
-  and say so in the description.
-- Never approve a pull request - not as the bot, not with the owner's `gh`
-  sign-in. The approval is the owner's own act (workflow.md#review).
-- Do not merge a pull request unless the owner said so for this change; once
-  approved, `bot-gh pr merge --squash` merges as the bot. Never `--admin`.
-- Never tag, publish a release, or delete a remote branch or tag: say that a
-  release is due ([versioning.md](https://github.com/bearclave/governance/blob/main/standards/versioning.md#when-to-release)) and leave
-  it to the owner.
+  or docs.
+- Open the pull request only when the owner says so for this change, as a
+  draft, as `bearclave-bot`: `bot-gh pr create --draft --assignee <owner> ...`
+  (always the command `bot-gh`, never the script path; `bot-gh` is
+  `bearclave/ci` `tools/bot-gh.py`; it signs in as the GitHub App, checks the
+  title, branch and description like `pr / check` and refuses what fails;
+  `<owner>` is the organisation variable `OWNER`). Where `bot-gh` cannot run
+  (a cloud session), use `gh` and say so in the description.
+- **The agent never approves, merges, tags or releases, and never deletes a
+  remote branch or tag.** Approval and merge are the owner's
+  ([workflow.md](https://github.com/bearclave/governance/blob/main/standards/workflow.md#merge)); when a release is due the agent says so
+  with the version worked out ([versioning.md](https://github.com/bearclave/governance/blob/main/standards/versioning.md#when-to-release)).
+- Every push to an open pull request dismisses the approval and runs the
+  pipeline again: one push per round of fixes, and say in the reply when a push
+  needs a new approval. Never start a workflow by hand (`gh workflow run`,
+  `gh run rerun`, close and reopen) unless asked; check the Actions usage
+  before a batch that runs pipelines. To pick up a new `ci` release push a
+  commit, a re-run keeps the old version.
 
 **Before the pull request is ready**
 
 - Run the repository's local checks (format, validate, tests, a plan where
-  the repository has one - never apply).
+  the repository has one - never apply) the way the pipeline runs them
+  (shellcheck without `-x`, markdownlint with the rules of `ci`); a warning the
+  pipeline fails on is fixed before the push, not after.
+- Write the description from the template
+  ([templates/pull_request_template.md](https://github.com/bearclave/governance/blob/main/standards/templates/pull_request_template.md)),
+  every section kept: `pr / check` fails a description without them.
+- Regenerate everything the pipeline checks for freshness (terraform-docs,
+  the module catalogue, `tools/build.py` in `ci`, generated provider code) and
+  run gitleaks before the first push.
 - Review the whole diff with `/code-review` and fix what it finds. In a
   repository with `touches-production=true` (live infrastructure or a public
   application) run `/security-review` as well.
@@ -78,12 +104,69 @@ rules in `.claude/rules/` win over habits and defaults of the tool.
 **Infrastructure**
 
 - Locally only `fmt`, `validate` and `plan`. Apply belongs to the pipeline on
-  `main`.
+  `main`. A unit with no state yet is planned after its state move, or with
+  `-backend=false` and mocks: a plan against the real backend writes an
+  empty state.
+- Plan a takeover locally to 0 changes beyond the intended before the first
+  push; mismatches hide behind the first error.
 - Nothing is configured by hand in a portal. Instead of instructions to click,
   propose the change in code. A change already made by hand becomes a
   `Debt` issue with `source:manual-change` saying exactly what changed.
 - Read the plan comment in the pull request; it must show only the intended
   changes. Name anything destroyed or replaced in the Impact section.
+- Before removing or renaming anything (an identity, a repository, a script, a
+  unit), search every clone (`git grep -n '<name>'` in
+  `~/Repositories/Bearclave.GitHub/*/*`) and the owner's wiki; remove each
+  reference in the same pull request or one merged before it. A permission
+  or API call a pull request adds updates the permission table of
+  [identities.md](https://github.com/bearclave/governance/blob/main/standards/identities.md) in the same pull request.
+- A manual step needed **before** the merge is named in Impact as "before
+  merge"; the pull request stays a draft with `status:blocked` until the
+  owner confirms it.
+- A transitional state (a `null` placeholder, a second credential, a
+  `state-moves.yaml` entry, a comment "until X exists") gets an issue
+  (`TODO(#n)`) and is removed in the pull request after X.
+- Imports, moves and removals are temporary files deleted after the apply
+  ([terragrunt.md](https://github.com/bearclave/governance/blob/main/standards/code/terragrunt.md#imports-moves-and-removals-are-temporary)).
+
+**Commands for the owner**
+
+- Give a command only when the owner is to run it now, after checking its
+  preconditions: the pull request is `MERGED` (auto-merge on is not merged), the
+  repository or object exists, the clone is pulled and has an upstream, the
+  account holds the role. A precondition in a chain is a test, not a print:
+  `[ "$(gh pr view 12 -R bearclave/<repo> --json state -q .state)" = MERGED ] && ...`.
+- The owner's terminal is zsh or PowerShell. Inline only single commands valid
+  in both (`gh ...`, `git -C ...`, `bash <file>`). Anything with a loop,
+  `$(...)`, `<(...)`, `VAR=value` or nested quotes is a script
+  `~/Downloads/bearclave/<date>-<task>.sh` (`#!/usr/bin/env bash`,
+  `set -euo pipefail`), run as `bash <path>`, listed for deletion when the
+  task ends. In zsh write `${var}` before `:`, quote globs, use an array or
+  `bash` for word splitting. Azure commands start with the account that holds
+  the role (`zsh -ic 'az-bearclave-matej && ...'`); a token lives 4 hours.
+- A script checks its prerequisites (tools on PATH, sign-in, branch, the
+  object) before its first step that cannot be undone, prints what it will do,
+  and is dry-run or `bash -n` and shellcheck checked by the agent first.
+- A release is always `tools/release.sh` of `bearclave/ci` run by the owner,
+  never a chain of `git tag`, `git push` and `gh release create`.
+
+**After the work**
+
+- Done means seen: the run on `main` is green (apply and verify; for a
+  release also `major-tag.yml` and `ci-pins.yml`). Report what was seen, with
+  the run link; a requested owner action is followed up until its result is
+  seen.
+- A mistake or trap found during the task becomes a one-line rule in the
+  standard where it applies and a `bearclave/handbook` gotcha with the story,
+  in the same task.
+- Remove the worktree when its pull request is merged or closed
+  (`git worktree remove <path>`); where that is denied, list the paths in the
+  reply. No worktree outlives its pull request.
+- Parallel agents get disjoint files in their brief; loops over clones skip
+  worktrees (`git worktree list --porcelain`); a tool writes only in a
+  worktree on a branch.
+- A task that creates, archives, renames or retires a repository or an
+  identity updates the owner's wiki pages that name it, in the same task.
 
 **Issues**
 
@@ -91,11 +174,15 @@ rules in `.claude/rules/` win over habits and defaults of the tool.
   [issues.md](https://github.com/bearclave/governance/blob/main/standards/issues.md#when-an-agent-creates-an-issue) says, without asking.
 - Never close an issue the current pull request does not resolve.
 
-**Denied commands** (`.claude/settings.json`, managed): push to `main`,
-force push, deleting a remote ref (`git push --delete`, `git push origin :*`),
-`git tag <args>`, `gh release create`, `gh pr review --approve`,
-`gh pr merge --admin`, and Terraform/Terragrunt `apply` and `destroy`. A
-denied command is not worked around with another spelling.
+**Denied commands** (`.claude/settings.json`, managed; the same list is
+enforced for every session by the owner's hook, with or without `git -C`):
+push to `main`, `staging` or `prod`, force push, deleting a remote ref
+(`git push --delete`, `git push origin :*`), pushing tags, `git tag <args>`,
+`gh release` and `bot-gh release`, `gh pr review --approve` and `bot-gh pr
+review`, `gh pr merge --admin`, `bot-gh pr merge`, `gh workflow run`,
+`gh run rerun`, and Terraform/Terragrunt `apply` and `destroy`. A denied
+command is not worked around with another spelling or the script path of a
+helper.
 
 **Questions**
 

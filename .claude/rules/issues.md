@@ -93,6 +93,7 @@ pull requests share it; a label marked "PR" is set on pull requests only.
 |---|---|---|---|
 | `type:feat` `type:fix` `type:perf` `type:refactor` `type:docs` `type:test` `type:ci` `type:chore` `type:deps` `type:revert` | PR | the commit type of the title | `pr` check |
 | `breaking` | PR | the title has `!`: consumers have to change | `pr` check |
+| `destroys` | PR | the plan destroys or replaces something; a review re-runs the gate only then | plan job |
 | `size:xs` `size:s` `size:m` `size:l` `size:xl` | PR | changed lines, see [workflow.md](https://github.com/bearclave/governance/blob/main/standards/workflow.md#pull-requests) | `pr` check |
 | `prio:high` | both | this week, or production is affected | person, agent |
 | `prio:low` | both | when convenient | person, agent |

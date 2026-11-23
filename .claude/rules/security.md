@@ -42,12 +42,13 @@
 - Federated credentials use the immutable subject with the organisation and
   repository IDs, so a credential cannot pass to a re-created repository.
 - Every identity is declared in `iac-identity` (one file per application,
-  with its federated credentials and permissions; `iac-azure` `tenant/`
-  until the hand-over) with a description of what it may do, and listed in
+  with its federated credentials and permissions) with a description of what
+  it may do, documented in `docs/identities.md` of its repository
+  ([identities.md](https://github.com/bearclave/governance/blob/main/standards/identities.md#documented-in-the-repository)) and listed in
   `bearclave/ci` `docs/identities.md`.
-- GitHub Apps get the permissions their purpose needs, set in code
-  (`iac-github` `tools/`); an App installed on all repositories with write
-  access (such as `claude`) is limited to the repositories it works in.
+- GitHub Apps get the permissions their purpose needs (procedure in
+  `iac-github` `docs/setup.md`); an App installed on all repositories with
+  write access (such as `claude`) is limited to the repositories it works in.
 
 ## Supply chain
 
@@ -104,7 +105,14 @@
   `touches-production=true` ([workflow.md](https://github.com/bearclave/governance/blob/main/standards/workflow.md#review)).
 - GitHub Team has no secret scanning, push protection or code scanning for
   private repositories (paid add-ons, not bought): gitleaks on every pull
-  request and the push ruleset stand in for them.
+  request and the push ruleset stand in for them. A public repository (`ci`,
+  `terraform-provider-scc`) gets no push ruleset (GitHub applies them to
+  private repositories only) and has secret scanning, push protection and
+  private vulnerability reporting on (free there), and immutable releases where
+  it publishes releases; gitleaks is its guard too.
+- The rules a repository's `.claude/settings.json` denies are enforced for
+  any session by the owner's hook, keyed on the bearclave remote
+  ([agents.md](https://github.com/bearclave/governance/blob/main/standards/agents.md#where-the-instructions-are)).
 
 ## Reporting
 

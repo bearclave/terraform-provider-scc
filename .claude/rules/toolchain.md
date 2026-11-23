@@ -110,8 +110,9 @@ month; a repository that falls behind is a `Debt` issue.
 | Tools in `.github/tool-versions.env` of every repository and `templates/security.yml` of `ci` | `deps.yml` in `ci`: version and sha256 (the release asset's `digest`), one pull request per repository | monthly |
 | Providers pinned in `account.hcl` | `deps.yml` in `ci` | monthly |
 | Provider lower bounds of the modules (`*-modules`) | not bumped; `deps.yml` lists them next to the latest release in its run summary | monthly |
-| `bearclave/ci@vX.Y.Z` pins | `ci-pins.yml` in `ci`, one pull request per pinned repository | after each `ci` release |
+| `bearclave/ci@vX.Y.Z` pins | `ci-pins.yml` in `ci`, one pull request per pinned repository, only when a called workflow changed and the tag is signed | after each `ci` release (weekly at most) |
 | npm, Python (uv), Docker of applications | Dependabot, one grouped pull request per ecosystem ([templates/dependabot.yml](https://github.com/bearclave/governance/blob/main/standards/templates/dependabot.yml)) | monthly |
+| Go modules of `terraform-provider-scc` | Dependabot `gomod`, grouped, 7 days of cooldown | monthly |
 | The NAS runner image (`app-nas` `deploy/runner/compose.yaml`) | Dependabot `docker-compose`, 14 days of cooldown; GitHub stops giving jobs to a runner 63 days after a newer release | monthly |
 | The Azure CLI of the NAS runner (`ci` `templates/_fragments/self-hosted-tools.yml`) | by hand in `ci` | with the monthly tool bump |
 | Security updates | Dependabot security updates (repository settings) | at once |

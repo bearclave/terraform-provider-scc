@@ -12,8 +12,10 @@ paths:
 Which identity a workflow signs in with, what it may do and how it is
 federated. Every identity a GitHub workflow uses is listed, with its
 credentials and permissions, in the inventory
-[`bearclave/ci` `docs/identities.md`](https://github.com/bearclave/ci/blob/main/docs/identities.md);
-this page holds the rules the inventory follows.
+[`bearclave/ci` `docs/identities.md`](https://github.com/bearclave/ci/blob/main/docs/identities.md),
+which links the page each repository keeps
+([Documented in the repository](#documented-in-the-repository)); this page
+holds the rules both follow.
 
 ## When a new identity is created
 
@@ -50,8 +52,8 @@ federation is a smaller blast radius.
 
 | Permission | plan | apply | bot | deploy |
 |---|---|---|---|---|
-| Terraform state | Storage Blob Data Reader on its own container; Contributor on its own container only where the first plan of a new unit must create the blob - never on the whole account | Storage Blob Data Contributor on its own container | - | - |
-| Key Vault | Key Vault Secrets User on the read-only vault of its pipeline (`kv-githubro`, `kv-home`) | Key Vault Secrets User on the vault of its pipeline (`kv-github`, `kv-home`) | Key Vault Secrets User on `kv-githubbot`; a promote identity only on `kv-ghpromote` | - |
+| Terraform state | Storage Blob Data Contributor on its own container only: the plan takes the state lock (a lease on the blob) and the first plan of a new unit creates the blob - never on the whole account | Storage Blob Data Contributor on its own container | - | - |
+| Key Vault | Key Vault Secrets User on the read-only vault of its pipeline (`kv-githubro`); in `kv-home` only the single secrets a plan needs (`secret_role_assignments`), never a write credential | Key Vault Secrets User on the vault of its pipeline (`kv-github`, `kv-home`) | Key Vault Secrets User on `kv-githubbot`; a promote identity only on `kv-ghpromote` | - |
 | Azure RBAC | Reader on the scope it plans | the narrowest role that applies (Contributor; where it assigns roles, Role Based Access Control Administrator with a condition that names the roles, never Owner) on the scope it manages | - | the narrowest role that deploys the resource (e.g. `Website Contributor` / Static Web App deployment, not Contributor on the resource group) |
 | Entra roles, Graph | Global Reader, `*.Read.All` application permissions | the admin roles and `*.ReadWrite.*` permissions the code manages, each named in the identity's description | - | - |
 | GitHub App | the read-only App (`bearclave-iac-github-read`): all permissions `read` but organisation and repository Administration `write` - GitHub refuses a read of an organisation ruleset and leaves the merge settings out of a repository without it (`iac-github` `docs/setup.md`) | the App that writes (`bearclave-iac-github`) | `bearclave-bot`: contents, pull requests, issues, workflows `write`, projects `write`, major-tag bypass; `bearclave-promote` (installed only on the applications): contents, workflows `write`, the bypass of `prod` and of `v*` tag creation there | - |
@@ -126,9 +128,9 @@ Microsoft Graph application permissions unless another API is named:
 | `iac-identity` | `Application.Read.All`, `Directory.Read.All`, `RoleManagement.Read.Directory`, `Policy.Read.All`, `AccessReview.Read.All`; Key Vault Reader and Reader on the vault with the public certificates of the applications (the public part: never Key Vault Certificate User, which reads the private key) | `Application.ReadWrite.All`, `AppRoleAssignment.ReadWrite.All`, `DelegatedPermissionGrant.ReadWrite.All`, `RoleManagement.ReadWrite.Directory` (roles, role-assignable groups and their members), `Group.ReadWrite.All`, `GroupMember.ReadWrite.All`, `User.Read.All`, `Policy.Read.All`, `Policy.ReadWrite.ApplicationConfiguration`, `Policy.ReadWrite.B2BManagementPolicy`, `Policy.ReadWrite.ConsentRequest`, `Policy.ReadWrite.AuthenticationMethod`, `Policy.ReadWrite.Authorization`, `Policy.ReadWrite.CrossTenantAccess`, `Policy.ReadWrite.ExternalIdentities`, `Policy.ReadWrite.SecurityDefaults`, `Policy.ReadWrite.IdentityProtection`, `Policy.ReadWrite.DeviceConfiguration`, `AccessReview.ReadWrite.All`, `Directory.ReadWrite.All` (only the directory settings `/settings` need it); Key Vault Reader and Reader on the same vault |
 | `iac-conditional-access` | `Policy.Read.All`, `Application.Read.All`, `Group.Read.All`, `RoleManagement.Read.Directory` | the same and `Policy.ReadWrite.ConditionalAccess` (policies, named locations, authentication strengths and contexts) |
 | `iac-intune` | `DeviceManagementConfiguration.Read.All`, `DeviceManagementApps.Read.All`, `DeviceManagementServiceConfig.Read.All`, `DeviceManagementRBAC.Read.All`, `Group.Read.All` | `DeviceManagementConfiguration.ReadWrite.All`, `DeviceManagementApps.ReadWrite.All`, `DeviceManagementServiceConfig.ReadWrite.All`, `DeviceManagementRBAC.Read.All`, `Group.Read.All`; never `DeviceManagementManagedDevices.*`, `Device.ReadWrite.All` or Intune Administrator |
-| `iac-exchange` | Office 365 Exchange Online `Exchange.ManageAsApp` and the Entra role Global Reader; `Application.Read.All` (`sp:` of RBAC for Applications), `Group.Read.All` (groups by name) | `Exchange.ManageAsApp` and the Entra role Exchange Administrator; `Application.Read.All`, `Group.Read.All` |
-| `iac-purview` | `Exchange.ManageAsApp` and Global Reader; `Group.Read.All` (rights of the labels) | `Exchange.ManageAsApp` and the Entra role Compliance Administrator (labels, label policies, DLP, retention, alert policies, the audit log); `Group.Read.All` |
-| `iac-sentinel` | Reader, Microsoft Sentinel Reader and Log Analytics Reader on the resource group of the workspace, Reader on the resource group of the playbooks; `Group.Read.All`, `User.Read.All`, `Application.Read.All` (watchlists made from groups, `sp:`); the Entra role Security Reader (the Entra diagnostic setting) | Microsoft Sentinel Contributor on the resource group of the workspace (rules, saved searches, workbooks, connectors) and Log Analytics Contributor there (the diagnostic setting `SentinelHealth` of the workspace), Logic App Contributor on the resource group of the playbooks, Role Based Access Control Administrator on both with a condition that allows only the Sentinel roles a playbook's identity needs; Security Reader on the subscriptions of the Defender for Cloud connector; the Entra role Security Administrator (the Entra diagnostic setting, the Entra ID and Office 365 connectors); the same Graph permissions as plan |
+| `iac-exchange` | Office 365 Exchange Online `Exchange.ManageAsApp`, the Entra role Global Reader and the Exchange custom role View-Only Role Management (`Get-ServicePrincipal`, `Get-ManagementScope`, `Get-ManagementRoleAssignment`; made by hand, `docs/manual-steps.md`); `Application.Read.All` (`sp:` of RBAC for Applications), `Group.Read.All` (groups by name) | `Exchange.ManageAsApp` and the Entra role Exchange Administrator; `Application.Read.All`, `Group.Read.All` |
+| `iac-purview` | `Exchange.ManageAsApp` and Global Reader; `Group.Read.All` only where a module looks groups up (rights of the labels) | `Exchange.ManageAsApp` and the Entra role Compliance Administrator (labels, label policies, DLP, retention, alert policies); the same `Group.Read.All` |
+| `iac-sentinel` | Reader, Microsoft Sentinel Reader and Log Analytics Reader on the resource group of the workspace, Reader on the resource group of the playbooks; `Group.Read.All`, `User.Read.All`, `Application.Read.All` (watchlists made from groups, `sp:`); the Entra role Security Reader (the Entra diagnostic setting) | Microsoft Sentinel Contributor on the resource group of the workspace (rules, saved searches, workbooks, connectors) and Log Analytics Contributor there (the diagnostic setting `SentinelHealth` of the workspace), Logic App Contributor on the resource group of the playbooks, Role Based Access Control Administrator on both with a condition that allows only the Sentinel roles a playbook's identity needs; the Entra role Security Administrator (the Entra diagnostic setting, the Entra ID, Office 365 and Defender XDR connectors - a narrower role is checked on Learn before it is granted); nothing on subscriptions (Defender for Cloud comes through Defender XDR); the same Graph permissions as plan |
 
 - **Never in these identities:** a permission of another domain, a
   `*.ReadWrite.All` on a plan identity, delegated permissions, a client
@@ -136,11 +138,15 @@ Microsoft Graph application permissions unless another API is named:
   granted in `iac-identity` (`sp:<Logic App>`), never by `iac-sentinel`.
 - **Exchange and Purview** read the same `ARM_*` variables as the other
   providers and sign in with the federated token; that Global Reader is
-  enough for the plan of Exchange and Security & Compliance app-only, and
-  Compliance Administrator for `Set-AdminAuditLogConfig`, is checked in the
-  read-only proof of concept before the first import. A certificate, should
+  enough for the plan of Exchange and Security & Compliance app-only is
+  checked in the read-only proof of concept before the first import. The
+  unified audit log stays out of code: Compliance Administrator does not hold
+  the Exchange role Audit Logs. A certificate, should
   a workload refuse the federated token, only for the apply identity, in the
   Key Vault of the pipeline.
+- **The apply identity of `iac-sentinel` is watched**: any sign-in of
+  `sp-tf-sentinel` that is not the pipeline raises an analytic rule of its
+  own; the plan identity stays read-only.
 - **A Logic App Standard** (prepared, not deployed) adds to `sp-tf-sentinel`
   what its first instance needs - the plan, the storage account, private
   endpoints - in the pull request that deploys it.
@@ -152,13 +158,18 @@ Microsoft Graph application permissions unless another API is named:
 | The application, its service principal, federated credentials, certificate and API permissions | `iac-identity`: one `<application>.yaml` in `infrastructure/applications/app-registrations/` |
 | Entra roles | `iac-identity` `infrastructure/roles/directory-roles/` |
 | Azure RBAC, Key Vault and state access | the unit of the resource, `role_assignments` |
-| Client ID in GitHub | repository variable in `iac-github` (`infrastructure/repositories/<name>`), looked up by the application's name |
-| GitHub Apps | the know-how repository `tools/iac-github/github-apps.py` (`iac-github`, `bearclave-bot`; key in the Key Vault), procedure in `iac-github` `docs/setup.md` |
-| Inventory | `bearclave/ci` `docs/identities.md` |
+| Client ID in GitHub | the repository's unit in `iac-github` names the application (`client_ids = { AZURE_CLIENT_ID_PLAN = "sp-tf-<subject>-plan" }`); `github/repository` resolves it by display name, so `sp-tf-github-plan` and `sp-tf-github` hold `Application.Read.All` |
+| GitHub Apps | procedure in `iac-github` `docs/setup.md` (the key in the Key Vault); the permissions are the table above |
+| Documentation | `docs/identities.md` of every repository whose pipeline signs in; the inventory in `bearclave/ci` `docs/identities.md` links them |
 
-Until `iac-identity` has imported them, the applications, credentials, Entra
-roles and Graph permissions are in `iac-azure` `tenant/`; the domain moves
-as one hand-over ([code/terragrunt.md](https://github.com/bearclave/governance/blob/main/standards/code/terragrunt.md#handing-a-unit-over-to-another-repository)).
+- **Removing an identity:** before the pull request, `git grep` its name and
+  client ID in every clone (`sp:<name>` in `_common/*.hcl`, YAML, docs) and the
+  owner's wiki; each reference goes in the same or an earlier pull request.
+- **App permissions:** a pull request that adds a resource type or an API call
+  checks the permission GitHub requires for it and updates the table in
+  `iac-github` `docs/setup.md`. A 403 or 422 in an apply is a missing
+  permission, not a reason to rerun. Instructions for the owner name the exact
+  page and section (Organization or Repository permissions).
 
 A new repository's identities, in this order: `iac-github` creates the
 repository and its environment; `iac-identity` the two applications, their
@@ -166,3 +177,33 @@ federated credentials (the repository ID is a literal, it never changes)
 and permissions; `iac-azure` the state container and its role assignments;
 `iac-github` the variables. The inventory row comes with the workflow change
 in `ci` or with the first pull request that uses it.
+
+A repository that refers to a principal by name (`sp:<name>`) is merged only
+after the pull request that creates it has applied; otherwise the reference is
+a `dependency` output.
+
+## Documented in the repository
+
+Every repository whose pipeline signs in has `docs/identities.md`, in one
+format. One table, one row per permission:
+
+| Identity | Used by | Role | Scope | Why |
+|---|---|---|---|---|
+| `sp-tf-exchange-plan` | plan, drift | Entra role Global Reader | tenant | reads what Exchange plans |
+| `sp-tf-exchange` | apply (`exchange-prod`) | Storage Blob Data Contributor | container `tfstate-exchange` | writes its state |
+
+- **Identity** is the display name; **used by** the workflow and
+  environment (or the device account); **role** is one permission - an Azure
+  role, an Entra role, a Graph application permission, an API role, a Key
+  Vault role - with the API named where it is not Graph; **scope** is where it
+  applies; **why** is the resource type or API that needs it. A GitHub App
+  and a device account the pipeline uses (RouterOS `tf-plan`, `tf-apply`) are
+  rows too. The file that declares each is named under the table or in a
+  `Declared in` column.
+- Below the table `## From scratch`: what each apply identity cannot create
+  by itself and the manual step that does (`docs/manual-steps.md`).
+- **Every deploy identity holds the permissions to redo the whole deployment
+  from scratch**; what it cannot get (a Tier-0 grant, a custom Exchange role)
+  is in `## From scratch`, never an unwritten step.
+- The table is what a deploy from scratch needs; the inventory in `ci` links
+  it instead of repeating it.

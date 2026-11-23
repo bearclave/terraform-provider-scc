@@ -13,8 +13,8 @@ paths:
 |---|---|---|
 | `README.md` | what the repository is, how it fits, how to change it, its pipeline | working rules for agents, history of changes |
 | `.claude/CLAUDE.md` | working rules specific to this repository | documentation, organisation standards (those are in `.claude/rules/`) |
-| `docs/*.md` | longer topics of the repository: `setup.md`, `manual-steps.md`, `out-of-scope.md`, `decisions.md`, `catalog.md` ([layout.md](https://github.com/bearclave/governance/blob/main/standards/layout.md#docs)) | anything the README already says |
-| `README.md` of a module | its inputs, outputs and why it is built the way it is | how a unit uses it |
+| `docs/*.md` | longer topics of the repository: `setup.md`, `identities.md`, `manual-steps.md`, `out-of-scope.md`, `decisions.md`, `catalog.md` ([layout.md](https://github.com/bearclave/governance/blob/main/standards/layout.md#docs)) | anything the README already says |
+| `README.md` of a module | its inputs, outputs and why it is built the way it is | which units use it, their values, the rules of a live repository |
 | `bearclave/handbook` | know-how across repositories, `gotchas/` | documentation of one repository |
 | LLM wiki | the owner's processes and where things are | technical documentation - it links here |
 
@@ -38,11 +38,16 @@ section that does not apply is left out, not left empty.
 6. **Conventions** - only what is specific to this repository; the
    organisation rules are linked, not repeated.
 7. **Gotchas** - links to `handbook/gotchas/` entries that bite here.
-8. **Repository settings** - one fixed line:
+8. **Repository settings** - the last section, one fixed line (`pr / check`
+   compares it):
    > Branch protection, required checks, merge settings and labels are
    > defined in [`bearclave/iac-github`](https://github.com/bearclave/iac-github)
    > (`infrastructure/repositories/<name>`). Engineering standards:
    > [`bearclave/governance`](https://github.com/bearclave/governance/tree/main/standards).
+
+No other `##` sections: a repository-specific topic is a file in `docs/`,
+linked from Layout. A fork of a public project (`terraform-provider-scc`)
+keeps the upstream README and adds only the Repository settings section.
 
 ## Writing
 
@@ -60,6 +65,12 @@ section that does not apply is left out, not left empty.
   longer.
 - A document that describes behaviour is updated in the same pull request
   that changes the behaviour.
+- A statement about a live setting (`stays off`, `installed on all
+  repositories`) is checked with `gh api` or the portal in the pull request
+  that writes it; a value that changes is not written (it is in Notion), a
+  check date never.
+- A mistake or trap found in practice is a `handbook/gotchas/` entry, linked
+  from the README Gotchas section.
 
 ## Markdown
 
@@ -95,8 +106,11 @@ the README or `docs/`, not into comments.
 - Only when necessary: a reason that is not obvious, a constraint, a trap, a
   workaround - which names what it works around and links its issue or
   gotcha, so it can go once that is fixed.
-- One or two lines each. Design, reasons, usage and how it fits belong in
-  the README (or `docs/`).
+- **One line each**, in `terragrunt.hcl`, context and topic files too; at
+  most two elsewhere. No header comment: the path says what a file is (a
+  shell script, a workflow caller, a compose file: one line of what it does).
+  Triggers, design, reasons, usage and how it fits belong in the README (or
+  `docs/`).
 - Never restate the code below.
 - No section banners and no decorative comments.
 - No commented-out code; git keeps the old version.

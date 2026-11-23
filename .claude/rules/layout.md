@@ -34,7 +34,7 @@ repository), a document in `docs/`.
 | `.github/markdownlint.yaml` | markdownlint rules that differ from `ci` |
 | `.github/dependabot.yml`, `.github/release.yml`, `.github/tool-versions.env` | GitHub and CI |
 | `.github/conventions.yaml` | conventions check, and the exceptions to this layout |
-| `.github/state-moves.yaml` | Terragrunt: the units whose state the owner moved ([code/terragrunt.md](https://github.com/bearclave/governance/blob/main/standards/code/terragrunt.md#moving-a-unit)) |
+| `.github/state-moves.yaml` | Terragrunt: the units whose state the owner moved, until the apply that used them ([code/terragrunt.md](https://github.com/bearclave/governance/blob/main/standards/code/terragrunt.md#moving-a-unit)) |
 | `.github/schemas/` | `<module>.schema.json`: the JSON Schema of each collection, copied from its module ([code/terragrunt.md](https://github.com/bearclave/governance/blob/main/standards/code/terragrunt.md#schemas)) |
 | `.github/sentinel-lint.yaml` | Sentinel lint |
 | `.github/trivyignore.yaml` | accepted trivy findings, each with a reason and a review date |
@@ -72,9 +72,9 @@ Content folders of a pipeline:
 | Pipeline | Content folders |
 |---|---|
 | `terragrunt`, `terragrunt-home` | `infrastructure/` (required), every unit below it |
-| `terraform-modules` | folders holding modules, one per platform (`azure/`, `entra/`, `github/`, `routeros/`) |
+| `terraform-modules` | `modules/`, one folder per platform below it (`modules/azure/`, `modules/entra/`, ...) |
 | `static-web-app` | `api/` (the Functions folder of the site) |
-| `content-sentinel` | `ARM/`, `terragrunt/` until the catalogue is in the YAML of `iac-sentinel`; then `content/` and the pipeline `checks` ([code/sentinel.md](https://github.com/bearclave/governance/blob/main/standards/code/sentinel.md#content-sentinel)) |
+| `content-sentinel` | `content/` (group `template`) and the pipeline `checks` ([code/sentinel.md](https://github.com/bearclave/governance/blob/main/standards/code/sentinel.md#content-sentinel)) |
 | `ci` | `templates/` |
 
 A script belongs in `tools/` only when it serves this repository. Logic
@@ -93,6 +93,10 @@ and no `deploy/`** (`forbidden` in `layout.yaml`):
 | bootstrap | a procedure with its commands in `docs/setup.md`, never code |
 | files deployed outside Terraform | the repository of what they deploy (`app-nas`) |
 
+A script moves to the know-how repository in a pull request merged **before**
+the one that deletes it here, and the deleting pull request links it (the
+scripts of `iac-home` were deleted and never arrived).
+
 A Terragrunt unit directory moves only with its state
 ([code/terragrunt.md](https://github.com/bearclave/governance/blob/main/standards/code/terragrunt.md#moving-a-unit)).
 
@@ -103,8 +107,9 @@ vocabulary.
 ## docs/
 
 - Flat, kebab-case names: `docs/break-glass.md`.
-- Fixed names where they apply: `setup.md`, `manual-steps.md`,
-  `out-of-scope.md`, `decisions.md`, `catalog.md`.
+- Fixed names where they apply: `setup.md`, `identities.md`,
+  `manual-steps.md`, `out-of-scope.md`, `decisions.md`, `catalog.md`.
+- File names are English ([README.md](https://github.com/bearclave/governance/blob/main/standards/README.md#scope-and-language)).
 - A subfolder only once `docs/` has eight files or more.
 - The README links every file in `docs/`.
 

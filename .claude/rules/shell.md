@@ -20,3 +20,7 @@ paths:
 - shellcheck clean at `--severity=warning` (the `security / scan` check runs
   it over every `*.sh` and every `run:` block).
 - A script longer than ~150 lines or with real logic becomes Python.
+- Commands typed in a terminal and the agent's Bash run in zsh: an unquoted
+  `$var` is not split (`set -- $p` sets one argument), `$var:a` is a modifier
+  (write `${var}:`), an unmatched glob is an error. Loops go into a `bash`
+  script.

@@ -25,21 +25,28 @@ have the default branch `staging` instead of `main`, and a second branch
 - `slug`: lowercase `a-z`, `0-9` and `-`, 2-5 words, says what the branch does:
   `fix/dcr-syslog-priority`, `feat/42-ca-block-legacy-auth`.
 - The issue number goes first when the branch resolves an issue.
-- Always from a fresh `origin/main` (`origin/staging` in an application):
-  `git novy <type>/<slug>` fetches and branches from the default branch in
-  one step.
+- Always from the fresh default branch (`origin/HEAD`: `main`, `staging` in an
+  application): `git -C <repository> novy <type>/<slug>` fetches and branches
+  in one step. The branch reaches GitHub with its first `git push`; nobody
+  creates a branch through the GitHub UI or API for an agent's work. After a
+  change of the default branch, `git remote set-head origin -a` in every clone.
+- A second task in the same repository gets a worktree, never a shared
+  checkout, in the one place `../<repository>-<slug>` on the branch
+  `<type>/<slug>` (`git -C <repository> worktree add -b <type>/<slug>
+  ../<repository>-<slug> origin/main`). It is removed after the merge
+  ([housekeeping](#housekeeping)).
 - Short-lived: merged or closed within days. A branch that waits on something
   stays a draft PR with the label `status:blocked` and a comment why.
-- A worktree branch (`worktree-<name>`) is renamed to `<type>/<slug>` before
-  its first push.
 - Bot branches keep their own names: `dependabot/...`; `bearclave-bot`'s `deps/tools`, `deps/actions` and
   `deps/ci` already have the `<type>/<slug>` form.
 - The `pr` check refuses any other branch name.
 
 **How it is enforced.** The branch name and the title are checked by the
 required check `pr / check`, not by a ruleset: the ruleset rules for branch
-names and commit messages exist only in GitHub Enterprise. A branch with a
-wrong name can be pushed, but its pull request cannot be merged. The commits
+names and commit messages exist only in GitHub Enterprise. Push rulesets on
+public repositories and the merge queue are Enterprise-only too, so the `pr`
+check and the settings below stand in for them. A branch with a wrong name can
+be pushed, but its pull request cannot be merged. The commits
 on a branch are not checked; only the title reaches `main`.
 
 ## Commits
@@ -82,24 +89,31 @@ BREAKING CHANGE: <what callers must change>
   the summary says everything.
 - **Footer**: `Refs #12` for a related issue, `Closes #12` only in the pull
   request description (see below).
-- Commits are signed (`commit.gpgsign`), with the identity verified on GitHub.
+- The commit on `main` is the squash commit GitHub signs. Branch commits are
+  signed with the owner's key wherever it is available (not in a cloud
+  session), with the identity verified on GitHub (`@bearclave.cz`).
 - No trace of AI anywhere: no `Co-Authored-By`, no "Generated with", no
   mention of an assistant.
 
 **How often.** Commit every logical step that passes the local checks of the
-repository (format, validate, tests). Push at least at the end of every day
-and before switching to another task: an unpushed branch is a branch nobody
-else can see and nothing backs up. Commits on a branch may be rough - only
-the pull request title reaches `main` - but they follow the format as well.
+repository (format, validate, tests), without asking. Before the pull request
+exists, push after every commit: a push to a branch without a pull request
+runs nothing, and an unpushed branch is one nobody else can see and nothing
+backs up. Once the pull request is open, push only a finished batch that
+deserves a new full run; never push or edit the description just to re-run a
+check. Commits on a branch may be rough - only the pull request title reaches
+`main` - but they follow the format as well.
 
 ## Pull requests
 
-**Push the branch at least daily; open the pull request when the change is
-ready for its first full run.** A pushed branch without a pull request costs
-nothing, every push to a pull request runs the pipeline and costs Actions
-minutes (3,000 a month for the whole organisation). Open it as a draft when
-the plan is needed early, mark it ready for review when it is done. An agent
-opens a pull request only when the owner says so for that change.
+**Open the pull request when the change is ready for its first full run,
+and for an agent only when the owner says so for that change, as a draft.**
+A pushed branch without a pull request costs nothing; every push to a pull
+request and every edit of its title or description runs the pipeline and
+costs Actions minutes (3,000 a month for the whole organisation): write the
+description once, completely. When the pipeline is green and the Review
+section is filled, the author marks it ready (`bot-gh pr ready <number>`);
+the owner approves.
 
 **Title** = the future commit on `main`, in the commit format above:
 `feat(conditional-access): block legacy authentication`. The `pr` check
@@ -116,7 +130,7 @@ delete one. Only Dependabot's pull requests are exempt:
 |---|---|
 | Why | the problem or goal, in one to three sentences |
 | What changes | bullet list of the changes a reviewer should know about |
-| Impact | production yes/no, what the plan or deployment does, anything destroyed or replaced, manual steps after merge |
+| Impact | production yes/no, what the plan or deployment does, anything destroyed or replaced, manual steps before merge and after merge |
 | Verification | what was run and seen: plan summary, tests, screenshot, run link |
 | Review | summary of the `/code-review` (and `/security-review`) pass and what was left unfixed - each left-over finding becomes an issue |
 | Links | `Closes #12` for the issue the PR resolves, `Refs #` for related ones |
@@ -184,7 +198,8 @@ pull request is the bot.
   and description (repository setting), so both have to be final before
   merging.
 - **Approve, then auto-merge.** Once the review is done, the owner approves
-  and turns on auto-merge (`gh pr merge --auto --squash`, or the button).
+  and turns on auto-merge (`gh pr merge --auto --squash`, or the button); he
+  runs "Update branch" right before approving.
   GitHub merges as soon as the required checks and the approval are there,
   and nobody waits for the last check by hand. A new push dismisses the
   approval, so auto-merge waits for the next one. Auto-merge does not use the
@@ -196,13 +211,15 @@ pull request is the bot.
 - **Branch up to date with `main`** in repositories that touch production
   (the ruleset requires it): "Update branch" re-runs the plan on the merged
   state.
-- **Who merges.** Changes to live configuration (`iac-*` except
-  `iac-modules`, `app-*`) are merged by the owner. An agent may merge only
-  where the owner said so for that change. Dependency pull requests
-  (Dependabot, `bearclave-bot`'s `deps`) are approved and merged by the
-  owner like any other ([toolchain.md](https://github.com/bearclave/governance/blob/main/standards/toolchain.md#dependency-updates)).
-- The branch is deleted by GitHub after the merge; `git uklid` and the daily
-  `git-sync-main` (which follows the default branch) clean up locally.
+- **Who merges: the owner, always.** Every pull request, dependency pull
+  requests (Dependabot, `bearclave-bot`'s `deps`) included
+  ([toolchain.md](https://github.com/bearclave/governance/blob/main/standards/toolchain.md#dependency-updates)). An agent never approves,
+  merges, tags or releases, and never uses `--admin`
+  ([agents.md](https://github.com/bearclave/governance/blob/main/standards/agents.md#working-rules)).
+- The branch is deleted by GitHub after the merge. Locally `git uklid` removes
+  the branch and `git worktree remove <path>` the worktree, the same day;
+  `git-sync-main` (which follows the default branch) removes the clean
+  worktrees of merged branches daily.
 - **After the merge**, check the run on `main`: the apply or deployment went
   through, or the run is red and says why. A red run on `main` is fixed the
   same day.
@@ -228,7 +245,7 @@ ruleset on `prod` lets only the App `bearclave-promote` create or move it
 read only by their `promote` environment; `bearclave-bot` has nothing to do
 with `prod`. No tag may be called `staging` or `prod`.
 
-1. **Develop** as everywhere: `git novy <type>/<slug>` (from `origin/staging`),
+1. **Develop** as everywhere: `git -C <repository> novy <type>/<slug>` (from `origin/staging`),
    a pull request into `staging`, review, squash merge.
 2. **Staging.** The merge builds the commit once, deploys it to staging and
    runs the smoke test. A red staging run is fixed the same day; such a
@@ -261,7 +278,7 @@ since a deleted branch or a closed pull request is easy to lose track of.
 |---|---|---|
 | Branch without a pull request | 30 days | open a draft pull request for it or delete it |
 | Pull request (draft or ready) without any update | 14 days | finish it, mark it `status:blocked` with a comment why, or close it |
-| Merged branch | at once | GitHub deletes it (repository setting); `git uklid` locally |
+| Merged branch | at once | GitHub deletes it (repository setting); `git uklid` removes the local branch and its worktree |
 
 A weekly report (`housekeeping` of `bearclave/ci`, one run for the whole
 organisation) lists what is stale in one issue per repository, assigned to
