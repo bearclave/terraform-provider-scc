@@ -7,6 +7,9 @@ package provider
 //   - sets: elements match case-insensitively, by any identity key of an
 //     identity object (a location read back as {"Name":..,"PrimarySmtpAddress":..}
 //     matches the configured address), or as equivalent JSON;
+//   - LocaleSettings elements of a label (JSON with localeKey and Settings):
+//     localeKey and locale keys are case-insensitive, Settings is a map (the
+//     cmdlet takes "DisplayName", Get-Label returns "displayName");
 //   - strings holding JSON (hashtable parameters such as
 //     ContentContainsSensitiveInformation): the configured JSON is contained
 //     in the read-back one (keys case-insensitive, scalars compared as text,
@@ -96,7 +99,7 @@ func sameSet(prior, read types.Set, raw any) bool {
 	}
 	return matchAll(len(want), len(have), func(i, j int) bool {
 		for _, alias := range have[j] {
-			if strings.EqualFold(alias, want[i]) || jsonEqual(want[i], alias) {
+			if strings.EqualFold(alias, want[i]) || jsonEqual(want[i], alias) || localeEqual(want[i], alias) {
 				return true
 			}
 		}
@@ -384,4 +387,71 @@ func planEquivalent(plan, state any, semantic map[string]equalFunc) bool {
 		}
 	}
 	return changed
+}
+
+// localeEqual reports whether a and b are the same LocaleSettings element: the
+// same localeKey (the cmdlet takes "DisplayName", Get-Label returns
+// "displayName") and the same locales, whose keys are case-insensitive and
+// whose order does not matter. Member names and values are compared as the
+// service keeps them: names case-insensitively, locale values exactly.
+func localeEqual(a, b string) bool {
+	ak, am, ok1 := parseLocale(a)
+	bk, bm, ok2 := parseLocale(b)
+	if !ok1 || !ok2 || ak != bk || len(am) != len(bm) {
+		return false
+	}
+	for k, v := range am {
+		if w, ok := bm[k]; !ok || w != v {
+			return false
+		}
+	}
+	return true
+}
+
+// parseLocale reads one LocaleSettings element into its lower-case localeKey
+// and a map of lower-case locale to text.
+func parseLocale(s string) (key string, settings map[string]string, ok bool) {
+	v, isJSON := decodeJSON(s)
+	obj, isObj := v.(map[string]any)
+	if !isJSON || !isObj {
+		return "", nil, false
+	}
+	var list []any
+	for name, val := range obj {
+		switch strings.ToLower(name) {
+		case "localekey":
+			str, isStr := val.(string)
+			if !isStr {
+				return "", nil, false
+			}
+			key = strings.ToLower(str)
+		case "settings":
+			list, _ = val.([]any)
+		}
+	}
+	if key == "" {
+		return "", nil, false
+	}
+	settings = map[string]string{}
+	for _, e := range list {
+		entry, isEntry := e.(map[string]any)
+		if !isEntry {
+			return "", nil, false
+		}
+		var k, val string
+		for name, x := range entry {
+			str, _ := x.(string)
+			switch strings.ToLower(name) {
+			case "key":
+				k = strings.ToLower(str)
+			case "value":
+				val = str
+			}
+		}
+		if k == "" {
+			return "", nil, false
+		}
+		settings[k] = val
+	}
+	return key, settings, true
 }
