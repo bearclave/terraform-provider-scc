@@ -1,0 +1,26 @@
+# Rules: bearclave/governance standards/toolchain.md#dependency-updates
+# One grouped pull request a month, minor and patch together, majors on their
+# own (a major needs its upgrade guide read). Only releases at least a week old.
+# The golangci-lint pin in ci.yml is bumped by hand.
+version: 2
+updates:
+  - package-ecosystem: gomod
+    directories: ["/", "/tools"]
+    schedule:
+      interval: monthly
+      time: "06:00"
+      timezone: Europe/Prague
+    cooldown:
+      default-days: 7
+    open-pull-requests-limit: 3
+    groups:
+      go:
+        applies-to: version-updates
+        update-types: [minor, patch]
+      go-security:
+        applies-to: security-updates
+        patterns: ["*"]
+    commit-message:
+      prefix: deps
+    labels: ["type:deps"]
+    assignees: ["matej-hrabalek"]
