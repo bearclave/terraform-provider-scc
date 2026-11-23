@@ -1,6 +1,5 @@
-# A Go Terraform provider keeps the layout every provider has: the Registry,
-# goreleaser and the Go toolchain read these from the root, and keeping
-# upstream's layout keeps the fork mergeable with terraprovider.
+# A Go Terraform provider keeps the layout the Go toolchain, the Terraform
+# Registry and goreleaser expect: they read these from the root.
 layout:
   exceptions:
     - path: go.mod
@@ -15,8 +14,6 @@ layout:
       reason: Read from the root by goreleaser, which builds and signs the release.
     - path: .golangci.yml
       reason: Read from the root by golangci-lint.
-    - path: aqua
-      reason: Upstream's pinned tool versions (aqua), kept to stay mergeable with upstream.
     - path: cmd
       reason: The generator (cmd/gen-tf), Go's convention for commands.
     - path: internal
