@@ -87,8 +87,8 @@ month; a repository that falls behind is a `Debt` issue.
 
 | Where | What is pinned | Why |
 |---|---|---|
-| Modules (`iac-modules`, `template-iac-modules`) | a lower bound only: `>= 5.0` | a module works with any newer provider the configuration chooses |
-| Configuration (every Terragrunt repository, `template-iac-terragrunt`) | the exact version, once, in `account.hcl` (`versions`), generated into every unit from `_common/templates/versions.tf.tmpl` | one place per repository; every unit runs the same provider |
+| Modules (`terraform-modules`) | a lower bound only: `>= 5.0` | a module works with any newer provider the configuration chooses |
+| Configuration (every Terragrunt repository) | the exact version, once, in `account.hcl` (`versions`), generated into every unit from `_common/templates/versions.tf.tmpl` | one place per repository; every unit runs the same provider |
 | `.terraform.lock.hcl` | committed in every unit, with hashes for `linux_amd64` and `darwin_arm64` | the provider binary is verified, not only its version |
 
 - Lock files are refreshed with

@@ -17,7 +17,7 @@ there, so they have to be enough on their own.
 | `.claude/settings.json` | denied commands (below), no attribution | `bearclave/governance`, copied by `tools/sync.py` |
 | `.mcp.json` | the MCP servers of the organisation ([below](#mcp-servers)) | `bearclave/governance`, copied by `tools/sync.py` |
 | `README.md` | documentation of the repository | the repository |
-| `bearclave/handbook` `gotchas/` | traps found in practice | read the ones the repository's README links before working in that area |
+| `bearclave/knowhow` `gotchas/` | traps found in practice | read the ones the repository's README links before working in that area |
 | `~/Repositories/Bearclave.GitHub/CLAUDE.md` | local only, not in git: the entry point of a session started above the repositories; points here | the owner's Mac |
 
 **These rules apply wherever a session starts inside
@@ -26,7 +26,7 @@ the owner's wiki included** (the wiki points here, it does not copy it).
 The tool loads a repository's `.claude/CLAUDE.md`, `.claude/rules/` and
 `.claude/settings.json` only when the session is started in that repository
 (or moved there with `/cd`). A session started above the repositories (the
-`bearclave` VS Code workspace starts in `Bearclave.GitHub/iac`) gets none of
+`bearclave` VS Code workspace starts in `Bearclave.GitHub/bearclave-infrastructure`) gets none of
 them by itself: read the repository's `.claude/CLAUDE.md` and
 `.claude/rules/*.md` before the first change, of every repository the task
 touches (`git -C` included). Its deny list is not active there; a global
@@ -157,7 +157,7 @@ rules in `.claude/rules/` win over habits and defaults of the tool.
   the run link; a requested owner action is followed up until its result is
   seen.
 - A mistake or trap found during the task becomes a one-line rule in the
-  standard where it applies and a `bearclave/handbook` gotcha with the story,
+  standard where it applies and a `bearclave/knowhow` gotcha with the story,
   in the same task.
 - Remove the worktree when its pull request is merged or closed
   (`git worktree remove <path>`); where that is denied, list the paths in the

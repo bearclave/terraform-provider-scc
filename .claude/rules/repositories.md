@@ -5,26 +5,34 @@
 ## Groups and names
 
 GitHub has no folders. A repository's group shows in four places that always
-agree: the **name prefix**, the custom property **`group`**, a **topic** and
-the organisation **Project** of the group. Locally the group is a folder in
-`~/Repositories/Bearclave.GitHub/`.
+agree: the custom property **`group`**, a **topic**, the organisation
+**Project** of the group and, locally, a folder in
+`~/Repositories/Bearclave.GitHub/`. The group value, the Project title and the
+folder name are the same string. The group is **not** a name prefix; the
+prefixes `iac-`, `app-` and `dev-` only name the subject.
 
-| Group | Prefix | Project | Local folder | What belongs here |
-|---|---|---|---|---|
-| `iac` | `iac-` | IaC | `iac/` | configuration applied by a pipeline, and the modules it uses |
-| `app` | `app-` | Apps | `app/` | applications and websites, and tools that build something |
-| `template` | `template-`, `content-` | Templates & content | `template/` | what is copied to a customer: IaC templates, content catalogues |
-| `platform` | none | Platform | `platform/` | how the organisation works: `ci`, `governance`, `handbook`, `ops-tools`, `.github`, `vs-code-extensions` |
+| Group = Project = folder | What belongs here | Repositories |
+|---|---|---|
+| `bearclave-infrastructure` | infrastructure as code applied by a pipeline, its modules and the shared pipelines | `terraform-modules`, `ci`, `iac-azure`, `iac-github`, `iac-home`, `iac-identity`, `iac-conditional-access`, `iac-intune`, `iac-exchange`, `iac-purview`, `iac-sentinel`, `terraform-provider-scc` |
+| `bearclave-knowhow` | how the organisation works: standards, know-how, tools, catalogues | `knowhow`, `governance`, `vs-code-extensions`, `office-templates`, `.github`, `content-sentinel` |
+| `applications` | applications and websites | `app-home`, `app-nas`, `app-web-bearclave`, `app-web-matejhrabalek` |
+| `dev-infrastructure` | a place to try things: empty twins of the infrastructure repositories and test repositories | `dev-terraform-modules`, `dev-ci`, every test repository `dev-*` |
 
-Name: `<prefix><subject>`, lowercase, words joined by `-`, English, the
-subject says what the repository manages (`iac-azure`, `app-web-bearclave`,
-`content-sentinel`). No `-repo`, no `-new`, no year. Repositories of a
+Archived repositories need no group and are skipped by the tools. A customer
+project inside `bearclave` gets its own group value
+(`<customer>-infrastructure`, [customers.md](https://github.com/bearclave/governance/blob/main/standards/customers.md)).
+
+Name: `<subject>`, optionally with the prefix `iac-` (configuration applied by
+a pipeline), `app-` (an application) or `dev-` (a test twin in
+`dev-infrastructure`), lowercase, words joined by `-`, English; the subject
+says what the repository manages (`iac-azure`, `app-web-bearclave`,
+`terraform-modules`, `content-sentinel`). No `-repo`, no `-new`, no year. Repositories of a
 customer: [customers.md](https://github.com/bearclave/governance/blob/main/standards/customers.md).
 
 One exception: a fork of a Terraform provider is named
 `terraform-provider-<name>` and is public, because the Terraform Registry
 publishes a provider only from such a repository
-(`terraform-provider-scc`, group `app`). It calls the workflows of
+(`terraform-provider-scc`, group `bearclave-infrastructure`). It calls the workflows of
 `bearclave/ci` like any other repository: `ci` is public so that a public
 repository can call it.
 
@@ -54,8 +62,8 @@ Set on every repository in `bearclave/iac-github`; the rulesets target them.
 
 | Property | Values | Drives |
 |---|---|---|
-| `group` | `iac`, `app`, `template`, `platform` | grouping, Project, topic |
-| `pipeline` | `terragrunt`, `terragrunt-home`, `terraform-modules`, `static-web-app`, `container`, `content-sentinel`, `checks`, `ci`, `template` | which shared workflow `ci.yml` calls, which checks are required |
+| `group` | `bearclave-infrastructure`, `bearclave-knowhow`, `applications`, `dev-infrastructure` | grouping, Project, topic, local folder |
+| `pipeline` | `terragrunt`, `terragrunt-home`, `terraform-modules`, `static-web-app`, `container`, `content-sentinel`, `checks`, `ci` | which shared workflow `ci.yml` calls, which checks are required |
 | `entity` | `sro`, `osvc`, `shared` | whose the repository is (Bearclave s.r.o., the sole trader, both) |
 | `touches-production` | `true`, `false` | branch up to date before merge, `/security-review` |
 | `direct-commit` | `true`, `false` | `true` only for repositories written straight to `main` (no pull request) |
@@ -96,9 +104,7 @@ saying so; a local edit is overwritten by the next sync (the section of
 `.gitattributes` below its marker is kept, and `CODEOWNERS` is written only
 when the repository has none). The pull request and issue templates are
 copied too: GitHub reads the organisation defaults of `bearclave/.github`
-only from a public repository, and that one is private. The `template-*`
-repositories get only `.gitattributes`, without the header: they are copied
-to customers and must not name the organisation.
+only from a public repository, and that one is private.
 
 ## Where the settings live
 
@@ -116,7 +122,7 @@ plan of `iac-github` does.
 | Item | Rule |
 |---|---|
 | Description | one sentence, at most 200 characters, what it manages and for whom |
-| Topics | the group (`iac`, `app`, `template`, `platform`) and two or three subjects (`azure`, `terragrunt`, `website`) |
+| Topics | the group (`bearclave-infrastructure`, ...) and two or three subjects (`azure`, `terragrunt`, `website`) |
 | Homepage | the URL of what it deploys (`https://bearclave.cz` for `app-web-bearclave`); empty otherwise |
 | `CODEOWNERS` | `.github/CODEOWNERS` with `* @bearclave/owners` (managed) |
 | `SECURITY.md` | `.github/SECURITY.md` (managed): report privately to the owner, never in an issue of a public repository |
@@ -143,7 +149,7 @@ links there.
    `iac-azure` (state container and roles) first
    ([identities.md](https://github.com/bearclave/governance/blob/main/standards/identities.md#where-they-are-declared)), then the
    variables in `iac-github`.
-3. Clone it from `github.com:bearclave/<name>` into the folder of its group: the remote and the folder select the `@bearclave.cz` identity, any other e-mail makes signed commits unverified and `main-protection` refuses them. `main` exists from the start (`auto_init`); work on `git -C <name> novy feat/skeleton`. A fork: clone `bearclave/<name>`, add the upstream as `upstream`, never commit in a clone whose `origin` is the upstream.
+3. Clone it from `github.com:bearclave/<name>` into the folder named after its group: the remote and the folder select the `@bearclave.cz` identity, any other e-mail makes signed commits unverified and `main-protection` refuses them. `main` exists from the start (`auto_init`); work on `git -C <name> novy feat/skeleton`. A fork: clone `bearclave/<name>`, add the upstream as `upstream`, never commit in a clone whose `origin` is the upstream.
 4. Run `governance/tools/sync.py <name>` for it, add `README.md`,
    `.claude/CLAUDE.md`, `.github/workflows/ci.yml` (and `dependabot.yml`
    when it has npm, uv or Docker packages) from the templates, and what

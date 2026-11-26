@@ -11,23 +11,21 @@ what runs, and the apply run is its record.
 | Repository | Versioned | Consumers pin |
 |---|---|---|
 | `ci` | yes | `@v2` (major tag), production repositories the exact `@v2.3.1` |
-| `iac-modules` | yes | `modules_ref` in `account.hcl` of every Terragrunt repository, always a tag `vX.Y.Z` |
+| `terraform-modules` | yes | `modules_ref` in `account.hcl` of every Terragrunt repository, always a tag `vX.Y.Z` |
 | `terraform-provider-scc` | yes | the `bearclave/scc` version in `account.hcl` of `iac-purview`, from the Terraform Registry |
-| `template-iac-*` | yes | the version handed over to a customer, written into the handover |
 | `app-home` | yes | the image `:vX.Y.Z` its release publishes; a release is a promotion ([below](#applications)) |
 | `app-web-*` | yes | nobody pins: `prod` is what runs, the tag records each promotion ([below](#applications)) |
-| `app-office-templates` | yes | the generated templates handed to the website |
+| `office-templates` | yes | the generated templates handed to the website |
 | `vs-code-extensions` | per extension | the `version` in each extension's `package.json`, built into its VSIX; no git tag ([below](#vs-code-extensions)) |
-| `iac-*` but `iac-modules` | no | applied from `main` |
-| `governance`, `handbook`, `ops-tools`, `.github`, `content-sentinel` | no | read, not consumed |
+| `iac-*` | no | applied from `main` |
+| `governance`, `knowhow`, `.github`, `content-sentinel` | no | read, not consumed |
 
 ## Repositories without a tag yet
 
-`app-office-templates` and the `template-iac-*` repositories are versioned by
-this standard but have no tag yet. Each gets `v1.0.0` with the next change a
-consumer receives: `app-office-templates` when it next hands templates to the
-website, a template at its next handover. With no earlier tag the first version is
-`v1.0.0`; after it, the rules of [Releasing](#releasing) apply.
+`office-templates` is versioned by this standard but has no tag yet. It gets
+`v1.0.0` with the next change a consumer receives: when it next hands
+templates to the website. With no earlier tag the first version is `v1.0.0`;
+after it, the rules of [Releasing](#releasing) apply.
 
 ## When to release
 
@@ -37,10 +35,9 @@ before a consumer needs a change:
 | Repository | Release when | Who |
 |---|---|---|
 | `ci` | a merged pull request since the last tag has a release effect (below) and a caller needs it - **at most once a week**, batching what was merged; a security fix or a broken pipeline at once. Every release reaches the pinned repositories as pull requests with a whole-tree plan | the owner runs `tools/release.sh`; `major-tag.yml` and `ci-pins.yml` follow |
-| `iac-modules` | a consumer is to receive a module change: release first, then bump `modules_ref` in the consumer by hand (Dependabot does not read it), its plan in that pull request | the owner |
+| `terraform-modules` | a consumer is to receive a module change: release first, then bump `modules_ref` in the consumer by hand (Dependabot does not read it), its plan in that pull request | the owner |
 | `app-home`, `app-web-*` | the change is to run in production: `promote` ([below](#applications)) | the owner starts `promote`; the App `bearclave-promote` tags |
-| `app-office-templates` | the templates are handed to the website | the owner |
-| `template-iac-*` | before a handover to a customer | the owner |
+| `office-templates` | the templates are handed to the website | the owner |
 | `vs-code-extensions` | in the pull request that changes an extension: its `package.json` version is bumped there | the author |
 
 - No release for `docs`, `test`, `ci` and `chore` alone.

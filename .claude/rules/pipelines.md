@@ -39,7 +39,7 @@ else. Templates for each pipeline: [templates/workflows/](https://github.com/bea
 | `terragrunt.yml` / `terragrunt-drift.yml` | `iac-azure`, `iac-github`, `iac-identity`, `iac-conditional-access`, `iac-intune`, `iac-exchange`, `iac-purview`, `iac-sentinel` | validate (fmt, HCL, `terraform validate`, lock files), conventions, Sentinel lint, plan of affected units with trivy, PR comment, `destroy / approved`, apply from `main`, verification of the apply, gate; drift fails on check blocks too |
 | `destroy-review.yml` | the repositories of `terragrunt.yml` | on a submitted approval, re-runs the failed `destroy / approved` of the last pull request run |
 | `terragrunt-home.yml` | `iac-home` | plan and apply of the router on the NAS runner (`network-runner`; through WireGuard from a GitHub runner as the fallback), certificate renewal, drift |
-| `terraform-modules.yml` | `iac-modules` | fmt, validate, tflint, trivy config, conventions |
+| `terraform-modules.yml` | `terraform-modules` | fmt, validate, tflint, trivy config, conventions |
 | `static-web-app.yml` | `app-web-*` | common site checks (with SEO), ESLint, the site's own checks, one build per commit (artifact `site`); a preview in the staging SWA per pull request, deploy to the staging SWA from `staging` (environment `staging`, noindex), the same build to production from `prod` (environment `prod`); smoke test after each |
 | `promote.yml` | the applications | a commit of `staging` to production as the App `bearclave-promote`: checks its staging run, fast-forwards `prod`, waits for the production run, then tags `vX.Y.Z` and publishes the release |
 | `container.yml` | `app-home` | ESLint, lint and tests in the image; with `environments`: push to `staging` publishes `:staging` and `:sha-<commit>` and deploys staging on the NAS runner, push to `prod` (or a manual run there) deploys that image without a rebuild, the release tag `vX.Y.Z` pushed by `promote.yml` adds `:vX.Y.Z` to it, a smoke test after each deployment; without: push to GHCR from `main` and from a release |
@@ -141,7 +141,7 @@ regexes = ['''...''']
 
 **tflint** runs where the Terraform is: in `terraform-modules`. A
 Terragrunt repository holds units (`terragrunt.hcl`) and no `.tf` of its
-own - its units take every module from `iac-modules` at `modules_ref`, and
+own - its units take every module from `terraform-modules` at `modules_ref`, and
 that module was linted there, with the same base config, before the ref
 existed. So tflint does not run in `terragrunt*`; what reaches the units is
 covered by `hcl validate`, the plan and trivy over it.
