@@ -11,6 +11,14 @@
       "Bash(git push * --force*)",
       "Bash(git push * -f*)",
       "Bash(git push origin +*)",
+      "Bash(git -C * push * main*)",
+      "Bash(git -C * push * staging*)",
+      "Bash(git -C * push * prod*)",
+      "Bash(git -C * push --force*)",
+      "Bash(git -C * push * --force*)",
+      "Bash(git -C * push * --delete*)",
+      "Bash(git -C * push * --tags*)",
+      "Bash(git -C * tag *)",
       "Bash(git push origin main*)",
       "Bash(git push origin HEAD:main*)",
       "Bash(git push origin staging*)",
@@ -46,7 +54,13 @@
       "Bash(bot-gh pr review*)",
       "Bash(bot-gh pr merge --admin*)",
       "Bash(bot-gh pr merge * --admin*)",
-      "Bash(bot-gh release*)"
+      "Bash(bot-gh release*)",
+      "Bash(bot-gh pr merge*)",
+      "Bash(*bot-gh.py pr review*)",
+      "Bash(*bot-gh.py release*)",
+      "Bash(*bot-gh.py pr merge*)",
+      "Bash(gh workflow run*)",
+      "Bash(gh run rerun*)"
     ]
   }
 }

@@ -213,3 +213,47 @@ func TestPlanEquivalentAfterImport(t *testing.T) {
 		t.Error("a configured subset of the read-back JSON is hidden")
 	}
 }
+
+func TestLocaleEqual(t *testing.T) {
+	want := `{"localeKey":"DisplayName","Settings":[{"Key":"en-us","Value":"Confidential"},{"Key":"de-de","Value":"Vertraulich"}]}`
+	read := `{"localeKey":"displayName","Settings":[{"Key":"de-DE","Value":"Vertraulich"},{"Key":"en-US","Value":"Confidential"}]}`
+	if !localeEqual(want, read) {
+		t.Error("case and order of keys must not matter")
+	}
+	for name, other := range map[string]string{
+		"another localeKey": `{"localeKey":"Tooltip","Settings":[{"Key":"en-us","Value":"Confidential"},{"Key":"de-de","Value":"Vertraulich"}]}`,
+		"another value":     `{"localeKey":"displayName","Settings":[{"Key":"en-us","Value":"confidential"},{"Key":"de-de","Value":"Vertraulich"}]}`,
+		"a missing locale":  `{"localeKey":"displayName","Settings":[{"Key":"en-us","Value":"Confidential"}]}`,
+		"not JSON":          `Confidential`,
+		"no localeKey":      `{"Settings":[]}`,
+	} {
+		if localeEqual(want, other) {
+			t.Errorf("%s compares equal", name)
+		}
+	}
+}
+
+// TestLabelLocaleSettingsKeepConfiguration reads the fixture label, whose
+// LocaleSettings come back as "displayName", into a state configured with the
+// spelling the cmdlet takes and checks that the refresh keeps it.
+func TestLabelLocaleSettingsKeepConfiguration(t *testing.T) {
+	ctx := context.Background()
+	obj := firstFixtureObject(t, "get-label.json", normalizeLabel)
+	var read labelModel
+	readLabel(ctx, obj, &read)
+
+	prior := read
+	prior.LocaleSettings = stringSetValue(ctx, []string{`{"Settings":[{"Value":"Vertraulich","Key":"DE-DE"}],"localeKey":"DisplayName"}`})
+	keepEquivalent(ctx, obj, &prior, &read, nil)
+	if !read.LocaleSettings.Equal(prior.LocaleSettings) {
+		t.Errorf("configured locale not kept: %v", read.LocaleSettings)
+	}
+
+	prior.LocaleSettings = stringSetValue(ctx, []string{`{"localeKey":"DisplayName","Settings":[{"Key":"en-us","Value":"Confidential"}]}`})
+	read2 := read
+	readLabel(ctx, obj, &read2)
+	keepEquivalent(ctx, obj, &prior, &read2, nil)
+	if read2.LocaleSettings.Equal(prior.LocaleSettings) {
+		t.Error("a locale the service does not hold is reported as unchanged")
+	}
+}

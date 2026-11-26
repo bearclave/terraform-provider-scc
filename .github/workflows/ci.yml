@@ -1,5 +1,5 @@
-# Pull request into main -> security scan, vet and tests, the gate
-# Push to main            -> the same
+# Pull request into main -> security scan, vet, tests, generation and docs without diff, lint, the gate
+# Weekly                 -> the same, for new gitleaks rules over the old history
 # Releases are cut by the owner on his Mac (tools/release.sh), not here.
 #
 # Actions minutes of a public repository are free.
@@ -8,8 +8,8 @@ name: ci
 on:
   pull_request:
     branches: [main]
-  push:
-    branches: [main]
+  schedule:
+    - cron: "23 5 * * 1"
   workflow_dispatch:
 
 permissions:
@@ -30,7 +30,12 @@ jobs:
     permissions:
       contents: read
     with:
-      # The runner's Go downloads the toolchain go.mod asks for.
+      # The runner's Go downloads the toolchain go.mod asks for. The generator
+      # and tfplugindocs must leave the committed code and docs as they are.
       command: |
         go vet ./...
         go test ./...
+        go run ./cmd/gen-tf
+        (cd tools && go run github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs generate --provider-dir .. --provider-name scc)
+        git diff --exit-code
+        go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.12.2 run ./...

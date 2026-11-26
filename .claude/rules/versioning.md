@@ -12,6 +12,7 @@ what runs, and the apply run is its record.
 |---|---|---|
 | `ci` | yes | `@v2` (major tag), production repositories the exact `@v2.3.1` |
 | `iac-modules` | yes | `modules_ref` in `account.hcl` of every Terragrunt repository, always a tag `vX.Y.Z` |
+| `terraform-provider-scc` | yes | the `bearclave/scc` version in `account.hcl` of `iac-purview`, from the Terraform Registry |
 | `template-iac-*` | yes | the version handed over to a customer, written into the handover |
 | `app-home` | yes | the image `:vX.Y.Z` its release publishes; a release is a promotion ([below](#applications)) |
 | `app-web-*` | yes | nobody pins: `prod` is what runs, the tag records each promotion ([below](#applications)) |
@@ -22,12 +23,10 @@ what runs, and the apply run is its record.
 
 ## Repositories without a tag yet
 
-`app-home`, `app-web-bearclave`, `app-office-templates` and the
-`template-iac-*` repositories are versioned by this standard but have no tag
-yet. Each gets `v1.0.0` with the next change a consumer receives: an
-application with its first promotion ([Applications](#applications)),
-`app-office-templates` when it next hands templates to the website, a
-template at its next handover. With no earlier tag the first version is
+`app-office-templates` and the `template-iac-*` repositories are versioned by
+this standard but have no tag yet. Each gets `v1.0.0` with the next change a
+consumer receives: `app-office-templates` when it next hands templates to the
+website, a template at its next handover. With no earlier tag the first version is
 `v1.0.0`; after it, the rules of [Releasing](#releasing) apply.
 
 ## When to release
@@ -37,7 +36,7 @@ before a consumer needs a change:
 
 | Repository | Release when | Who |
 |---|---|---|
-| `ci` | a merged pull request since the last tag has a release effect (below) and a caller needs it - at the latest at the end of the week of the merge | the owner tags; `major-tag.yml` and `ci-pins.yml` follow |
+| `ci` | a merged pull request since the last tag has a release effect (below) and a caller needs it - **at most once a week**, batching what was merged; a security fix or a broken pipeline at once. Every release reaches the pinned repositories as pull requests with a whole-tree plan | the owner runs `tools/release.sh`; `major-tag.yml` and `ci-pins.yml` follow |
 | `iac-modules` | a consumer is to receive a module change: release first, then bump `modules_ref` in the consumer by hand (Dependabot does not read it), its plan in that pull request | the owner |
 | `app-home`, `app-web-*` | the change is to run in production: `promote` ([below](#applications)) | the owner starts `promote`; the App `bearclave-promote` tags |
 | `app-office-templates` | the templates are handed to the website | the owner |
@@ -67,7 +66,9 @@ Before `v1.0.0` (a new repository), breaking changes bump the minor.
 ## Tags
 
 - **Release tag** `vX.Y.Z`: annotated, signed (`tag.gpgsign`), on a commit of
-  `main`, never moved or deleted. The tag ruleset in `iac-github` refuses an
+  `main`, never moved or deleted. `gh release create` for a tag that does not
+  exist makes a lightweight, unsigned tag on GitHub: never used;
+  `major-tag.yml` and `ci-pins.yml` refuse such a release. The tag ruleset in `iac-github` refuses an
   update or deletion. An application's tag is the exception: annotated, made
   by the App `bearclave-promote` and not signed by the owner, on the commit `prod` was
   moved to ([below](#applications)).
@@ -91,14 +92,16 @@ only organisation owners create `v*` tags. Applications are released by
    `gh pr list --repo bearclave/<repo> --state merged --search "merged:>$(git log -1 --format=%cs <last-tag>)"`.
    Publishing through `release.yml` is not used: it would create an
    unsigned tag, and no `RELEASE_TOKEN` secret exists.
-3. Tag and publish the release with notes generated from the pull requests:
-
-   ```bash
-   git switch main && git pull --ff-only
-   git tag -s v2.5.0 -m "v2.5.0"
-   git push origin v2.5.0
-   gh release create v2.5.0 --verify-tag --generate-notes
-   ```
+3. Run `tools/release.sh <repo-path> [vX.Y.Z]` of `bearclave/ci` (`--dry-run`
+   first); it is the only way to release, never a chain of `git tag`,
+   `git push` and `gh release create`. It refuses when it is not run in a
+   terminal, a `main` that is not a clean copy of `origin/main`, an open pull
+   request with auto-merge on or approved and mergeable (it may be about to
+   land), a release with nothing that calls for one and a version other than
+   the computed one; it checks its tools before the tag, then signs, pushes
+   and publishes after the version is typed. Tag only after the pull requests
+   of the release are merged (`MERGED`, not auto-merge on): a tag cannot be
+   moved.
 
    In `ci` the major tag then moves by itself: publishing the release runs
    `major-tag.yml`, which moves `v2` as `bearclave-bot` to a published,

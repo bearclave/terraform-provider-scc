@@ -20,3 +20,7 @@
 *.vsix binary
 
 # --- Repository-specific (kept by sync.py) ---
+internal/provider/*_resource.go linguist-generated=true
+docs/** linguist-generated=true
+internal/provider/*_data_source.go linguist-generated=true
+internal/provider/zz_generated_*.go linguist-generated=true

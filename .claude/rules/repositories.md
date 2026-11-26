@@ -28,6 +28,16 @@ publishes a provider only from such a repository
 `bearclave/ci` like any other repository: `ci` is public so that a public
 repository can call it.
 
+A provider fork follows these rules too:
+
+- Every upstream release and CI configuration is reviewed when it is adopted
+  (goreleaser `draft: true` hides a release from the Registry).
+- A no-op on an equivalent spelling lives in `Update`, never in `ModifyPlan`:
+  Terraform rejects a changed planned value of a configured attribute.
+- A model holds what the API reads back, not what the cmdlet takes; after
+  every import the plan shows 0 changes.
+- Generated code and docs are regenerated before every push.
+
 An IaC repository of the Microsoft cloud is named after the product or
 security domain it manages, in the singular, the way an administrator looks
 for it: `iac-identity`, `iac-conditional-access`, `iac-intune`,
@@ -45,7 +55,7 @@ Set on every repository in `bearclave/iac-github`; the rulesets target them.
 | Property | Values | Drives |
 |---|---|---|
 | `group` | `iac`, `app`, `template`, `platform` | grouping, Project, topic |
-| `pipeline` | `terragrunt`, `terragrunt-home`, `terraform-modules`, `static-web-app`, `container`, `content-sentinel`, `checks`, `ci`, `template`; `m365-dsc` only on `iac-m365` until it is archived | which shared workflow `ci.yml` calls, which checks are required |
+| `pipeline` | `terragrunt`, `terragrunt-home`, `terraform-modules`, `static-web-app`, `container`, `content-sentinel`, `checks`, `ci`, `template` | which shared workflow `ci.yml` calls, which checks are required |
 | `entity` | `sro`, `osvc`, `shared` | whose the repository is (Bearclave s.r.o., the sole trader, both) |
 | `touches-production` | `true`, `false` | branch up to date before merge, `/security-review` |
 | `direct-commit` | `true`, `false` | `true` only for repositories written straight to `main` (no pull request) |
@@ -133,7 +143,7 @@ links there.
    `iac-azure` (state container and roles) first
    ([identities.md](https://github.com/bearclave/governance/blob/main/standards/identities.md#where-they-are-declared)), then the
    variables in `iac-github`.
-3. Clone it into the folder of its group, `git novy feat/skeleton`.
+3. Clone it from `github.com:bearclave/<name>` into the folder of its group: the remote and the folder select the `@bearclave.cz` identity, any other e-mail makes signed commits unverified and `main-protection` refuses them. `main` exists from the start (`auto_init`); work on `git -C <name> novy feat/skeleton`. A fork: clone `bearclave/<name>`, add the upstream as `upstream`, never commit in a clone whose `origin` is the upstream.
 4. Run `governance/tools/sync.py <name>` for it, add `README.md`,
    `.claude/CLAUDE.md`, `.github/workflows/ci.yml` (and `dependabot.yml`
    when it has npm, uv or Docker packages) from the templates, and what
@@ -143,9 +153,25 @@ links there.
 6. Link it to the Project of its group (`gh project link`,
    [projects.md](https://github.com/bearclave/governance/blob/main/standards/projects.md)); `project-sync` in `ci` adds its issues and
    pull requests from then on.
-7. Add it to the table in `work/repos.md` of the LLM wiki.
+7. Add it to the table of repositories in the owner's LLM wiki.
+
+## Changing visibility
+
+Making a repository public or private is one pull request in `iac-github`
+that also covers:
+
+- the organisation variables and secrets it reads: visibility `all` (a
+  `private` one is invisible to a public repository);
+- the Actions access setting, which GitHub refuses on a public repository;
+- secret scanning, push protection and private vulnerability reporting, on for
+  a public repository (free there); a push ruleset does not reach it;
+- gitleaks over the whole history before the switch.
 
 ## Archiving
 
 A repository nobody works on any more is archived (`archived = true` in
 `iac-github`), not deleted. It stays in its Project and keeps its history.
+
+Archiving ends with deleting the local clone (by the owner: `rm -rf` is denied
+to an agent), and the pages of the owner's wiki that name the repository are
+updated in the same task.

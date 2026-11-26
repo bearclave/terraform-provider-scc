@@ -1,10 +1,6 @@
 #!/usr/bin/env bash
-# Release of bearclave/scc: signed tag, goreleaser builds and signs the
-# checksums with the key from kv-tech-sec-weu-001, the Terraform Registry
-# picks the GitHub release up. Run by the owner from a clean main:
-#   az-bearclave-matej && tools/release.sh v1.0.0
-# Needs go, goreleaser, gpg, az (an account that reads kv-tech) and gh.
 set -euo pipefail
+# Release of bearclave/scc by the owner from a clean main: tools/release.sh vX.Y.Z (needs go, goreleaser, gpg, az, gh).
 version=${1:?usage: tools/release.sh vX.Y.Z}
 [[ $version =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "not vX.Y.Z: $version" >&2; exit 1; }
 [ "$(git branch --show-current)" = main ] || { echo "run from main" >&2; exit 1; }
