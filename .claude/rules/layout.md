@@ -40,8 +40,7 @@ repository), a document in `docs/`.
 | `.github/trivyignore.yaml` | accepted trivy findings, each with a reason and a review date |
 | `.github/pssa.psd1` | PSScriptAnalyzer settings |
 
-No scripts in `.github/`. The exception are the `template-*` repositories,
-whose exported pipeline copies carry their scripts in `.github/scripts/`.
+No scripts in `.github/`.
 
 ## Folders
 
@@ -56,8 +55,8 @@ English, plural, the same names everywhere:
 | `_common/` | shared code that is neither a unit nor a module (Terragrunt includes, `_common/` of modules) |
 | `.vscode/` | `settings.json` only, with what the editor needs to read the repository: the `yaml.schemas` of the collections. No extensions list, no personal settings |
 
-Only in the group `app`, each with a line in the README Layout section
-(`content/` also in the group `template`, for a catalogue):
+Only in repositories named `app-*`, each with a line in the README Layout section
+(`content/` also in `content-*`, for a catalogue):
 
 | Folder | Holds |
 |---|---|
@@ -74,7 +73,7 @@ Content folders of a pipeline:
 | `terragrunt`, `terragrunt-home` | `infrastructure/` (required), every unit below it |
 | `terraform-modules` | `modules/`, one folder per platform below it (`modules/azure/`, `modules/entra/`, ...) |
 | `static-web-app` | `api/` (the Functions folder of the site) |
-| `content-sentinel` | `content/` (group `template`) and the pipeline `checks` ([code/sentinel.md](https://github.com/bearclave/governance/blob/main/standards/code/sentinel.md#content-sentinel)) |
+| `content-sentinel` | `content/` (a `content-*` repository) and the pipeline `checks` ([code/sentinel.md](https://github.com/bearclave/governance/blob/main/standards/code/sentinel.md#content-sentinel)) |
 | `ci` | `templates/` |
 
 A script belongs in `tools/` only when it serves this repository. Logic
@@ -101,7 +100,7 @@ A Terragrunt unit directory moves only with its state
 ([code/terragrunt.md](https://github.com/bearclave/governance/blob/main/standards/code/terragrunt.md#moving-a-unit)).
 
 Names of product content that is Czech by nature (the templates of
-`app-office-templates`) may stay Czech; the folders around them follow the
+`office-templates`) may stay Czech; the folders around them follow the
 vocabulary.
 
 ## docs/

@@ -15,9 +15,9 @@
   Vault (GitHub App keys included). The GitHub secrets are two SSH keys,
   which cannot be federated:
   - `MODULES_DEPLOY_KEY` in the Terragrunt repositories: the private half of
-    a read-only deploy key of `iac-modules`, one key per consuming
+    a read-only deploy key of `terraform-modules`, one key per consuming
     repository, declared in `iac-github` (`deploy_keys` of
-    `repositories/iac-modules`). Rotation: once a year or at once on
+    `repositories/terraform-modules`). Rotation: once a year or at once on
     suspicion, by the procedure in `iac-github` `docs/deploy-keys.md` - a new
     key pair, the public key in code, the secret set by the owner, the old
     key removed by the next merge.

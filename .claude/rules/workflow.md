@@ -5,7 +5,7 @@
 One task = one branch from a fresh `main` = one pull request = one squash
 commit on `main`. Nobody pushes to `main`; the organisation rulesets in
 `bearclave/iac-github` refuse it, for the owner too. The only exception are
-repositories with `direct-commit=true` (`handbook`, `app-office-templates`),
+repositories with `direct-commit=true` (`knowhow`, `office-templates`),
 which the owner writes straight to `main`; agents work there on a branch
 and a pull request as everywhere else.
 

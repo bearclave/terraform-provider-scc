@@ -124,8 +124,8 @@ Dependabot's `dependencies`/`github_actions` are not used.
 ## Where issues show up
 
 - Per repository on GitHub, and across the organisation in the Projects
-  `IaC`, `Apps`, `Templates & content` and `Platform` (one per repository
-  group): fields, views and what Status means are in
+  `bearclave-infrastructure`, `bearclave-knowhow`, `applications` and
+  `dev-infrastructure` (one per repository group): fields, views and what Status means are in
   [projects.md](https://github.com/bearclave/governance/blob/main/standards/projects.md).
 - Every open issue and pull request is added to the Project of its
   repository's `group` by the daily workflow `project-sync` in `ci`

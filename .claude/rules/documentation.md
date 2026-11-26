@@ -15,7 +15,7 @@ paths:
 | `.claude/CLAUDE.md` | working rules specific to this repository | documentation, organisation standards (those are in `.claude/rules/`) |
 | `docs/*.md` | longer topics of the repository: `setup.md`, `identities.md`, `manual-steps.md`, `out-of-scope.md`, `decisions.md`, `catalog.md` ([layout.md](https://github.com/bearclave/governance/blob/main/standards/layout.md#docs)) | anything the README already says |
 | `README.md` of a module | its inputs, outputs and why it is built the way it is | which units use it, their values, the rules of a live repository |
-| `bearclave/handbook` | know-how across repositories, `gotchas/` | documentation of one repository |
+| `bearclave/knowhow` | know-how across repositories, `gotchas/` | documentation of one repository |
 | LLM wiki | the owner's processes and where things are | technical documentation - it links here |
 
 One fact lives in one place; everywhere else links to it.
@@ -29,7 +29,7 @@ section that does not apply is left out, not left empty.
 2. **How it fits** - what it depends on and what depends on it, a small
    diagram if more than two repositories are involved.
 3. **Layout** - the directory tree to the depth that explains the code. A
-   repository whose content is documents (`handbook`) indexes them here,
+   repository whose content is documents (`knowhow`) indexes them here,
    one subsection per folder.
 4. **How to make a change** - the commands to run locally (format, validate,
    plan, tests), and what a pull request gets checked for.
@@ -37,7 +37,7 @@ section that does not apply is left out, not left empty.
    workflow of `bearclave/ci` it calls.
 6. **Conventions** - only what is specific to this repository; the
    organisation rules are linked, not repeated.
-7. **Gotchas** - links to `handbook/gotchas/` entries that bite here.
+7. **Gotchas** - links to `knowhow/gotchas/` entries that bite here.
 8. **Repository settings** - the last section, one fixed line (`pr / check`
    compares it):
    > Branch protection, required checks, merge settings and labels are
@@ -69,7 +69,7 @@ keeps the upstream README and adds only the Repository settings section.
   repositories`) is checked with `gh api` or the portal in the pull request
   that writes it; a value that changes is not written (it is in Notion), a
   check date never.
-- A mistake or trap found in practice is a `handbook/gotchas/` entry, linked
+- A mistake or trap found in practice is a `knowhow/gotchas/` entry, linked
   from the README Gotchas section.
 
 ## Markdown

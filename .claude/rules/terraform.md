@@ -8,15 +8,15 @@ paths:
 
 <!-- Standard of bearclave/governance (standards/code/terraform.md). In other repositories this is a managed copy - change it in governance. -->
 
-Modules live in `bearclave/iac-modules`; the live repositories call them
+Modules live in `bearclave/terraform-modules`; the live repositories call them
 ([terragrunt.md](https://github.com/bearclave/governance/blob/main/standards/code/terragrunt.md)). Skeleton:
 [../templates/terraform-module/](https://github.com/bearclave/governance/tree/main/standards/templates/terraform-module/). Azure
 rules (naming, tags, RBAC): [azure.md](https://github.com/bearclave/governance/blob/main/standards/code/azure.md).
 
-## Layout of iac-modules
+## Layout of terraform-modules
 
 ```text
-iac-modules/
+terraform-modules/
   docs/catalog.md      generated list of the modules
   modules/
     _empty/            the empty module a handed-over unit runs (removed blocks)
@@ -78,7 +78,7 @@ field out.
 | `main.tf` | yes | the resources; past ~300 lines split into `<concern>.tf` (`rules.tf`) |
 | `outputs.tf` | yes | every output with `description`; IDs and names; a secret only with `sensitive = true` |
 | `locals.tf` | only when several files read the locals | otherwise `locals` at the top of the file that uses them |
-| `README.md` | public modules | `## What it manages` (1-2 sentences, read by the catalog), `## Why this way` (only what is particular to the module, as bullets `Fixed:` (values set on purpose), `Left out:`, `Gap:` (provider, exact version, issue or `handbook/gotchas/` link); no history, no deployment status, no live object names, no rules of a live repository, no licence terms of a provider), `## Example` (the `inputs` of a unit with every input, the context as `include.root.locals.ctx.<name>`; a collection module shows one `<key>.yaml`), `## Reference` (the block `<!-- BEGIN_TF_DOCS -->` ... `<!-- END_TF_DOCS -->` that terraform-docs writes from `.terraform-docs.yml`) |
+| `README.md` | public modules | `## What it manages` (1-2 sentences, read by the catalog), `## Why this way` (only what is particular to the module, as bullets `Fixed:` (values set on purpose), `Left out:`, `Gap:` (provider, exact version, issue or `knowhow/gotchas/` link); no history, no deployment status, no live object names, no rules of a live repository, no licence terms of a provider), `## Example` (the `inputs` of a unit with every input, the context as `include.root.locals.ctx.<name>`; a collection module shows one `<key>.yaml`), `## Reference` (the block `<!-- BEGIN_TF_DOCS -->` ... `<!-- END_TF_DOCS -->` that terraform-docs writes from `.terraform-docs.yml`) |
 | `tests/*.tftest.hcl` | in `_common/`; recommended where a module has logic; required for a collection module | `command = plan` with `mock_provider`, offline; a test for every `validation` with `expect_failures`; a collection module passes its README example object through the variable, and that object is a fixture `collection-schema` validates, so that variable and schema cannot drift apart |
 | `schema.json` | a module whose unit reads `definitions/<key>.yaml` files (a map written in HCL in the unit needs none) | the JSON Schema of one object (one `<key>.yaml`), 2020-12, closed (`additionalProperties: false`), no `$id`, a one-line `description` per key, every `validation` of the variable that JSON Schema can express (`enum`, `pattern`, `minimum`/`maximum`, `oneOf`, `uniqueItems`); the live repositories copy it to `.github/schemas/<module>.schema.json` ([terragrunt.md](https://github.com/bearclave/governance/blob/main/standards/code/terragrunt.md#schemas)) |
 | `scripts/` | only for a provider gap | a script `local-exec` calls; its first line names the provider version and links the issue it works around; never a script next to the `.tf` files |

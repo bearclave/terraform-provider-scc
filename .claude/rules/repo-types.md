@@ -35,7 +35,7 @@ moves between repositories follows
 | Lock files | `.terraform.lock.hcl` committed in every unit, hashes `linux_amd64` and `darwin_arm64` |
 | Layout | `root.hcl`, `account.hcl`, `_common/` (`units/`, `deps/`, `templates/`), `infrastructure/`; no `tools/`, no `deploy/`; no `imports.hcl`, `moves.hcl`, `removed.hcl` on `main` after the apply ([code/terragrunt.md](https://github.com/bearclave/governance/blob/main/standards/code/terragrunt.md)) |
 | Collections | the Microsoft cloud repositories: collection units of `definitions/<key>.yaml`, the schema of each in `.github/schemas/`, `.vscode/settings.json` mapping them, one page per collection in `docs/` ([code/terragrunt.md](https://github.com/bearclave/governance/blob/main/standards/code/terragrunt.md#collections)) |
-| Modules | from `iac-modules` at a tag (`modules_ref` in `account.hcl`), in `_common/units/<module>.hcl`, never a local path |
+| Modules | from `terraform-modules` at a tag (`modules_ref` in `account.hcl`), in `_common/units/<module>.hcl`, never a local path |
 | Properties | `touches-production=true`; exact pin of `bearclave/ci` (`@vX.Y.Z`) |
 | Docs | README Pipeline table with every trigger and identity; `docs/setup.md` (bootstrap as a procedure with its commands: state, identities, environment); `docs/identities.md` ([identities.md](https://github.com/bearclave/governance/blob/main/standards/identities.md#documented-in-the-repository)); `docs/manual-steps.md` and `docs/out-of-scope.md` in every IaC repository (`Nothing.` when empty); `docs/<collection>.md` per collection |
 | State moves | `.github/state-moves.yaml` while a moved unit waits for its apply |
@@ -74,8 +74,8 @@ deployment.
 
 ## Know-how, tools and content: `checks`, `content-sentinel`
 
-`governance`, `handbook`, `ops-tools`, `.github`, `vs-code-extensions`,
-`app-office-templates` (`checks`); `content-sentinel`, the catalogue of all
+`governance`, `knowhow`, `.github`, `vs-code-extensions`,
+`office-templates` (`checks`); `content-sentinel`, the catalogue of all
 Sentinel content in the format of `iac-sentinel`, deploys nothing: pipeline
 `checks` without a command, and `pr / check` validates every file against the
 schemas (`collection-schema`). `iac-sentinel` holds only what is deployed
@@ -100,9 +100,3 @@ know-how repository.
 | Identities | one bot identity per workflow purpose, each in its own environment |
 | Docs | README per workflow; `docs/identities.md`, the inventory of every identity a workflow uses |
 | Properties | `touches-production=true`: an apply pipeline runs its code |
-
-## Templates: `template`
-
-Copied to customers: nothing names the organisation or a tenant, local
-copies of the shared workflows, a
-version per handover ([versioning.md](https://github.com/bearclave/governance/blob/main/standards/versioning.md)).
