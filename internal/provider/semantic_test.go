@@ -220,6 +220,11 @@ func TestLocaleEqual(t *testing.T) {
 	if !localeEqual(want, read) {
 		t.Error("case and order of keys must not matter")
 	}
+	// Get-Label adds the "default" locale (the label's own DisplayName) after an apply.
+	readDefault := `{"LocaleKey":"displayName","Settings":[{"Key":"default","Value":"Důvěrné"},{"Key":"en-us","Value":"Confidential"},{"Key":"de-de","Value":"Vertraulich"}]}`
+	if !localeEqual(want, readDefault) {
+		t.Error("the default locale must not matter")
+	}
 	for name, other := range map[string]string{
 		"another localeKey": `{"localeKey":"Tooltip","Settings":[{"Key":"en-us","Value":"Confidential"},{"Key":"de-de","Value":"Vertraulich"}]}`,
 		"another value":     `{"localeKey":"displayName","Settings":[{"Key":"en-us","Value":"confidential"},{"Key":"de-de","Value":"Vertraulich"}]}`,

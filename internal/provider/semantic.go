@@ -409,7 +409,9 @@ func localeEqual(a, b string) bool {
 }
 
 // parseLocale reads one LocaleSettings element into its lower-case localeKey
-// and a map of lower-case locale to text.
+// and a map of lower-case locale to text. The "default" locale is left out:
+// Get-Label returns it with the label's DisplayName and Tooltip, which their
+// own attributes manage, so a configuration never lists it.
 func parseLocale(s string) (key string, settings map[string]string, ok bool) {
 	v, isJSON := decodeJSON(s)
 	obj, isObj := v.(map[string]any)
@@ -450,6 +452,9 @@ func parseLocale(s string) (key string, settings map[string]string, ok bool) {
 		}
 		if k == "" {
 			return "", nil, false
+		}
+		if k == "default" {
+			continue
 		}
 		settings[k] = val
 	}
