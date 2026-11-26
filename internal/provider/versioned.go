@@ -39,6 +39,8 @@ func withOverrides(ctors []func() resource.Resource) []func() resource.Resource 
 		ctor := c
 		if o, ok := resourceOverrides[resourceTypeName(c())]; ok {
 			ctor = o
+		} else if o, ok := verifiedDeletes[resourceTypeName(c())]; ok {
+			ctor = o
 		}
 		out = append(out, func() resource.Resource { return &versioned{Resource: ctor()} })
 	}
