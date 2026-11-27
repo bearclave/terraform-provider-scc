@@ -9,7 +9,8 @@ maintained by Bearclave and not contributed upstream. It is regenerated on
 tf-msadmin v0.9.5 and fixed so that sensitivity labels, label policies, DLP and
 retention are managed in place
 ([upstream #11](https://github.com/terraprovider/terraform-provider-scc/issues/11)).
-Not affiliated with or endorsed by Microsoft.
+Licensed under the MIT licence of the upstream, see [LICENSE](LICENSE). Not
+affiliated with or endorsed by Microsoft.
 
 ## How it fits
 
@@ -107,10 +108,6 @@ generated resource is wrapped instead of edited:
 - Every resource has schema version 1; state from 0.2.x (version 0) is
   converted by shape (`versioned.go`). Local development against
   sibling module checkouts uses the git-ignored `go.work`.
-
-## License
-
-MIT, see [LICENSE](LICENSE).
 
 ## Repository settings
 
