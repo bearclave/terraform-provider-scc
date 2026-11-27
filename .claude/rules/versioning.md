@@ -82,23 +82,24 @@ workflow cannot sign as him, and the ruleset `version-tags-creation` lets
 only organisation owners create `v*` tags. Applications are released by
 `promote` instead ([Applications](#applications)).
 
-1. Merge everything that belongs to the release.
-2. Work out the version and preview the notes: the workflow `release.yml` of
-   `bearclave/ci` in its default dry run (where a repository has a caller), or
-   by hand from the titles since the last tag:
-   `gh pr list --repo bearclave/<repo> --state merged --search "merged:>$(git log -1 --format=%cs <last-tag>)"`.
-   Publishing through `release.yml` is not used: it would create an
-   unsigned tag, and no `RELEASE_TOKEN` secret exists.
-3. Run `tools/release.sh <repo-path> [vX.Y.Z]` of `bearclave/ci` (`--dry-run`
-   first); it is the only way to release, never a chain of `git tag`,
-   `git push` and `gh release create`. It refuses when it is not run in a
-   terminal, a `main` that is not a clean copy of `origin/main`, an open pull
-   request with auto-merge on or approved and mergeable (it may be about to
-   land), a release with nothing that calls for one and a version other than
-   the computed one; it checks its tools before the tag, then signs, pushes
-   and publishes after the version is typed. Tag only after the pull requests
-   of the release are merged (`MERGED`, not auto-merge on): a tag cannot be
+1. Merge everything that belongs to the release: the tag goes on `main`
+   after the pull requests are `MERGED` (not auto-merge on); a tag cannot be
    moved.
+2. Run `tools/release.sh <repo-path> --dry-run` of `bearclave/ci`: it checks
+   that the clone is a clean copy of `origin/main`, computes the version from
+   the pull request titles since the last tag by `src/release_version.py`
+   (the rules above), lists those titles and stops. It refuses when it is not
+   run in a terminal, when a tool or the sign-in it needs is missing
+   (`gh`, `gpg`, `git`), when an open pull request has auto-merge on or is
+   approved and mergeable (it may be about to land; `--force-open`), when
+   nothing calls for a release and when the version asked for differs from
+   the computed one (`--force-version`, never below the last tag).
+3. Run `tools/release.sh <repo-path> [vX.Y.Z]` without `--dry-run`: after the
+   version is typed it makes the signed tag, pushes it and runs
+   `gh release create --verify-tag --generate-notes`. It is the only way to
+   release, never a chain of `git tag`, `git push` and `gh release create`.
+   The workflow `release.yml` of `bearclave/ci` is not used to publish: it
+   would create an unsigned tag, and no `RELEASE_TOKEN` secret exists.
 
    In `ci` the major tag then moves by itself: publishing the release runs
    `major-tag.yml`, which moves `v2` as `bearclave-bot` to a published,
@@ -111,6 +112,11 @@ only organisation owners create `v*` tags. Applications are released by
    (`.github/release.yml`, managed): Breaking changes, Features, Fixes,
    Performance, Dependencies, Other. Edit the generated notes only to add
    upgrade steps for a breaking change.
+
+`terraform-provider-scc` has its own `tools/release.sh vX.Y.Z` (in that
+repository, run by the owner on his Mac): the tag, then goreleaser signs the
+artefacts with the key from Key Vault and publishes them for the Registry
+(its README, Pipeline).
 
 ## Applications
 

@@ -33,7 +33,7 @@ have the default branch `staging` instead of `main`, and a second branch
 - A second task in the same repository gets a worktree, never a shared
   checkout, in the one place `../<repository>-<slug>` on the branch
   `<type>/<slug>` (`git -C <repository> worktree add -b <type>/<slug>
-  ../<repository>-<slug> origin/main`). It is removed after the merge
+  ../<repository>-<slug> origin/HEAD`). It is removed after the merge
   ([housekeeping](#housekeeping)).
 - Short-lived: merged or closed within days. A branch that waits on something
   stays a draft PR with the label `status:blocked` and a comment why.
@@ -110,7 +110,7 @@ check. Commits on a branch may be rough - only the pull request title reaches
 and for an agent only when the owner says so for that change, as a draft.**
 A pushed branch without a pull request costs nothing; every push to a pull
 request and every edit of its title or description runs the pipeline and
-costs Actions minutes (3,000 a month for the whole organisation): write the
+costs Actions minutes (one budget for the whole organisation): write the
 description once, completely. When the pipeline is green and the Review
 section is filled, the author marks it ready (`bot-gh pr ready <number>`);
 the owner approves.

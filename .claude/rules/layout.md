@@ -36,6 +36,7 @@ repository), a document in `docs/`.
 | `.github/conventions.yaml` | conventions check, and the exceptions to this layout |
 | `.github/state-moves.yaml` | Terragrunt: the units whose state the owner moved, until the apply that used them ([code/terragrunt.md](https://github.com/bearclave/governance/blob/main/standards/code/terragrunt.md#moving-a-unit)) |
 | `.github/schemas/` | `<module>.schema.json`: the JSON Schema of each collection, copied from its module ([code/terragrunt.md](https://github.com/bearclave/governance/blob/main/standards/code/terragrunt.md#schemas)) |
+| `.github/allowed-ids.yaml` | the GUIDs the `yaml-ids` rule allows in the YAML of the collections (Microsoft's own IDs), each with its name |
 | `.github/sentinel-lint.yaml` | Sentinel lint |
 | `.github/trivyignore.yaml` | accepted trivy findings, each with a reason and a review date |
 | `.github/pssa.psd1` | PSScriptAnalyzer settings |
@@ -73,7 +74,6 @@ Content folders of a pipeline:
 | `terragrunt`, `terragrunt-home` | `infrastructure/` (required), every unit below it |
 | `terraform-modules` | `modules/`, one folder per platform below it (`modules/azure/`, `modules/entra/`, ...) |
 | `static-web-app` | `api/` (the Functions folder of the site) |
-| `content-sentinel` | `content/` (a `content-*` repository) and the pipeline `checks` ([code/sentinel.md](https://github.com/bearclave/governance/blob/main/standards/code/sentinel.md#content-sentinel)) |
 | `ci` | `templates/` |
 
 A script belongs in `tools/` only when it serves this repository. Logic
@@ -125,7 +125,11 @@ layout:
 ```
 
 `path` is a root entry, or `.github/<name>`, `docs/<name>`; globs are
-allowed. An exception without a reason fails the check.
+allowed. An exception without a reason fails the check. `review: YYYY-MM-DD`
+(when to look again) is optional on a layout exception, because it is
+structure that stays; `ci` `exception_review.py` warns only when a given
+date has passed or is not a date. Every exception of a rule or a tool needs
+the date.
 
 ## .gitattributes
 
