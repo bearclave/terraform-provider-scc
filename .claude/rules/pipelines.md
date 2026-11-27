@@ -69,9 +69,9 @@ with a whole-tree plan, so releases are batched weekly
 ([versioning.md](https://github.com/bearclave/governance/blob/main/standards/versioning.md#when-to-release)).
 
 A repository in another organisation (a customer's, [customers.md](https://github.com/bearclave/governance/blob/main/standards/customers.md))
-cannot reach the private `bearclave/ci`: it carries local copies of the
-shared workflows and calls them with `uses: ./.github/workflows/...`, with
-the same check names.
+does not call `bearclave/ci` (public, but a customer's code must not depend
+on ours): it carries local copies of the shared workflows and calls them with
+`uses: ./.github/workflows/...`, with the same check names.
 
 ## Checks and their exceptions
 
@@ -221,8 +221,8 @@ everything else is configured in the repository section, not rewritten.
   identity must have no failed operation in the Azure Activity Log of the
   affected subscriptions (where there are any), and no `check {}` block may
   fail. A failure makes the run red and the pipeline opens a `Bug` issue
-  (`prio:high`, `source:drift`) and a draft revert pull request
-  (`revert/<short-sha>`, `revert: <original title>`); the owner decides.
+  (`prio:high`, `source:drift`) and nothing else, no revert pull request;
+  the owner decides (a revert is a pull request of his, [workflow.md](https://github.com/bearclave/governance/blob/main/standards/workflow.md#pull-requests)).
   The results go to the job summary and `verification.json`, for the
   `### Verification` section of the apply comment. Only the job that does
   this has `contents`, `pull-requests` and `issues: write`, so the caller

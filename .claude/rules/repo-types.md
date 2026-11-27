@@ -28,7 +28,7 @@ moves between repositories follows
 | Item | Rule |
 |---|---|
 | Pipeline | `ci.yml` from [templates/workflows/](https://github.com/bearclave/governance/tree/main/standards/templates/workflows/); plan on the pull request, apply from `main` ([pipelines.md](https://github.com/bearclave/governance/blob/main/standards/pipelines.md)); `subscription-id` empty where the repository manages no Azure resource |
-| Drift | weekly, read-only identity, red on any difference (`drift.yml`, or the schedule in `ci.yml` for `terragrunt-home`); the Microsoft 365 repositories on different days ([code/m365.md](https://github.com/bearclave/governance/blob/main/standards/code/m365.md#drift)), so that Graph and Exchange do not throttle them together |
+| Drift | weekly, read-only identity, red on any difference (`drift.yml`, or the schedule in `ci.yml` for `terragrunt-home`); the Microsoft cloud repositories staggered over the week ([code/m365.md](https://github.com/bearclave/governance/blob/main/standards/code/m365.md#drift)) |
 | Environment | `<subject>-prod` (`azure-prod`, `github-prod`, `home-prod`, `identity-prod`, `conditional-access-prod`, `intune-prod`, `exchange-prod`, `purview-prod`, `sentinel-prod`), deployment branches `main` only, in `iac-github` |
 | Identities | a plan and an apply identity ([identities.md](https://github.com/bearclave/governance/blob/main/standards/identities.md)), variables `AZURE_CLIENT_ID_PLAN` and `AZURE_CLIENT_ID_APPLY` |
 | Versions | `.github/tool-versions.env` (Terraform, Terragrunt, trivy with sha256); providers exact in `account.hcl` ([toolchain.md](https://github.com/bearclave/governance/blob/main/standards/toolchain.md)) |
@@ -48,7 +48,7 @@ moves between repositories follows
 | Layout | `modules/<platform>/<module>/` (`modules/azure/key-vault/`), `modules/<platform>/_common/`, `modules/_empty/`; `docs/catalog.md` generated; skeleton [templates/terraform-module/](https://github.com/bearclave/governance/tree/main/standards/templates/terraform-module/) |
 | Rules | [code/terraform.md](https://github.com/bearclave/governance/blob/main/standards/code/terraform.md): no defaults, no `any`, provider lower bounds, a README with the terraform-docs block per public module, tests in `_common/` |
 | Releases | one tag for the repository, `vX.Y.Z` ([versioning.md](https://github.com/bearclave/governance/blob/main/standards/versioning.md)); consumers pin it in `account.hcl` |
-| Properties | `touches-production=true` while a consumer reads `main`; `false` once every consumer pins a tag |
+| Properties | `touches-production=false`: every consumer pins a tag, nothing runs from `main` |
 
 ## Application: `static-web-app`, `container`
 
@@ -72,10 +72,11 @@ A new kind of application (Azure Functions, a container on another host)
 gets its shared workflow in `ci` and its row here before the first
 deployment.
 
-## Know-how, tools and content: `checks`, `content-sentinel`
+## Know-how, tools and providers: `checks`
 
 `governance`, `knowhow`, `.github`, `vs-code-extensions`,
-`office-templates` (`checks`); `content-sentinel`, the catalogue of all
+`office-templates`, `content-sentinel`, `terraform-provider-scc`, `app-nas`
+and the repositories `dev-*`. `content-sentinel`, the catalogue of all
 Sentinel content in the format of `iac-sentinel`, deploys nothing: pipeline
 `checks` without a command, and `pr / check` validates every file against the
 schemas (`collection-schema`). `iac-sentinel` holds only what is deployed
@@ -88,7 +89,15 @@ know-how repository.
 | Pipeline | `checks.yml`: security scan, ESLint where there is JavaScript, the repository's own command (tests, generators up to date) |
 | Docs | Markdown rules of [documentation.md](https://github.com/bearclave/governance/blob/main/standards/documentation.md#markdown); links work |
 | Releases | only where something is consumed by reference ([versioning.md](https://github.com/bearclave/governance/blob/main/standards/versioning.md)) |
-| Properties | `touches-production=false`; `direct-commit=true` only where the owner writes straight to `main` |
+| Properties | `touches-production=false` for every `checks` repository, `app-nas` included; `direct-commit=true` only where the owner writes straight to `main` |
+
+What differs, by repository:
+
+| Repository | What it is | In addition |
+|---|---|---|
+| `terraform-provider-scc` | the fork of a Go provider (public, group `bearclave-infrastructure`), consumed by `iac-purview` as `bearclave/scc` from the Terraform Registry | README of the upstream plus only the Repository settings section ([documentation.md](https://github.com/bearclave/governance/blob/main/standards/documentation.md#readme-structure)); command in `ci.yml`: `go vet`, `go test`, golangci-lint, generation and docs without a diff; its own `tools/release.sh vX.Y.Z` ([versioning.md](https://github.com/bearclave/governance/blob/main/standards/versioning.md#releasing)) |
+| `app-nas` | what runs on the home NAS outside Terraform: Vector, acme.sh, the self-hosted runner and the deployment user of `app-home` (group `applications`, runner group `nas`) | the files under `deploy/` and `docs/setup.md`, `deploy.md`, `runner.md`; deployed over SSH by hand, so no `promote`, no `staging` and `prod`: default branch `main` |
+| `dev-*` | test twins in `dev-infrastructure` ([repositories.md](https://github.com/bearclave/governance/blob/main/standards/repositories.md#groups-and-names)): `dev-ci`, `dev-terraform-modules` | a `checks` repository like the others: `tools/sync.py <name>` and `ci.yml` from [ci-checks.yml](https://github.com/bearclave/governance/blob/main/standards/templates/workflows/ci-checks.yml), a README saying what it is a twin of; without them no pull request merges (required checks), which is a `Debt` issue, not an exemption |
 
 ## Shared workflows: `ci`
 

@@ -54,7 +54,7 @@
 
 - Actions are pinned to a full commit SHA with the version in a comment;
   the organisation allows only GitHub-owned (`actions/*`, `github/*`),
-  `azure/*`, `hashicorp/*` and `bearclave/*` actions - not "verified
+  `azure/*` and `hashicorp/*` actions - not "verified
   creators" (`verified_allowed = false`); everything else is a pinned
   binary.
 - Other tools are downloaded as release binaries and checked against a

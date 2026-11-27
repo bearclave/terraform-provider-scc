@@ -38,11 +38,13 @@ section that does not apply is left out, not left empty.
 6. **Conventions** - only what is specific to this repository; the
    organisation rules are linked, not repeated.
 7. **Gotchas** - links to `knowhow/gotchas/` entries that bite here.
-8. **Repository settings** - the last section, one fixed line (`pr / check`
-   compares it):
+8. **Repository settings** - the last section, the one line of the template
+   [templates/README.md](https://github.com/bearclave/governance/blob/main/standards/templates/README.md#repository-settings), copied
+   word for word with the repository name filled in; no check compares it,
+   the reviewer does:
    > Branch protection, required checks, merge settings and labels are
    > defined in [`bearclave/iac-github`](https://github.com/bearclave/iac-github)
-   > (`infrastructure/repositories/<name>`). Engineering standards:
+   > (`infrastructure/repositories/<repository>`). Engineering standards:
    > [`bearclave/governance`](https://github.com/bearclave/governance/tree/main/standards).
 
 No other `##` sections: a repository-specific topic is a file in `docs/`,

@@ -63,7 +63,7 @@ Set on every repository in `bearclave/iac-github`; the rulesets target them.
 | Property | Values | Drives |
 |---|---|---|
 | `group` | `bearclave-infrastructure`, `bearclave-knowhow`, `applications`, `dev-infrastructure` | grouping, Project, topic, local folder |
-| `pipeline` | `terragrunt`, `terragrunt-home`, `terraform-modules`, `static-web-app`, `container`, `content-sentinel`, `checks`, `ci` | which shared workflow `ci.yml` calls, which checks are required |
+| `pipeline` | `terragrunt`, `terragrunt-home`, `terraform-modules`, `static-web-app`, `container`, `checks`, `ci` | which shared workflow `ci.yml` calls, which checks are required |
 | `entity` | `sro`, `osvc`, `shared` | whose the repository is (Bearclave s.r.o., the sole trader, both) |
 | `touches-production` | `true`, `false` | branch up to date before merge, `/security-review` |
 | `direct-commit` | `true`, `false` | `true` only for repositories written straight to `main` (no pull request) |
@@ -135,7 +135,7 @@ What the organisation pays for and on which plan is kept in Notion, in
 Actions minutes and budget), Microsoft 365 and Entra licences, Azure
 subscriptions, Claude (plan and seats), and the other tools. A change of a
 plan is recorded there first; a standard that depends on a plan (GitHub Team
-features in [docs/organisation-settings.md](https://github.com/bearclave/governance/blob/main/docs/organisation-settings.md))
+features in [docs/organisation-settings.md](https://github.com/bearclave/governance/blob/main/docs/organisation-settings.md#github-team-against-free-and-enterprise))
 links there.
 
 ## A new repository
@@ -159,7 +159,8 @@ links there.
 6. Link it to the Project of its group (`gh project link`,
    [projects.md](https://github.com/bearclave/governance/blob/main/standards/projects.md)); `project-sync` in `ci` adds its issues and
    pull requests from then on.
-7. Add it to the table of repositories in the owner's LLM wiki.
+7. Name it in the owner's LLM wiki only where a page lists repositories, as a
+   link; the wiki copies no table of what a repository contains.
 
 ## Changing visibility
 

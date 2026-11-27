@@ -121,16 +121,14 @@ state container `tfstate-<subject>` (Storage Blob Data Contributor for both,
 on that container only: every unit of a new repository is new, and its first
 plan creates the blob) and nothing of another domain: a repository more is a
 narrower identity, never the sum of two admin roles.
-Microsoft Graph application permissions unless another API is named:
-
-| Repository | plan | apply |
-|---|---|---|
-| `iac-identity` | `Application.Read.All`, `Directory.Read.All`, `RoleManagement.Read.Directory`, `Policy.Read.All`, `AccessReview.Read.All`; Key Vault Reader and Reader on the vault with the public certificates of the applications (the public part: never Key Vault Certificate User, which reads the private key) | `Application.ReadWrite.All`, `AppRoleAssignment.ReadWrite.All`, `DelegatedPermissionGrant.ReadWrite.All`, `RoleManagement.ReadWrite.Directory` (roles, role-assignable groups and their members), `Group.ReadWrite.All`, `GroupMember.ReadWrite.All`, `User.Read.All`, `Policy.Read.All`, `Policy.ReadWrite.ApplicationConfiguration`, `Policy.ReadWrite.B2BManagementPolicy`, `Policy.ReadWrite.ConsentRequest`, `Policy.ReadWrite.AuthenticationMethod`, `Policy.ReadWrite.Authorization`, `Policy.ReadWrite.CrossTenantAccess`, `Policy.ReadWrite.ExternalIdentities`, `Policy.ReadWrite.SecurityDefaults`, `Policy.ReadWrite.IdentityProtection`, `Policy.ReadWrite.DeviceConfiguration`, `AccessReview.ReadWrite.All`, `Directory.ReadWrite.All` (only the directory settings `/settings` need it); Key Vault Reader and Reader on the same vault |
-| `iac-conditional-access` | `Policy.Read.All`, `Application.Read.All`, `Group.Read.All`, `RoleManagement.Read.Directory` | the same and `Policy.ReadWrite.ConditionalAccess` (policies, named locations, authentication strengths and contexts) |
-| `iac-intune` | `DeviceManagementConfiguration.Read.All`, `DeviceManagementApps.Read.All`, `DeviceManagementServiceConfig.Read.All`, `DeviceManagementRBAC.Read.All`, `Group.Read.All` | `DeviceManagementConfiguration.ReadWrite.All`, `DeviceManagementApps.ReadWrite.All`, `DeviceManagementServiceConfig.ReadWrite.All`, `DeviceManagementRBAC.Read.All`, `Group.Read.All`; never `DeviceManagementManagedDevices.*`, `Device.ReadWrite.All` or Intune Administrator |
-| `iac-exchange` | Office 365 Exchange Online `Exchange.ManageAsApp`, the Entra role Global Reader and the Exchange custom role View-Only Role Management (`Get-ServicePrincipal`, `Get-ManagementScope`, `Get-ManagementRoleAssignment`; made by hand, `docs/manual-steps.md`); `Application.Read.All` (`sp:` of RBAC for Applications), `Group.Read.All` (groups by name) | `Exchange.ManageAsApp` and the Entra role Exchange Administrator; `Application.Read.All`, `Group.Read.All` |
-| `iac-purview` | `Exchange.ManageAsApp` and Global Reader; `Group.Read.All` only where a module looks groups up (rights of the labels) | `Exchange.ManageAsApp` and the Entra role Compliance Administrator (labels, label policies, DLP, retention, alert policies); the same `Group.Read.All` |
-| `iac-sentinel` | Reader, Microsoft Sentinel Reader and Log Analytics Reader on the resource group of the workspace, Reader on the resource group of the playbooks; `Group.Read.All`, `User.Read.All`, `Application.Read.All` (watchlists made from groups, `sp:`); the Entra role Security Reader (the Entra diagnostic setting) | Microsoft Sentinel Contributor on the resource group of the workspace (rules, saved searches, workbooks, connectors) and Log Analytics Contributor there (the diagnostic setting `SentinelHealth` of the workspace), Logic App Contributor on the resource group of the playbooks and, only once a playbook with an identity exists, Role Based Access Control Administrator on both with a condition that allows only the Sentinel roles a playbook's identity needs; the Entra role Security Administrator (the Entra diagnostic setting, the Entra ID and Office 365 connectors; Defender XDR is managed by the Defender portal once the workspace is onboarded there); nothing on subscriptions (Defender for Cloud comes through Defender XDR); the same Graph permissions as plan |
+The permissions of each identity are written once, in the YAML of its
+application in `iac-identity`
+(`infrastructure/applications/app-registrations/definitions/pipelines/<name>.yaml`),
+and explained, row by row, in `docs/identities.md` of its repository
+([Documented in the repository](#documented-in-the-repository)). They are
+Microsoft Graph application permissions unless another API is named. A
+permission is added there and in that page in one pull request; this page
+keeps the rules.
 
 - **Never in these identities:** a permission of another domain, a
   `*.ReadWrite.All` on a plan identity, delegated permissions, a client
@@ -155,11 +153,11 @@ Microsoft Graph application permissions unless another API is named:
 
 | What | Where |
 |---|---|
-| The application, its service principal, federated credentials, certificate and API permissions | `iac-identity`: one `<application>.yaml` in `infrastructure/applications/app-registrations/` |
+| The application, its service principal, federated credentials, certificate and API permissions | `iac-identity`: one `<application>.yaml` in `infrastructure/applications/app-registrations/definitions/` (`pipelines/`, `integrations/`, `sites/`) |
 | Entra roles | `iac-identity` `infrastructure/roles/directory-roles/` |
 | Azure RBAC, Key Vault and state access | the unit of the resource, `role_assignments` |
 | Client ID in GitHub | the repository's unit in `iac-github` names the application (`client_ids = { AZURE_CLIENT_ID_PLAN = "sp-tf-<subject>-plan" }`); `github/repository` resolves it by display name, so `sp-tf-github-plan` and `sp-tf-github` hold `Application.Read.All` |
-| GitHub Apps | procedure in `iac-github` `docs/setup.md` (the key in the Key Vault); the permissions are the table above |
+| GitHub Apps | procedure and permissions in `iac-github` `docs/setup.md` (the key in the Key Vault) |
 | Documentation | `docs/identities.md` of every repository whose pipeline signs in; the inventory in `bearclave/ci` `docs/identities.md` links them |
 
 - **Removing an identity:** before the pull request, `git grep` its name and
